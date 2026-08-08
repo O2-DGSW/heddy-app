@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { BottomBar } from "@/widgets/bottom-bar";
+// import { BottomBar } from "@/widgets/bottom-bar";
 
 const MobileLayout = () => {
   const location = useLocation();
@@ -16,8 +16,8 @@ const MobileLayout = () => {
           <Outlet />
         </main>
         {!hideBottomBar && (
-          <div className="relative w-full [&>div]:!absolute [&>div]:!bottom-0">
-            <BottomBar />
+          <div className="relative w-full [&>div]:!bottom-0">
+            {/*<BottomBar />*/}
           </div>
         )}
       </div>

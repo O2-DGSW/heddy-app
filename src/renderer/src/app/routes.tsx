@@ -39,6 +39,7 @@ export const AppRoutes = () => {
     return (
         <Routes>
             <Route element={<MobileLayout />}>
+                    <Route path="*" element={<>안녕</>} />
                 {/*<Route path="/login" element={<LoginPage />} />*/}
                 {/*<Route path="/signup" element={<SignupPage />} />*/}
                 {/*<Route path="/find/:type" element={<FindPage />} />*/}
