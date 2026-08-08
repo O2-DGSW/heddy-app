@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DEFAULT_API_BASE_URL = "https://api.heddy.site";
+// const DEFAULT_API_BASE_URL = "https://api.heddy.site";
 
 // 현재 env가 없기에 잠깐 주석 처리
 // const baseURL = import.meta.env.VITE_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL;
