@@ -26,7 +26,8 @@
     "axios": "^1.19.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "@heddy/design-tokens": "workspace:*"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
