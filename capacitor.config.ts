@@ -11,9 +11,6 @@ const config: CapacitorConfig = {
   appId: 'com.heddy.app',
   appName: 'heddy-app',
   webDir: 'src/renderer/src/dist',
-  ios: {
-    contentInset: 'automatic',
-  },
   server: isLive
     ? {
         url: `http://${liveHost}:${livePort}`,
@@ -22,8 +19,9 @@ const config: CapacitorConfig = {
     : undefined,
   plugins: {
     StatusBar: {
-      overlaysWebView: false,
-      style: 'DARK',
+      overlaysWebView: true,
+      // 'LIGHT' = dark icons/text, for our light app background.
+      style: 'LIGHT',
     },
     Keyboard: {
       resize: 'body',
