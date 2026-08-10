@@ -4,13 +4,24 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "ios": "npx cap add ios",
+    "android": "npx cap add android",
     "dev": "vite",
+    "dev:ios": "CAPACITOR_LIVE=true CAPACITOR_LIVE_HOST=localhost npx cap sync ios && npx cap open ios",
+    "dev:android": "CAPACITOR_LIVE=true CAPACITOR_LIVE_HOST=10.0.2.2 npx cap sync android && npx cap open android",
     "build": "tsc -b && vite build",
+    "build:ios": "pnpm build && npx cap sync ios && npx cap open ios",
+    "build:android": "pnpm build && npx cap sync android && npx cap open android",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/status-bar": "^8.0.3",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
     "react": "^19.2.8",
@@ -18,6 +29,7 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
