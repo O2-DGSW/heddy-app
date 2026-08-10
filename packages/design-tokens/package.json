@@ -1,0 +1,14 @@
+{
+  "name": "@heddy/design-tokens",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./font": "./font/index.ts",
+    "./theme": "./theme/index.ts"
+  },
+  "peerDependencies": {
+    "tailwindcss": "4.3.0"
+  }
+}

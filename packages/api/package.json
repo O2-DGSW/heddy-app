@@ -1,0 +1,14 @@
+{
+  "name": "@heddy/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./axios": "./axios.ts",
+    "./type": "./type.ts"
+  },
+  "peerDependencies": {
+    "axios": "^1.16.0"
+  }
+}
