@@ -16,6 +16,7 @@ export const NavBar = () => {
         min-h-[4.5rem] px-[1.75rem] py-[0.5rem]
         items-center justify-between
         shadow-[0_-2px_6px_rgba(0,0,0,0.05)]
+        rounded-tl-4xl rounded-tr-3xl
       "
             style={{ backgroundColor: lightTheme.background.normal }}
         >
