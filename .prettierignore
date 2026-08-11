@@ -1,0 +1,8 @@
+dist
+node_modules
+.idea
+.claude
+.pnpm-store
+android
+ios
+coverage
