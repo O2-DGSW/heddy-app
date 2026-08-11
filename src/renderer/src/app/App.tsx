@@ -18,19 +18,19 @@ import { AppRoutes } from "./routes";
 // };
 
 const App = () => {
-    // useEffect(() => {
-    //     if (!shouldRestoreAuthSession()) {
-    //         return;
-    //     }
-    //
-    //     void restoreAuthSession();
-    // }, []);
+  // useEffect(() => {
+  //     if (!shouldRestoreAuthSession()) {
+  //         return;
+  //     }
+  //
+  //     void restoreAuthSession();
+  // }, []);
 
-    return (
-        <BrowserRouter>
-            <AppRoutes />
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
 };
 
 export default App;
