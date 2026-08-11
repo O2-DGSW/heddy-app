@@ -13,8 +13,12 @@ interface CutsTabBarProps {
  *   라우팅(NavLink) 대신 선택 상태를 부모로부터 받아 클릭으로 바꾼다.
  */
 export const CutsTabBar = ({ selected, onSelect }: CutsTabBarProps) => {
+  const selectedIndex = CUTS_TABS.findIndex(({ label }) => label === selected);
+  const tabWidthPercent = 100 / CUTS_TABS.length;
+  const indicatorLeftPercent = tabWidthPercent * selectedIndex + tabWidthPercent / 2;
+
   return (
-    <nav className="flex" style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}>
+    <nav className="relative flex" style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}>
       {CUTS_TABS.map(({ label }) => {
         const isActive = label === selected;
 
@@ -23,19 +27,19 @@ export const CutsTabBar = ({ selected, onSelect }: CutsTabBarProps) => {
             key={label}
             type="button"
             onClick={() => onSelect(label)}
-            className={`relative flex-1 flex flex-col items-center px-2 py-3 transition-colors ${font.label.medium}`}
+            className={`flex-1 flex flex-col items-center px-2 py-3 transition-colors duration-200 ${font.label.medium}`}
             style={{ color: isActive ? lightTheme.label.strong : lightTheme.label.assistive }}
           >
             {label}
-            {isActive && (
-              <div
-                className="absolute -bottom-px h-0.75 w-12 rounded-full"
-                style={{ backgroundColor: lightTheme.label.strong }}
-              />
-            )}
           </button>
         );
       })}
+
+      {/* 탭마다 밑줄을 따로 그리지 않고, 하나의 밑줄을 활성 탭 위치로 이동시켜서 자연스럽게 이어지는 것처럼 보이게 한다. */}
+      <div
+        className="absolute -bottom-px h-0.75 w-12 rounded-full transition-[left] duration-200 ease-out"
+        style={{ backgroundColor: lightTheme.label.strong, left: `${indicatorLeftPercent}%`, transform: "translateX(-50%)" }}
+      />
     </nav>
   );
 };
