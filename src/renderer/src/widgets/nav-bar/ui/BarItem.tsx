@@ -31,13 +31,17 @@ export const BarItem = ({
     >
       <div className="flex flex-col items-center gap-[0.25rem]">
         <div
-          className="flex h-[2rem] w-[2rem] items-center justify-center rounded-lg"
+          className="flex h-[2rem] w-[2rem] items-center justify-center rounded-lg transition-colors duration-200"
           style={{ backgroundColor }}
         >
-          <Icon aria-hidden="true" className="h-[2rem] w-[2rem]" style={{ color: iconColor }} />
+          <Icon
+            aria-hidden="true"
+            className="h-[2rem] w-[2rem] transition-colors duration-200"
+            style={{ color: iconColor }}
+          />
         </div>
 
-        <p className={font.caption.medium} style={{ color: textColor }}>
+        <p className={`${font.caption.medium} transition-colors duration-200`} style={{ color: textColor }}>
           {title}
         </p>
       </div>
