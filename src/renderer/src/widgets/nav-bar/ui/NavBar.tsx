@@ -9,10 +9,12 @@ export const NavBar = () => {
     const location = useLocation();
 
     return (
-        <div
+        <nav
+            aria-label="하단 메뉴"
             className="
-        flex fixed bottom-0 left-0 w-full
-        rounded-2xl p-[0.5rem]
+        flex w-full
+        min-h-[4.5rem] px-[1.75rem] py-[0.5rem]
+        items-center justify-between
         shadow-[0_-2px_6px_rgba(0,0,0,0.05)]
       "
             style={{ backgroundColor: lightTheme.background.normal }}
@@ -24,6 +26,7 @@ export const NavBar = () => {
                     <BarItem
                         key={to}
                         Icon={Icon}
+                        isActive={state.isActive}
                         title={title}
                         iconColor={state.iconColor}
                         backgroundColor={state.backgroundColor}
@@ -32,6 +35,6 @@ export const NavBar = () => {
                     />
                 );
             })}
-        </div>
+        </nav>
     );
 };
