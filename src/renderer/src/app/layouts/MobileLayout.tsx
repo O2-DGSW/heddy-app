@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import {NavBar} from "../../widgets/nav-bar/ui/NavBar.tsx";
+import { NavBar } from "../../widgets/nav-bar/ui/NavBar.tsx";
 
 const MobileLayout = () => {
   const location = useLocation();
