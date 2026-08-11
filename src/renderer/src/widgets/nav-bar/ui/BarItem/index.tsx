@@ -1,6 +1,6 @@
 import { font } from "@heddy/design-tokens";
 
-import type { IconType } from "../model/types";
+import type { IconType } from "../../model/types";
 
 interface BarItemProps {
   Icon: IconType;
@@ -12,7 +12,7 @@ interface BarItemProps {
   onClick: () => void;
 }
 
-export const BarItem = ({
+const BarItem = ({
   Icon,
   isActive,
   title,
@@ -25,22 +25,24 @@ export const BarItem = ({
     <button
       aria-current={isActive ? "page" : undefined}
       aria-label={title}
-      className="flex min-h-[3.5rem] min-w-[2.75rem] shrink-0 justify-center border-0 bg-transparent p-0"
+      className="flex min-h-[55px] shrink-0 justify-center border-0 bg-transparent p-0"
       onClick={onClick}
       type="button"
     >
-      <div className="flex flex-col items-center gap-[0.25rem]">
-        <div
-          className="flex h-[2rem] w-[2rem] items-center justify-center rounded-lg"
+      <span className="flex flex-col items-center gap-[4px]">
+        <span
+          className="flex h-[34px] w-[35px] items-center justify-center rounded-[8px]"
           style={{ backgroundColor }}
         >
-          <Icon aria-hidden="true" className="h-[2rem] w-[2rem]" style={{ color: iconColor }} />
-        </div>
+          <Icon aria-hidden="true" className="h-[35px] w-[35px]" style={{ color: iconColor }} />
+        </span>
 
-        <p className={font.caption.medium} style={{ color: textColor }}>
+        <span className={font.label.medium} style={{ color: textColor }}>
           {title}
-        </p>
-      </div>
+        </span>
+      </span>
     </button>
   );
 };
+
+export default BarItem;
