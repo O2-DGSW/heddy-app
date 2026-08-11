@@ -1,6 +1,8 @@
 // import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { MobileLayout } from "./layouts";
+import { RecordAddPage } from "../pages/record-add";
+import { RecordAdd2Page } from "../pages/record-add2";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -35,11 +37,14 @@ import { MobileLayout } from "./layouts";
 //     return <Outlet />;
 // };
 
-export const AppRoutes = () => {
+const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
-        <Route path="*" element={<>안녕</>} />
+        <Route path="/" element={<RecordAddPage />} />
+        <Route path="/cuts/add" element={<RecordAddPage />} />
+        <Route path="/cuts/add2" element={<RecordAdd2Page />} />
+        <Route path="*" element={<RecordAddPage />} />
         {/*<Route path="/login" element={<LoginPage />} />*/}
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
@@ -63,3 +68,5 @@ export const AppRoutes = () => {
     </Routes>
   );
 };
+
+export default AppRoutes;
