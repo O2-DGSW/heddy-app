@@ -13,15 +13,15 @@ export default defineConfig({
     alias: [
       {
         find: "@design-tokens",
-        replacement: resolve(__dirname, "pakages/design-tokens"),
+        replacement: resolve(__dirname, "packages/design-tokens"),
       },
       {
         find: "@/shared",
-        replacement: resolve(__dirname, "src/renderer/shared"),
+        replacement: resolve(__dirname, "src/renderer/src/shared"),
       },
       {
         find: "@",
-        replacement: resolve(__dirname, "src/renderer/mobile/src"),
+        replacement: resolve(__dirname, "src/renderer/src"),
       },
     ],
   },

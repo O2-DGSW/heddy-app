@@ -15,6 +15,11 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "paths": {
+      "@design-tokens": ["./packages/design-tokens/index.ts"],
+      "@/shared/*": ["./src/renderer/src/shared/*"],
+      "@/*": ["./src/renderer/src/*"]
+    },
 
     /* Linting */
     "noUnusedLocals": true,
