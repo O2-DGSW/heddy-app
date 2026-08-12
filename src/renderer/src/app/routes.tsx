@@ -3,7 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import { MobileLayout } from "./layouts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
-import {LoginPage} from "../pages/auth/login/ui/LoginPage.tsx";
+import { LoginPage } from "../pages/auth/login/ui/LoginPage.tsx";
+import { WelcomePage } from "@/pages/auth/welcome";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -46,6 +47,7 @@ export const AppRoutes = () => {
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
         <Route path="*" element={<>안녕</>} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
 
