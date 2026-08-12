@@ -34,6 +34,9 @@ importers:
       axios:
         specifier: ^1.19.0
         version: 1.19.0
+      capacitor-secure-storage-plugin:
+        specifier: ^0.13.0
+        version: 0.13.0(@capacitor/core@8.5.0)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -101,12 +104,6 @@ importers:
       vite-plugin-svgr:
         specifier: ^5.2.0
         version: 5.2.0(typescript@6.0.3)(vite@8.2.1(@types/node@24.13.3)(jiti@2.7.0))
-
-  packages/api:
-    dependencies:
-      axios:
-        specifier: ^1.16.0
-        version: 1.19.0
 
   packages/design-tokens:
     dependencies:
@@ -1221,6 +1218,14 @@ packages:
       {
         integrity: sha512-xxWVywk6a6Arlk+hymeycyn/VgqEfLDxupvhH/xiY5SJ/18kmi9o6MiO320DCUzypORHLtvh0I4i04tUhCNHNQ==,
       }
+
+  capacitor-secure-storage-plugin@0.13.0:
+    resolution:
+      {
+        integrity: sha512-+rLC/9Z0LTaRRt6L6HjBwcDh5gqgI3NPmDSwo4hk41XQOy3EBrRo81VleIqFsowsMA3oMT+E59Bl8/HiWk0nhQ==,
+      }
+    peerDependencies:
+      "@capacitor/core": ">=8.0.0"
 
   chownr@3.0.0:
     resolution:
@@ -3601,6 +3606,10 @@ snapshots:
   camelcase@6.3.0: {}
 
   caniuse-lite@1.0.30001809: {}
+
+  capacitor-secure-storage-plugin@0.13.0(@capacitor/core@8.5.0):
+    dependencies:
+      "@capacitor/core": 8.5.0
 
   chownr@3.0.0: {}
 
