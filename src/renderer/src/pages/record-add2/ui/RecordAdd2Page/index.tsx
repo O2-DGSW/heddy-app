@@ -218,7 +218,7 @@ const RecordAdd2Page = () => {
       style={pageStyle}
     >
       <header
-        className="sticky top-0 z-10 flex h-[58px] items-center justify-center"
+        className="sticky top-0 z-10 flex h-[112px] items-center justify-center pt-[54px]"
         style={pageStyle}
       >
         <button
