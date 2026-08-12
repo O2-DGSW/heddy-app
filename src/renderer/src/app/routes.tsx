@@ -4,6 +4,7 @@ import { MobileLayout } from "./layouts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
 import {LoginPage} from "../pages/auth/login/ui/LoginPage.tsx";
+import { CutsListPage } from "../pages/cuts";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -42,6 +43,7 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
+        <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
         <Route path="*" element={<>안녕</>} />
