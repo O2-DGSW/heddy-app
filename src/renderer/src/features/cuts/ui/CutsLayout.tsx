@@ -12,7 +12,7 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
           시술기록
         </h1>
         <div style={{ backgroundColor: lightTheme.background.normal }}>{header}</div>
-        <div className="relative overflow-y-auto scrollbar-hidden pb-[calc(100px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
+        <div className="relative flex flex-col overflow-y-auto scrollbar-hidden pb-[calc(100px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
           {children}
         </div>
       </div>
