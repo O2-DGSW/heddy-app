@@ -10,7 +10,12 @@ interface PasswordInputProps {
   className?: string;
 }
 
-export const PasswordInput = ({ placeholder = "비밀번호", value, onChange, className = "" }: PasswordInputProps) => {
+export const PasswordInput = ({
+  placeholder = "비밀번호",
+  value,
+  onChange,
+  className = "",
+}: PasswordInputProps) => {
   const [show, setShow] = useState(false);
 
   return (
