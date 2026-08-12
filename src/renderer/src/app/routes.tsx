@@ -1,6 +1,7 @@
 // import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { MobileLayout } from "./layouts";
+import {LoginPage} from "../pages/auth/login/ui/LoginPage.tsx";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -40,7 +41,7 @@ export const AppRoutes = () => {
     <Routes>
       <Route element={<MobileLayout />}>
         <Route path="*" element={<>안녕</>} />
-        {/*<Route path="/login" element={<LoginPage />} />*/}
+        <Route path="/login" element={<LoginPage />} />
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
 
