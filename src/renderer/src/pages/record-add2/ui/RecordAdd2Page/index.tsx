@@ -3,45 +3,24 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, CSSProperties, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { cn } from "../../../../shared";
-import recordPhoto from "../../assets/images/record-photo.png";
-import arrowIcon from "../../assets/svg/arrow.svg";
-import dateIcon from "../../assets/svg/date.svg";
-import pictureIcon from "../../assets/svg/picture.svg";
-import removeIcon from "../../assets/svg/remove.svg";
-import starActiveIcon from "../../assets/svg/star-active.svg";
-import starDisabledIcon from "../../assets/svg/star-disabled.svg";
+import recordPhoto from "@/pages/record-add2/assets/images/record-photo.png";
+import arrowIcon from "@/pages/record-add2/assets/svg/arrow.svg";
+import dateIcon from "@/pages/record-add2/assets/svg/date.svg";
+import pictureIcon from "@/pages/record-add2/assets/svg/picture.svg";
+import removeIcon from "@/pages/record-add2/assets/svg/remove.svg";
+import starActiveIcon from "@/pages/record-add2/assets/svg/star-active.svg";
+import starDisabledIcon from "@/pages/record-add2/assets/svg/star-disabled.svg";
+import type {
+  PhotoItem,
+  PlaceholderStyle,
+  RecordFieldConfig,
+  RecordFieldNameType,
+  RecordFormValues,
+} from "@/pages/record-add2/model";
+import { cn } from "@/shared";
 
 const MAX_PHOTO_COUNT = 10;
 const PROCEDURE_TYPES = ["#커트", "#펌", "#염색", "#클리닉"] as const;
-
-type RecordFieldNameType = "salon" | "price" | "designer" | "duration";
-
-interface RecordFormValues {
-  date: string;
-  salon: string;
-  price: string;
-  designer: string;
-  duration: string;
-  details: string;
-}
-
-interface RecordFieldConfig {
-  id: RecordFieldNameType;
-  label: string;
-  placeholder: string;
-  inputMode: "decimal" | "text";
-}
-
-interface PhotoItem {
-  id: string;
-  src: string;
-  isObjectUrl: boolean;
-}
-
-type PlaceholderStyle = CSSProperties & {
-  "--placeholder-color": string;
-};
 
 const RECORD_FIELDS = [
   { id: "salon", label: "미용실", placeholder: "미용실", inputMode: "text" },
