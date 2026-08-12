@@ -1,6 +1,6 @@
 // import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes";
+import { AppRoutes } from "./routes";
 // import { restoreAuthSession } from "@/entities/auth/model/session";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
 

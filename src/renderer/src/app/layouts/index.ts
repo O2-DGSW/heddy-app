@@ -1,1 +1,1 @@
-export { default as MobileLayout } from "./MobileLayout";
+export { MobileLayout } from "./MobileLayout";
