@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { NavBar } from "../../widgets/nav-bar/ui/NavBar.tsx";
+
+import { NavBar } from "../../widgets/nav-bar";
 
 const MobileLayout = () => {
   const location = useLocation();
@@ -9,12 +10,12 @@ const MobileLayout = () => {
     ["/login", "/signup"].includes(location.pathname) || location.pathname.startsWith("/find/");
 
   return (
-    <div className="min-h-dvh w-full bg-gray-100 flex justify-center">
+    <div className="flex min-h-dvh w-full justify-center bg-gray-100">
       <div
-        className={`w-full ${frameWidthClassName} bg-white h-dvh relative flex flex-col sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] transform-gpu overflow-hidden`}
+        className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] ${frameWidthClassName}`}
       >
         <main
-          className={`flex-1 overflow-y-auto no-scrollbar pt-safe px-safe ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
+          className={`flex-1 overflow-y-auto px-safe pt-safe no-scrollbar ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
         >
           <Outlet />
         </main>

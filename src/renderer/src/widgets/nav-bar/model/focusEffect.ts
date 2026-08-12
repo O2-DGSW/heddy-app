@@ -2,7 +2,9 @@ import { lightTheme } from "@heddy/design-tokens";
 
 export const getBarItemState = (currentPath: string, targetPath: string) => {
   const isActive =
-    currentPath === targetPath || (targetPath !== "/" && currentPath.startsWith(`${targetPath}/`));
+    currentPath === targetPath ||
+    (targetPath === "/" && currentPath.startsWith("/cuts")) ||
+    (targetPath !== "/" && currentPath.startsWith(`${targetPath}/`));
 
   return {
     isActive,
