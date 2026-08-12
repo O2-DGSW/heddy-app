@@ -1,6 +1,5 @@
-import { font, lightTheme } from "@heddy/design-tokens";
-
 import { CutsRecordCard } from "@/features/cuts/ui/CutsRecordCard";
+import { CutsEmptyState } from "@/features/cuts/ui/CutsEmptyState";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 interface CutsRecordListProps {
@@ -10,11 +9,7 @@ interface CutsRecordListProps {
 
 export const CutsRecordList = ({ records, onRecordClick }: CutsRecordListProps) => {
   if (records.length === 0) {
-    return (
-      <p className={`px-4 py-10 text-center ${font.body.regular}`} style={{ color: lightTheme.label.assistive }}>
-        해당하는 시술기록이 없어요.
-      </p>
-    );
+    return <CutsEmptyState />;
   }
 
   return (
