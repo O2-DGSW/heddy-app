@@ -14,7 +14,7 @@
 - 앱 소스: `src/renderer/src`
 - 공용 패키지: `packages/api`, `packages/design-tokens`
 - 패키지 매니저: `pnpm`
-- 경로 별칭 `@/`은 현재 설정되어 있지 않다. 설정을 추가하지 않은 상태에서 임의로 사용하지 않는다.
+- 경로 별칭 `@/`은 `src/renderer/src`를 가리킨다. renderer의 레이어와 slice를 참조할 때 public API와 함께 사용한다.
 - UI 색상과 타이포그래피는 `@heddy/design-tokens`의 `lightTheme`, `palette`, `font`를 우선 사용한다.
 - HTTP 공통 기능은 `@heddy/api`에 둔다. 앱 코드에서 Axios를 직접 생성하거나 설정하지 않는다.
 
