@@ -30,9 +30,9 @@ export const lightTheme: Theme = {
     alternative: "#FAFAFA",
   },
   status: {
-    error: "#EE2A2B",
-    info: "#1A97FF",
-    success: "#31E87A",
+    error: "#FA3838",
+    info: "#38A9FA",
+    success: "#04C87D",
     warning: "#FFD11A",
   },
 };
