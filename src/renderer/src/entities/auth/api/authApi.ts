@@ -1,5 +1,12 @@
 import { api } from "@/shared/lib/api";
-import type { LoginRequest, LoginResponse, SignupRequest, SignupOwnerRequest, SmsSendRequest, SmsVerifyRequest } from "@/entities/auth/model/auth.types";
+import type {
+  LoginRequest,
+  LoginResponse,
+  SignupRequest,
+  SignupOwnerRequest,
+  SmsSendRequest,
+  SmsVerifyRequest,
+} from "@/entities/auth/model/auth.types";
 
 type AuthApiResponse<T> = {
   success: boolean;
