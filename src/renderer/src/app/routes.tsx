@@ -37,14 +37,13 @@ import { RecordAdd2Page } from "../pages/record-add2";
 //     return <Outlet />;
 // };
 
-const AppRoutes = () => {
+export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
-        <Route path="/" element={<RecordAddPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
-        <Route path="*" element={<RecordAddPage />} />
+        <Route path="*" element={<>안녕</>} />
         {/*<Route path="/login" element={<LoginPage />} />*/}
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
@@ -68,5 +67,3 @@ const AppRoutes = () => {
     </Routes>
   );
 };
-
-export default AppRoutes;
