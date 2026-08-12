@@ -27,6 +27,7 @@
     "@heddy/design-tokens": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
+    "capacitor-secure-storage-plugin": "^0.13.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
