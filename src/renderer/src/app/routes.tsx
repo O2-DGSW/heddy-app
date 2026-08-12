@@ -1,9 +1,9 @@
 // import { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { MobileLayout } from "./layouts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
-import { LoginPage } from "../pages/auth/login";
+import {LoginPage} from "../pages/auth/login/ui/LoginPage.tsx";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -42,11 +42,10 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
-        <Route index element={<Navigate replace to="/cuts/add" />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
+        <Route path="*" element={<>안녕</>} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate replace to="/cuts/add" />} />
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
 
