@@ -1,4 +1,4 @@
-import { font, lightTheme } from "@design-tokens";
+import { font, lightTheme } from "@heddy/design-tokens";
 
 import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.types";
 

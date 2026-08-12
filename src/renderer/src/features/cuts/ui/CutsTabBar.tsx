@@ -1,4 +1,4 @@
-import { font, lightTheme } from "@design-tokens";
+import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CUTS_TABS, type CutsStatusFilter } from "@/features/cuts/constrants/tabs";
 
