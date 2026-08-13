@@ -16,7 +16,7 @@ const MobileLayout = () => {
         className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] ${frameWidthClassName}`}
       >
         <main
-          className={`flex-1 overflow-y-auto px-safe pt-safe no-scrollbar ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
+          className={`flex-1 overflow-y-auto overscroll-contain px-safe pt-safe no-scrollbar ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
         >
           <Outlet />
         </main>
