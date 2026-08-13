@@ -20,6 +20,10 @@ const MobileLayout = () => {
         >
           <Outlet />
         </main>
+        {/* iOS WebView는 CSS만으로 내부 스크롤의 bounce(러버밴드)를 완전히 막을 수 없어서,
+            스크롤을 아무리 당겨도 이 영역이 항상 배경색으로 덮여 있도록
+            세이프에어리어 상단을 별도 레이어로 고정한다. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-white pt-safe" />
         {!hideBottomBar && (
           <div className="absolute inset-x-0 bottom-0 w-full">
             <NavBar />
