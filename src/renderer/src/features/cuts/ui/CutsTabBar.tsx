@@ -1,5 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
+import { useTabIndicator } from "@/features/cuts/model/hooks/useTabIndicator";
 import { CUTS_TABS, type CutsStatusFilter } from "@/features/cuts/constrants/tabs";
 
 interface CutsTabBarProps {
@@ -13,9 +14,7 @@ interface CutsTabBarProps {
  *   라우팅(NavLink) 대신 선택 상태를 부모로부터 받아 클릭으로 바꾼다.
  */
 export const CutsTabBar = ({ selected, onSelect }: CutsTabBarProps) => {
-  const selectedIndex = CUTS_TABS.findIndex(({ label }) => label === selected);
-  const tabWidthPercent = 100 / CUTS_TABS.length;
-  const indicatorLeftPercent = tabWidthPercent * selectedIndex + tabWidthPercent / 2;
+  const { indicatorLeftPercent } = useTabIndicator(selected);
 
   return (
     <nav className="relative flex" style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}>
