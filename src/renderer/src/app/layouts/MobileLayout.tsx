@@ -7,7 +7,8 @@ const MobileLayout = () => {
   const frameWidthClassName = import.meta.env.DEV ? "sm:max-w-[430px]" : "";
 
   const hideBottomBar =
-    ["/login", "/signup","/welcome"].includes(location.pathname) || location.pathname.startsWith("/find/");
+    ["/login", "/signup", "/welcome"].includes(location.pathname) ||
+    location.pathname.startsWith("/find/");
 
   return (
     <div className="flex min-h-dvh w-full justify-center bg-gray-100">
