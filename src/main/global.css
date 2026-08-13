@@ -22,6 +22,21 @@
       sans-serif;
   }
 
+  /* 내부 overflow-y-auto 컨테이너가 스크롤 끝에 닿으면 iOS WebView가
+     스크롤을 body로 넘겨서(scroll chaining) body 자체가 튕기며(bounce)
+     세이프에어리어 영역의 컨텐츠가 잠깐 노출된다. body 자체 스크롤을 막아
+     내부 컨테이너만 스크롤되도록 고정한다. */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100%;
+  }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
