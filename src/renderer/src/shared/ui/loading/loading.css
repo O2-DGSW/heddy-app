@@ -1,0 +1,143 @@
+@keyframes heddy-loading-character {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.8deg);
+  }
+
+  45% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+
+  70% {
+    transform: translateY(-5px) rotate(-0.4deg);
+  }
+}
+
+@keyframes heddy-loading-cloud {
+  from {
+    transform: translateX(-28vw) scale(var(--cloud-scale, 1));
+  }
+
+  to {
+    transform: translateX(128vw) scale(var(--cloud-scale, 1));
+  }
+}
+
+@keyframes heddy-loading-text {
+  0%,
+  100% {
+    opacity: 0.48;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.heddy-loading-character {
+  animation: heddy-loading-character 1.7s ease-in-out infinite;
+  transform-origin: 50% 88%;
+  will-change: transform;
+}
+
+.heddy-loading-clouds {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.heddy-loading-cloud {
+  --cloud-scale: 1;
+  animation: heddy-loading-cloud linear infinite;
+  height: auto;
+  left: 0;
+  opacity: 0.64;
+  position: absolute;
+  top: 54px;
+  width: 116px;
+  will-change: transform;
+}
+
+.heddy-loading-cloud-one {
+  --cloud-scale: 0.48;
+  animation-delay: -2s;
+  animation-duration: 22s;
+  opacity: 0.34;
+  top: 22px;
+}
+
+.heddy-loading-cloud-two {
+  --cloud-scale: 0.68;
+  animation-delay: -11s;
+  animation-duration: 28s;
+  opacity: 0.52;
+  top: 66px;
+}
+
+.heddy-loading-cloud-three {
+  --cloud-scale: 0.42;
+  animation-delay: -18s;
+  animation-duration: 24s;
+  opacity: 0.28;
+  top: 130px;
+}
+
+.heddy-loading-cloud-four {
+  --cloud-scale: 0.58;
+  animation-delay: -26s;
+  animation-duration: 32s;
+  opacity: 0.44;
+  top: 38px;
+}
+
+.heddy-loading-cloud-five {
+  --cloud-scale: 0.36;
+  animation-delay: -5s;
+  animation-duration: 30s;
+  opacity: 0.24;
+  top: 164px;
+}
+
+.heddy-loading-cloud-six {
+  --cloud-scale: 0.76;
+  animation-delay: -33s;
+  animation-duration: 36s;
+  opacity: 0.4;
+  top: 98px;
+}
+
+.heddy-loading-cloud-seven {
+  --cloud-scale: 0.3;
+  animation-delay: -15s;
+  animation-duration: 26s;
+  opacity: 0.2;
+  top: 8px;
+}
+
+.heddy-loading-cloud-eight {
+  --cloud-scale: 0.5;
+  animation-delay: -39s;
+  animation-duration: 34s;
+  opacity: 0.32;
+  top: 188px;
+}
+
+.heddy-loading-cloud-nine {
+  --cloud-scale: 0.62;
+  animation-delay: -21s;
+  animation-duration: 38s;
+  opacity: 0.28;
+  top: 122px;
+}
+
+.heddy-loading-text {
+  animation: heddy-loading-text 1.7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heddy-loading-character,
+  .heddy-loading-cloud,
+  .heddy-loading-text {
+    animation: none;
+  }
+}
