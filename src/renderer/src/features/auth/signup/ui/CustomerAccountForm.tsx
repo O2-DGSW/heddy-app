@@ -39,7 +39,7 @@ export const CustomerAccountForm = ({ form, onChange, onNext }: CustomerAccountF
       />
 
       <button
-        className={`w-full py-4 rounded-2xl mt-2 ${font.headline2.semiBold}`}
+        className={`w-full py-4 rounded-2xl mt-4 ${font.headline2.semiBold}`}
         style={{
           backgroundColor: isValid ? lightTheme.primary.normal : lightTheme.line.alternative,
           color: isValid ? lightTheme.fill.normal : lightTheme.line.normal,
