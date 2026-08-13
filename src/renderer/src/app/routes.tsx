@@ -45,8 +45,8 @@ export const AppRoutes = () => {
       <Route element={<MobileLayout />}>
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
-        <Route path="*" element={<>안녕</>} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<>회원가입 페이지 제작 예정</>} />
         <Route path="/welcome" element={<WelcomePage />} />
         {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
@@ -66,6 +66,7 @@ export const AppRoutes = () => {
         {/*    />*/}
         {/*    <Route path="*" element={<Navigate replace to="/" />} />*/}
         {/*</Route>*/}
+        <Route path="*" element={<>404p</>} />
       </Route>
     </Routes>
   );
