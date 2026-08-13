@@ -1,10 +1,10 @@
 // import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { MobileLayout } from "./layouts";
+import { CutsListPage } from "@/pages/cuts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
 import { LoginPage } from "@/pages/auth/login";
-import { WelcomePage } from "@/pages/auth/welcome";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -43,12 +43,12 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
+        <Route path="/" element={<Navigate replace to="/cuts" />} />
+        <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<>회원가입 페이지 제작 예정</>} />
-        <Route path="/welcome" element={<WelcomePage />} />
-        {/*<Route path="/signup" element={<SignupPage />} />*/}
         {/*<Route path="/find/:type" element={<FindPage />} />*/}
 
         {/*<Route element={<RequireAuth />}>*/}
