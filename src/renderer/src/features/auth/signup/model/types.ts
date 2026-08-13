@@ -18,8 +18,6 @@ export type BaseAccountForm = {
 
 export type CustomerAccountForm = BaseAccountForm;
 
-export type OwnerAccountForm = BaseAccountForm;
-
 export type ShopForm = {
   shopName: string;
   address: string;
