@@ -3,7 +3,6 @@ import type {
   LoginRequest,
   LoginResponse,
   SignupRequest,
-  SignupOwnerRequest,
   SmsSendRequest,
   SmsVerifyRequest,
 } from "@/entities/auth/model/auth.types";
@@ -39,13 +38,6 @@ export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
 
 export const signupApi = async (body: SignupRequest): Promise<void> => {
   const res = await api.post<AuthApiResponse<null>>("/auth/signup", body);
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "회원가입에 실패했습니다.");
-  }
-};
-
-export const signupOwnerApi = async (body: SignupOwnerRequest): Promise<void> => {
-  const res = await api.post<AuthApiResponse<null>>("/auth/signup/owner", body);
   if (!res.data.success) {
     throw new Error(res.data.error?.message || res.data.message || "회원가입에 실패했습니다.");
   }
