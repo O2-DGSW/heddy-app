@@ -1,6 +1,7 @@
 // import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { MobileLayout } from "./layouts";
+import { CutsListPage } from "../pages/cuts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
 import {LoginPage} from "../pages/auth/login/ui/LoginPage.tsx";
@@ -42,6 +43,8 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
+        <Route path="/" element={<Navigate replace to="/cuts" />} />
+        <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/add2" element={<RecordAdd2Page />} />
         <Route path="*" element={<>안녕</>} />
