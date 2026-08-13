@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { MobileLayout } from "./layouts";
 import { RecordAddPage } from "../pages/record-add";
 import { RecordAdd2Page } from "../pages/record-add2";
-import { LoginPage } from "../pages/auth/login/ui/LoginPage.tsx";
+import { LoginPage } from "@/pages/auth/login";
 import { WelcomePage } from "@/pages/auth/welcome";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
