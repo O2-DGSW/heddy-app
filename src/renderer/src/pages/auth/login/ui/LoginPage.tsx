@@ -4,7 +4,7 @@ import { LoginForm, SocialLogin } from "@/features/auth/login";
 export const LoginPage = () => {
   return (
     <div
-      className="h-full overflow-y-auto flex flex-col justify-start items-center px-6 pt-8"
+      className="h-full overflow-y-auto flex flex-col justify-center items-center px-6 pt-8"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <div className="flex flex-col items-center gap-2 mb-14">
