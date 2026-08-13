@@ -1,6 +1,9 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import { useNavigate } from "react-router-dom";
 
 export const WelcomePage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex h-full flex-col items-center justify-between overflow-y-auto px-6 py-24">
       {/*  */}
@@ -28,6 +31,7 @@ export const WelcomePage = () => {
             backgroundColor: lightTheme.primary.normal,
             color: lightTheme.fill.normal,
           }}
+          onClick={() => navigate("/signup")}
         >
           시작하기
         </button>
@@ -39,6 +43,7 @@ export const WelcomePage = () => {
           <p
             className={`${font.label.medium} underline`}
             style={{ color: lightTheme.primary.normal }}
+            onClick={() => navigate("/login")}
           >
             로그인
           </p>
