@@ -55,7 +55,7 @@ export const CustomerAccountForm = ({ form, onChange, onNext }: CustomerAccountF
         style={{ color: lightTheme.label.assistive }}
       >
         <span>이미 계정이 있으신가요?</span>
-        <Link to="/login" style={{ color: lightTheme.primary.normal }}>
+        <Link to="/login" style={{ color: lightTheme.primary.normal }} className="underline">
           로그인
         </Link>
       </div>
