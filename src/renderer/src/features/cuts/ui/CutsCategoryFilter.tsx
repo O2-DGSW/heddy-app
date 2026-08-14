@@ -1,6 +1,9 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { CUTS_CATEGORIES, type CutsCategoryFilterValue } from "@/features/cuts/constrants/categories";
+import {
+  CUTS_CATEGORIES,
+  type CutsCategoryFilterValue,
+} from "@/features/cuts/constrants/categories";
 
 interface CutsCategoryFilterProps {
   selected: CutsCategoryFilterValue;

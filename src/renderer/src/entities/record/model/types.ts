@@ -1,4 +1,4 @@
-import type { RecordFieldNameType } from "./types";
+export type RecordFieldNameType = "salon" | "price" | "designer" | "duration";
 
 export interface RecordFormValues {
   date: string;
@@ -20,4 +20,12 @@ export interface PhotoItem {
   id: string;
   src: string;
   isObjectUrl: boolean;
+}
+
+export interface CalendarDay {
+  id: string;
+  label: string;
+  isCurrentMonth: boolean;
+  day?: number;
+  tone?: "mutedSunday";
 }
