@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import type { BaseAccountForm } from './types';
-import { isValidPhone, isPasswordMatch } from './validation';
+import { useState } from "react";
+import type { BaseAccountForm } from "@/features/auth/signup/model/types.ts";
+import { isValidPhone, isPasswordMatch } from "./validation";
 
-export const useAccountForm = (form: BaseAccountForm, extraValid: boolean, onNext: () => void) => {
+export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
   const [submitted, setSubmitted] = useState(false);
 
   const isValid =
@@ -19,13 +19,18 @@ export const useAccountForm = (form: BaseAccountForm, extraValid: boolean, onNex
     isValidPhone(form.phone);
 
   const showPasswordError = submitted && !isPasswordMatch(form.password, form.passwordConfirm);
+
   const showPhoneError = submitted && !isValidPhone(form.phone);
+
   const showNameError = submitted && !form.name;
 
-  const handleNext = () => {
-    setSubmitted(true);
-    if (isValid) onNext();
+  return {
+    isValid,
+    canRequestVerification,
+    showPasswordError,
+    showPhoneError,
+    showNameError,
+    submitted,
+    setSubmitted,
   };
-
-  return { isValid, canRequestVerification, showPasswordError, showPhoneError, showNameError, submitted, handleNext };
 };
