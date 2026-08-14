@@ -50,7 +50,7 @@ export const PhoneVerificationField = ({
             color: isAlddulSelected ? lightTheme.primary.normal : lightTheme.label.assistive,
           }}
           value={isAlddulSelected ? carrier : ""}
-          onChange={e => onCarrierChange(e.target.value as MvnoCarrier)}
+          onChange={e => onCarrierChange(e.target.value as Carrier)}
         >
           <option value="" disabled>
             알뜰폰

@@ -24,8 +24,9 @@ export const AccountFormFields = ({
         <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
           아이디
         </p>
+
         <input
-          className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.caption.regular}`}
           style={inputStyle}
           placeholder="아이디"
           value={form.id}
@@ -45,13 +46,15 @@ export const AccountFormFields = ({
         <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
           {nameLabel}
         </p>
+
         <input
-          className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.caption.regular}`}
           style={inputStyle}
           placeholder={nameLabel}
           value={form.name}
           onChange={e => onChange({ ...form, name: e.target.value })}
         />
+
         {showNameError && (
           <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.error }}>
             {nameLabel}을 입력해주세요.
@@ -66,8 +69,8 @@ export const AccountFormFields = ({
         canRequestVerification={canRequestVerification}
         showPhoneError={showPhoneError}
         smsVerification={smsVerification}
-        onCarrierChange={v => onChange({ ...form, carrier: v })}
-        onPhoneChange={v => onChange({ ...form, phone: v })}
+        onCarrierChange={e => onChange({ ...form, carrier: e })}
+        onPhoneChange={e => onChange({ ...form, phone: e })}
         onVerificationCodeChange={v => onChange({ ...form, verificationCode: v })}
       />
     </>
