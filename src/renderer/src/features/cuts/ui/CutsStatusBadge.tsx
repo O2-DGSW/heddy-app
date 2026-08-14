@@ -8,12 +8,16 @@ interface CutsStatusBadgeProps {
   variant: CutsBadgeVariant;
 }
 
-const BADGE_STYLE_BY_VARIANT: Record<CutsBadgeVariant, { backgroundColor: string; color: string }> = {
-  sharing: { backgroundColor: lightTheme.status.info, color: lightTheme.background.normal },
-  "분석 완료": { backgroundColor: lightTheme.status.success, color: lightTheme.background.normal },
-  "분석 중": { backgroundColor: lightTheme.fill.neutral, color: lightTheme.label.assistive },
-  재촬영: { backgroundColor: lightTheme.status.error, color: lightTheme.background.normal },
-};
+const BADGE_STYLE_BY_VARIANT: Record<CutsBadgeVariant, { backgroundColor: string; color: string }> =
+  {
+    sharing: { backgroundColor: lightTheme.status.info, color: lightTheme.background.normal },
+    "분석 완료": {
+      backgroundColor: lightTheme.status.success,
+      color: lightTheme.background.normal,
+    },
+    "분석 중": { backgroundColor: lightTheme.fill.neutral, color: lightTheme.label.assistive },
+    재촬영: { backgroundColor: lightTheme.status.error, color: lightTheme.background.normal },
+  };
 
 const BADGE_LABEL_BY_VARIANT: Record<CutsBadgeVariant, string> = {
   sharing: "공유중",

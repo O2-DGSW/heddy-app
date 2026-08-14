@@ -7,7 +7,11 @@ import { CutsCategoryFilter } from "@/features/cuts/ui/CutsCategoryFilter";
 import { CutsRecordList } from "@/features/cuts/ui/CutsRecordList";
 import { CutsAddButton } from "@/features/cuts/ui/CutsAddButton";
 import { CUTS_TABS, type CutsStatusFilter } from "@/features/cuts/constrants/tabs";
-import { CUTS_CATEGORIES, isCutsCategory, type CutsCategoryFilterValue } from "@/features/cuts/constrants/categories";
+import {
+  CUTS_CATEGORIES,
+  isCutsCategory,
+  type CutsCategoryFilterValue,
+} from "@/features/cuts/constrants/categories";
 import { dummyCutsRecords } from "@/features/cuts/constrants/dummyRecords";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
@@ -31,7 +35,8 @@ export const CutsListPage = () => {
   const filteredRecords = useMemo(
     () =>
       dummyCutsRecords.filter(record => {
-        const matchesCategory = !isCutsCategory(categoryFilter) || record.category === categoryFilter;
+        const matchesCategory =
+          !isCutsCategory(categoryFilter) || record.category === categoryFilter;
 
         return matchesCategory && matchesStatusFilter(record, statusFilter);
       }),
