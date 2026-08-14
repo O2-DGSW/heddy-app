@@ -1,4 +1,4 @@
-import type { BaseAccountForm, Carrier } from '@/features/auth/signup/model/types';
+import type { Carrier, CustomerAccountForm } from "@/features/auth/signup/model/types";
 
 export interface SmsVerificationState {
   isSent: boolean;
@@ -11,14 +11,14 @@ export interface SmsVerificationState {
 }
 
 export interface AccountFormFieldsProps {
-  form: BaseAccountForm;
+  form: CustomerAccountForm;
   showPasswordError: boolean;
   showPhoneError: boolean;
   showNameError?: boolean;
   canRequestVerification: boolean;
   nameLabel?: string;
   smsVerification: SmsVerificationState;
-  onChange: (form: BaseAccountForm) => void;
+  onChange: (form: CustomerAccountForm) => void;
 }
 
 export interface PasswordFieldsProps {
