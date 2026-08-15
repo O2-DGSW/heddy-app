@@ -10,7 +10,7 @@ export const FindPage = () => {
 
   return (
     <div
-      className="flex h-full flex-col items-center overflow-y-auto px-6 pt-8"
+      className="flex h-full flex-col items-center overflow-y-auto px-6 pt-23.5"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <div className="mb-10 flex flex-col items-center gap-2">
