@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { font, lightTheme } from '@design-tokens';
-import { useFindPassword } from '@/features/auth/find/model/useFindPassword';
-import { useResetPassword } from '@/features/auth/find/model/useResetPassword';
-import { useSmsVerification } from '@/features/auth/signup/model/useSmsVerification';
-import type { Carrier, MvnoCarrier } from '@/features/auth/signup/model/types';
-import { MAIN_CARRIERS, MVNO_CARRIERS } from '@/features/auth/signup/constants/signup';
-import { RadioButton } from '@/private/shared/ui/radio/RadioButton';
-import { PasswordInput } from '@/private/shared/ui/password-input/PasswordInput';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { font, lightTheme } from "@heddy/design-tokens";
+import { useFindPassword } from "@/features/auth/find/model/useFindPassword";
+import { useResetPassword } from "@/features/auth/find/model/useResetPassword";
+import { useSmsVerification } from "@/features/auth/signup/model/useSmsVerification";
+import type { Carrier, MvnoCarrier } from "@/features/auth/signup/model/types";
+import { MAIN_CARRIERS, MVNO_CARRIERS } from "@/features/auth/signup/constants/signup";
+import { RadioButton } from "@/shared/ui/radio/RadioButton";
+import { PasswordInput } from "@/shared/ui/password-input/PasswordInput";
 
 const MVNO_SET = new Set<string>(MVNO_CARRIERS);
 const isMvno = (c: Carrier): c is MvnoCarrier => MVNO_SET.has(c);
@@ -15,7 +15,13 @@ const isMvno = (c: Carrier): c is MvnoCarrier => MVNO_SET.has(c);
 export const FindPasswordForm = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
-  const { idField, carrierField, phoneField, verificationField, canSubmit: canSubmitBase } = useFindPassword();
+  const {
+    idField,
+    carrierField,
+    phoneField,
+    verificationField,
+    canSubmit: canSubmitBase,
+  } = useFindPassword();
   const { passwordField, passwordConfirmField, canSubmit: canReset } = useResetPassword();
   const sms = useSmsVerification("PASSWORD_RESET", phoneField.value);
 
@@ -27,10 +33,13 @@ export const FindPasswordForm = () => {
   };
 
   const tabs = (
-    <div className="flex w-full mb-8" style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}>
+    <div
+      className="flex w-full mb-8"
+      style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
+    >
       {[
-        { label: '아이디 찾기', path: '/find/id', isActive: false },
-        { label: '비밀번호 찾기', path: '/find/password', isActive: true },
+        { label: "아이디 찾기", path: "/find/id", isActive: false },
+        { label: "비밀번호 찾기", path: "/find/password", isActive: true },
       ].map(({ label, path, isActive }) => (
         <button
           key={path}
@@ -41,7 +50,7 @@ export const FindPasswordForm = () => {
           <span className="pb-3">{label}</span>
           <div
             className="w-[60px] h-[2px] -mb-px"
-            style={{ backgroundColor: isActive ? lightTheme.label.normal : 'transparent' }}
+            style={{ backgroundColor: isActive ? lightTheme.label.normal : "transparent" }}
           />
         </button>
       ))}
@@ -54,14 +63,25 @@ export const FindPasswordForm = () => {
         {tabs}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-1">
-            <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
+            <p
+              className={`${font.label.medium} pl-2`}
+              style={{ color: lightTheme.label.assistive }}
+            >
               새 비밀번호
             </p>
             <div className="mb-1">
-              <PasswordInput placeholder="비밀번호" value={passwordField.value} onChange={passwordField.onChange} />
+              <PasswordInput
+                placeholder="비밀번호"
+                value={passwordField.value}
+                onChange={passwordField.onChange}
+              />
             </div>
             <div className="mb-3">
-              <PasswordInput placeholder="비밀번호 확인" value={passwordConfirmField.value} onChange={passwordConfirmField.onChange} />
+              <PasswordInput
+                placeholder="비밀번호 확인"
+                value={passwordConfirmField.value}
+                onChange={passwordConfirmField.onChange}
+              />
             </div>
           </div>
         </div>
@@ -113,13 +133,21 @@ export const FindPasswordForm = () => {
             ))}
             <select
               className={`focus:outline-none bg-transparent ${font.caption.medium}`}
-              style={{ color: isMvno(carrierField.value) ? lightTheme.primary.normal : lightTheme.label.assistive }}
-              value={isMvno(carrierField.value) ? carrierField.value : ''}
+              style={{
+                color: isMvno(carrierField.value)
+                  ? lightTheme.primary.normal
+                  : lightTheme.label.assistive,
+              }}
+              value={isMvno(carrierField.value) ? carrierField.value : ""}
               onChange={e => carrierField.onChange(e.target.value as MvnoCarrier)}
             >
-              <option value="" disabled>알뜰폰</option>
+              <option value="" disabled>
+                알뜰폰
+              </option>
               {MVNO_CARRIERS.map(c => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </div>
@@ -134,8 +162,14 @@ export const FindPasswordForm = () => {
             <button
               className={`px-6 py-4 rounded-xl ${font.label.medium}`}
               style={{
-                backgroundColor: phoneField.canRequest && !sms.isSending ? lightTheme.primary.normal : lightTheme.line.alternative,
-                color: phoneField.canRequest && !sms.isSending ? lightTheme.fill.normal : lightTheme.line.normal,
+                backgroundColor:
+                  phoneField.canRequest && !sms.isSending
+                    ? lightTheme.primary.normal
+                    : lightTheme.line.alternative,
+                color:
+                  phoneField.canRequest && !sms.isSending
+                    ? lightTheme.fill.normal
+                    : lightTheme.line.normal,
               }}
               disabled={!phoneField.canRequest || sms.isSending}
               onClick={() => sms.sendCode(phoneField.value, carrierField.value)}
@@ -155,8 +189,14 @@ export const FindPasswordForm = () => {
               <button
                 className={`px-6 py-4 rounded-xl ${font.label.medium}`}
                 style={{
-                  backgroundColor: verificationField.value.length > 0 && !sms.isVerifying ? lightTheme.primary.normal : lightTheme.line.alternative,
-                  color: verificationField.value.length > 0 && !sms.isVerifying ? lightTheme.fill.normal : lightTheme.line.normal,
+                  backgroundColor:
+                    verificationField.value.length > 0 && !sms.isVerifying
+                      ? lightTheme.primary.normal
+                      : lightTheme.line.alternative,
+                  color:
+                    verificationField.value.length > 0 && !sms.isVerifying
+                      ? lightTheme.fill.normal
+                      : lightTheme.line.normal,
                 }}
                 disabled={verificationField.value.length === 0 || sms.isVerifying}
                 onClick={() => sms.verifyCode(phoneField.value, verificationField.value)}
@@ -166,12 +206,18 @@ export const FindPasswordForm = () => {
             </div>
           )}
           {sms.isVerified && (
-            <p className={`${font.caption.regular} pl-2 mb-1`} style={{ color: lightTheme.status.success }}>
+            <p
+              className={`${font.caption.regular} pl-2 mb-1`}
+              style={{ color: lightTheme.status.success }}
+            >
               인증이 완료되었습니다.
             </p>
           )}
           {sms.smsError && (
-            <p className={`${font.caption.regular} pl-2 mb-1`} style={{ color: lightTheme.status.error }}>
+            <p
+              className={`${font.caption.regular} pl-2 mb-1`}
+              style={{ color: lightTheme.status.error }}
+            >
               {sms.smsError}
             </p>
           )}
