@@ -28,12 +28,3 @@ export type SmsVerifyRequest = {
   code: string;
   purpose: SmsPurpose;
 };
-
-export type SignupOwnerRequest = SignupRequest & {
-  storeName: string;
-  roadAddress: string;
-  detailAddress: string;
-  landline: string;
-  storeEmail: string;
-  businessNumber: string;
-};
