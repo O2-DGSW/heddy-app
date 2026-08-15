@@ -104,7 +104,7 @@ export const FindPasswordForm = () => {
   return (
     <div className="flex flex-col w-full flex-1">
       {tabs}
-      <div className="flex flex-col gap-4 flex-1">
+      <div className="flex flex-col gap-6 flex-1">
         <div className="flex flex-col gap-1">
           <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
             아이디
@@ -122,7 +122,7 @@ export const FindPasswordForm = () => {
           <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
             전화번호
           </p>
-          <div className="flex items-center gap-9 flex-wrap ml-2">
+          <div className="flex items-center justify-between flex-wrap ml-2">
             {MAIN_CARRIERS.map(c => (
               <RadioButton
                 key={c}
