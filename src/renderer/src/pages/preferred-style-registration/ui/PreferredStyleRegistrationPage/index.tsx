@@ -2,181 +2,19 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { arrowIcon, dropdownIcon } from "@/entities/record";
+import { arrowIcon } from "@/entities/record";
 import { cn } from "@/shared";
 
-type PreferredStyleTabType = "preferred" | "excluded";
-type StyleTagStatusType = "none" | "preferred" | "excluded";
-
-interface StyleTag {
-  id: string;
-  label: string;
-  status: StyleTagStatusType;
-}
-
-interface StyleTagButtonProps {
-  label: string;
-  status: StyleTagStatusType;
-  disabled?: boolean;
-  onClick?: () => void;
-}
-
-interface StyleTagResultRowProps {
-  label: string;
-  tags: StyleTag[];
-  status: Exclude<StyleTagStatusType, "none">;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-}
-
-const SELECTED_BACKGROUND_COLOR = "#F4FBF8";
-const MAX_VISIBLE_RESULT_TAGS = 2;
-
-const INITIAL_STYLE_TAGS: StyleTag[] = [
-  { id: "layered-cut", label: "#레이어드컷", status: "preferred" },
-  { id: "hush-cut", label: "#허쉬컷", status: "preferred" },
-  { id: "bob-cut", label: "#단발", status: "none" },
-  { id: "hippie-perm", label: "#히피펌", status: "none" },
-  { id: "volume-magic", label: "#볼륨매직", status: "preferred" },
-  { id: "ash-brown", label: "#애쉬브라운", status: "excluded" },
-  { id: "bleach", label: "#탈색", status: "none" },
-  { id: "clinic", label: "#클리닉", status: "none" },
-  { id: "dandy-cut", label: "#댄디컷", status: "preferred" },
-  { id: "leaf-cut", label: "#리프컷", status: "none" },
-  { id: "parted-perm", label: "#가르마펌", status: "preferred" },
-  { id: "c-curl", label: "#C컬펌", status: "excluded" },
-  { id: "s-curl", label: "#S컬펌", status: "none" },
-  { id: "tassel-cut", label: "#태슬컷", status: "preferred" },
-];
-
-const tabLabelByType: Record<PreferredStyleTabType, string> = {
-  preferred: "선호",
-  excluded: "제외",
-};
-
-const titleByTab: Record<PreferredStyleTabType, string> = {
-  preferred: "선호 스타일 등록",
-  excluded: "제외 스타일 등록",
-};
-
-const getIsTagDisabled = (status: StyleTagStatusType, activeTab: PreferredStyleTabType) => {
-  if (activeTab === "preferred") {
-    return status === "excluded";
-  }
-
-  return status === "preferred";
-};
-
-const StyleTagButton = ({ label, status, disabled = false, onClick }: StyleTagButtonProps) => {
-  const isPreferred = status === "preferred";
-  const isExcluded = status === "excluded";
-  const className = cn(
-    `inline-flex h-[26px] shrink-0 items-center justify-center rounded-[15px] border px-[8px] py-[4px] transition-colors duration-200 ${font.label.medium}`,
-    disabled && "cursor-not-allowed"
-  );
-  const style = {
-    backgroundColor: isPreferred
-      ? SELECTED_BACKGROUND_COLOR
-      : isExcluded
-        ? lightTheme.line.normal
-        : lightTheme.background.normal,
-    borderColor: isPreferred
-      ? lightTheme.primary.normal
-      : isExcluded
-        ? lightTheme.line.normal
-        : lightTheme.fill.neutral,
-    color: isPreferred
-      ? lightTheme.primary.normal
-      : isExcluded
-        ? lightTheme.label.assistive
-        : lightTheme.label.alternative,
-  };
-
-  if (!onClick) {
-    return (
-      <span className={className} style={style}>
-        {label}
-      </span>
-    );
-  }
-
-  return (
-    <button
-      aria-pressed={isPreferred || isExcluded}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-      style={style}
-      type="button"
-    >
-      {label}
-    </button>
-  );
-};
-
-const getNextTagStatus = (currentStatus: StyleTagStatusType, activeTab: PreferredStyleTabType) => {
-  if (currentStatus === activeTab) {
-    return "none";
-  }
-
-  return activeTab;
-};
-
-const StyleTagResultRow = ({
-  label,
-  tags,
-  status,
-  isExpanded,
-  onToggleExpand,
-}: StyleTagResultRowProps) => {
-  const visibleTags = tags.slice(0, MAX_VISIBLE_RESULT_TAGS);
-  const hasHiddenTags = tags.length > MAX_VISIBLE_RESULT_TAGS;
-  const displayTags = isExpanded ? tags : visibleTags;
-
-  return (
-    <div className="flex flex-col gap-[14px] px-[14px] py-[14px]">
-      <div className="flex min-h-[26px] items-center justify-between gap-[12px]">
-        <span className={font.body.medium} style={{ color: lightTheme.label.inactive }}>
-          {label}
-        </span>
-
-        <div className="flex flex-wrap items-center justify-end gap-[4px]">
-          {!isExpanded &&
-            displayTags.map(tag => (
-              <StyleTagButton key={tag.id} label={tag.label} status={status} />
-            ))}
-
-          {hasHiddenTags && (
-            <button
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? `${label} 접기` : `${label} 더 보기`}
-              className="flex h-[32px] w-[32px] shrink-0 items-center justify-center border-0 bg-transparent p-0"
-              onClick={onToggleExpand}
-              type="button"
-            >
-              <img
-                alt=""
-                className={cn(
-                  "h-[24px] w-[24px] transition-transform duration-200",
-                  isExpanded && "rotate-180"
-                )}
-                src={dropdownIcon}
-              />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {isExpanded && (
-        <div className="flex flex-wrap gap-[4px] transition-opacity duration-200">
-          {displayTags.map(tag => (
-            <StyleTagButton key={tag.id} label={tag.label} status={status} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { getIsTagDisabled, getNextTagStatus } from "../../lib/styleTag";
+import {
+  INITIAL_STYLE_TAGS,
+  PREFERRED_STYLE_TABS,
+  TAB_LABEL_BY_TYPE,
+  TITLE_BY_TAB,
+} from "../../model/constants";
+import type { PreferredStyleTabType, StyleTag } from "../../model/types";
+import StyleTagButton from "../StyleTagButton";
+import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
   const navigate = useNavigate();
@@ -251,7 +89,7 @@ const PreferredStyleRegistrationPage = () => {
           id="preferred-style-registration-title"
           style={{ color: lightTheme.label.neutral }}
         >
-          {titleByTab[activeTab]}
+          {TITLE_BY_TAB[activeTab]}
         </h1>
       </header>
 
@@ -271,7 +109,7 @@ const PreferredStyleRegistrationPage = () => {
           style={{ backgroundColor: lightTheme.label.neutral }}
         />
 
-        {(["preferred", "excluded"] as const).map(tab => {
+        {PREFERRED_STYLE_TABS.map(tab => {
           const isActive = activeTab === tab;
 
           return (
@@ -287,7 +125,7 @@ const PreferredStyleRegistrationPage = () => {
               style={{ color: isActive ? lightTheme.label.neutral : lightTheme.line.normal }}
               type="button"
             >
-              {tabLabelByType[tab]}
+              {TAB_LABEL_BY_TYPE[tab]}
             </button>
           );
         })}
