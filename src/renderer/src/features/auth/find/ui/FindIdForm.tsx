@@ -20,6 +20,7 @@ export const FindIdForm = () => {
         style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
       >
         {[
+          { label: "로그인", path: "/login", isActive: false },
           { label: "아이디 찾기", path: "/find-id", isActive: true },
           { label: "비밀번호 찾기", path: "/find-password", isActive: false },
         ].map(({ label, path, isActive }) => (

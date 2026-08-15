@@ -38,6 +38,7 @@ export const FindPasswordForm = () => {
       style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
     >
       {[
+        { label: "로그인", path: "/login", isActive: false },
         { label: "아이디 찾기", path: "/find-id", isActive: false },
         { label: "비밀번호 찾기", path: "/find-password", isActive: true },
       ].map(({ label, path, isActive }) => (
