@@ -1,11 +1,11 @@
-import { useParams } from 'react-router-dom';
-import { font, lightTheme } from '@design-tokens';
-import { FindIdForm, FindPasswordForm } from '@/features/auth/find';
+import { useParams } from "react-router-dom";
+import { font, lightTheme } from "@heddy/design-tokens";
+import { FindIdForm, FindPasswordForm } from "@/features/auth/find";
 
 export const FindPage = () => {
   const { type } = useParams<{ type: string }>();
-  const isPassword = type === 'password';
-  const title = isPassword ? '비밀번호 찾기' : '아이디 찾기';
+  const isPassword = type === "password";
+  const title = isPassword ? "비밀번호 찾기" : "아이디 찾기";
 
   return (
     <div
