@@ -17,11 +17,11 @@ const RecordAddPage = () => {
   return (
     <section
       aria-labelledby="record-add-title"
-      className="min-h-full overflow-x-clip pb-[15px]"
+      className="flex h-full min-h-0 flex-col overflow-hidden"
       style={pageStyle}
     >
       <header
-        className="sticky top-0 z-10 flex h-[58px] items-center justify-center"
+        className="relative z-10 flex h-[58px] shrink-0 items-center justify-center"
         style={pageStyle}
       >
         <button
@@ -38,7 +38,9 @@ const RecordAddPage = () => {
         </h1>
       </header>
 
-      <RecordAddForm onCancel={handleClose} />
+      <div className="min-h-0 flex-1 touch-pan-y overflow-y-scroll overscroll-contain pb-[15px] [-webkit-overflow-scrolling:touch]">
+        <RecordAddForm onCancel={handleClose} />
+      </div>
     </section>
   );
 };
