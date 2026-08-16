@@ -23,6 +23,7 @@ export const CutsDetailTabBar = () => {
           key={path}
           to={path}
           end
+          replace
           className={`flex-1 flex flex-col items-center px-2 py-3 transition-colors duration-200 ${font.label.medium}`}
           style={({ isActive }) => ({
             color: isActive ? lightTheme.label.strong : lightTheme.label.assistive,
