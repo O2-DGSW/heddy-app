@@ -7,7 +7,7 @@ const MobileLayout = () => {
   const frameWidthClassName = import.meta.env.DEV ? "sm:max-w-[430px]" : "";
 
   const hideBottomBar =
-    ["/login", "/signup", "/welcome"].includes(location.pathname) ||
+    ["/login", "/signup", "/welcome", "/find-id", "/find-password"].includes(location.pathname) ||
     location.pathname.startsWith("/find/");
 
   return (
