@@ -4,6 +4,7 @@ import { MobileLayout } from "./layouts";
 import { CutsListPage } from "@/pages/cuts";
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
+import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
 import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
 
@@ -47,6 +48,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<Navigate replace to="/cuts" />} />
         <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
+        <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
