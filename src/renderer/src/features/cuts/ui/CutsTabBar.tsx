@@ -14,7 +14,8 @@ interface CutsTabBarProps {
  *   라우팅(NavLink) 대신 선택 상태를 부모로부터 받아 클릭으로 바꾼다.
  */
 export const CutsTabBar = ({ selected, onSelect }: CutsTabBarProps) => {
-  const { indicatorLeftPercent } = useTabIndicator(selected);
+  const selectedIndex = CUTS_TABS.findIndex(({ label }) => label === selected);
+  const { indicatorLeftPercent } = useTabIndicator(CUTS_TABS.length, selectedIndex);
 
   return (
     <nav
