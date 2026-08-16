@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CutsDetailTabBar } from "@/features/cuts/ui/CutsDetailTabBar";
-import { CutsChevronLeftIcon } from "@/features/cuts/ui/icons/CutsChevronLeftIcon";
+import { arrowIcon } from "@/entities/record";
 import type { CutsDetailLayoutProps } from "@/features/cuts/model/types/CutsDetailLayout.types";
 
 export const CutsDetailLayout = ({ title, children }: CutsDetailLayoutProps) => {
@@ -11,16 +11,16 @@ export const CutsDetailLayout = ({ title, children }: CutsDetailLayoutProps) => 
   return (
     <div className="flex min-h-full flex-col">
       <div className="sticky top-0 z-10" style={{ backgroundColor: lightTheme.background.normal }}>
-        <div className="relative flex items-center justify-center py-2 pt-3">
+        <div className="relative flex h-[58px] items-center justify-center">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="뒤로가기"
-            className="absolute left-0 flex h-8 w-8 items-center justify-center"
+            aria-label="뒤로 가기"
+            className="absolute left-[14px] flex h-[44px] w-[44px] items-center justify-start border-0 bg-transparent p-0"
           >
-            <CutsChevronLeftIcon />
+            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
           </button>
-          <h1 className={`text-center ${font.headline1.bold}`} style={{ color: lightTheme.label.neutral }}>
+          <h1 className={font.headline1.bold} style={{ color: lightTheme.label.neutral }}>
             {title}
           </h1>
         </div>
