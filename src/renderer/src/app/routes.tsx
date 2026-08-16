@@ -7,6 +7,7 @@ import { LoginPage } from "@/pages/auth/login";
 import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
 import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
+import { FindPage } from "@/pages/auth/find";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -52,7 +53,8 @@ export const AppRoutes = () => {
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        {/*<Route path="/find/:type" element={<FindPage />} />*/}
+        <Route path="/find-id" element={<FindPage />} />
+        <Route path="/find-password" element={<FindPage />} />
 
         {/*<Route element={<RequireAuth />}>*/}
         {/*    <Route path="/" element={<MainPage />} />*/}
