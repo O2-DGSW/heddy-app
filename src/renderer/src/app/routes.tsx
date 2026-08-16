@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { MobileLayout } from "./layouts";
 import { CutsListPage } from "@/pages/cuts";
+import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
@@ -49,6 +50,11 @@ export const AppRoutes = () => {
         <Route path="/" element={<Navigate replace to="/cuts" />} />
         <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
+        <Route path="/cuts/:id" element={<CutsDetailPage />}>
+          <Route index element={<Navigate replace to="info" />} />
+          <Route path="info" element={<CutsDetailInfoPage />} />
+          <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+        </Route>
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
