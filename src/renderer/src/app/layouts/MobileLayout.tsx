@@ -1,10 +1,10 @@
 import { Outlet, useLocation } from "react-router-dom";
-
 import { NavBar } from "../../widgets/nav-bar";
-
-const BOTTOM_BAR_HIDDEN_PATHS = ["/login", "/signup", "/welcome", "/find-id", "/find-password"];
-const BOTTOM_BAR_HIDDEN_PREFIXES = ["/find/"];
-const PAGE_SCROLL_PATHS = ["/cuts/add"];
+import {
+  PAGE_SCROLL_PATHS,
+  BOTTOM_BAR_HIDDEN_PREFIXES,
+  BOTTOM_BAR_HIDDEN_PATHS,
+} from "@/app/layouts/constant/layout.ts";
 
 const MobileLayout = () => {
   const location = useLocation();
