@@ -1,14 +1,21 @@
 import { Outlet, useLocation } from "react-router-dom";
-
 import { NavBar } from "../../widgets/nav-bar";
+import {
+  PAGE_SCROLL_PATHS,
+  BOTTOM_BAR_HIDDEN_PREFIXES,
+  BOTTOM_BAR_HIDDEN_PATHS,
+} from "@/app/layouts/constant/layout.ts";
 
 const MobileLayout = () => {
   const location = useLocation();
   const frameWidthClassName = import.meta.env.DEV ? "sm:max-w-[430px]" : "";
+  const usePageScroll = PAGE_SCROLL_PATHS.some(pathPrefix =>
+    location.pathname.startsWith(pathPrefix)
+  );
 
   const hideBottomBar =
-    ["/login", "/signup", "/welcome", "/find-id", "/find-password"].includes(location.pathname) ||
-    location.pathname.startsWith("/find/");
+    BOTTOM_BAR_HIDDEN_PATHS.includes(location.pathname) ||
+    BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
 
   return (
     <div className="flex min-h-dvh w-full justify-center bg-gray-100">
@@ -16,7 +23,7 @@ const MobileLayout = () => {
         className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] ${frameWidthClassName}`}
       >
         <main
-          className={`flex-1 overflow-y-auto overscroll-contain px-safe pt-safe no-scrollbar ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
+          className={`min-h-0 flex-1 overscroll-contain px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-scroll [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
         >
           <Outlet />
         </main>

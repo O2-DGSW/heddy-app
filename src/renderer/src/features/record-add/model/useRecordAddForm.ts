@@ -48,7 +48,7 @@ export const useRecordAddForm = () => {
       };
     });
 
-    setPhotos(currentPhotos => [...currentPhotos, ...addedPhotos]);
+    setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
     event.currentTarget.value = "";
   };
 
