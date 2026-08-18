@@ -2,6 +2,7 @@ import { lightTheme, font } from "@heddy/design-tokens";
 
 import {
   ProcedureTypeSelector,
+  RECORD_DETAIL_FIELDS,
   RECORD_FIELDS,
   RecordPhotoUploader,
   RecordRatingField,
@@ -77,13 +78,25 @@ const RecordAddForm = ({ onCancel }: RecordAddFormProps) => {
 
       <RecordRatingField onChange={handleRatingChange} rating={rating} />
 
+      {RECORD_DETAIL_FIELDS.map(field => (
+        <RecordTextField
+          inputMode={field.inputMode}
+          key={field.id}
+          label={field.label}
+          name={field.id}
+          onChange={handleFieldChange(field.id)}
+          placeholder={field.placeholder}
+          value={formValues[field.id]}
+        />
+      ))}
+
       <RecordTextField
-        label="상세 내용"
+        label="메모"
         maxLength={500}
         multiline
         name="details"
         onChange={handleDetailsChange}
-        placeholder="(선택) 상세 내용을 입력해 주세요."
+        placeholder="(선택) 메모를 입력해 주세요."
         value={formValues.details}
       />
 
