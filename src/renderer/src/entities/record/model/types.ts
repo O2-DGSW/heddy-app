@@ -1,11 +1,12 @@
-export type RecordFieldNameType = "salon" | "price" | "designer" | "duration";
+export type RecordFieldNameType = "salon" | "price" | "duration" | "designer" | "procedureContent";
 
 export interface RecordFormValues {
   date: string;
   salon: string;
   price: string;
-  designer: string;
   duration: string;
+  designer: string;
+  procedureContent: string;
   details: string;
 }
 
