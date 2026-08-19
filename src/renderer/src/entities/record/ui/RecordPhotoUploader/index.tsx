@@ -31,7 +31,7 @@ const RecordPhotoUploader = ({
   onRemovePhoto,
 }: RecordPhotoUploaderProps) => {
   return (
-    <div className="flex w-[363px] flex-col gap-[6px]">
+    <div className="flex w-full flex-col gap-[6px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         사진
       </h2>
@@ -45,7 +45,8 @@ const RecordPhotoUploader = ({
         type="file"
       />
 
-      <div className="w-[383px] overflow-x-auto pb-[2px] scrollbar-hidden">
+      {/* 사진 목록은 폼의 좌우 패딩(14px)을 넘어 화면 오른쪽 끝까지 이어지도록 그만큼 넓게 잡는다. */}
+      <div className="w-[calc(100%+14px)] overflow-x-auto pb-[2px] scrollbar-hidden">
         <div className="flex w-max items-end gap-[11px]">
           <button
             aria-label="사진 추가"
