@@ -27,7 +27,7 @@ export const CutsAnalysisPhotoCard = ({ photoUrl, overlays }: CutsAnalysisPhotoC
       </h2>
 
       <div
-        className="aspect-[16/10] w-4/5 mx-auto overflow-hidden rounded-2xl"
+        className="aspect-square w-4/5 mx-auto overflow-hidden rounded-2xl"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {photoUrl && <img src={photoUrl} alt="시술 분석 사진" className="h-full w-full object-cover" />}
