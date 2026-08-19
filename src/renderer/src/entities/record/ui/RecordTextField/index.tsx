@@ -42,7 +42,7 @@ const RecordTextField = ({
   value,
 }: RecordTextFieldProps) => {
   return (
-    <label className="flex w-[363px] flex-col gap-[10px]">
+    <label className="flex w-full flex-col gap-[10px]">
       <span className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         {label}
       </span>
