@@ -16,6 +16,11 @@ export const CutsSharePage = () => {
     navigate(-1);
   };
 
+  /** 공유 링크를 만들고 선택한 시술기록 상세로 이동해 QR 모달을 띄운다 */
+  const handleCreateShareLink = () => {
+    navigate(`/cuts/${selectedId}/info`, { state: { isShareModalOpen: true } });
+  };
+
   return (
     <div className="flex min-h-full flex-col" style={{ backgroundColor: lightTheme.background.normal }}>
       <div className="sticky top-0 z-10 flex h-[58px] items-center justify-center" style={{ backgroundColor: lightTheme.background.normal }}>
@@ -51,6 +56,7 @@ export const CutsSharePage = () => {
           </button>
           <button
             type="button"
+            onClick={handleCreateShareLink}
             className={`h-[46px] rounded-xl border border-transparent ${font.headline2.semiBold}`}
             style={{ backgroundColor: lightTheme.primary.normal, color: lightTheme.label.buttonText }}
           >
