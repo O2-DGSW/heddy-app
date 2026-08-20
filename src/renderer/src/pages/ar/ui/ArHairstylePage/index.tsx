@@ -81,7 +81,7 @@ const ArHairstylePage = () => {
               />
             )}
 
-            <div className="absolute inset-x-0 bottom-[29px] flex items-center justify-center gap-[14px]">
+            <div className="absolute inset-x-0 top-[304px] flex items-center justify-center gap-[14px]">
               <button
                 aria-label={isFaceGuideVisible ? "얼굴 가이드 숨기기" : "얼굴 가이드 표시"}
                 className="flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
@@ -89,7 +89,7 @@ const ArHairstylePage = () => {
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
                 type="button"
               >
-                <img alt="" className="h-[16px] w-[16px]" src={eyeIcon} />
+                <img alt="" className="h-[10px] w-[14.6667px]" src={eyeIcon} />
               </button>
               <button
                 aria-label="카메라 제어"
@@ -97,7 +97,7 @@ const ArHairstylePage = () => {
                 style={{ backgroundColor: lightTheme.background.normal }}
                 type="button"
               >
-                <img alt="" className="h-[24px] w-[24px]" src={cameraIcon} />
+                <img alt="" className="h-[18px] w-[20px]" src={cameraIcon} />
               </button>
               <button
                 aria-label="얼굴 가이드 다시 표시"
@@ -106,7 +106,7 @@ const ArHairstylePage = () => {
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
                 type="button"
               >
-                <img alt="" className="h-[14px] w-[14px]" src={refreshIcon} />
+                <img alt="" className="h-[11.6667px] w-[11.6667px]" src={refreshIcon} />
               </button>
             </div>
           </div>
