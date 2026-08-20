@@ -80,6 +80,7 @@ const ArHairstylePage = () => {
 
         if (cameraPreviewRef.current) {
           cameraPreviewRef.current.srcObject = cameraStream;
+          void cameraPreviewRef.current.play().catch(() => undefined);
         }
       } catch {
         // 카메라 권한을 거부했거나 사용할 수 없는 경우 기존 AR 안내 화면을 유지한다.
@@ -122,7 +123,7 @@ const ArHairstylePage = () => {
             <video
               aria-hidden="true"
               autoPlay
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover [transform:scaleX(-1)]"
               muted
               playsInline
               ref={cameraPreviewRef}
