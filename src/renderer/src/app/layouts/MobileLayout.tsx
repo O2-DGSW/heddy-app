@@ -20,12 +20,12 @@ const MobileLayout = () => {
 
   return (
     <div
-      className={`flex min-h-dvh w-full justify-center bg-gray-100 ${isBrowserDevicePreview ? "sm:items-center sm:bg-[#1A1A1A] sm:p-[16px]" : ""}`}
+      className={`flex min-h-dvh w-full justify-center bg-gray-100 ${isBrowserDevicePreview ? "sm:items-center sm:bg-white sm:p-[16px]" : ""}`}
     >
       <div
         className={
           isBrowserDevicePreview
-            ? "contents sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-32px))] sm:w-auto sm:shrink-0 sm:rounded-[64px] sm:bg-black sm:px-[3.2558%] sm:py-[3.0233%] sm:shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+            ? "contents sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-32px))] sm:w-auto sm:shrink-0 sm:rounded-[64px] sm:bg-[#1C1C1E] sm:px-[3.2558%] sm:py-[3.0233%] sm:shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
             : "contents"
         }
       >
