@@ -15,11 +15,13 @@ export const CutsRecordCard = ({ record, onClick }: CutsRecordCardProps) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-stretch gap-3 rounded-2xl p-3 text-left shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
+      className="flex w-full items-center gap-3 rounded-2xl p-3 text-left shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
+      {/* 정사각형을 항상 유지해야 하므로 가로/세로를 각각 고정한다.
+          (self-stretch로 세로를 옆 텍스트 블록 높이에 맞추면 좁은 화면에서 폭만 줄어 비율이 깨진다.) */}
       <div
-        className="w-20 shrink-0 self-stretch overflow-hidden rounded-xl max-[400px]:w-16"
+        className="h-20 w-20 shrink-0 overflow-hidden rounded-xl max-[400px]:h-16 max-[400px]:w-16"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {record.thumbnailUrl && (
