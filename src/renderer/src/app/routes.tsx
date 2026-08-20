@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { MobileLayout } from "./layouts";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
+import { CutsSharePage } from "@/pages/cuts-share";
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
@@ -56,6 +57,7 @@ export const AppRoutes = () => {
           <Route path="info" element={<CutsDetailInfoPage />} />
           <Route path="analysis" element={<CutsDetailAnalysisPage />} />
         </Route>
+        <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         <Route path="/profile" element={<SharePermissionsPage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
