@@ -10,6 +10,7 @@ import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registra
 import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
 import { FindPage } from "@/pages/auth/find";
+import { ArHairstylePage } from "@/pages/ar";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
@@ -58,6 +59,7 @@ export const AppRoutes = () => {
           <Route path="analysis" element={<CutsDetailAnalysisPage />} />
         </Route>
         <Route path="/cuts/:id/share" element={<CutsSharePage />} />
+        <Route path="/ar" element={<ArHairstylePage />} />
         <Route path="/profile" element={<SharePermissionsPage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
