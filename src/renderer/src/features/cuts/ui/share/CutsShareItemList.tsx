@@ -21,9 +21,13 @@ export const CutsShareItemList = () => {
         공유 항목
       </h2>
 
-      <div className="flex flex-col divide-y" style={{ borderColor: lightTheme.line.alternative }}>
-        {CUTS_SHARE_ITEMS.map(item => (
-          <div key={item.id} className="flex items-center justify-between py-4">
+      <div className="flex flex-col">
+        {CUTS_SHARE_ITEMS.map((item, index) => (
+          <div
+            key={item.id}
+            className="flex items-center justify-between py-4"
+            style={index > 0 ? { borderTop: `1px solid ${lightTheme.label.disable}` } : undefined}
+          >
             <span className={font.body.medium} style={{ color: lightTheme.label.neutral }}>
               {item.label}
             </span>
