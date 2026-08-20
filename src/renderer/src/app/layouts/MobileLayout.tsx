@@ -23,7 +23,7 @@ const MobileLayout = () => {
         className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] ${frameWidthClassName}`}
       >
         <main
-          className={`min-h-0 flex-1 overscroll-contain px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-scroll [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
+          className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
         >
           <Outlet />
         </main>
