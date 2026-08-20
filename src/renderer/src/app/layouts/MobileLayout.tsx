@@ -20,17 +20,37 @@ const MobileLayout = () => {
 
   return (
     <div
-      className={`flex min-h-dvh w-full justify-center bg-gray-100 ${isBrowserDevicePreview ? "sm:items-center sm:bg-white sm:p-[16px]" : ""}`}
+      className={`flex min-h-dvh w-full justify-center bg-gray-100 ${isBrowserDevicePreview ? "sm:items-center sm:bg-white sm:p-6" : ""}`}
     >
       <div
         className={
           isBrowserDevicePreview
-            ? "contents sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-32px))] sm:w-auto sm:shrink-0 sm:rounded-[64px] sm:bg-[#1C1C1E] sm:px-[3.2558%] sm:py-[3.0233%] sm:shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
+            ? "contents sm:relative sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-48px))] sm:w-auto sm:shrink-0 sm:rounded-[64px] sm:bg-[#1C1C1E] sm:px-[14px] sm:py-[13px] sm:shadow-[0_20px_40px_rgba(0,0,0,0.2)] sm:ring-1 sm:ring-black/10"
             : "contents"
         }
       >
+        {isBrowserDevicePreview && (
+          <>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[2px] top-[19%] z-10 hidden h-[4.5%] w-[3px] rounded-l-full bg-[#2C2C2E] sm:block"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[2px] top-[29%] z-10 hidden h-[6.5%] w-[3px] rounded-l-full bg-[#2C2C2E] sm:block"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[2px] top-[37%] z-10 hidden h-[6.5%] w-[3px] rounded-l-full bg-[#2C2C2E] sm:block"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-[2px] top-[30%] z-10 hidden h-[10%] w-[3px] rounded-r-full bg-[#2C2C2E] sm:block"
+            />
+          </>
+        )}
         <div
-          className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)] ${isBrowserDevicePreview ? "sm:h-full sm:rounded-[50px] sm:border-0 sm:shadow-none sm:[--safe-area-inset-top:59px] sm:[--safe-area-inset-bottom:34px]" : ""}`}
+          className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white ${isBrowserDevicePreview ? "sm:h-auto sm:min-h-0 sm:flex-1 sm:rounded-[51px] sm:border sm:border-white/70 sm:shadow-none sm:[--safe-area-inset-top:59px] sm:[--safe-area-inset-bottom:34px]" : "sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)]"}`}
         >
           <main
             className={`min-h-0 flex-1 overscroll-contain px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-scroll [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-[100px]"}`}
@@ -44,7 +64,7 @@ const MobileLayout = () => {
           {isBrowserDevicePreview && (
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[13px] z-30 hidden h-[37px] w-[126px] -translate-x-1/2 rounded-full bg-black sm:block"
+              className="pointer-events-none absolute left-1/2 top-[1.4874%] z-30 hidden h-[4.2334%] w-[31.3433%] -translate-x-1/2 rounded-full bg-black sm:block"
             />
           )}
           {!hideBottomBar && (
