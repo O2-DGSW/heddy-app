@@ -87,6 +87,14 @@
     display: none;
   }
 
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .pt-safe {
     padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
   }
