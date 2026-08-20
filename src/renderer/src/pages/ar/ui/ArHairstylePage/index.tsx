@@ -146,7 +146,7 @@ const ArHairstylePage = () => {
             {isFaceGuideVisible && (
               <img
                 alt="얼굴 가이드"
-                className="pointer-events-none absolute left-1/2 top-1/2 h-[160px] w-[128px] -translate-x-1/2 -translate-y-1/2"
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[160px] w-[128px] -translate-x-1/2 -translate-y-1/2 mix-blend-screen"
                 src={faceGuideImage}
               />
             )}
