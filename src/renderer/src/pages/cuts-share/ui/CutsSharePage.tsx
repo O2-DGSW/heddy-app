@@ -28,7 +28,7 @@ export const CutsSharePage = () => {
           <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
         </button>
         <h1 className={font.headline1.bold} style={{ color: lightTheme.label.neutral }}>
-          기록 수정
+          기록 공유
         </h1>
       </div>
 
