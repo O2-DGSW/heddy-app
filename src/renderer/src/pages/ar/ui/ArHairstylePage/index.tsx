@@ -209,7 +209,7 @@ const ArHairstylePage = () => {
           </div>
         </section>
 
-        <div className="mt-auto grid grid-cols-2 gap-[7px] pt-[14px]">
+        <div className="sticky bottom-[114px] z-10 mt-auto grid grid-cols-2 gap-[7px] pt-[14px]">
           <button
             className={cn("h-[42px] rounded-[10px] border", font.headline2.semiBold)}
             style={{
