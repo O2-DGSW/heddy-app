@@ -1,10 +1,11 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import cameraIcon from "../../assets/camera.svg";
 import downPermImage from "../../assets/down-perm.png";
 import eyeIcon from "../../assets/eye.svg";
 import faceGuideImage from "../../assets/face-guide.png";
+import modalCloseImage from "../../assets/modal-close.png";
 import refreshIcon from "../../assets/refresh.svg";
 import { cn } from "@/shared";
 
@@ -20,10 +21,24 @@ const COLOR_OPTIONS = Array.from({ length: 5 }, (_, index) => ({
 
 const SELECTED_BACKGROUND_COLOR = "#F4FBF8";
 
+type ArModal = "candidate-save" | "capture";
+
+type PlaceholderStyle = CSSProperties & {
+  "--placeholder-color": string;
+};
+
+const CANDIDATE_MEMO_STYLE = {
+  "--placeholder-color": lightTheme.line.normal,
+  backgroundColor: lightTheme.background.neutral,
+  color: lightTheme.label.neutral,
+} satisfies PlaceholderStyle;
+
 const ArHairstylePage = () => {
   const [selectedHairstyleId, setSelectedHairstyleId] = useState(HAIRSTYLE_OPTIONS[0].id);
   const [selectedColorId, setSelectedColorId] = useState(COLOR_OPTIONS[1].id);
   const [isFaceGuideVisible, setIsFaceGuideVisible] = useState(true);
+  const [activeModal, setActiveModal] = useState<ArModal | null>(null);
+  const [candidateMemo, setCandidateMemo] = useState("");
 
   const handleFaceGuideToggle = () => {
     setIsFaceGuideVisible(isVisible => !isVisible);
@@ -31,6 +46,14 @@ const ArHairstylePage = () => {
 
   const handleFaceGuideReset = () => {
     setIsFaceGuideVisible(true);
+  };
+
+  const handleModalOpen = (modal: ArModal) => {
+    setActiveModal(modal);
+  };
+
+  const handleModalClose = () => {
+    setActiveModal(null);
   };
 
   return (
@@ -212,6 +235,7 @@ const ArHairstylePage = () => {
         <div className="mt-auto grid grid-cols-2 gap-[7px] pt-[14px]">
           <button
             className={cn("h-[42px] rounded-[10px] border", font.headline2.semiBold)}
+            onClick={() => handleModalOpen("capture")}
             style={{
               backgroundColor: lightTheme.background.alternative,
               borderColor: lightTheme.fill.neutral,
@@ -223,6 +247,7 @@ const ArHairstylePage = () => {
           </button>
           <button
             className={cn("h-[42px] rounded-[10px] border-0", font.headline2.semiBold)}
+            onClick={() => handleModalOpen("candidate-save")}
             style={{
               backgroundColor: lightTheme.primary.normal,
               color: lightTheme.label.buttonText,
@@ -233,6 +258,155 @@ const ArHairstylePage = () => {
           </button>
         </div>
       </main>
+
+      {activeModal === "candidate-save" && (
+        <div
+          aria-labelledby="candidate-save-modal-title"
+          aria-modal="true"
+          className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
+          role="dialog"
+        >
+          <div
+            className="w-[290px] translate-y-[11.5px] rounded-[10px] px-[14px] pb-[14px] pt-[15px]"
+            style={{ backgroundColor: lightTheme.background.normal }}
+          >
+            <div className="flex h-[28px] items-start justify-between">
+              <h2
+                className={font.headline2.semiBold}
+                id="candidate-save-modal-title"
+                style={{ color: lightTheme.label.neutral }}
+              >
+                후보 스타일 저장
+              </h2>
+              <button
+                aria-label="후보 스타일 저장 모달 닫기"
+                className="flex h-[28px] w-[28px] items-center justify-center rounded-full"
+                onClick={handleModalClose}
+                style={{ backgroundColor: lightTheme.fill.normal }}
+                type="button"
+              >
+                <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
+              </button>
+            </div>
+
+            <label className="mt-[14px] flex flex-col gap-[10px]">
+              <span className={font.label.semiBold} style={{ color: lightTheme.label.alternative }}>
+                메모
+              </span>
+              <textarea
+                className={cn(
+                  "h-[86px] resize-none rounded-[15px] px-[12px] py-[9px] outline-none",
+                  "placeholder:text-[var(--placeholder-color)]",
+                  font.caption.medium
+                )}
+                onChange={event => setCandidateMemo(event.target.value)}
+                placeholder="(선택) 메모 내용을 입력해 주세요."
+                style={CANDIDATE_MEMO_STYLE}
+                value={candidateMemo}
+              />
+            </label>
+
+            <div className="mt-[16px] flex gap-[6px]">
+              <button
+                className={cn("h-[26px] w-[128px] rounded-[5px] border", font.label.medium)}
+                onClick={handleModalClose}
+                style={{
+                  backgroundColor: lightTheme.label.buttonText,
+                  borderColor: lightTheme.fill.neutral,
+                  color: lightTheme.label.alternative,
+                }}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className={cn("h-[26px] w-[128px] rounded-[5px]", font.label.medium)}
+                onClick={handleModalClose}
+                style={{
+                  backgroundColor: lightTheme.primary.normal,
+                  color: lightTheme.label.buttonText,
+                }}
+                type="button"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === "capture" && (
+        <div
+          aria-labelledby="capture-modal-title"
+          aria-modal="true"
+          className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
+          role="dialog"
+        >
+          <div
+            className="h-[525px] w-[290px] -translate-y-[31.5px] rounded-[10px] px-[14px] pb-[15px] pt-[15px]"
+            style={{ backgroundColor: lightTheme.background.normal }}
+          >
+            <div className="flex h-[28px] items-start justify-between">
+              <h2
+                className={font.headline2.semiBold}
+                id="capture-modal-title"
+                style={{ color: lightTheme.label.neutral }}
+              >
+                캡쳐 이미지
+              </h2>
+              <button
+                aria-label="캡쳐 이미지 모달 닫기"
+                className="flex h-[28px] w-[28px] items-center justify-center rounded-full"
+                onClick={handleModalClose}
+                style={{ backgroundColor: lightTheme.fill.normal }}
+                type="button"
+              >
+                <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
+              </button>
+            </div>
+
+            <div className="mt-[24px]">
+              <div
+                aria-label="캡쳐 이미지 미리보기"
+                className="h-[367px] w-[262px] rounded-[10px]"
+                style={{ backgroundColor: lightTheme.label.normal }}
+              />
+              <p
+                className={cn("mt-[10px]", font.caption.medium)}
+                style={{ color: lightTheme.label.alternative }}
+              >
+                ※내 기기에만 저장되고 서버로 올라가지 않아요.
+              </p>
+            </div>
+
+            <div className="mt-[24px] flex gap-[6px]">
+              <button
+                className={cn("h-[26px] w-[128px] rounded-[5px] border", font.label.medium)}
+                onClick={handleModalClose}
+                style={{
+                  backgroundColor: lightTheme.label.buttonText,
+                  borderColor: lightTheme.fill.neutral,
+                  color: lightTheme.label.alternative,
+                }}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className={cn("h-[26px] w-[128px] rounded-[5px]", font.label.medium)}
+                onClick={handleModalClose}
+                style={{
+                  backgroundColor: lightTheme.primary.normal,
+                  color: lightTheme.label.buttonText,
+                }}
+                type="button"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
