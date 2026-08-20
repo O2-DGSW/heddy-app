@@ -4,6 +4,7 @@ import { useState } from "react";
 import cameraIcon from "../../assets/camera.svg";
 import downPermImage from "../../assets/down-perm.png";
 import eyeIcon from "../../assets/eye.svg";
+import faceGuideImage from "../../assets/face-guide.png";
 import refreshIcon from "../../assets/refresh.svg";
 import { cn } from "@/shared";
 
@@ -73,10 +74,10 @@ const ArHairstylePage = () => {
             </div>
 
             {isFaceGuideVisible && (
-              <div
-                aria-label="얼굴 가이드"
-                className="absolute left-1/2 top-1/2 h-[160px] w-[128px] -translate-x-1/2 -translate-y-1/2 rounded-[72px] border-2 border-dashed opacity-70"
-                style={{ borderColor: lightTheme.primary.normal }}
+              <img
+                alt="얼굴 가이드"
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[160px] w-[128px] -translate-x-1/2 -translate-y-1/2"
+                src={faceGuideImage}
               />
             )}
 
