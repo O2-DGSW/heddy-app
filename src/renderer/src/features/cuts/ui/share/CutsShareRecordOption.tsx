@@ -1,5 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
+import { RadioButton } from "@/shared/ui/radio/RadioButton";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 interface CutsShareRecordOptionProps {
@@ -10,22 +11,14 @@ interface CutsShareRecordOptionProps {
 
 export const CutsShareRecordOption = ({ record, isSelected, onSelect }: CutsShareRecordOptionProps) => {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
       role="radio"
       aria-checked={isSelected}
+      onClick={onSelect}
       className="flex w-full items-center gap-3 rounded-2xl p-3 text-left"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
-      <span
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-        style={{ border: `2px solid ${isSelected ? lightTheme.primary.normal : lightTheme.line.neutral}` }}
-      >
-        {isSelected && (
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: lightTheme.primary.normal }} />
-        )}
-      </span>
+      <RadioButton label="" selected={isSelected} onClick={onSelect} />
 
       <div
         className="h-14 w-14 shrink-0 overflow-hidden rounded-xl"
@@ -48,6 +41,6 @@ export const CutsShareRecordOption = ({ record, isSelected, onSelect }: CutsShar
           {record.salonName} · {record.date}
         </span>
       </div>
-    </button>
+    </div>
   );
 };
