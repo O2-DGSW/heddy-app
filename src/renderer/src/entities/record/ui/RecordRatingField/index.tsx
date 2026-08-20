@@ -13,7 +13,7 @@ const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 
 const RecordRatingField = ({ rating, onChange }: RecordRatingFieldProps) => {
   return (
-    <div className="flex w-[363px] flex-col gap-[10px]">
+    <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         만족도
       </h2>
