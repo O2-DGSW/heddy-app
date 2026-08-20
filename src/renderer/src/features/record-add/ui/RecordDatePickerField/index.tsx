@@ -134,7 +134,7 @@ const RecordDatePickerField = ({ value, onChange }: RecordDatePickerFieldProps) 
   }, [isYearSelectOpen]);
 
   return (
-    <div className="flex w-[363px] flex-col gap-[10px]">
+    <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         날짜
       </h2>
@@ -188,7 +188,7 @@ const RecordDatePickerField = ({ value, onChange }: RecordDatePickerFieldProps) 
                 </button>
               </div>
 
-              <div className="flex w-[338px] flex-col gap-[24px]">
+              <div className="flex w-full flex-col gap-[24px]">
                 <div className="relative self-start">
                   <button
                     aria-controls="date-picker-year-list"
@@ -293,10 +293,7 @@ const RecordDatePickerField = ({ value, onChange }: RecordDatePickerFieldProps) 
               </div>
 
               <button
-                className={cn(
-                  font.headline2.semiBold,
-                  "h-[48px] w-[339px] rounded-[10px] border-0"
-                )}
+                className={cn(font.headline2.semiBold, "h-[48px] w-full rounded-[10px] border-0")}
                 onClick={handleConfirmDate}
                 style={confirmButtonStyle}
                 type="button"

@@ -47,7 +47,10 @@ const RecordAddForm = ({ onCancel }: RecordAddFormProps) => {
   } = useRecordAddForm();
 
   return (
-    <form className="flex flex-col items-center gap-[28px] pt-[10px]" onSubmit={handleSubmit}>
+    <form
+      className="mx-auto flex w-full max-w-[391px] flex-col items-center gap-[28px] px-[14px] pt-[10px]"
+      onSubmit={handleSubmit}
+    >
       <RecordPhotoUploader
         inputRef={photoInputRef}
         isPhotoLimitReached={isPhotoLimitReached}
@@ -100,7 +103,7 @@ const RecordAddForm = ({ onCancel }: RecordAddFormProps) => {
         value={formValues.details}
       />
 
-      <div className="grid w-[363px] grid-cols-[178px_178px] gap-[7px] pt-[10px]">
+      <div className="grid w-full grid-cols-2 gap-[7px] pt-[10px]">
         <button
           className={cn(font.headline2.semiBold, "h-[42px] rounded-[10px] border border-solid")}
           onClick={onCancel}

@@ -20,7 +20,7 @@ const getProcedureButtonStyle = (isSelected: boolean): CSSProperties => ({
 
 const ProcedureTypeSelector = ({ selectedProcedureType, onChange }: ProcedureTypeSelectorProps) => {
   return (
-    <div className="flex w-[363px] flex-col gap-[12px]">
+    <div className="flex w-full flex-col gap-[12px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         시술 종류
       </h2>

@@ -38,7 +38,7 @@ const RecordAddPage = () => {
         </h1>
       </header>
 
-      <div className="min-h-0 flex-1 touch-pan-y overflow-y-scroll overscroll-contain pb-[15px] [-webkit-overflow-scrolling:touch]">
+      <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[15px] [-webkit-overflow-scrolling:touch]">
         <RecordAddForm onCancel={handleClose} />
       </div>
     </section>
