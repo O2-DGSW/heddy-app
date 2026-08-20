@@ -45,7 +45,6 @@ const RecordPhotoUploader = ({
         type="file"
       />
 
-      {/* 사진 목록은 폼의 좌우 패딩(14px)을 넘어 화면 오른쪽 끝까지 이어지도록 그만큼 넓게 잡는다. */}
       <div className="w-[calc(100%+14px)] overflow-x-auto pb-[2px] scrollbar-hidden">
         <div className="flex w-max items-end gap-[11px]">
           <button
