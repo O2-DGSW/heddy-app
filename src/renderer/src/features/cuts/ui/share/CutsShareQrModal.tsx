@@ -32,7 +32,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
 
       <div className="absolute inset-0 flex items-center justify-center px-6">
         <div
-          className="flex w-full flex-col gap-6 rounded-3xl px-6 py-6"
+          className="flex w-full flex-col gap-6 rounded-lg px-6 py-6"
           style={{ backgroundColor: lightTheme.background.normal }}
         >
           <div className="flex items-center justify-between">
