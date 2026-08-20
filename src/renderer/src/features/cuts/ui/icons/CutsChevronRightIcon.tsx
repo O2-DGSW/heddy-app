@@ -4,7 +4,7 @@ export const CutsChevronRightIcon = () => (
   <svg
     aria-hidden="true"
     viewBox="0 0 24 24"
-    className="h-5 w-5 shrink-0"
+    className="h-5 w-5 shrink-0 self-center"
     fill="none"
     stroke={lightTheme.line.normal}
     strokeWidth={2}
