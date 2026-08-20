@@ -25,7 +25,7 @@ const MobileLayout = () => {
       <div
         className={
           isBrowserDevicePreview
-            ? "contents sm:relative sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-48px))] sm:w-auto sm:shrink-0 sm:rounded-[64px] sm:bg-[#1C1C1E] sm:px-[14px] sm:py-[13px] sm:shadow-[0_20px_40px_rgba(0,0,0,0.2)] sm:ring-1 sm:ring-black/10"
+            ? "contents sm:relative sm:flex sm:aspect-[43/90] sm:h-[min(900px,calc(100dvh-48px))] sm:w-auto sm:min-w-0 sm:shrink-0 sm:rounded-[64px] sm:bg-[#1C1C1E] sm:px-[14px] sm:py-[13px] sm:shadow-[0_20px_40px_rgba(0,0,0,0.2)] sm:ring-1 sm:ring-black/10"
             : "contents"
         }
       >
