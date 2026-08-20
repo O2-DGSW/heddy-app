@@ -368,7 +368,7 @@ const ArHairstylePage = () => {
             <div className="mt-[24px]">
               <div
                 aria-label="캡쳐 이미지 미리보기"
-                className="h-[367px] w-[262px] rounded-[10px]"
+                className="h-[367px] w-[263px] rounded-[10px]"
                 style={{ backgroundColor: lightTheme.label.normal }}
               />
               <p
