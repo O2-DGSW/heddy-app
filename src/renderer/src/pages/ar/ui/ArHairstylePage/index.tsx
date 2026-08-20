@@ -1,5 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useState, type CSSProperties } from "react";
+import { Capacitor } from "@capacitor/core";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import cameraIcon from "../../assets/camera.svg";
 import downPermImage from "../../assets/down-perm.png";
@@ -34,6 +35,7 @@ const CANDIDATE_MEMO_STYLE = {
 } satisfies PlaceholderStyle;
 
 const ArHairstylePage = () => {
+  const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const [selectedHairstyleId, setSelectedHairstyleId] = useState(HAIRSTYLE_OPTIONS[0].id);
   const [selectedColorId, setSelectedColorId] = useState(COLOR_OPTIONS[1].id);
   const [isFaceGuideVisible, setIsFaceGuideVisible] = useState(true);
@@ -55,6 +57,42 @@ const ArHairstylePage = () => {
   const handleModalClose = () => {
     setActiveModal(null);
   };
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || !navigator.mediaDevices?.getUserMedia) {
+      return;
+    }
+
+    let isUnmounted = false;
+    let cameraStream: MediaStream | null = null;
+
+    const startCameraPreview = async () => {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: "user" } },
+        });
+
+        if (isUnmounted) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        if (cameraPreviewRef.current) {
+          cameraPreviewRef.current.srcObject = cameraStream;
+        }
+      } catch {
+        // 카메라 권한을 거부했거나 사용할 수 없는 경우 기존 AR 안내 화면을 유지한다.
+      }
+    };
+
+    void startCameraPreview();
+
+    return () => {
+      isUnmounted = true;
+      cameraStream?.getTracks().forEach(track => track.stop());
+    };
+  }, []);
 
   return (
     <section
@@ -81,6 +119,14 @@ const ArHairstylePage = () => {
             className="relative h-[367px] w-full max-w-[340px] overflow-hidden rounded-[10px]"
             style={{ backgroundColor: lightTheme.label.normal }}
           >
+            <video
+              aria-hidden="true"
+              autoPlay
+              className="absolute inset-0 h-full w-full object-cover"
+              muted
+              playsInline
+              ref={cameraPreviewRef}
+            />
             <div className="absolute inset-x-[16px] top-[14px] flex items-center justify-between">
               <span
                 className={cn("rounded-[5px] px-[8px] py-[4px]", font.label.medium)}
