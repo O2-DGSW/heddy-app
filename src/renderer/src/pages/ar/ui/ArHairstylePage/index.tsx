@@ -59,7 +59,7 @@ const ArHairstylePage = () => {
   return (
     <section
       aria-labelledby="ar-hairstyle-title"
-      className="flex min-h-full flex-col overflow-x-clip"
+      className="ar-motion-page-enter flex min-h-full flex-col overflow-x-clip"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
@@ -107,7 +107,7 @@ const ArHairstylePage = () => {
             <div className="absolute inset-x-0 top-[304px] flex items-center justify-center gap-[14px]">
               <button
                 aria-label={isFaceGuideVisible ? "얼굴 가이드 숨기기" : "얼굴 가이드 표시"}
-                className="flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
+                className="ar-motion-press flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
                 onClick={handleFaceGuideToggle}
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
                 type="button"
@@ -116,7 +116,7 @@ const ArHairstylePage = () => {
               </button>
               <button
                 aria-label="카메라 제어"
-                className="flex h-[44px] w-[44px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
+                className="ar-motion-press flex h-[44px] w-[44px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
                 style={{ backgroundColor: lightTheme.background.normal }}
                 type="button"
               >
@@ -124,7 +124,7 @@ const ArHairstylePage = () => {
               </button>
               <button
                 aria-label="얼굴 가이드 다시 표시"
-                className="flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
+                className="ar-motion-press flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
                 onClick={handleFaceGuideReset}
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
                 type="button"
@@ -152,7 +152,7 @@ const ArHairstylePage = () => {
                 return (
                   <button
                     aria-pressed={isSelected}
-                    className="flex h-[99px] w-[80px] shrink-0 flex-col items-center justify-center gap-[4px] rounded-[10px] border p-[4px]"
+                    className="ar-motion-press flex h-[99px] w-[80px] shrink-0 flex-col items-center justify-center gap-[4px] rounded-[10px] border p-[4px]"
                     key={option.id}
                     onClick={() => setSelectedHairstyleId(option.id)}
                     style={{
@@ -202,7 +202,7 @@ const ArHairstylePage = () => {
               return (
                 <button
                   aria-pressed={isSelected}
-                  className="flex items-center gap-[6px] rounded-[15px] border px-[8px] py-[4px]"
+                  className="ar-motion-press flex items-center gap-[6px] rounded-[15px] border px-[8px] py-[4px]"
                   key={option.id}
                   onClick={() => setSelectedColorId(option.id)}
                   style={{
@@ -234,7 +234,10 @@ const ArHairstylePage = () => {
 
         <div className="mt-auto grid grid-cols-2 gap-[7px] pt-[14px]">
           <button
-            className={cn("h-[42px] rounded-[10px] border", font.headline2.semiBold)}
+            className={cn(
+              "ar-motion-press h-[42px] rounded-[10px] border",
+              font.headline2.semiBold
+            )}
             onClick={() => handleModalOpen("capture")}
             style={{
               backgroundColor: lightTheme.background.alternative,
@@ -246,7 +249,10 @@ const ArHairstylePage = () => {
             캡쳐
           </button>
           <button
-            className={cn("h-[42px] rounded-[10px] border-0", font.headline2.semiBold)}
+            className={cn(
+              "ar-motion-press h-[42px] rounded-[10px] border-0",
+              font.headline2.semiBold
+            )}
             onClick={() => handleModalOpen("candidate-save")}
             style={{
               backgroundColor: lightTheme.primary.normal,
@@ -263,73 +269,84 @@ const ArHairstylePage = () => {
         <div
           aria-labelledby="candidate-save-modal-title"
           aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
+          className="ar-motion-overlay-enter fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
           role="dialog"
         >
-          <div
-            className="w-[290px] translate-y-[11.5px] rounded-[10px] px-[14px] pb-[14px] pt-[15px]"
-            style={{ backgroundColor: lightTheme.background.normal }}
-          >
-            <div className="flex h-[28px] items-start justify-between">
-              <h2
-                className={font.headline2.semiBold}
-                id="candidate-save-modal-title"
-                style={{ color: lightTheme.label.neutral }}
-              >
-                후보 스타일 저장
-              </h2>
-              <button
-                aria-label="후보 스타일 저장 모달 닫기"
-                className="flex h-[28px] w-[28px] items-center justify-center rounded-full"
-                onClick={handleModalClose}
-                style={{ backgroundColor: lightTheme.fill.normal }}
-                type="button"
-              >
-                <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
-              </button>
-            </div>
+          <div className="translate-y-[11.5px]">
+            <div
+              className="ar-motion-modal-enter w-[290px] rounded-[10px] px-[14px] pb-[14px] pt-[15px]"
+              style={{ backgroundColor: lightTheme.background.normal }}
+            >
+              <div className="flex h-[28px] items-start justify-between">
+                <h2
+                  className={font.headline2.semiBold}
+                  id="candidate-save-modal-title"
+                  style={{ color: lightTheme.label.neutral }}
+                >
+                  후보 스타일 저장
+                </h2>
+                <button
+                  aria-label="후보 스타일 저장 모달 닫기"
+                  className="ar-motion-press flex h-[28px] w-[28px] items-center justify-center rounded-full"
+                  onClick={handleModalClose}
+                  style={{ backgroundColor: lightTheme.fill.normal }}
+                  type="button"
+                >
+                  <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
+                </button>
+              </div>
 
-            <label className="mt-[14px] flex flex-col gap-[10px]">
-              <span className={font.label.semiBold} style={{ color: lightTheme.label.alternative }}>
-                메모
-              </span>
-              <textarea
-                className={cn(
-                  "h-[86px] resize-none rounded-[15px] px-[12px] py-[9px] outline-none",
-                  "placeholder:text-[var(--placeholder-color)]",
-                  font.caption.medium
-                )}
-                onChange={event => setCandidateMemo(event.target.value)}
-                placeholder="(선택) 메모 내용을 입력해 주세요."
-                style={CANDIDATE_MEMO_STYLE}
-                value={candidateMemo}
-              />
-            </label>
+              <label className="mt-[14px] flex flex-col gap-[10px]">
+                <span
+                  className={font.label.semiBold}
+                  style={{ color: lightTheme.label.alternative }}
+                >
+                  메모
+                </span>
+                <textarea
+                  className={cn(
+                    "h-[86px] resize-none rounded-[15px] px-[12px] py-[9px] outline-none",
+                    "placeholder:text-[var(--placeholder-color)]",
+                    font.caption.medium
+                  )}
+                  onChange={event => setCandidateMemo(event.target.value)}
+                  placeholder="(선택) 메모 내용을 입력해 주세요."
+                  style={CANDIDATE_MEMO_STYLE}
+                  value={candidateMemo}
+                />
+              </label>
 
-            <div className="mt-[16px] flex gap-[6px]">
-              <button
-                className={cn("h-[26px] w-[128px] rounded-[5px] border", font.label.medium)}
-                onClick={handleModalClose}
-                style={{
-                  backgroundColor: lightTheme.label.buttonText,
-                  borderColor: lightTheme.fill.neutral,
-                  color: lightTheme.label.alternative,
-                }}
-                type="button"
-              >
-                취소
-              </button>
-              <button
-                className={cn("h-[26px] w-[128px] rounded-[5px]", font.label.medium)}
-                onClick={handleModalClose}
-                style={{
-                  backgroundColor: lightTheme.primary.normal,
-                  color: lightTheme.label.buttonText,
-                }}
-                type="button"
-              >
-                저장
-              </button>
+              <div className="mt-[16px] flex gap-[6px]">
+                <button
+                  className={cn(
+                    "ar-motion-press h-[26px] w-[128px] rounded-[5px] border",
+                    font.label.medium
+                  )}
+                  onClick={handleModalClose}
+                  style={{
+                    backgroundColor: lightTheme.label.buttonText,
+                    borderColor: lightTheme.fill.neutral,
+                    color: lightTheme.label.alternative,
+                  }}
+                  type="button"
+                >
+                  취소
+                </button>
+                <button
+                  className={cn(
+                    "ar-motion-press h-[26px] w-[128px] rounded-[5px]",
+                    font.label.medium
+                  )}
+                  onClick={handleModalClose}
+                  style={{
+                    backgroundColor: lightTheme.primary.normal,
+                    color: lightTheme.label.buttonText,
+                  }}
+                  type="button"
+                >
+                  저장
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -339,70 +356,78 @@ const ArHairstylePage = () => {
         <div
           aria-labelledby="capture-modal-title"
           aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
+          className="ar-motion-overlay-enter fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
           role="dialog"
         >
-          <div
-            className="h-[525px] w-[290px] -translate-y-[31.5px] rounded-[10px] px-[14px] pb-[15px] pt-[15px]"
-            style={{ backgroundColor: lightTheme.background.normal }}
-          >
-            <div className="flex h-[28px] items-start justify-between">
-              <h2
-                className={font.headline2.semiBold}
-                id="capture-modal-title"
-                style={{ color: lightTheme.label.neutral }}
-              >
-                캡쳐 이미지
-              </h2>
-              <button
-                aria-label="캡쳐 이미지 모달 닫기"
-                className="flex h-[28px] w-[28px] items-center justify-center rounded-full"
-                onClick={handleModalClose}
-                style={{ backgroundColor: lightTheme.fill.normal }}
-                type="button"
-              >
-                <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
-              </button>
-            </div>
+          <div className="-translate-y-[31.5px]">
+            <div
+              className="ar-motion-modal-enter h-[525px] w-[290px] rounded-[10px] px-[14px] pb-[15px] pt-[15px]"
+              style={{ backgroundColor: lightTheme.background.normal }}
+            >
+              <div className="flex h-[28px] items-start justify-between">
+                <h2
+                  className={font.headline2.semiBold}
+                  id="capture-modal-title"
+                  style={{ color: lightTheme.label.neutral }}
+                >
+                  캡쳐 이미지
+                </h2>
+                <button
+                  aria-label="캡쳐 이미지 모달 닫기"
+                  className="ar-motion-press flex h-[28px] w-[28px] items-center justify-center rounded-full"
+                  onClick={handleModalClose}
+                  style={{ backgroundColor: lightTheme.fill.normal }}
+                  type="button"
+                >
+                  <img alt="" className="h-[23px] w-[23px]" src={modalCloseImage} />
+                </button>
+              </div>
 
-            <div className="mt-[24px]">
-              <div
-                aria-label="캡쳐 이미지 미리보기"
-                className="h-[367px] w-[263px] rounded-[10px]"
-                style={{ backgroundColor: lightTheme.label.normal }}
-              />
-              <p
-                className={cn("mt-[10px]", font.caption.medium)}
-                style={{ color: lightTheme.label.alternative }}
-              >
-                ※내 기기에만 저장되고 서버로 올라가지 않아요.
-              </p>
-            </div>
+              <div className="mt-[24px]">
+                <div
+                  aria-label="캡쳐 이미지 미리보기"
+                  className="h-[367px] w-[263px] rounded-[10px]"
+                  style={{ backgroundColor: lightTheme.label.normal }}
+                />
+                <p
+                  className={cn("mt-[10px]", font.caption.medium)}
+                  style={{ color: lightTheme.label.alternative }}
+                >
+                  ※내 기기에만 저장되고 서버로 올라가지 않아요.
+                </p>
+              </div>
 
-            <div className="mt-[24px] flex gap-[6px]">
-              <button
-                className={cn("h-[26px] w-[128px] rounded-[5px] border", font.label.medium)}
-                onClick={handleModalClose}
-                style={{
-                  backgroundColor: lightTheme.label.buttonText,
-                  borderColor: lightTheme.fill.neutral,
-                  color: lightTheme.label.alternative,
-                }}
-                type="button"
-              >
-                취소
-              </button>
-              <button
-                className={cn("h-[26px] w-[128px] rounded-[5px]", font.label.medium)}
-                onClick={handleModalClose}
-                style={{
-                  backgroundColor: lightTheme.primary.normal,
-                  color: lightTheme.label.buttonText,
-                }}
-                type="button"
-              >
-                저장
-              </button>
+              <div className="mt-[24px] flex gap-[6px]">
+                <button
+                  className={cn(
+                    "ar-motion-press h-[26px] w-[128px] rounded-[5px] border",
+                    font.label.medium
+                  )}
+                  onClick={handleModalClose}
+                  style={{
+                    backgroundColor: lightTheme.label.buttonText,
+                    borderColor: lightTheme.fill.neutral,
+                    color: lightTheme.label.alternative,
+                  }}
+                  type="button"
+                >
+                  취소
+                </button>
+                <button
+                  className={cn(
+                    "ar-motion-press h-[26px] w-[128px] rounded-[5px]",
+                    font.label.medium
+                  )}
+                  onClick={handleModalClose}
+                  style={{
+                    backgroundColor: lightTheme.primary.normal,
+                    color: lightTheme.label.buttonText,
+                  }}
+                  type="button"
+                >
+                  저장
+                </button>
+              </div>
             </div>
           </div>
         </div>
