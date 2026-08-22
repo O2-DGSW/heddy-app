@@ -9,10 +9,10 @@ import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.typ
 export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
   return (
     <div className="flex min-h-full flex-col" style={{ backgroundColor: lightTheme.fill.normal }}>
-      <div className="sticky top-0 z-10" style={{ backgroundColor: lightTheme.fill.neutral }}>
+      <div className="sticky top-0 z-10" style={{ backgroundColor: lightTheme.label.disable }}>
         <h1
           className={`py-2 pt-3 text-center ${font.headline1.bold}`}
-          style={{ color: lightTheme.label.neutral }}
+          style={{ color: lightTheme.label.neutral, backgroundColor: lightTheme.label.disable }}
         >
           시술기록
         </h1>
