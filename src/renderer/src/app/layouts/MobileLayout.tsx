@@ -68,7 +68,7 @@ const MobileLayout = () => {
                 className="pointer-events-none absolute inset-x-[8.7%] top-[2.75%] z-30 hidden items-center justify-between leading-none text-black sm:flex"
               >
                 <span
-                  className="text-[17px] font-semibold tracking-[-0.025em] tabular-nums"
+                  className="text-[17px] font-bold tracking-normal tabular-nums"
                   style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
                 >
                   9:41
