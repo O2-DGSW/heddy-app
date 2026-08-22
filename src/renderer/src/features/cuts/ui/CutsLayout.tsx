@@ -18,7 +18,7 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
         </h1>
         {header}
       </div>
-      <div className="relative flex flex-1 flex-col pb-[calc(100px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
+      <div className="relative flex flex-1 flex-col pb-[calc(116px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
         {children}
       </div>
     </div>
