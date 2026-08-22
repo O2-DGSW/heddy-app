@@ -26,7 +26,8 @@ export const CutsDetailLayout = ({ title, children }: CutsDetailLayoutProps) => 
         </div>
         <CutsDetailTabBar />
       </div>
-      <div className="relative flex flex-1 flex-col pb-[calc(116px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
+      {/* NavBar는 세이프에어리어만큼 커지지 않는 고정 106px라, 여기서도 safe-area를 더하면 안 된다. */}
+      <div className="relative flex flex-1 flex-col pb-[116px]">
         {children}
       </div>
     </div>
