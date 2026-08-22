@@ -12,7 +12,10 @@ interface CutsCategoryFilterProps {
 
 export const CutsCategoryFilter = ({ selected, onSelect }: CutsCategoryFilterProps) => {
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hidden">
+    <div
+      className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hidden"
+      style={{ backgroundColor: lightTheme.fill.normal }}
+    >
       {CUTS_CATEGORIES.map(category => {
         const isActive = category === selected;
 
