@@ -62,10 +62,50 @@ const MobileLayout = () => {
               세이프에어리어 상단을 별도 레이어로 고정한다. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-white pt-safe" />
           {isBrowserDevicePreview && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[1.4874%] z-30 hidden h-[4.2334%] w-[31.3433%] -translate-x-1/2 rounded-full bg-black sm:block"
-            />
+            <>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-[8.7%] top-[2.75%] z-30 hidden items-center justify-between text-[16px] font-bold leading-none tracking-[-0.03em] text-black sm:flex"
+              >
+                <div className="flex items-center gap-[4px]">
+                  <span>9:41</span>
+                  <span className="relative h-[12px] w-[12px] rounded-full bg-black after:absolute after:-right-[2px] after:-top-[2px] after:h-[12px] after:w-[12px] after:rounded-full after:bg-white" />
+                </div>
+                <div className="flex items-center gap-[6px]">
+                  <svg className="h-[14px] w-[20px]" viewBox="0 0 20 14">
+                    <rect height="5" rx="1.5" width="3.5" x="0" y="9" fill="currentColor" />
+                    <rect height="8" rx="1.5" width="3.5" x="5.5" y="6" fill="currentColor" />
+                    <rect
+                      height="11"
+                      rx="1.5"
+                      width="3.5"
+                      x="11"
+                      y="3"
+                      fill="currentColor"
+                      opacity="0.25"
+                    />
+                    <rect
+                      height="14"
+                      rx="1.5"
+                      width="3.5"
+                      x="16.5"
+                      y="0"
+                      fill="currentColor"
+                      opacity="0.25"
+                    />
+                  </svg>
+                  <span className="text-[14px] font-bold tracking-[-0.02em]">5G</span>
+                  <span className="relative flex h-[14px] w-[27px] items-center justify-center rounded-[5px] bg-[#C7C7CC] text-[12px] font-bold leading-none after:absolute after:-right-[2px] after:top-1/2 after:h-[6px] after:w-[2px] after:-translate-y-1/2 after:rounded-r-full after:bg-[#C7C7CC]">
+                    <span className="absolute inset-y-0 left-0 w-[80%] rounded-l-[5px] bg-[#FFD11A]" />
+                    <span className="relative">80</span>
+                  </span>
+                </div>
+              </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-[1.4874%] z-30 hidden h-[4.2334%] w-[31.3433%] -translate-x-1/2 rounded-full bg-black sm:block"
+              />
+            </>
           )}
           {!hideBottomBar && (
             <div className="absolute inset-x-0 bottom-0 w-full">
