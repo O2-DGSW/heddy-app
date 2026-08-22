@@ -65,12 +65,14 @@ const MobileLayout = () => {
             <>
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-[8.7%] top-[2.75%] z-30 hidden items-center justify-between text-[16px] font-bold leading-none tracking-[-0.03em] text-black sm:flex"
+                className="pointer-events-none absolute inset-x-[8.7%] top-[2.75%] z-30 hidden items-center justify-between leading-none text-black sm:flex"
               >
-                <div className="flex items-center gap-[4px]">
-                  <span>9:41</span>
-                  <span className="relative h-[12px] w-[12px] rounded-full bg-black after:absolute after:-right-[2px] after:-top-[2px] after:h-[12px] after:w-[12px] after:rounded-full after:bg-white" />
-                </div>
+                <span
+                  className="text-[17px] font-semibold tracking-[-0.025em] tabular-nums"
+                  style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
+                >
+                  9:41
+                </span>
                 <div className="flex items-center gap-[6px]">
                   <svg className="h-[14px] w-[20px]" viewBox="0 0 20 14">
                     <rect height="5" rx="1.5" width="3.5" x="0" y="9" fill="currentColor" />
@@ -95,9 +97,13 @@ const MobileLayout = () => {
                     />
                   </svg>
                   <span className="text-[14px] font-bold tracking-[-0.02em]">5G</span>
-                  <span className="relative flex h-[14px] w-[27px] items-center justify-center rounded-[5px] bg-[#C7C7CC] text-[12px] font-bold leading-none after:absolute after:-right-[2px] after:top-1/2 after:h-[6px] after:w-[2px] after:-translate-y-1/2 after:rounded-r-full after:bg-[#C7C7CC]">
-                    <span className="absolute inset-y-0 left-0 w-[80%] rounded-l-[5px] bg-[#FFD11A]" />
-                    <span className="relative">80</span>
+                  <span className="relative flex h-[14px] w-[29px] items-center justify-center text-[12px] font-bold leading-none">
+                    <span className="absolute inset-y-0 left-0 right-[2px] rounded-[5px] bg-[#C7C7CC]" />
+                    <span className="absolute inset-y-0 left-0 right-[2px] overflow-hidden rounded-[5px]">
+                      <span className="absolute inset-y-0 left-0 w-[80%] bg-[#FFD11A]" />
+                    </span>
+                    <span className="absolute right-0 top-1/2 h-[6px] w-[2px] -translate-y-1/2 rounded-r-full bg-[#C7C7CC]" />
+                    <span className="relative -translate-x-px">80</span>
                   </span>
                 </div>
               </div>
