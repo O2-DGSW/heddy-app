@@ -8,8 +8,15 @@ import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.typ
  */
 export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
   return (
-    <div className="flex min-h-full flex-col" style={{ backgroundColor: lightTheme.fill.normal }}>
-      <div className="sticky top-0 z-10" style={{ backgroundColor: lightTheme.background.normal }}>
+    // cap-page로 감싸는 전환 애니메이션은 페이지가 자기 높이(h-full) 안에서
+    // 직접 스크롤하는 걸 전제로 한다. <main>에 얹혀 스크롤하던 이전 방식과 달리
+    // 여기서 직접 overflow-y-auto를 갖는다 (PAGE_SCROLL_PATHS에 "/cuts" 등록됨).
+    <div
+      className="flex h-full flex-col overflow-hidden"
+      style={{ backgroundColor: lightTheme.fill.normal }}
+    >
+      {/* 헤더는 스크롤 컨테이너(아래 flex-1 div) 밖의 별도 flex 아이템이라 sticky 없이도 고정된다. */}
+      <div className="shrink-0" style={{ backgroundColor: lightTheme.background.normal }}>
         <h1
           className={`py-2 pt-3 text-center ${font.headline1.bold}`}
           style={{ color: lightTheme.label.neutral, backgroundColor: lightTheme.background.normal }}
@@ -19,7 +26,7 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
         {header}
       </div>
       {/* NavBar는 세이프에어리어만큼 커지지 않는 고정 106px라, 여기서도 safe-area를 더하면 안 된다. */}
-      <div className="relative flex flex-1 flex-col pb-[116px]">
+      <div className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[116px] [-webkit-overflow-scrolling:touch]">
         {children}
       </div>
     </div>
