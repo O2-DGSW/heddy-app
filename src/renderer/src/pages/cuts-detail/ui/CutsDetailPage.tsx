@@ -24,15 +24,17 @@ export const CutsDetailPage = () => {
   };
 
   return (
-    <CutsDetailLayout title={record?.procedureName ?? "시술기록"}>
-      <Outlet />
+    <cap-page>
+      <CutsDetailLayout title={record?.procedureName ?? "시술기록"}>
+        <Outlet />
 
-      {isShareModalOpen && (
-        <CutsShareQrModal
-          shareLink={(id && dummyShareLinks[id]) || DEFAULT_SHARE_LINK}
-          onClose={handleCloseShareModal}
-        />
-      )}
-    </CutsDetailLayout>
+        {isShareModalOpen && (
+          <CutsShareQrModal
+            shareLink={(id && dummyShareLinks[id]) || DEFAULT_SHARE_LINK}
+            onClose={handleCloseShareModal}
+          />
+        )}
+      </CutsDetailLayout>
+    </cap-page>
   );
 };
