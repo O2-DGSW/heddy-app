@@ -51,7 +51,7 @@ export const CutsSharePage = () => {
         </div>
 
         <div
-          className="flex flex-1 flex-col overflow-y-auto overscroll-none pb-[calc(28px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] [-webkit-overflow-scrolling:touch]"
+          className="flex flex-1 flex-col overflow-y-auto overscroll-none pb-[calc(28px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] no-scrollbar [-webkit-overflow-scrolling:touch]"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
           <CutsShareRecordList
