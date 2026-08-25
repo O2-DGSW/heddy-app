@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { MobileLayout } from "./layouts";
+import { getRefreshToken } from "@/entities/auth";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
 import { WelcomePage } from "@/pages/auth/welcome";
@@ -11,44 +13,48 @@ import { RecordAddPage } from "@/pages/record-add";
 import { FindPage } from "@/pages/auth/find";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 
-// type AuthStatus = "checking" | "authenticated" | "unauthenticated";
-//
-// const RequireAuth = () => {
-//     const location = useLocation();
-//     const [authStatus, setAuthStatus] = useState<AuthStatus>("checking");
-//
-//     useEffect(() => {
-//         let isMounted = true;
-//
-//         void restoreAuthSession().then(isAuthenticated => {
-//             if (!isMounted) {
-//                 return;
-//             }
-//
-//             setAuthStatus(isAuthenticated ? "authenticated" : "unauthenticated");
-//         });
-//
-//         return () => {
-//             isMounted = false;
-//         };
-//     }, []);
-//
-//     if (authStatus === "checking") {
-//         return null;
-//     }
-//
-//     if (authStatus === "unauthenticated") {
-//         return <Navigate replace to="/login" state={{ from: location }} />;
-//     }
-//
-//     return <Outlet />;
-// };
+type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
+
+const EntryRedirect = () => {
+  const [entryStatus, setEntryStatus] = useState<EntryStatusType>("checking");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void getRefreshToken()
+      .then(refreshToken => {
+        if (!isMounted) {
+          return;
+        }
+
+        setEntryStatus(refreshToken ? "authenticated" : "unauthenticated");
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setEntryStatus("unauthenticated");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (entryStatus === "checking") {
+    return null;
+  }
+
+  return <Navigate replace to={entryStatus === "authenticated" ? "/home" : "/welcome"} />;
+};
 
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
-        <Route path="/" element={<Navigate replace to="/cuts" />} />
+        <Route path="/" element={<EntryRedirect />} />
+        <Route path="/home" element={<div />} />
         <Route path="/cuts" element={<CutsListPage />} />
         <Route path="/cuts/add" element={<RecordAddPage />} />
         <Route path="/cuts/:id" element={<CutsDetailPage />}>
