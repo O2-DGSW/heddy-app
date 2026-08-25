@@ -1,56 +1,82 @@
+import { isAxiosError } from "axios";
+
 import { api } from "@/shared/lib/api";
+import type { ApiResponse } from "@/shared/lib/api";
 import type {
   LoginRequest,
   LoginResponse,
   SignupRequest,
   SmsSendRequest,
   SmsVerifyRequest,
-} from "@/entities/auth/model/auth.types";
+} from "@/entities";
 
-type AuthApiResponse<T> = {
-  success: boolean;
-  message: string;
-  data: T;
-  error: { code: string; message: string } | null;
+const getAuthApiData = <TData>(response: ApiResponse<TData>, fallbackMessage: string): TData => {
+  if (!response.success) {
+    throw new Error(response.error?.message || response.message || fallbackMessage);
+  }
+
+  return response.data;
+};
+
+const getAuthApiErrorMessage = (error: unknown, fallbackMessage: string) => {
+  if (isAxiosError<ApiResponse<unknown>>(error)) {
+    return error.response?.data.error?.message || error.response?.data.message || fallbackMessage;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+};
+
+const requestAuthData = async <TData>(
+  request: Promise<{ data: ApiResponse<TData> }>,
+  fallbackMessage: string
+): Promise<TData> => {
+  try {
+    const res = await request;
+    return getAuthApiData(res.data, fallbackMessage);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, fallbackMessage), { cause: error });
+  }
 };
 
 export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
-  const res = await api.post<AuthApiResponse<LoginResponse>>("/auth/login", body);
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "로그인에 실패했습니다.");
-  }
-  return res.data.data;
+  return requestAuthData(
+    api.post<ApiResponse<LoginResponse>>("/auth/login", body),
+    "로그인에 실패했습니다."
+  );
 };
 
 export const smsSendApi = async (body: SmsSendRequest): Promise<void> => {
-  const res = await api.post<AuthApiResponse<null>>("/auth/sms/send", body);
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "인증번호 발송에 실패했습니다.");
-  }
+  await requestAuthData(
+    api.post<ApiResponse<null>>("/auth/sms/send", body),
+    "인증번호 발송에 실패했습니다."
+  );
 };
 
 export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
-  const res = await api.post<AuthApiResponse<null>>("/auth/sms/verify", body);
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "인증번호가 올바르지 않습니다.");
-  }
+  await requestAuthData(
+    api.post<ApiResponse<null>>("/auth/sms/verify", body),
+    "인증번호가 올바르지 않습니다."
+  );
 };
 
 export const signupApi = async (body: SignupRequest): Promise<void> => {
-  const res = await api.post<AuthApiResponse<null>>("/auth/signup", body);
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "회원가입에 실패했습니다.");
-  }
+  await requestAuthData(
+    api.post<ApiResponse<null>>("/auth/signup", body),
+    "회원가입에 실패했습니다."
+  );
 };
 
 export const refreshTokenApi = async (refreshToken: string): Promise<LoginResponse> => {
-  const res = await api.post<AuthApiResponse<LoginResponse>>("/auth/token/refresh", undefined, {
-    headers: {
-      Authorization: `Bearer ${refreshToken}`,
-    },
-  });
-  if (!res.data.success) {
-    throw new Error(res.data.error?.message || res.data.message || "토큰 재발급에 실패했습니다.");
-  }
-  return res.data.data;
+  return requestAuthData(
+    api.post<ApiResponse<LoginResponse>>("/auth/token/refresh", undefined, {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    }),
+    "토큰 재발급에 실패했습니다."
+  );
 };
