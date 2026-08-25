@@ -26,7 +26,7 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
         {header}
       </div>
       {/* NavBar 여백은 <main>의 pb-[var(--nav-bar-height)]가 이미 확보한다 — 여기서 또 더하면 간격이 겹으로 벌어진다. */}
-      <div className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[15px] [-webkit-overflow-scrolling:touch]">
+      <div className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
         {children}
       </div>
     </div>
