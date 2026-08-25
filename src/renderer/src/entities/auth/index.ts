@@ -1,4 +1,4 @@
-export { loginApi, refreshTokenApi, signupApi, smsSendApi, smsVerifyApi } from "./api";
+export { loginApi, logoutApi, refreshTokenApi, signupApi, smsSendApi, smsVerifyApi } from "./api";
 export {
   clearAccessToken,
   clearAuthTokens,

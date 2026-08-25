@@ -49,6 +49,10 @@ export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
   );
 };
 
+export const logoutApi = async (): Promise<void> => {
+  await requestAuthData(api.post<ApiResponse<null>>("/auth/logout"), "로그아웃에 실패했습니다.");
+};
+
 export const smsSendApi = async (body: SmsSendRequest): Promise<void> => {
   await requestAuthData(
     api.post<ApiResponse<null>>("/auth/sms/send", body),
