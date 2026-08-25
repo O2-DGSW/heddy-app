@@ -8,7 +8,7 @@ export const dummyRecommendations: RecommendationItem[] = [
     styleName: "다운펌",
     reasonType: "이력 기반",
     riskLevel: "하",
-    reasonDescription: "만족도 5점이었던 애쉬 브라운 염색 이력과 유사",
+    reasonDescription: "애쉬 브라운 염색 이력과 유사",
     referenceRecordLabel: "2026-07-18 염색 기록",
   },
   {
@@ -17,7 +17,7 @@ export const dummyRecommendations: RecommendationItem[] = [
     styleName: "다운펌",
     reasonType: "이력 기반",
     riskLevel: "하",
-    reasonDescription: "만족도 5점이었던 애쉬 브라운 염색 이력과 유사",
+    reasonDescription: "애쉬 브라운 염색 이력과 유사",
     referenceRecordLabel: "2026-07-18 염색 기록",
   },
   {
@@ -26,7 +26,7 @@ export const dummyRecommendations: RecommendationItem[] = [
     styleName: "다운펌",
     reasonType: "이력 기반",
     riskLevel: "하",
-    reasonDescription: "만족도 5점이었던 애쉬 브라운 염색 이력과 유사",
+    reasonDescription: "애쉬 브라운 염색 이력과 유사",
     referenceRecordLabel: "2026-07-18 염색 기록",
   },
 ];
