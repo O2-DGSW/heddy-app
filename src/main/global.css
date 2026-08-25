@@ -12,12 +12,13 @@
 
 @layer base {
   :root {
-    /* NavBar 콘텐츠 높이(pt-16 + 아이템 ~56px) + 기기별 세이프에어리어. 세이프에어리어가
-       없는 기기(홈버튼/일부 안드로이드)에서는 콘텐츠 높이만 남고, 홈 인디케이터가 있는
-       기기(대략 34px)에서는 그만큼 늘어난다 — 화면마다 여백 크기가 달라 보이던 문제
-       (고정 106px)를 없애기 위해 NavBar 실제 높이를 이 값 하나로 통일한다. 여기에 별도
-       최소 여백을 더 얹으면 세이프에어리어가 있는 기기에서 원래보다 더 커져버리니 더하지 말 것. */
-    --nav-bar-height: calc(72px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    /* NavBar 콘텐츠 높이(pt-16 + 아이템 ~56px) + max(최소 16px, 기기별 세이프에어리어).
+       세이프에어리어가 없는 기기(홈버튼 iPhone SE 등)는 16px 최소 여백만 남아 라벨 텍스트가
+       실기기에서 잘리지 않고, 홈 인디케이터가 있는 기기(대략 34px)는 그만큼 늘어난다 —
+       max()라서 세이프에어리어가 있는 기기에서 최소 여백과 겹쳐 더 커지는 일은 없다. */
+    --nav-bar-height: calc(
+      72px + max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)))
+    );
   }
 
   html,
