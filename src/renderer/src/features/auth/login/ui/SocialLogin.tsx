@@ -5,7 +5,9 @@ import NaverIcon from "@/features/auth/login/assets/social-field/naver.svg";
 import { useSocialLogin } from "../model/socialLogin.ts";
 
 export const SocialLogin = () => {
-  const { handleKakaoLogin, handleNaverLogin, handleGoogleLogin } = useSocialLogin();
+  const { error, pendingProvider, handleKakaoLogin, handleNaverLogin, handleGoogleLogin } =
+    useSocialLogin();
+  const isPending = pendingProvider !== null;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
@@ -18,18 +20,39 @@ export const SocialLogin = () => {
       </div>
 
       <div className="flex gap-6">
-        <button onClick={handleKakaoLogin}>
+        <button
+          type="button"
+          aria-busy={pendingProvider === "kakao"}
+          disabled={isPending}
+          onClick={handleKakaoLogin}
+        >
           <img src={KakaoIcon} alt="카카오 로그인" className="size-12" />
         </button>
 
-        <button onClick={handleNaverLogin}>
+        <button
+          type="button"
+          aria-busy={pendingProvider === "naver"}
+          disabled={isPending}
+          onClick={handleNaverLogin}
+        >
           <img src={NaverIcon} alt="네이버 로그인" className="size-12" />
         </button>
 
-        <button onClick={handleGoogleLogin}>
+        <button
+          type="button"
+          aria-busy={pendingProvider === "google"}
+          disabled={isPending}
+          onClick={handleGoogleLogin}
+        >
           <img src={GoogleIcon} alt="구글 로그인" className="size-12" />
         </button>
       </div>
+
+      {error && (
+        <p className={font.caption.regular} style={{ color: lightTheme.status.error }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 };
