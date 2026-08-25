@@ -1,4 +1,4 @@
-import { refreshTokenApi } from "../api/authApi";
+import { refreshTokenApi } from "@/entities";
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "./token";
 import { isAxiosError } from "axios";
 
