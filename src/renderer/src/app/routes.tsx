@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { MobileLayout } from "./layouts";
+import { MobileLayout, CutsTransitionOutlet } from "./layouts";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
 import { CutsSharePage } from "@/pages/cuts-share";
@@ -51,14 +51,16 @@ export const AppRoutes = () => {
     <Routes>
       <Route element={<MobileLayout />}>
         <Route path="/" element={<Navigate replace to="/cuts" />} />
-        <Route path="/cuts" element={<CutsListPage />} />
-        <Route path="/cuts/add" element={<RecordAddPage />} />
-        <Route path="/cuts/:id" element={<CutsDetailPage />}>
-          <Route index element={<Navigate replace to="info" />} />
-          <Route path="info" element={<CutsDetailInfoPage />} />
-          <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+        <Route element={<CutsTransitionOutlet />}>
+          <Route path="/cuts" element={<CutsListPage />} />
+          <Route path="/cuts/add" element={<RecordAddPage />} />
+          <Route path="/cuts/:id" element={<CutsDetailPage />}>
+            <Route index element={<Navigate replace to="info" />} />
+            <Route path="info" element={<CutsDetailInfoPage />} />
+            <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+          </Route>
+          <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         </Route>
-        <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         <Route path="/ar" element={<ArHairstylePage />} />
         <Route path="/profile" element={<SharePermissionsPage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
