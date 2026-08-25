@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">heddy-app</string>
-    <string name="title_activity_main">heddy-app</string>
+    <string name="app_name">heddy</string>
+    <string name="title_activity_main">heddy</string>
     <string name="package_name">com.heddy.app</string>
     <string name="custom_url_scheme">com.heddy.app</string>
 </resources>
