@@ -1,5 +1,6 @@
-import { font, lightTheme } from "@heddy/design-tokens";
+import { lightTheme } from "@heddy/design-tokens";
 
+import { PageTitle } from "@/shared";
 import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.types";
 
 /**
@@ -17,12 +18,7 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
     >
       {/* 헤더는 스크롤 컨테이너(아래 flex-1 div) 밖의 별도 flex 아이템이라 sticky 없이도 고정된다. */}
       <div className="shrink-0" style={{ backgroundColor: lightTheme.background.normal }}>
-        <h1
-          className={`py-2 pt-3 text-center ${font.headline1.bold}`}
-          style={{ color: lightTheme.label.neutral, backgroundColor: lightTheme.background.normal }}
-        >
-          시술기록
-        </h1>
+        <PageTitle>시술기록</PageTitle>
         {header}
       </div>
       {/* NavBar 여백은 <main>의 pb-[var(--nav-bar-height)]가 이미 확보한다 — 여기서 또 더하면 간격이 겹으로 벌어진다. */}
