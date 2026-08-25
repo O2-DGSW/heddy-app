@@ -6,6 +6,7 @@ import type {
   LoginRequest,
   LoginResponse,
   SignupRequest,
+  SocialSignupRequest,
   SmsSendRequest,
   SmsVerifyRequest,
 } from "@/entities";
@@ -71,6 +72,13 @@ export const signupApi = async (body: SignupRequest): Promise<void> => {
   await requestAuthData(
     api.post<ApiResponse<null>>("/auth/signup", body),
     "회원가입에 실패했습니다."
+  );
+};
+
+export const socialSignupApi = async (body: SocialSignupRequest): Promise<LoginResponse> => {
+  return requestAuthData(
+    api.post<ApiResponse<LoginResponse>>("/auth/social/signup", body),
+    "소셜 회원가입에 실패했습니다."
   );
 };
 

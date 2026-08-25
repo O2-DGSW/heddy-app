@@ -3,6 +3,7 @@ export {
   logoutApi,
   refreshTokenApi,
   signupApi,
+  socialSignupApi,
   smsSendApi,
   smsVerifyApi,
 } from "./authApi";

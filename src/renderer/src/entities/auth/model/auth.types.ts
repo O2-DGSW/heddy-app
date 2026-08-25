@@ -15,6 +15,12 @@ export type SignupRequest = {
   phoneNumber: string;
 };
 
+export type SocialSignupRequest = {
+  pendingToken: string;
+  name: string;
+  phoneNumber: string;
+};
+
 export type SmsPurpose = "SIGNUP" | "OWNER_SIGNUP" | "PASSWORD_RESET" | "PHONE_CHANGE";
 
 export type SmsSendRequest = {
