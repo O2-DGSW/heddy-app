@@ -11,6 +11,14 @@
 }
 
 @layer base {
+  :root {
+    /* NavBar 콘텐츠 높이(pt-16 + 아이템 55px) + 최소 여백(12px) + 기기별 세이프에어리어.
+       세이프에어리어가 없는 기기(홈버튼/일부 안드로이드)에서는 최소 12px만 확보되고,
+       홈 인디케이터가 있는 기기에서는 그만큼 자동으로 늘어난다 — 화면마다 여백 크기가
+       달라 보이던 문제(고정 106px)를 없애기 위해 NavBar 실제 높이를 이 값 하나로 통일한다. */
+    --nav-bar-height: calc(83px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+
   html,
   body,
   #root {
