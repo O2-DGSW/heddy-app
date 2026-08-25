@@ -18,8 +18,10 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <div className="flex gap-3">
+        {/* 이 카드는 옆 텍스트 블록 높이에 맞춰 세로로 늘어나는 직사각형 썸네일을 쓴다
+            (정사각형을 고정해야 하는 CutsRecordCard와는 다른 디자인 의도). */}
         <div
-          className="h-28 w-28 shrink-0 overflow-hidden rounded-xl"
+          className="w-28 shrink-0 self-stretch overflow-hidden rounded-xl"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
           {recommendation.thumbnailUrl && (
