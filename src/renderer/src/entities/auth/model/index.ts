@@ -2,6 +2,7 @@ export type {
   LoginRequest,
   LoginResponse,
   SignupRequest,
+  SocialSignupRequest,
   SmsPurpose,
   SmsSendRequest,
   SmsVerifyRequest,
