@@ -5,7 +5,7 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
 };
 
 export type SignupRequest = {

@@ -1,10 +1,5 @@
-import { refreshTokenApi } from "@/entities/auth/api/authApi";
-import {
-  clearAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-  setAuthTokens,
-} from "@/entities/auth/model/token";
+import { refreshTokenApi } from "../api/authApi";
+import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "./token";
 import { isAxiosError } from "axios";
 
 let refreshTokenRequest: Promise<Awaited<ReturnType<typeof refreshTokenApi>>> | null = null;
