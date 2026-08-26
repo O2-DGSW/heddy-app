@@ -11,6 +11,7 @@ import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
 import { FindPage } from "@/pages/auth/find";
 import { ArHairstylePage } from "@/pages/ar";
+import { RecommendPage } from "@/pages/recommend";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
@@ -62,6 +63,7 @@ export const AppRoutes = () => {
           <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         </Route>
         <Route path="/ar" element={<ArHairstylePage />} />
+        <Route path="/recommend" element={<RecommendPage />} />
         <Route path="/profile" element={<SharePermissionsPage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
