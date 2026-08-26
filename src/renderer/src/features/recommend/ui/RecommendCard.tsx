@@ -23,7 +23,7 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
           정사각형이 유지되면서 카드 아래(AR 버튼)까지 꽉 찬다.
           self-stretch + aspect-square는 높이↔폭이 서로를 참조해 폭이 0으로 무너지니 쓰지 말 것. */}
       <div
-        className="aspect-square w-[40%] shrink-0 self-start overflow-hidden rounded-xl"
+        className="aspect-square w-[42%] shrink-0 self-start overflow-hidden rounded-xl max-[360px]:w-[38%]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {recommendation.thumbnailUrl && (
@@ -50,13 +50,13 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
             {recommendation.styleName}
           </span>
           <p
-            className={`${font.caption.regular} text-[0.6875rem] max-[400px]:text-[0.625rem]`}
+            className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
             style={{ color: lightTheme.label.alternative }}
           >
             근거: {recommendation.reasonDescription}
           </p>
           <p
-            className={`${font.caption.regular} text-[0.6875rem] max-[400px]:text-[0.625rem]`}
+            className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
             style={{ color: lightTheme.label.assistive }}
           >
             참고기록: {recommendation.referenceRecordLabel}
