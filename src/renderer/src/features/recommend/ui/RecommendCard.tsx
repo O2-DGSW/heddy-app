@@ -19,10 +19,11 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
       className="flex gap-3 rounded-2xl p-3 shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
-      {/* 정사각형을 항상 유지해야 하므로 가로/세로를 각각 고정한다.
-          (self-stretch로 세로를 옆 텍스트 블록 높이에 맞추면 비율이 깨진다.) */}
+      {/* 폭을 카드 기준 비율로 잡고 aspect-square로 높이를 따라가게 해서, 화면 폭이 달라져도
+          정사각형이 유지되면서 카드 아래(AR 버튼)까지 꽉 찬다.
+          self-stretch + aspect-square는 높이↔폭이 서로를 참조해 폭이 0으로 무너지니 쓰지 말 것. */}
       <div
-        className="h-28 w-28 shrink-0 overflow-hidden rounded-xl max-[400px]:h-24 max-[400px]:w-24"
+        className="aspect-square w-[40%] shrink-0 self-start overflow-hidden rounded-xl"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {recommendation.thumbnailUrl && (
@@ -43,26 +44,29 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
 
         <div className="flex flex-col gap-0.5">
           <span
-            className={`${font.headline2.bold} max-[400px]:text-[1rem]`}
+            className={`${font.headline2.bold} text-[1rem] max-[400px]:text-[0.9375rem]`}
             style={{ color: lightTheme.label.normal }}
           >
             {recommendation.styleName}
           </span>
           <p
-            className={`${font.caption.regular} max-[400px]:text-[0.6875rem]`}
+            className={`${font.caption.regular} text-[0.6875rem] max-[400px]:text-[0.625rem]`}
             style={{ color: lightTheme.label.alternative }}
           >
             근거: {recommendation.reasonDescription}
           </p>
           <p
-            className={`${font.caption.regular} max-[400px]:text-[0.6875rem]`}
+            className={`${font.caption.regular} text-[0.6875rem] max-[400px]:text-[0.625rem]`}
             style={{ color: lightTheme.label.assistive }}
           >
             참고기록: {recommendation.referenceRecordLabel}
           </p>
         </div>
 
-        <RecommendArButton />
+        {/* 사진이 텍스트보다 높으면 버튼을 아래로 밀어 사진 하단과 나란히 맞춘다 */}
+        <div className="mt-auto">
+          <RecommendArButton />
+        </div>
       </div>
     </article>
   );
