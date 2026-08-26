@@ -15,7 +15,7 @@ export const RecommendArButton = () => {
     <button
       type="button"
       onClick={handleClick}
-      className={`flex w-full items-center justify-center gap-1 rounded-full py-2.5 ${font.label.semiBold}`}
+      className={`flex w-full items-center justify-center gap-1 rounded-full py-2.5 max-[400px]:py-2 ${font.label.semiBold} max-[400px]:text-[0.8125rem]`}
       style={{ backgroundColor: lightTheme.fill.neutral, color: lightTheme.label.neutral }}
     >
       AR로 체험

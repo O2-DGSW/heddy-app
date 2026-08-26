@@ -10,7 +10,7 @@ export const RecommendRiskBadge = ({ riskLevel }: RecommendRiskBadgeProps) => {
   return (
     <span
       aria-label={`관리 난이도 ${riskLevel}`}
-      className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${font.caption.bold}`}
+      className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full max-[400px]:h-5 max-[400px]:w-5 ${font.caption.bold} max-[400px]:text-[0.6875rem]`}
       style={{ backgroundColor: lightTheme.status.info, color: lightTheme.background.normal }}
     >
       {riskLevel}
