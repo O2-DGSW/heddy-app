@@ -12,6 +12,8 @@
     "build": "tsc -b && vite build",
     "build:ios": "pnpm build && npx cap sync ios && npx cap open ios",
     "build:android": "pnpm build && npx cap sync android && npx cap open android",
+    "sync:ios": "npx cap sync ios",
+    "sync:android": "npx cap sync android",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
