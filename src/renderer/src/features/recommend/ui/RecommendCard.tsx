@@ -19,10 +19,10 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
       className="flex gap-3 rounded-2xl p-3 shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
-      {/* 옆 텍스트 블록 높이에 맞춰 세로로 늘어나는 직사각형 썸네일
-          (정사각형을 고정해야 하는 CutsRecordCard와는 다른 디자인 의도). */}
+      {/* 정사각형을 항상 유지해야 하므로 가로/세로를 각각 고정한다.
+          (self-stretch로 세로를 옆 텍스트 블록 높이에 맞추면 비율이 깨진다.) */}
       <div
-        className="w-28 shrink-0 self-stretch overflow-hidden rounded-xl max-[400px]:w-24"
+        className="h-28 w-28 shrink-0 overflow-hidden rounded-xl max-[400px]:h-24 max-[400px]:w-24"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {recommendation.thumbnailUrl && (
