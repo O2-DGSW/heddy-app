@@ -25,6 +25,7 @@ export type {
   AuthApiResponse,
   AuthTokensApiData,
   AuthTokensResponse,
+  LoginApiResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
