@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import { CutsLayout } from "@/features/cuts/ui/CutsLayout.tsx";
 import { CutsTabBar } from "@/features/cuts/ui/CutsTabBar";
@@ -44,20 +45,23 @@ export const CutsListPage = () => {
   );
 
   const handleRecordClick = (record: CutsRecord) => {
+    setDirection("forward");
     navigate(`/cuts/${record.id}`);
   };
 
   return (
-    <CutsLayout
-      header={
-        <>
-          <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
-          <CutsCategoryFilter selected={categoryFilter} onSelect={setCategoryFilter} />
-        </>
-      }
-    >
-      <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
-      <CutsAddButton />
-    </CutsLayout>
+    <cap-page>
+      <CutsLayout
+        header={
+          <>
+            <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
+            <CutsCategoryFilter selected={categoryFilter} onSelect={setCategoryFilter} />
+          </>
+        }
+      >
+        <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+        <CutsAddButton />
+      </CutsLayout>
+    </cap-page>
   );
 };

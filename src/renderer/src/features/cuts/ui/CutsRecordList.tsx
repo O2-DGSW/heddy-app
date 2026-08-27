@@ -13,7 +13,7 @@ export const CutsRecordList = ({ records, onRecordClick }: CutsRecordListProps) 
   }
 
   return (
-    <ul className="flex flex-col gap-2 px-4 pb-6">
+    <ul className="flex flex-col gap-2 px-4 pb-6 max-[400px]:px-3">
       {records.map(record => (
         <li key={record.id}>
           <CutsRecordCard record={record} onClick={() => onRecordClick(record)} />
