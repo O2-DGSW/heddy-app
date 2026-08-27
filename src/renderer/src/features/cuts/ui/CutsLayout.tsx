@@ -7,7 +7,7 @@ import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.typ
  * 시술기록 목록 레이아웃
  * - 카드가 흰색이라 배경도 흰색이면 경계가 보이지 않는다. 목록 배경을 회색으로 깔아 카드를 구분한다.
  */
-export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
+export const CutsLayout = ({ children, header, contentSwipeProps }: CutsLayoutProps) => {
   return (
     // cap-page로 감싸는 전환 애니메이션은 페이지가 자기 높이(h-full) 안에서
     // 직접 스크롤하는 걸 전제로 한다. <main>에 얹혀 스크롤하던 이전 방식과 달리
@@ -22,7 +22,10 @@ export const CutsLayout = ({ children, header }: CutsLayoutProps) => {
         {header}
       </div>
       {/* NavBar 여백은 <main>의 pb-[var(--nav-bar-height)]가 이미 확보한다 — 여기서 또 더하면 간격이 겹으로 벌어진다. */}
-      <div className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
+      <div
+        className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]"
+        {...contentSwipeProps}
+      >
         {children}
       </div>
     </div>

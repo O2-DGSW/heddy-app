@@ -14,6 +14,7 @@ import {
   type CutsCategoryFilterValue,
 } from "@/features/cuts/constrants/categories";
 import { dummyCutsRecords } from "@/features/cuts/constrants/dummyRecords";
+import { useHorizontalSwipe } from "@/shared";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 const matchesStatusFilter = (record: CutsRecord, statusFilter: CutsStatusFilter) => {
@@ -49,9 +50,26 @@ export const CutsListPage = () => {
     navigate(`/cuts/${record.id}`);
   };
 
+  /** 좌우 스와이프로 상태 탭을 넘긴다 (양 끝에서는 더 넘어가지 않는다) */
+  const moveTab = (offset: number) => {
+    const nextIndex = CUTS_TABS.findIndex(({ label }) => label === statusFilter) + offset;
+
+    if (nextIndex < 0 || nextIndex >= CUTS_TABS.length) {
+      return;
+    }
+
+    setStatusFilter(CUTS_TABS[nextIndex].label);
+  };
+
+  const contentSwipeProps = useHorizontalSwipe({
+    onSwipeLeft: () => moveTab(1),
+    onSwipeRight: () => moveTab(-1),
+  });
+
   return (
     <cap-page>
       <CutsLayout
+        contentSwipeProps={contentSwipeProps}
         header={
           <>
             <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
