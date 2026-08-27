@@ -3,9 +3,29 @@ export type LoginRequest = {
   password: string;
 };
 
-export type LoginResponse = {
+export type AuthTokensResponse = {
   accessToken: string;
   refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+};
+
+export type LoginResponse = AuthTokensResponse;
+
+export type AuthTokensApiData = {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+};
+
+export type AuthApiResponse<TData> = {
+  data: TData;
+  request_id: string;
+};
+
+export type RefreshTokenRequest = {
+  refresh_token: string;
 };
 
 export type SignupRequest = {
