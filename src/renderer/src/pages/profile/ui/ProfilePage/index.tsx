@@ -52,7 +52,12 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
           {item.label}
         </span>
       </span>
-      <img alt="" className="h-[14px] w-[14px] shrink-0" src={arrowRightIcon} />
+      <img
+        alt=""
+        className="h-[14px] w-[14px] shrink-0"
+        src={arrowRightIcon}
+        style={{ transform: "rotate(180deg)" }}
+      />
     </>
   );
 
@@ -84,38 +89,40 @@ const ProfilePage = () => {
     <section
       aria-labelledby="profile-title"
       className="flex min-h-full flex-col"
-      style={{ backgroundColor: lightTheme.background.normal }}
+      style={{ backgroundColor: lightTheme.fill.normal }}
     >
-      <div className="mx-[26px] flex flex-col gap-[28px] pb-[25px] pt-[22px]">
-        <header className="flex flex-col gap-[28px]">
-          <div className="flex items-center gap-[20px]">
-            <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
-            <h1
-              className={font.headline1.bold}
-              id="profile-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              {PROFILE_NAME}님
-            </h1>
-          </div>
+      <div style={{ backgroundColor: lightTheme.background.normal }}>
+        <div className="mx-[26px] flex flex-col gap-[28px] pb-[25px] pt-[22px]">
+          <header className="flex flex-col gap-[28px]">
+            <div className="flex items-center gap-[20px]">
+              <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
+              <h1
+                className={font.headline1.bold}
+                id="profile-title"
+                style={{ color: lightTheme.label.neutral }}
+              >
+                {PROFILE_NAME}님
+              </h1>
+            </div>
 
-          <dl
-            className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
-            style={{ backgroundColor: "#F4FBF8" }}
-          >
-            {PROFILE_STATS.map(stat => (
-              <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
-                <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
-                  <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
-                  <span style={{ color: lightTheme.label.alternative }}>건</span>
-                </dd>
-                <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-                  {stat.label}
-                </dt>
-              </div>
-            ))}
-          </dl>
-        </header>
+            <dl
+              className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
+              style={{ backgroundColor: "#F4FBF8" }}
+            >
+              {PROFILE_STATS.map(stat => (
+                <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
+                  <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
+                    <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
+                    <span style={{ color: lightTheme.label.alternative }}>건</span>
+                  </dd>
+                  <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+                    {stat.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+          </header>
+        </div>
       </div>
 
       <div className="flex px-[22px] py-[37px]" style={{ backgroundColor: lightTheme.fill.normal }}>
