@@ -1,5 +1,4 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { Capacitor } from "@capacitor/core";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import cameraIcon from "../../assets/camera.svg";
@@ -59,7 +58,7 @@ const ArHairstylePage = () => {
   };
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || !navigator.mediaDevices?.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia) {
       return;
     }
 
