@@ -61,6 +61,15 @@ export type SocialSignupAgreements = {
   marketing_notification: boolean;
 };
 
+export type SocialLoginRequest = {
+  provider: SocialSignupProviderType;
+  provider_token: string;
+};
+
+export type SocialLoginResponse = SocialSignupResponse;
+
+export type SocialLoginApiResponse = AuthApiResponse<SocialLoginResponse>;
+
 export type SocialSignupRequest = {
   provider: SocialSignupProviderType;
   provider_token: string;
