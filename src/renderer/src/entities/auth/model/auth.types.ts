@@ -30,6 +30,17 @@ export type AuthApiResponse<TData> = {
   request_id: string;
 };
 
+export type EmailAvailabilityParams = {
+  email: string;
+};
+
+export type EmailAvailabilityResponse = {
+  email: string;
+  available: boolean;
+};
+
+export type EmailAvailabilityApiResponse = AuthApiResponse<EmailAvailabilityResponse>;
+
 export type RefreshTokenRequest = {
   refresh_token: string;
 };

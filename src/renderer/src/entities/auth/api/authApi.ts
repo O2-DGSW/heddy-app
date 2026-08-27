@@ -5,6 +5,9 @@ import type { ApiResponse } from "@/shared/lib/api";
 import type {
   AuthApiResponse,
   AuthTokensApiData,
+  EmailAvailabilityApiResponse,
+  EmailAvailabilityParams,
+  EmailAvailabilityResponse,
   LoginApiResponse,
   LoginRequest,
   LoginResponse,
@@ -61,6 +64,25 @@ export const socialLoginApi = async (body: SocialLoginRequest): Promise<SocialLo
     return res.data.data;
   } catch (error) {
     throw new Error(getAuthApiErrorMessage(error, "소셜 로그인에 실패했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+export const checkEmailAvailabilityApi = async (
+  email: string
+): Promise<EmailAvailabilityResponse> => {
+  try {
+    const params: EmailAvailabilityParams = { email };
+    const res = await api.post<EmailAvailabilityApiResponse>(
+      "/auth/email-availability",
+      undefined,
+      { params }
+    );
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "이메일 사용 가능 여부 확인에 실패했습니다."), {
       cause: error,
     });
   }

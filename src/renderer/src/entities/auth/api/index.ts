@@ -1,4 +1,5 @@
 export {
+  checkEmailAvailabilityApi,
   loginApi,
   logoutApi,
   refreshTokenApi,
