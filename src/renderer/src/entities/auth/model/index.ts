@@ -5,6 +5,8 @@ export type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
+  ResetPasswordApiResponse,
+  ResetPasswordRequest,
   SignupApiResponse,
   SignupRequest,
   SignupResponse,

@@ -8,6 +8,8 @@ import type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
+  ResetPasswordApiResponse,
+  ResetPasswordRequest,
   SignupApiResponse,
   SignupRequest,
   SignupResponse,
@@ -83,6 +85,16 @@ export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
     await api.post<AuthApiResponse<string>>("/auth/sms/verify", body);
   } catch (error) {
     throw new Error(getAuthApiErrorMessage(error, "인증번호가 올바르지 않습니다."), {
+      cause: error,
+    });
+  }
+};
+
+export const resetPasswordApi = async (body: ResetPasswordRequest): Promise<void> => {
+  try {
+    await api.post<ResetPasswordApiResponse>("/auth/password/reset", body);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "비밀번호 재설정에 실패했습니다."), {
       cause: error,
     });
   }

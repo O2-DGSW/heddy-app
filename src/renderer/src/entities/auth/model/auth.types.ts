@@ -28,6 +28,13 @@ export type RefreshTokenRequest = {
   refresh_token: string;
 };
 
+export type ResetPasswordRequest = {
+  phone_number: string;
+  new_password: string;
+};
+
+export type ResetPasswordApiResponse = AuthApiResponse<string>;
+
 export type SignupRequest = {
   email: string;
   password: string;

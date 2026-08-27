@@ -2,6 +2,7 @@ export {
   loginApi,
   logoutApi,
   refreshTokenApi,
+  resetPasswordApi,
   signupApi,
   socialSignupApi,
   smsSendApi,
