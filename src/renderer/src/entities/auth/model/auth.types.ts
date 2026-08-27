@@ -1,5 +1,5 @@
 export type LoginRequest = {
-  loginId: string;
+  email: string;
   password: string;
 };
 
@@ -15,6 +15,8 @@ export type AuthTokensResponse = {
 };
 
 export type LoginResponse = AuthTokensResponse;
+
+export type LoginApiResponse = AuthApiResponse<SocialSignupResponse>;
 
 export type AuthTokensApiData = {
   access_token: string;

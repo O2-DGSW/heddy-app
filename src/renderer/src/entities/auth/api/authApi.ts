@@ -5,6 +5,7 @@ import type { ApiResponse } from "@/shared/lib/api";
 import type {
   AuthApiResponse,
   AuthTokensApiData,
+  LoginApiResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
@@ -24,14 +25,6 @@ import type {
   SmsVerifyRequest,
 } from "@/entities";
 
-const getAuthApiData = <TData>(response: ApiResponse<TData>, fallbackMessage: string): TData => {
-  if (!response.success) {
-    throw new Error(response.error?.message || response.message || fallbackMessage);
-  }
-
-  return response.data;
-};
-
 const getAuthApiErrorMessage = (error: unknown, fallbackMessage: string) => {
   if (isAxiosError<ApiResponse<unknown>>(error)) {
     return error.response?.data.error?.message || error.response?.data.message || fallbackMessage;
@@ -44,18 +37,6 @@ const getAuthApiErrorMessage = (error: unknown, fallbackMessage: string) => {
   return fallbackMessage;
 };
 
-const requestAuthData = async <TData>(
-  request: Promise<{ data: ApiResponse<TData> }>,
-  fallbackMessage: string
-): Promise<TData> => {
-  try {
-    const res = await request;
-    return getAuthApiData(res.data, fallbackMessage);
-  } catch (error) {
-    throw new Error(getAuthApiErrorMessage(error, fallbackMessage), { cause: error });
-  }
-};
-
 const mapAuthTokens = (tokens: AuthTokensApiData): LoginResponse => ({
   accessToken: tokens.access_token,
   refreshToken: tokens.refresh_token,
@@ -64,10 +45,14 @@ const mapAuthTokens = (tokens: AuthTokensApiData): LoginResponse => ({
 });
 
 export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
-  return requestAuthData(
-    api.post<ApiResponse<LoginResponse>>("/auth/login/email", body),
-    "로그인에 실패했습니다."
-  );
+  try {
+    const res = await api.post<LoginApiResponse>("/auth/login/email", body);
+    return mapAuthTokens(res.data.data.tokens);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "로그인에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const socialLoginApi = async (body: SocialLoginRequest): Promise<SocialLoginResponse> => {
