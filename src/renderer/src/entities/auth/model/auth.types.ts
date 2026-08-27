@@ -3,6 +3,10 @@ export type LoginRequest = {
   password: string;
 };
 
+export type LogoutRequest = {
+  refresh_token: string;
+};
+
 export type AuthTokensResponse = {
   accessToken: string;
   refreshToken: string;
