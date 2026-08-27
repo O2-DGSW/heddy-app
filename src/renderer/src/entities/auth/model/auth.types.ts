@@ -82,7 +82,7 @@ export type SmsSendRequest = {
 };
 
 export type SmsVerifyRequest = {
-  phoneNumber: string;
+  phone_number: string;
   code: string;
   purpose: SmsPurpose;
 };

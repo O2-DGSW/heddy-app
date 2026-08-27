@@ -74,10 +74,13 @@ export const smsSendApi = async (body: SmsSendRequest): Promise<void> => {
 };
 
 export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
-  await requestAuthData(
-    api.post<ApiResponse<null>>("/auth/sms/verify", body),
-    "인증번호가 올바르지 않습니다."
-  );
+  try {
+    await api.post<AuthApiResponse<string>>("/auth/sms/verify", body);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "인증번호가 올바르지 않습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const signupApi = async (body: SignupRequest): Promise<void> => {
