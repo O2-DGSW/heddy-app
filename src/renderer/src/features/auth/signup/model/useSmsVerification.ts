@@ -29,7 +29,7 @@ export const useSmsVerification = (purpose: SmsPurpose, phoneNumber?: string) =>
     setIsSending(true);
     setSmsError(null);
     try {
-      await smsSendApi({ phoneNumber: phoneNumber.replace(/\D/g, ""), carrier, purpose });
+      await smsSendApi({ phone_number: phoneNumber.replace(/\D/g, ""), carrier, purpose });
       setIsSent(true);
       setIsVerified(false);
     } catch (err) {

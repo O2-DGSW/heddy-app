@@ -67,10 +67,13 @@ export const logoutApi = async (): Promise<void> => {
 };
 
 export const smsSendApi = async (body: SmsSendRequest): Promise<void> => {
-  await requestAuthData(
-    api.post<ApiResponse<null>>("/auth/sms/send", body),
-    "인증번호 발송에 실패했습니다."
-  );
+  try {
+    await api.post<AuthApiResponse<string>>("/auth/sms/send", body);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "인증번호 발송에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
