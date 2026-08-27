@@ -47,7 +47,7 @@ const requestAuthData = async <TData>(
 
 export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
   return requestAuthData(
-    api.post<ApiResponse<LoginResponse>>("/auth/login", body),
+    api.post<ApiResponse<LoginResponse>>("/auth/login/email", body),
     "로그인에 실패했습니다."
   );
 };

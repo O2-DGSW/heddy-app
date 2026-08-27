@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-import { MobileLayout } from "./layouts";
+import { MobileLayout, CutsTransitionOutlet } from "./layouts";
 import { getRefreshToken } from "@/entities/auth";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
+import { CutsSharePage } from "@/pages/cuts-share";
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
 import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
 import { FindPage } from "@/pages/auth/find";
+import { ArHairstylePage } from "@/pages/ar";
+import { RecommendPage } from "@/pages/recommend";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
@@ -55,13 +58,18 @@ export const AppRoutes = () => {
       <Route element={<MobileLayout />}>
         <Route path="/" element={<EntryRedirect />} />
         <Route path="/home" element={<div />} />
-        <Route path="/cuts" element={<CutsListPage />} />
-        <Route path="/cuts/add" element={<RecordAddPage />} />
-        <Route path="/cuts/:id" element={<CutsDetailPage />}>
-          <Route index element={<Navigate replace to="info" />} />
-          <Route path="info" element={<CutsDetailInfoPage />} />
-          <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+        <Route element={<CutsTransitionOutlet />}>
+          <Route path="/cuts" element={<CutsListPage />} />
+          <Route path="/cuts/add" element={<RecordAddPage />} />
+          <Route path="/cuts/:id" element={<CutsDetailPage />}>
+            <Route index element={<Navigate replace to="info" />} />
+            <Route path="info" element={<CutsDetailInfoPage />} />
+            <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+          </Route>
+          <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         </Route>
+        <Route path="/ar" element={<ArHairstylePage />} />
+        <Route path="/recommend" element={<RecommendPage />} />
         <Route path="/profile" element={<SharePermissionsPage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />

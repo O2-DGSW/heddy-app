@@ -45,6 +45,9 @@ lerna-debug.log*
 # Local docs
 docs/
 
+# Local agent instructions
+AGENTS.md
+
 # Editor directories and files
 .claude/
 .vscode/*
