@@ -20,8 +20,12 @@ export {
   setRefreshToken,
 } from "./model";
 export type {
+  AuthApiResponse,
+  AuthTokensApiData,
+  AuthTokensResponse,
   LoginRequest,
   LoginResponse,
+  RefreshTokenRequest,
   SignupRequest,
   SocialSignupAgreements,
   SocialSignupApiResponse,

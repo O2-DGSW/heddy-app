@@ -3,8 +3,11 @@ import { isAxiosError } from "axios";
 import { api } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/lib/api";
 import type {
+  AuthApiResponse,
+  AuthTokensApiData,
   LoginRequest,
   LoginResponse,
+  RefreshTokenRequest,
   SignupRequest,
   SocialSignupApiResponse,
   SocialSignupRequest,
@@ -44,6 +47,13 @@ const requestAuthData = async <TData>(
     throw new Error(getAuthApiErrorMessage(error, fallbackMessage), { cause: error });
   }
 };
+
+const mapAuthTokens = (tokens: AuthTokensApiData): LoginResponse => ({
+  accessToken: tokens.access_token,
+  refreshToken: tokens.refresh_token,
+  tokenType: tokens.token_type,
+  expiresIn: tokens.expires_in,
+});
 
 export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
   return requestAuthData(
@@ -89,12 +99,14 @@ export const socialSignupApi = async (body: SocialSignupRequest): Promise<Social
 };
 
 export const refreshTokenApi = async (refreshToken: string): Promise<LoginResponse> => {
-  return requestAuthData(
-    api.post<ApiResponse<LoginResponse>>("/auth/token/refresh", undefined, {
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-      },
-    }),
-    "토큰 재발급에 실패했습니다."
-  );
+  try {
+    const body: RefreshTokenRequest = { refresh_token: refreshToken };
+    const res = await api.post<AuthApiResponse<AuthTokensApiData>>("/auth/token/refresh", body);
+
+    return mapAuthTokens(res.data.data);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "토큰 재발급에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
