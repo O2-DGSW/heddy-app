@@ -76,7 +76,7 @@ export type SocialSignupApiResponse = {
 export type SmsPurpose = "SIGNUP" | "OWNER_SIGNUP" | "PASSWORD_RESET" | "PHONE_CHANGE";
 
 export type SmsSendRequest = {
-  phoneNumber: string;
+  phone_number: string;
   carrier: string;
   purpose: SmsPurpose;
 };
