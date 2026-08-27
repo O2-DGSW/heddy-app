@@ -4,13 +4,15 @@ import { isValidPhone, isPasswordMatch } from "./validation";
 
 export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
   const [submitted, setSubmitted] = useState(false);
+  const hasRequiredAgreements = form.agreements.terms_of_service && form.agreements.privacy_policy;
 
   const isValid =
     !!form.id &&
     !!form.name &&
     isPasswordMatch(form.password, form.passwordConfirm) &&
     isValidPhone(form.phone) &&
-    extraValid;
+    extraValid &&
+    hasRequiredAgreements;
 
   const canRequestVerification =
     !!form.id &&
