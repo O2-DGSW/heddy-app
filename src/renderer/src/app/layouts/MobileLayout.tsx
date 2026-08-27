@@ -115,7 +115,7 @@ const MobileLayout = () => {
             className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white ${isBrowserDevicePreview ? "sm:h-auto sm:min-h-0 sm:flex-1 sm:rounded-[51px] sm:border sm:border-white/70 sm:shadow-none sm:[--safe-area-inset-top:59px] sm:[--safe-area-inset-bottom:34px]" : "sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)]"}`}
           >
             <main
-              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-[var(--nav-bar-height)]"}`}
+              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-0"}`}
             >
               <Outlet />
             </main>
@@ -176,7 +176,7 @@ const MobileLayout = () => {
               </>
             )}
             {!hideBottomBar && (
-              <div className="absolute inset-x-0 bottom-0 w-full">
+              <div className="w-full shrink-0">
                 <NavBar />
               </div>
             )}
