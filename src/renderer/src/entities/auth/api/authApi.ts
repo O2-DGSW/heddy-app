@@ -8,7 +8,9 @@ import type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
+  SignupApiResponse,
   SignupRequest,
+  SignupResponse,
   SocialSignupApiResponse,
   SocialSignupRequest,
   SocialSignupResponse,
@@ -86,11 +88,15 @@ export const smsVerifyApi = async (body: SmsVerifyRequest): Promise<void> => {
   }
 };
 
-export const signupApi = async (body: SignupRequest): Promise<void> => {
-  await requestAuthData(
-    api.post<ApiResponse<null>>("/auth/signup", body),
-    "회원가입에 실패했습니다."
-  );
+export const signupApi = async (body: SignupRequest): Promise<SignupResponse> => {
+  try {
+    const res = await api.post<SignupApiResponse>("/auth/signup/email", body);
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "회원가입에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const socialSignupApi = async (body: SocialSignupRequest): Promise<SocialSignupResponse> => {

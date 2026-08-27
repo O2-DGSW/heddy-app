@@ -29,11 +29,16 @@ export type RefreshTokenRequest = {
 };
 
 export type SignupRequest = {
-  loginId: string;
+  email: string;
   password: string;
-  name: string;
-  phoneNumber: string;
+  nickname: string;
+  phone_number: string;
+  agreements: SocialSignupAgreements;
 };
+
+export type SignupResponse = SocialSignupResponse;
+
+export type SignupApiResponse = AuthApiResponse<SignupResponse>;
 
 export type SocialSignupProviderType = "EMAIL" | "KAKAO" | "NAVER" | "GOOGLE";
 
