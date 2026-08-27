@@ -13,6 +13,7 @@ import { FindPage } from "@/pages/auth/find";
 import { ArHairstylePage } from "@/pages/ar";
 import { RecommendPage } from "@/pages/recommend";
 import { SharePermissionsPage } from "@/pages/share-permissions";
+import { ProfilePage } from "@/pages/profile";
 
 // type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 //
@@ -64,7 +65,7 @@ export const AppRoutes = () => {
         </Route>
         <Route path="/ar" element={<ArHairstylePage />} />
         <Route path="/recommend" element={<RecommendPage />} />
-        <Route path="/profile" element={<SharePermissionsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
