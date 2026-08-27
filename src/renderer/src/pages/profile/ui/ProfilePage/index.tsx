@@ -128,7 +128,7 @@ const ProfilePage = () => {
       <div className="flex px-[22px] py-[37px]" style={{ backgroundColor: lightTheme.fill.normal }}>
         <section
           aria-labelledby="profile-settings-title"
-          className="flex h-[370px] w-full flex-col items-center justify-between rounded-[15px] px-[22px] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
+          className="flex h-[390px] w-full flex-col items-center justify-between rounded-[15px] px-[22px] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
           style={{ backgroundColor: lightTheme.background.normal }}
         >
           <div className="flex w-full max-w-[300px] flex-col gap-[24px]">
