@@ -14,6 +14,9 @@ import type {
   SignupApiResponse,
   SignupRequest,
   SignupResponse,
+  SocialLoginApiResponse,
+  SocialLoginRequest,
+  SocialLoginResponse,
   SocialSignupApiResponse,
   SocialSignupRequest,
   SocialSignupResponse,
@@ -65,6 +68,17 @@ export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
     api.post<ApiResponse<LoginResponse>>("/auth/login/email", body),
     "로그인에 실패했습니다."
   );
+};
+
+export const socialLoginApi = async (body: SocialLoginRequest): Promise<SocialLoginResponse> => {
+  try {
+    const res = await api.post<SocialLoginApiResponse>("/auth/login/social", body);
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "소셜 로그인에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const logoutApi = async (refreshToken: string): Promise<void> => {
