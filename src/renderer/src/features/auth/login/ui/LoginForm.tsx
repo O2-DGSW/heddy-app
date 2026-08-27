@@ -5,7 +5,7 @@ import { useLoginForm } from "@/features/auth/login/model/login";
 import { PasswordInput } from "@/shared/ui/password-input/PasswordInput";
 
 export const LoginForm = () => {
-  const { id, setId, password, setPassword, error, isLoading, handleLogin } = useLoginForm();
+  const { email, setEmail, password, setPassword, error, isLoading, handleLogin } = useLoginForm();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -16,24 +16,25 @@ export const LoginForm = () => {
     <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
       <div className="flex flex-col gap-1">
         <label
-          htmlFor="login-id"
+          htmlFor="login-email"
           className={`${font.label.medium} pl-2`}
           style={{ color: lightTheme.label.assistive }}
         >
-          아이디
+          이메일
         </label>
         <input
-          id="login-id"
-          name="loginId"
+          id="login-email"
+          name="email"
+          type="email"
           className={`w-full px-4 py-4 rounded-xl  focus:outline-none ${font.caption.regular}`}
           style={{
             backgroundColor: lightTheme.background.neutral,
             color: lightTheme.label.normal,
           }}
-          autoComplete="username"
-          placeholder="아이디"
-          value={id}
-          onChange={e => setId(e.target.value)}
+          autoComplete="email"
+          placeholder="이메일"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
       </div>
 
