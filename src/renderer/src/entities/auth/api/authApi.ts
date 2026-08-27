@@ -7,6 +7,7 @@ import type {
   AuthTokensApiData,
   LoginRequest,
   LoginResponse,
+  LogoutRequest,
   RefreshTokenRequest,
   ResetPasswordApiResponse,
   ResetPasswordRequest,
@@ -66,8 +67,15 @@ export const loginApi = async (body: LoginRequest): Promise<LoginResponse> => {
   );
 };
 
-export const logoutApi = async (): Promise<void> => {
-  await requestAuthData(api.post<ApiResponse<null>>("/auth/logout"), "로그아웃에 실패했습니다.");
+export const logoutApi = async (refreshToken: string): Promise<void> => {
+  try {
+    const body: LogoutRequest = { refresh_token: refreshToken };
+    await api.post("/auth/logout", body);
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "로그아웃에 실패했습니다."), {
+      cause: error,
+    });
+  }
 };
 
 export const smsSendApi = async (body: SmsSendRequest): Promise<void> => {

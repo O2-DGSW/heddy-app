@@ -4,6 +4,7 @@ export type {
   AuthTokensResponse,
   LoginRequest,
   LoginResponse,
+  LogoutRequest,
   RefreshTokenRequest,
   ResetPasswordApiResponse,
   ResetPasswordRequest,
