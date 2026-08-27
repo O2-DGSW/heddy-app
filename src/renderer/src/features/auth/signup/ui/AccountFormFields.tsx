@@ -9,7 +9,7 @@ export const AccountFormFields = ({
   showPhoneError,
   showNameError,
   canRequestVerification,
-  nameLabel = "이름",
+  nameLabel = "닉네임",
   smsVerification,
   onChange,
 }: Props) => {
@@ -21,14 +21,22 @@ export const AccountFormFields = ({
   return (
     <>
       <div className="flex flex-col gap-1">
-        <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
-          아이디
-        </p>
+        <label
+          htmlFor="signup-email"
+          className={`${font.label.medium} pl-2`}
+          style={{ color: lightTheme.label.assistive }}
+        >
+          이메일
+        </label>
 
         <input
+          id="signup-email"
+          name="email"
+          type="email"
+          autoComplete="email"
           className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.caption.regular}`}
           style={inputStyle}
-          placeholder="아이디"
+          placeholder="이메일"
           value={form.id}
           onChange={e => onChange({ ...form, id: e.target.value })}
         />

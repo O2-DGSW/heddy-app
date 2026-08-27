@@ -22,14 +22,30 @@ export const FindPasswordForm = () => {
     verificationField,
     canSubmit: canSubmitBase,
   } = useFindPassword();
-  const { passwordField, passwordConfirmField, canSubmit: canReset } = useResetPassword();
+  const {
+    passwordField,
+    passwordConfirmField,
+    canSubmit: canReset,
+    error: resetError,
+    isLoading: isResetting,
+    submitResetPassword,
+  } = useResetPassword();
   const sms = useSmsVerification("PASSWORD_RESET", phoneField.value);
 
   const canSubmit = canSubmitBase && sms.isVerified;
+  const canResetPassword = canReset && !isResetting;
 
   const inputStyle = {
     backgroundColor: lightTheme.background.neutral,
     color: lightTheme.label.normal,
+  };
+
+  const handleResetPassword = async () => {
+    const isSuccess = await submitResetPassword(phoneField.value);
+
+    if (isSuccess) {
+      navigate("/login", { replace: true });
+    }
   };
 
   const tabs = (
@@ -87,15 +103,27 @@ export const FindPasswordForm = () => {
           </div>
         </div>
         <div className="w-full pb-8">
+          {resetError && (
+            <p
+              className={`${font.caption.regular} mb-3 pl-2`}
+              style={{ color: lightTheme.status.error }}
+            >
+              {resetError}
+            </p>
+          )}
           <button
+            type="button"
             className={`w-full py-4 rounded-2xl ${font.headline2.semiBold}`}
             style={{
-              backgroundColor: canReset ? lightTheme.primary.normal : lightTheme.line.alternative,
-              color: canReset ? lightTheme.fill.normal : lightTheme.line.normal,
+              backgroundColor: canResetPassword
+                ? lightTheme.primary.normal
+                : lightTheme.line.alternative,
+              color: canResetPassword ? lightTheme.fill.normal : lightTheme.line.normal,
             }}
-            disabled={!canReset}
+            disabled={!canResetPassword}
+            onClick={handleResetPassword}
           >
-            비밀번호 찾기
+            {isResetting ? "변경 중" : "비밀번호 변경"}
           </button>
         </div>
       </div>

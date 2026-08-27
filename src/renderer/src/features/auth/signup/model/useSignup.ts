@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupApi } from "@/entities/auth";
+import { setAuthTokens, signupApi } from "@/entities/auth";
+import { queryClient } from "@/app/queryClient";
 import type { CustomerAccountForm } from "./types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
@@ -11,6 +12,13 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   carrier: "SKT",
   phone: "",
   verificationCode: "",
+  agreements: {
+    terms_of_service: false,
+    privacy_policy: false,
+    ai_training: false,
+    service_analytics: false,
+    marketing_notification: false,
+  },
 };
 
 export const useSignup = () => {
@@ -28,14 +36,20 @@ export const useSignup = () => {
     setError(null);
 
     try {
-      await signupApi({
-        loginId: customerForm.id,
+      const { tokens } = await signupApi({
+        email: customerForm.id.trim(),
         password: customerForm.password,
-        name: customerForm.name,
-        phoneNumber: customerForm.phone.replace(/\D/g, ""),
+        nickname: customerForm.name.trim(),
+        phone_number: customerForm.phone.replace(/\D/g, ""),
+        agreements: customerForm.agreements,
       });
 
-      navigate("/login");
+      await setAuthTokens({
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+      });
+      queryClient.clear();
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {
