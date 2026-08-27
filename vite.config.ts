@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config
 export default defineConfig({
   root: new URL("src/renderer/src", import.meta.url).pathname,
+  envDir: new URL(".", import.meta.url).pathname,
   publicDir: new URL("public", import.meta.url).pathname,
   plugins: [react(), tailwindcss(), svgr()],
   resolve: {

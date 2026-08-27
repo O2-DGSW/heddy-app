@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupApi } from "@/entities/auth/api/authApi";
+import { signupApi } from "@/entities/auth";
 import type { CustomerAccountForm } from "./types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
