@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { loginApi } from "@/entities/auth/api/authApi";
-import { setAuthTokens } from "@/entities/auth/model/token";
+import { loginApi, setAuthTokens } from "@/entities/auth";
 import { queryClient } from "@/app/queryClient";
 
 export const useLoginForm = () => {
@@ -13,10 +12,21 @@ export const useLoginForm = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    const trimmedId = id.trim();
+
+    if (!trimmedId || !password) {
+      setError("아이디와 비밀번호를 입력해주세요.");
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
     try {
-      const { accessToken, refreshToken } = await loginApi({ loginId: id, password });
+      const { accessToken, refreshToken } = await loginApi({ loginId: trimmedId, password });
       await setAuthTokens({ accessToken, refreshToken });
       queryClient.clear();
       navigate("/");

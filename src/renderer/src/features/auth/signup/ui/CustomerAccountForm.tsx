@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { Link } from "react-router-dom";
 import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/types";
@@ -23,14 +24,16 @@ export const CustomerAccountForm = ({
   const { isValid, canRequestVerification, showPasswordError, showPhoneError, showNameError } =
     useAccountForm(form, sms.isVerified);
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     if (!isValid || isLoading) return;
 
     onSubmit();
   };
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
       <AccountFormFields
         form={form}
         showPasswordError={showPasswordError}
@@ -46,13 +49,13 @@ export const CustomerAccountForm = ({
       />
 
       <button
+        type="submit"
         className={`mt-4 w-full rounded-2xl py-4 ${font.headline2.semiBold}`}
         style={{
           backgroundColor: isValid ? lightTheme.primary.normal : lightTheme.line.alternative,
           color: isValid ? lightTheme.fill.normal : lightTheme.line.normal,
         }}
         disabled={!isValid || isLoading}
-        onClick={handleSubmit}
       >
         {isLoading ? "가입 중..." : "회원가입"}
       </button>
@@ -67,6 +70,6 @@ export const CustomerAccountForm = ({
           로그인
         </Link>
       </div>
-    </div>
+    </form>
   );
 };

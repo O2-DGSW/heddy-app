@@ -5,12 +5,18 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
 };
 
 export type SignupRequest = {
   loginId: string;
   password: string;
+  name: string;
+  phoneNumber: string;
+};
+
+export type SocialSignupRequest = {
+  pendingToken: string;
   name: string;
   phoneNumber: string;
 };

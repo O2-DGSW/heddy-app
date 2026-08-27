@@ -71,6 +71,7 @@ export const PhoneVerificationField = ({
           onChange={e => onPhoneChange(formatPhone(e.target.value))}
         />
         <button
+          type="button"
           className={`w-[5.5rem] shrink-0 py-4 rounded-xl ${font.label.medium}`}
           style={{
             backgroundColor: canSend ? lightTheme.primary.normal : lightTheme.line.alternative,
@@ -97,6 +98,7 @@ export const PhoneVerificationField = ({
             onChange={e => onVerificationCodeChange(e.target.value)}
           />
           <button
+            type="button"
             className={`w-[5.5rem] shrink-0 py-4 rounded-xl ${font.label.medium}`}
             style={{
               backgroundColor:
