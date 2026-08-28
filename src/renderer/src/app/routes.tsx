@@ -16,6 +16,7 @@ import { ArHairstylePage } from "@/pages/ar";
 import { RecommendPage } from "@/pages/recommend";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 import { ProfilePage } from "@/pages/profile";
+import { HomePage } from "@/pages/home";
 
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
 
@@ -58,7 +59,7 @@ export const AppRoutes = () => {
     <Routes>
       <Route element={<MobileLayout />}>
         <Route path="/" element={<EntryRedirect />} />
-        <Route path="/home" element={<div />} />
+        <Route path="/home" element={<HomePage />} />
         <Route element={<CutsTransitionOutlet />}>
           <Route path="/cuts" element={<CutsListPage />} />
           <Route path="/cuts/add" element={<RecordAddPage />} />
