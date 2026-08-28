@@ -1,4 +1,3 @@
-import alarmIcon from "@/pages/home/assets/alarm.svg";
 import profileHeadIcon from "@/pages/home/assets/profile-head.svg";
 import type { HomeHeaderProps } from "@/pages/home/model/types.ts";
 
@@ -10,9 +9,6 @@ const HomeHeader = ({ onProfileClick }: HomeHeaderProps) => {
       <HeddyLogo />
 
       <div className="flex items-center gap-3">
-        <span aria-label="알림" role="img" className="flex size-[28px] items-center justify-center">
-          <img src={alarmIcon} alt="" className="size-[28px]" />
-        </span>
         <button
           type="button"
           aria-label="프로필로 이동"
