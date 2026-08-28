@@ -1,6 +1,6 @@
-import recentHairImage from "../../../pages/home/assets/recent-hair.png";
+import recentHairImage from "@/pages/home/assets/recent-hair.png";
 
-import type { CroppedHairImageProps } from "../../../pages/home/model/types.ts";
+import type { CroppedHairImageProps } from "@/pages/home/model/types.ts";
 
 const CroppedHairImage = ({ alt }: CroppedHairImageProps) => {
   return (

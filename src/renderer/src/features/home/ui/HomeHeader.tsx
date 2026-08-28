@@ -1,6 +1,6 @@
-import alarmIcon from "../../../pages/home/assets/alarm.svg";
-import profileHeadIcon from "../../../pages/home/assets/profile-head.svg";
-import type { HomeHeaderProps } from "../../../pages/home/model/types.ts";
+import alarmIcon from "@/pages/home/assets/alarm.svg";
+import profileHeadIcon from "@/pages/home/assets/profile-head.svg";
+import type { HomeHeaderProps } from "@/pages/home/model/types.ts";
 
 import HeddyLogo from "./HeddyLogo.tsx";
 

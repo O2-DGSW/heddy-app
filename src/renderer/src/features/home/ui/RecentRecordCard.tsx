@@ -1,7 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { RECENT_RECORD } from "../../../pages/home/model/constants.ts";
-import type { RecentRecordCardProps } from "../../../pages/home/model/types.ts";
+import { RECENT_RECORD } from "@/pages/home/model/constants.ts";
+import type { RecentRecordCardProps } from "@/pages/home/model/types.ts";
 
 import CroppedHairImage from "./CroppedHairImage.tsx";
 import RatingStars from "./RatingStars.tsx";

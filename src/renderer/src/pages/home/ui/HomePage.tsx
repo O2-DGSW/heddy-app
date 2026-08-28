@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import { SHORTCUT_CARDS } from "../model/constants";
 
-import HomeHeader from "../../../features/home/ui/HomeHeader.tsx";
-import RecentRecordCard from "../../../features/home/ui/RecentRecordCard.tsx";
-import RecommendationSection from "../../../features/home/ui/RecommendationSection.tsx";
-import ShortcutCard from "../../../features/home/ui/ShortcutCard.tsx";
+import HomeHeader from "@/features/home/ui/HomeHeader.tsx";
+import RecentRecordCard from "@/features/home/ui/RecentRecordCard.tsx";
+import RecommendationSection from "@/features/home/ui/RecommendationSection.tsx";
+import ShortcutCard from "@/features/home/ui/ShortcutCard.tsx";
 
 const HomePage = () => {
   const navigate = useNavigate();
