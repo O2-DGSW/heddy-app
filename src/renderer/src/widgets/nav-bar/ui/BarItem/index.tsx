@@ -1,11 +1,13 @@
 import { font } from "@heddy/design-tokens";
 
+import { cn } from "@/shared";
 import type { IconType } from "../../model/types";
 
 interface BarItemProps {
   Icon: IconType;
   isActive: boolean;
   title: string;
+  iconClassName?: string;
   iconColor: string;
   backgroundColor: string;
   textColor: string;
@@ -16,6 +18,7 @@ const BarItem = ({
   Icon,
   isActive,
   title,
+  iconClassName,
   iconColor,
   backgroundColor,
   textColor,
@@ -34,7 +37,11 @@ const BarItem = ({
           className="flex h-[34px] w-[35px] items-center justify-center rounded-[8px]"
           style={{ backgroundColor }}
         >
-          <Icon aria-hidden="true" className="h-[35px] w-[35px]" style={{ color: iconColor }} />
+          <Icon
+            aria-hidden="true"
+            className={cn("h-[35px] w-[35px]", iconClassName)}
+            style={{ color: iconColor }}
+          />
         </span>
 
         <span className={font.label.medium} style={{ color: textColor }}>
