@@ -1,0 +1,83 @@
+import arMascotImage from "../assets/ar-mascot.png";
+import logoPart1 from "../assets/logo-d1.svg";
+import logoPart2 from "../assets/logo-y.svg";
+import logoPart3 from "../assets/logo-h.svg";
+import logoPart4 from "../assets/logo-e.svg";
+import logoPart5 from "../assets/logo-d2.svg";
+import shareScissorsImage from "../assets/share-scissors.png";
+
+import type {
+  LogoPartType,
+  RecommendationCardType,
+  RecentRecordType,
+  ShortcutCardType,
+} from "./types";
+
+export const RECENT_RECORD: RecentRecordType = {
+  date: "2026-07-18",
+  procedureName: "다운펌",
+  salonName: "준오헤어 강남점",
+  designerName: "오용준",
+  rating: 5,
+};
+
+export const SHORTCUT_CARDS: ShortcutCardType[] = [
+  {
+    id: "ar-style",
+    eyebrow: "나에게 어울리는 스타일로",
+    title: "AR 스타일",
+    imageSrc: arMascotImage,
+    imageAlt: "AR 스타일 캐릭터",
+    imageClassName: "right-[13px] top-[38px] h-[52px] w-[52px]",
+    to: "/ar",
+  },
+  {
+    id: "share-record",
+    eyebrow: "최근 기록을",
+    title: "시술기록 공유",
+    imageSrc: shareScissorsImage,
+    imageAlt: "시술기록 공유 가위",
+    imageClassName: "right-[11px] top-[20px] h-[70px] w-[67px] rotate-[-7deg]",
+    to: "/cuts/record-1/share",
+  },
+];
+
+export const RECOMMENDATION_CARDS: RecommendationCardType[] = [
+  {
+    id: "recommend-1",
+    rank: 1,
+    title: "남자 다운펌",
+    colorName: "내추럴 블랙",
+    tags: ["남자", "다운펌"],
+  },
+  {
+    id: "recommend-2",
+    rank: 1,
+    title: "남자 다운펌",
+    colorName: "내추럴 블랙",
+    tags: ["남자", "다운펌"],
+  },
+];
+
+export const HEDDY_LOGO_PARTS: LogoPartType[] = [
+  {
+    src: logoPart1,
+    className: "left-0 top-[0.13px] h-[21.68px] w-[15.43px]",
+  },
+  {
+    src: logoPart2,
+    className: "left-[16.35px] top-[5.79px] h-[15.94px] w-[16.31px]",
+  },
+  {
+    src: logoPart3,
+    className: "left-[33.48px] top-0 h-[21.74px] w-[15.97px]",
+  },
+  {
+    src: logoPart4,
+    className: "left-[50.47px] top-0 h-[21.74px] w-[15.97px]",
+  },
+  {
+    src: logoPart5,
+    className: "left-[67.72px] top-[6.53px] h-[21.47px] w-[15.4px]",
+  },
+];
