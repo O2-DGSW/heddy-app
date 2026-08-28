@@ -1,6 +1,6 @@
-import starIcon from "../assets/star.svg";
+import starIcon from "../../../pages/home/assets/star.svg";
 
-import type { RatingStarsProps } from "../model/types";
+import type { RatingStarsProps } from "../../../pages/home/model/types.ts";
 
 const RatingStars = ({ rating }: RatingStarsProps) => {
   return (
