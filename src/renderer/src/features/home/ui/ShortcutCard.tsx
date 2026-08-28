@@ -1,6 +1,6 @@
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
-import type { ShortcutCardProps } from "../../../pages/home/model/types.ts";
+import type { ShortcutCardProps } from "@/pages/home/model/types.ts";
 
 const ShortcutCard = ({ card, onClick }: ShortcutCardProps) => {
   return (

@@ -1,8 +1,8 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import bookmarkIcon from "../../../pages/home/assets/bookmark.svg";
-import colorDotIcon from "../../../pages/home/assets/color-dot.svg";
-import type { RecommendationCardProps } from "../../../pages/home/model/types.ts";
+import bookmarkIcon from "@/pages/home/assets/bookmark.svg";
+import colorDotIcon from "@/pages/home/assets/color-dot.svg";
+import type { RecommendationCardProps } from "@/pages/home/model/types.ts";
 
 import CroppedHairImage from "./CroppedHairImage.tsx";
 

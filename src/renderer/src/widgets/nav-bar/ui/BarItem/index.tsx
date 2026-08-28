@@ -1,7 +1,7 @@
 import { font } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
-import type { IconType } from "../../model/types";
+import type { IconType } from "@/widgets/nav-bar/model/types";
 
 interface BarItemProps {
   Icon: IconType;
