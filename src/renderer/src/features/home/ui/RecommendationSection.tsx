@@ -1,10 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import arrowIcon from "../assets/arrow.svg";
-import { RECOMMENDATION_CARDS } from "../model/constants";
-import type { RecommendationSectionProps } from "../model/types";
+import arrowIcon from "../../../pages/home/assets/arrow.svg";
+import { RECOMMENDATION_CARDS } from "../../../pages/home/model/constants.ts";
+import type { RecommendationSectionProps } from "../../../pages/home/model/types.ts";
 
-import RecommendationCard from "./RecommendationCard";
+import RecommendationCard from "./RecommendationCard.tsx";
 
 const RecommendationSection = ({
   onMoreClick,

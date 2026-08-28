@@ -1,10 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { RECENT_RECORD } from "../model/constants";
-import type { RecentRecordCardProps } from "../model/types";
+import { RECENT_RECORD } from "../../../pages/home/model/constants.ts";
+import type { RecentRecordCardProps } from "../../../pages/home/model/types.ts";
 
-import CroppedHairImage from "./CroppedHairImage";
-import RatingStars from "./RatingStars";
+import CroppedHairImage from "./CroppedHairImage.tsx";
+import RatingStars from "./RatingStars.tsx";
 
 const RecentRecordCard = ({ onClick }: RecentRecordCardProps) => {
   return (

@@ -1,4 +1,4 @@
-import { HEDDY_LOGO_PARTS } from "../model/constants";
+import { HEDDY_LOGO_PARTS } from "../../../pages/home/model/constants.ts";
 
 const HeddyLogo = () => {
   return (
