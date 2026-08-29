@@ -1,0 +1,1 @@
+export { getTreatmentRecordsApi } from "./treatmentRecordApi";
