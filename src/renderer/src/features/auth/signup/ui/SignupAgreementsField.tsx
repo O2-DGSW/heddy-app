@@ -4,6 +4,40 @@ import { SIGNUP_AGREEMENT_ITEMS } from "@/features/auth/signup/constants/signup"
 import type { SignupAgreementKey } from "@/features/auth/signup/model/types";
 import type { SignupAgreementsFieldProps as Props } from "@/features/auth/signup/ui/types";
 
+interface AgreementCheckboxProps {
+  id: string;
+  checked: boolean;
+  className?: string;
+  onChange: (checked: boolean) => void;
+}
+
+const AgreementCheckbox = ({ id, checked, className = "", onChange }: AgreementCheckboxProps) => {
+  return (
+    <span className={`relative inline-flex size-5 shrink-0 ${className}`}>
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        className="peer sr-only"
+        onChange={event => onChange(event.target.checked)}
+      />
+      <span
+        aria-hidden="true"
+        className="flex size-5 items-center justify-center rounded-md border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+        style={{
+          backgroundColor: checked ? lightTheme.primary.normal : lightTheme.background.normal,
+          borderColor: checked ? lightTheme.primary.normal : lightTheme.line.normal,
+          outlineColor: lightTheme.primary.normal,
+        }}
+      >
+        {checked && (
+          <span className="mb-0.5 h-2.5 w-1.5 rotate-45 border-b-2 border-r-2 border-white" />
+        )}
+      </span>
+    </span>
+  );
+};
+
 export const SignupAgreementsField = ({ agreements, showError = false, onChange }: Props) => {
   const allAgreementsAccepted = SIGNUP_AGREEMENT_ITEMS.every(item => agreements[item.key]);
 
@@ -37,13 +71,10 @@ export const SignupAgreementsField = ({ agreements, showError = false, onChange 
         className="flex items-center gap-3 rounded-xl px-4 py-3"
         style={{ backgroundColor: lightTheme.background.neutral }}
       >
-        <input
+        <AgreementCheckbox
           id="signup-agreement-all"
-          type="checkbox"
           checked={allAgreementsAccepted}
-          className="size-5 shrink-0"
-          style={{ accentColor: lightTheme.primary.normal }}
-          onChange={event => handleToggleAll(event.target.checked)}
+          onChange={handleToggleAll}
         />
         <span className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
           전체 동의
@@ -54,13 +85,11 @@ export const SignupAgreementsField = ({ agreements, showError = false, onChange 
         {SIGNUP_AGREEMENT_ITEMS.map(item => (
           <li key={item.key}>
             <label htmlFor={`signup-agreement-${item.key}`} className="flex items-start gap-3">
-              <input
+              <AgreementCheckbox
                 id={`signup-agreement-${item.key}`}
-                type="checkbox"
                 checked={agreements[item.key]}
-                className="mt-0.5 size-5 shrink-0"
-                style={{ accentColor: lightTheme.primary.normal }}
-                onChange={event => handleToggleAgreement(item.key, event.target.checked)}
+                className="mt-0.5"
+                onChange={checked => handleToggleAgreement(item.key, checked)}
               />
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className={font.label.medium} style={{ color: lightTheme.label.neutral }}>
