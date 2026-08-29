@@ -29,7 +29,7 @@ export const useLoginForm = () => {
       const { accessToken, refreshToken } = await loginApi({ email: trimmedEmail, password });
       await setAuthTokens({ accessToken, refreshToken });
       queryClient.clear();
-      navigate("/");
+      navigate("/home", { replace: true });
     } catch (err) {
       console.error("로그인 실패:", err);
       if (err instanceof Error) {

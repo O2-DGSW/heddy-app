@@ -5,12 +5,14 @@ import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/
 import { useAccountForm } from "@/features/auth/signup/model/useAccountForm";
 import { useSmsVerification } from "@/features/auth/signup/model/useSmsVerification";
 import { AccountFormFields } from "@/features/auth/signup/ui/AccountFormFields";
+import { SignupAgreementsField } from "@/features/auth/signup/ui/SignupAgreementsField";
 
 interface CustomerAccountFormProps {
   form: CustomerAccountFormType;
   onChange: (form: CustomerAccountFormType) => void;
   onSubmit: () => void;
   isLoading: boolean;
+  error?: string | null;
 }
 
 export const CustomerAccountForm = ({
@@ -18,14 +20,23 @@ export const CustomerAccountForm = ({
   onChange,
   onSubmit,
   isLoading,
+  error,
 }: CustomerAccountFormProps) => {
   const sms = useSmsVerification("SIGNUP", form.phone);
 
-  const { isValid, canRequestVerification, showPasswordError, showPhoneError, showNameError } =
-    useAccountForm(form, sms.isVerified);
+  const {
+    isValid,
+    canRequestVerification,
+    showPasswordError,
+    showPhoneError,
+    showNameError,
+    showAgreementError,
+    setSubmitted,
+  } = useAccountForm(form, sms.isVerified);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitted(true);
 
     if (!isValid || isLoading) return;
 
@@ -47,6 +58,18 @@ export const CustomerAccountForm = ({
         }}
         onChange={onChange}
       />
+
+      <SignupAgreementsField
+        agreements={form.agreements}
+        showError={showAgreementError}
+        onChange={agreements => onChange({ ...form, agreements })}
+      />
+
+      {error && (
+        <p className={font.caption.regular} style={{ color: lightTheme.status.error }}>
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"

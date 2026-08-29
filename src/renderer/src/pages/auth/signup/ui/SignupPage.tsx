@@ -2,27 +2,30 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useSignup, CustomerAccountForm } from "@/features/auth/signup";
 
 export const SignupPage = () => {
-  const { customerForm, setCustomerForm, submitSignup, isLoading } = useSignup();
+  const { customerForm, setCustomerForm, submitSignup, isLoading, error } = useSignup();
 
   return (
     <div
-      className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 pt-4"
+      className="flex min-h-full flex-col items-center px-6 pb-8 pt-[64px]"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
-      <div className="flex flex-col items-center">
-        <img src="/heddyIcon.svg" alt="heddy" className="w-50" />
+      <div className="flex w-full max-w-[330px] flex-col items-center">
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <img src="/heddyIcon.svg" alt="heddy" className="h-[69px] w-[204px] shrink-0" />
 
-        <p className={font.body.medium} style={{ color: lightTheme.label.assistive }}>
-          회원가입
-        </p>
+          <p className={font.body.medium} style={{ color: lightTheme.label.assistive }}>
+            회원가입
+          </p>
+        </div>
+
+        <CustomerAccountForm
+          form={customerForm}
+          onChange={setCustomerForm}
+          onSubmit={submitSignup}
+          isLoading={isLoading}
+          error={error}
+        />
       </div>
-
-      <CustomerAccountForm
-        form={customerForm}
-        onChange={setCustomerForm}
-        onSubmit={submitSignup}
-        isLoading={isLoading}
-      />
     </div>
   );
 };

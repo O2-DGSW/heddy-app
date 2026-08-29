@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setAuthTokens, signupApi } from "@/entities/auth";
-import { queryClient } from "@/app/queryClient";
+import { signupApi } from "@/entities/auth";
+import { isRequiredSignupAgreementsAccepted } from "./validation";
 import type { CustomerAccountForm } from "./types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
@@ -32,11 +32,20 @@ export const useSignup = () => {
   const [error, setError] = useState<string | null>(null);
 
   const submitSignup = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isRequiredSignupAgreementsAccepted(customerForm.agreements)) {
+      setError("필수 약관에 동의해주세요.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const { tokens } = await signupApi({
+      await signupApi({
         email: customerForm.id.trim(),
         password: customerForm.password,
         nickname: customerForm.name.trim(),
@@ -44,12 +53,7 @@ export const useSignup = () => {
         agreements: customerForm.agreements,
       });
 
-      await setAuthTokens({
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-      });
-      queryClient.clear();
-      navigate("/");
+      navigate("/login", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {
