@@ -21,9 +21,15 @@ import { HomePage } from "@/pages/home";
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
 
 const EntryRedirect = () => {
-  const [entryStatus, setEntryStatus] = useState<EntryStatusType>("checking");
+  const [entryStatus, setEntryStatus] = useState<EntryStatusType>(
+    import.meta.env.DEV ? "unauthenticated" : "checking"
+  );
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      return;
+    }
+
     let isMounted = true;
 
     void getRefreshToken()
