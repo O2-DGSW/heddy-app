@@ -2,6 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
+import { BottomBarVisibilityProvider, useBottomBarVisibility } from "@/shared";
 import {
   PAGE_SCROLL_PATHS,
   BOTTOM_BAR_HIDDEN_PREFIXES,
@@ -43,8 +44,9 @@ const useBrowserDevicePreview = () => {
   return { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale };
 };
 
-const MobileLayout = () => {
+const MobileLayoutContent = () => {
   const location = useLocation();
+  const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale } =
     useBrowserDevicePreview();
 
@@ -62,7 +64,8 @@ const MobileLayout = () => {
 
   const hideBottomBar =
     BOTTOM_BAR_HIDDEN_PATHS.includes(location.pathname) ||
-    BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
+    BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix)) ||
+    isBottomBarHidden;
 
   return (
     <div
@@ -184,6 +187,14 @@ const MobileLayout = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const MobileLayout = () => {
+  return (
+    <BottomBarVisibilityProvider>
+      <MobileLayoutContent />
+    </BottomBarVisibilityProvider>
   );
 };
 

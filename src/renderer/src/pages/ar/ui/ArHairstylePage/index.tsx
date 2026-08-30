@@ -1,25 +1,29 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-import cameraIcon from "../../assets/camera.svg";
+import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
-import eyeIcon from "../../assets/eye.svg";
-import faceGuideImage from "../../assets/face-guide.png";
 import modalCloseImage from "../../assets/modal-close.png";
+import noStyleIcon from "../../assets/no-style.svg";
 import refreshIcon from "../../assets/refresh.svg";
-import { cn } from "@/shared";
+import resizeIcon from "../../assets/resize.svg";
+import { cn, useBottomBarVisibility } from "@/shared";
 
-const HAIRSTYLE_OPTIONS = Array.from({ length: 5 }, (_, index) => ({
-  id: `down-perm-${index + 1}`,
-  label: "다운펌",
-}));
+const HAIRSTYLE_OPTIONS = [
+  { id: "down-perm-1", size: 50 },
+  { id: "none", size: 62 },
+  { id: "down-perm-2", size: 80 },
+  { id: "down-perm-3", size: 62 },
+  { id: "down-perm-4", size: 50 },
+] as const;
 
-const COLOR_OPTIONS = Array.from({ length: 5 }, (_, index) => ({
-  id: `natural-black-${index + 1}`,
-  label: "내추럴 블랙",
-}));
-
-const SELECTED_BACKGROUND_COLOR = "#F4FBF8";
+const HAIR_COLOR_OPTIONS = [
+  { id: "natural-black", color: lightTheme.label.strong },
+  { id: "dark-brown", color: "#100604" },
+  { id: "brown", color: "#3B150E" },
+  { id: "auburn", color: "#4A251F" },
+  { id: "ash-brown", color: "#342D2D" },
+] as const;
 
 type ArModal = "candidate-save" | "capture";
 
@@ -35,19 +39,12 @@ const CANDIDATE_MEMO_STYLE = {
 
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
-  const [selectedHairstyleId, setSelectedHairstyleId] = useState(HAIRSTYLE_OPTIONS[0].id);
-  const [selectedColorId, setSelectedColorId] = useState(COLOR_OPTIONS[1].id);
-  const [isFaceGuideVisible, setIsFaceGuideVisible] = useState(true);
+  const { setIsBottomBarHidden } = useBottomBarVisibility();
+  const [selectedHairstyleId, setSelectedHairstyleId] = useState<string>("down-perm-2");
+  const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModal | null>(null);
   const [candidateMemo, setCandidateMemo] = useState("");
-
-  const handleFaceGuideToggle = () => {
-    setIsFaceGuideVisible(isVisible => !isVisible);
-  };
-
-  const handleFaceGuideReset = () => {
-    setIsFaceGuideVisible(true);
-  };
 
   const handleModalOpen = (modal: ArModal) => {
     setActiveModal(modal);
@@ -55,6 +52,15 @@ const ArHairstylePage = () => {
 
   const handleModalClose = () => {
     setActiveModal(null);
+  };
+
+  const handleStyleReset = () => {
+    setSelectedHairstyleId("down-perm-2");
+    setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
+  };
+
+  const handleExpandedToggle = () => {
+    setIsExpanded(isCurrentExpanded => !isCurrentExpanded);
   };
 
   useEffect(() => {
@@ -82,7 +88,7 @@ const ArHairstylePage = () => {
           void cameraPreviewRef.current.play().catch(() => undefined);
         }
       } catch {
-        // 카메라 권한을 거부했거나 사용할 수 없는 경우 기존 AR 안내 화면을 유지한다.
+        // 카메라 권한을 거부했거나 사용할 수 없는 경우 검은 AR 미리보기 화면을 유지한다.
       }
     };
 
@@ -94,221 +100,195 @@ const ArHairstylePage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setIsBottomBarHidden(isExpanded);
+
+    return () => {
+      setIsBottomBarHidden(false);
+    };
+  }, [isExpanded, setIsBottomBarHidden]);
+
   return (
     <section
       aria-labelledby="ar-hairstyle-title"
-      className="ar-motion-page-enter flex min-h-full flex-col overflow-x-clip"
+      className="ar-motion-page-enter flex min-h-full flex-col overflow-hidden"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
-      <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
-        <h1
-          className={font.headline1.bold}
-          id="ar-hairstyle-title"
-          style={{ color: lightTheme.label.neutral }}
-        >
-          AR 헤어스타일
-        </h1>
-      </header>
-
-      <main
-        className="flex flex-1 flex-col gap-[28px] px-[19px] pb-[22px] pt-[29px]"
-        style={{ backgroundColor: lightTheme.fill.normal }}
-      >
-        <section aria-label="AR 미리보기" className="flex flex-col items-center gap-[28px]">
-          <div
-            className="relative h-[367px] w-full max-w-[340px] overflow-hidden rounded-[10px]"
-            style={{ backgroundColor: lightTheme.label.normal }}
-          >
-            <video
-              aria-hidden="true"
-              autoPlay
-              className="absolute inset-0 h-full w-full object-cover [transform:scaleX(-1)]"
-              muted
-              playsInline
-              ref={cameraPreviewRef}
-            />
-            <div className="absolute inset-x-[16px] top-[14px] flex items-center justify-between">
-              <span
-                className={cn("rounded-[5px] px-[8px] py-[4px]", font.label.medium)}
-                style={{
-                  backgroundColor: lightTheme.primary.normal,
-                  color: lightTheme.label.buttonText,
-                }}
-              >
-                얼굴 인식 중
-              </span>
-              <span className={font.label.medium} style={{ color: lightTheme.background.normal }}>
-                후보 목록
-              </span>
-            </div>
-
-            {isFaceGuideVisible && (
-              <img
-                alt="얼굴 가이드"
-                className="pointer-events-none absolute left-1/2 top-1/2 h-[160px] w-[128px] -translate-x-1/2 -translate-y-1/2 mix-blend-screen"
-                src={faceGuideImage}
-              />
-            )}
-
-            <div className="absolute inset-x-0 top-[304px] flex items-center justify-center gap-[14px]">
-              <button
-                aria-label={isFaceGuideVisible ? "얼굴 가이드 숨기기" : "얼굴 가이드 표시"}
-                className="ar-motion-press flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
-                onClick={handleFaceGuideToggle}
-                style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
-                type="button"
-              >
-                <img alt="" className="h-[10px] w-[14.6667px]" src={eyeIcon} />
-              </button>
-              <button
-                aria-label="카메라 제어"
-                className="ar-motion-press flex h-[44px] w-[44px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
-                style={{ backgroundColor: lightTheme.background.normal }}
-                type="button"
-              >
-                <img alt="" className="h-[18px] w-[20px]" src={cameraIcon} />
-              </button>
-              <button
-                aria-label="얼굴 가이드 다시 표시"
-                className="ar-motion-press flex h-[27px] w-[27px] items-center justify-center rounded-full shadow-[0_0_6px_rgba(0,0,0,0.07)]"
-                onClick={handleFaceGuideReset}
-                style={{ backgroundColor: "rgba(255, 255, 255, 0.16)" }}
-                type="button"
-              >
-                <img alt="" className="h-[11.6667px] w-[11.6667px]" src={refreshIcon} />
-              </button>
-            </div>
-          </div>
-
-          <section
-            aria-labelledby="hairstyle-options-title"
-            className="flex w-full flex-col gap-[10px]"
-          >
-            <h2
-              className={cn("px-[10px]", font.headline2.semiBold)}
-              id="hairstyle-options-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              헤어스타일
-            </h2>
-            <div className="no-scrollbar -mx-[19px] flex gap-[8px] overflow-x-auto px-[19px] pb-[2px]">
-              {HAIRSTYLE_OPTIONS.map(option => {
-                const isSelected = option.id === selectedHairstyleId;
-
-                return (
-                  <button
-                    aria-pressed={isSelected}
-                    className="ar-motion-press flex h-[99px] w-[80px] shrink-0 flex-col items-center justify-center gap-[4px] rounded-[10px] border p-[4px]"
-                    key={option.id}
-                    onClick={() => setSelectedHairstyleId(option.id)}
-                    style={{
-                      backgroundColor: isSelected
-                        ? SELECTED_BACKGROUND_COLOR
-                        : lightTheme.background.normal,
-                      borderColor: isSelected
-                        ? lightTheme.primary.normal
-                        : lightTheme.label.disable,
-                    }}
-                    type="button"
-                  >
-                    <img
-                      alt={`${option.label} 헤어스타일`}
-                      className="h-[70px] w-[70px] rounded-[10px] object-cover"
-                      src={downPermImage}
-                    />
-                    <span
-                      className={font.caption.medium}
-                      style={{
-                        color: isSelected
-                          ? lightTheme.primary.normal
-                          : lightTheme.label.alternative,
-                      }}
-                    >
-                      {option.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        </section>
-
-        <section aria-labelledby="hair-color-options-title" className="flex flex-col gap-[10px]">
-          <h2
-            className={cn("px-[10px]", font.headline2.semiBold)}
-            id="hair-color-options-title"
+      {!isExpanded && (
+        <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
+          <h1
+            className={font.headline1.bold}
+            id="ar-hairstyle-title"
             style={{ color: lightTheme.label.neutral }}
           >
-            헤어스타일
-          </h2>
-          <div className="flex flex-wrap gap-[8px]">
-            {COLOR_OPTIONS.map(option => {
-              const isSelected = option.id === selectedColorId;
+            AR 헤어스타일
+          </h1>
+        </header>
+      )}
 
-              return (
-                <button
-                  aria-pressed={isSelected}
-                  className="ar-motion-press flex items-center gap-[6px] rounded-[15px] border px-[8px] py-[4px]"
-                  key={option.id}
-                  onClick={() => setSelectedColorId(option.id)}
-                  style={{
-                    backgroundColor: isSelected
-                      ? SELECTED_BACKGROUND_COLOR
-                      : lightTheme.background.normal,
-                    borderColor: isSelected ? lightTheme.primary.normal : lightTheme.fill.neutral,
-                  }}
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="h-[12px] w-[12px] rounded-full"
-                    style={{ backgroundColor: lightTheme.label.strong }}
-                  />
-                  <span
-                    className={font.label.medium}
-                    style={{
-                      color: isSelected ? lightTheme.primary.normal : lightTheme.label.alternative,
-                    }}
-                  >
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      <main
+        aria-label="AR 미리보기"
+        className={cn(
+          "relative min-h-[656px] flex-1 overflow-hidden",
+          isExpanded && "fixed inset-x-0 z-[25] min-h-0"
+        )}
+        style={{
+          backgroundColor: lightTheme.label.normal,
+          ...(isExpanded && {
+            bottom: "0px",
+            top: "0px",
+          }),
+        }}
+      >
+        {isExpanded && (
+          <h1 className="sr-only" id="ar-hairstyle-title">
+            AR 헤어스타일
+          </h1>
+        )}
+        <video
+          aria-hidden="true"
+          autoPlay
+          className="absolute inset-0 h-full w-full bg-black object-cover [transform:scaleX(-1)]"
+          muted
+          playsInline
+          ref={cameraPreviewRef}
+        />
 
-        <div className="mt-auto grid grid-cols-2 gap-[7px] pt-[14px]">
+        <span
+          className={cn(
+            "absolute right-[16px] top-[15px] rounded-[5px] px-[8px] py-[4px]",
+            font.label.medium
+          )}
+          style={{
+            backgroundColor: lightTheme.primary.normal,
+            color: lightTheme.label.buttonText,
+          }}
+        >
+          얼굴 인식 중
+        </span>
+
+        <div
+          aria-label="헤어 컬러 선택"
+          className="absolute left-[31px] top-[172px] flex flex-col gap-[11px]"
+        >
+          {HAIR_COLOR_OPTIONS.map(option => {
+            const isSelected = option.id === selectedColorId;
+
+            return (
+              <button
+                aria-label={`${option.id} 컬러 선택`}
+                aria-pressed={isSelected}
+                className="ar-motion-press h-[36px] w-[36px] rounded-full"
+                key={option.id}
+                onClick={() => setSelectedColorId(option.id)}
+                style={{
+                  backgroundColor: option.color,
+                  borderColor: isSelected ? "#F4FBF8" : "rgba(128, 128, 128, 0.3)",
+                  borderWidth: isSelected ? "2px" : "0.818841px",
+                }}
+                type="button"
+              />
+            );
+          })}
+        </div>
+
+        <div
+          className={cn(
+            "absolute left-1/2 flex w-[332px] -translate-x-1/2 items-center gap-[8px]",
+            isExpanded ? "bottom-[252px]" : "bottom-[142px]"
+          )}
+        >
           <button
-            className={cn(
-              "ar-motion-press h-[42px] rounded-[10px] border",
-              font.headline2.semiBold
-            )}
-            onClick={() => handleModalOpen("capture")}
-            style={{
-              backgroundColor: lightTheme.background.alternative,
-              borderColor: lightTheme.fill.neutral,
-              color: lightTheme.label.alternative,
-            }}
+            aria-label="후보 스타일 저장"
+            className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+            onClick={() => handleModalOpen("candidate-save")}
             type="button"
           >
-            캡쳐
+            <img alt="" className="h-[19px] w-[15px]" src={bookmarkIcon} />
+          </button>
+          <span
+            className={cn(
+              "flex h-[37px] flex-1 items-center justify-center whitespace-nowrap rounded-full bg-white/20 px-[43px] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)] backdrop-blur",
+              font.label.medium
+            )}
+            style={{ color: lightTheme.label.disable }}
+          >
+            다운펌 - 내추럴 블랙
+          </span>
+          <button
+            aria-label="스타일 선택 초기화"
+            className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+            onClick={handleStyleReset}
+            type="button"
+          >
+            <img alt="" className="h-[20px] w-[20px]" src={refreshIcon} />
           </button>
           <button
-            className={cn(
-              "ar-motion-press h-[42px] rounded-[10px] border-0",
-              font.headline2.semiBold
-            )}
-            onClick={() => handleModalOpen("candidate-save")}
-            style={{
-              backgroundColor: lightTheme.primary.normal,
-              color: lightTheme.label.buttonText,
-            }}
+            aria-label={isExpanded ? "AR 화면 축소" : "AR 화면 확대"}
+            className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+            onClick={handleExpandedToggle}
             type="button"
           >
-            후보 저장
+            <img alt="" className="h-[17px] w-[17px]" src={resizeIcon} />
           </button>
         </div>
+
+        <div
+          aria-label="헤어스타일 선택"
+          className={cn(
+            "absolute left-1/2 flex w-[404px] -translate-x-1/2 items-center gap-[25px]",
+            isExpanded ? "bottom-[123px]" : "bottom-[24px]"
+          )}
+        >
+          {HAIRSTYLE_OPTIONS.map(option => {
+            const isSelected = option.id === selectedHairstyleId;
+            const isNoStyle = option.id === "none";
+
+            return (
+              <button
+                aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
+                aria-pressed={isSelected}
+                className={cn(
+                  "ar-motion-press shrink-0 overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
+                  option.size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
+                  isSelected && option.size !== 80 && "ring-[2px] ring-[#F4FBF8]"
+                )}
+                key={option.id}
+                onClick={() => setSelectedHairstyleId(option.id)}
+                style={{ height: option.size, width: option.size }}
+                type="button"
+              >
+                {isNoStyle ? (
+                  <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
+                    <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
+                  </span>
+                ) : (
+                  <span
+                    className={cn(
+                      "block h-full w-full overflow-hidden rounded-full",
+                      option.size === 80 && "border-[2.5px] border-black"
+                    )}
+                  >
+                    <img
+                      alt="다운펌 헤어스타일"
+                      className="h-full w-full object-cover"
+                      src={downPermImage}
+                    />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {isExpanded && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 flex h-[34px] items-end justify-center bg-white pb-[8px]"
+          >
+            <span className="h-[5px] w-[144px] rounded-full bg-black" />
+          </div>
+        )}
       </main>
 
       {activeModal === "candidate-save" && (
