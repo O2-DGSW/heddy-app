@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type TransitionEvent } from "react";
 
 import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
@@ -22,10 +22,21 @@ const HAIRSTYLE_SIZES = [50, 62, 80, 62, 50] as const;
 
 const HAIRSTYLE_GAP = 25;
 const HAIRSTYLE_CENTER_POSITION = 202;
+const HAIRSTYLE_CYCLE_COUNT = 3;
 
 const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
 
 type HairstyleOption = (typeof HAIRSTYLE_OPTIONS)[number];
+
+const HAIRSTYLE_TRACK_OPTIONS = Array.from(
+  { length: HAIRSTYLE_OPTIONS.length * HAIRSTYLE_CYCLE_COUNT },
+  (_, trackIndex) => ({
+    option: HAIRSTYLE_OPTIONS[trackIndex % HAIRSTYLE_OPTIONS.length],
+    trackIndex,
+  })
+);
+const HAIRSTYLE_TRACK_START_INDEX =
+  HAIRSTYLE_OPTIONS.length + Math.floor(HAIRSTYLE_OPTIONS.length / 2);
 
 const HAIR_COLOR_OPTIONS = [
   { id: "natural-black", color: lightTheme.label.strong },
@@ -41,9 +52,9 @@ type PlaceholderStyle = CSSProperties & {
   "--placeholder-color": string;
 };
 
-const getHairstyleSizes = (selectedIndex: number) =>
-  HAIRSTYLE_OPTIONS.map((_, index) => {
-    const distance = Math.abs(index - selectedIndex);
+const getHairstyleSizes = (selectedTrackIndex: number) =>
+  HAIRSTYLE_TRACK_OPTIONS.map((_, index) => {
+    const distance = Math.abs(index - selectedTrackIndex);
 
     if (distance === 0) {
       return HAIRSTYLE_SIZES[2];
@@ -74,8 +85,10 @@ const CANDIDATE_MEMO_STYLE = {
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
-  const [selectedHairstyleId, setSelectedHairstyleId] =
-    useState<HairstyleOption["id"]>("down-perm-2");
+  const [activeHairstyleTrackIndex, setActiveHairstyleTrackIndex] = useState(
+    HAIRSTYLE_TRACK_START_INDEX
+  );
+  const [isTrackRecentering, setIsTrackRecentering] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModal | null>(null);
@@ -90,12 +103,50 @@ const ArHairstylePage = () => {
   };
 
   const handleStyleReset = () => {
-    setSelectedHairstyleId("down-perm-2");
+    handleHairstyleSelect("down-perm-2");
     setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
   };
 
   const handleHairstyleSelect = (selectedId: HairstyleOption["id"]) => {
-    setSelectedHairstyleId(selectedId);
+    const selectedIndex = HAIRSTYLE_OPTIONS.findIndex(option => option.id === selectedId);
+
+    setActiveHairstyleTrackIndex(currentTrackIndex => {
+      const currentIndex = currentTrackIndex % HAIRSTYLE_OPTIONS.length;
+      const forwardDistance =
+        (selectedIndex - currentIndex + HAIRSTYLE_OPTIONS.length) % HAIRSTYLE_OPTIONS.length;
+      const movement =
+        forwardDistance > HAIRSTYLE_OPTIONS.length / 2
+          ? forwardDistance - HAIRSTYLE_OPTIONS.length
+          : forwardDistance;
+
+      return currentTrackIndex + movement;
+    });
+  };
+
+  const handleTrackTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || event.propertyName !== "transform") {
+      return;
+    }
+
+    const shouldMoveForward = activeHairstyleTrackIndex <= HAIRSTYLE_OPTIONS.length / 2;
+    const shouldMoveBackward =
+      activeHairstyleTrackIndex >=
+      HAIRSTYLE_TRACK_OPTIONS.length - 1 - Math.floor(HAIRSTYLE_OPTIONS.length / 2);
+
+    if (!shouldMoveForward && !shouldMoveBackward) {
+      return;
+    }
+
+    setIsTrackRecentering(true);
+    setActiveHairstyleTrackIndex(currentTrackIndex =>
+      shouldMoveForward
+        ? currentTrackIndex + HAIRSTYLE_OPTIONS.length
+        : currentTrackIndex - HAIRSTYLE_OPTIONS.length
+    );
+
+    window.requestAnimationFrame(() => {
+      setIsTrackRecentering(false);
+    });
   };
 
   const handleExpandedToggle = () => {
@@ -147,11 +198,8 @@ const ArHairstylePage = () => {
     };
   }, [isExpanded, setIsBottomBarHidden]);
 
-  const selectedHairstyleIndex = HAIRSTYLE_OPTIONS.findIndex(
-    option => option.id === selectedHairstyleId
-  );
-  const hairstyleSizes = getHairstyleSizes(selectedHairstyleIndex);
-  const hairstyleTrackOffset = getHairstyleTrackOffset(hairstyleSizes, selectedHairstyleIndex);
+  const hairstyleSizes = getHairstyleSizes(activeHairstyleTrackIndex);
+  const hairstyleTrackOffset = getHairstyleTrackOffset(hairstyleSizes, activeHairstyleTrackIndex);
 
   return (
     <section
@@ -289,23 +337,28 @@ const ArHairstylePage = () => {
         <div
           aria-label="헤어스타일 선택"
           className={cn(
-            "absolute left-1/2 w-[404px] -translate-x-1/2",
+            "absolute left-1/2 w-[404px] -translate-x-1/2 overflow-hidden",
             isExpanded ? "top-[626px]" : "bottom-[24px]"
           )}
         >
           <div
-            className="flex items-center gap-[25px] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            className={cn(
+              "flex items-center gap-[25px] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              isTrackRecentering && "transition-none"
+            )}
+            onTransitionEnd={handleTrackTransitionEnd}
             style={{ transform: `translateX(${hairstyleTrackOffset}px)` }}
           >
-            {HAIRSTYLE_OPTIONS.map((option, index) => {
-              const isSelected = option.id === selectedHairstyleId;
+            {HAIRSTYLE_TRACK_OPTIONS.map(({ option, trackIndex }, index) => {
+              const isSelected = trackIndex === activeHairstyleTrackIndex;
               const isNoStyle = option.id === "none";
               const size = hairstyleSizes[index];
+              const isFocusable = Math.abs(trackIndex - activeHairstyleTrackIndex) <= 2;
 
               return (
                 <div
                   className="shrink-0 transition-[width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-                  key={option.id}
+                  key={trackIndex}
                   style={{ height: size, width: size }}
                 >
                   <button
@@ -317,6 +370,7 @@ const ArHairstylePage = () => {
                       isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
                     )}
                     onClick={() => handleHairstyleSelect(option.id)}
+                    tabIndex={isFocusable ? 0 : -1}
                     type="button"
                   >
                     {isNoStyle ? (
