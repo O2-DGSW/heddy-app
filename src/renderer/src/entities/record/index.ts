@@ -38,6 +38,7 @@ export type {
   TreatmentRecordSummaryApiData,
 } from "./model";
 export { getTreatmentRecordsApi } from "./api";
+export { recordQueryKeys, useGetTreatmentRecords } from "./api";
 export {
   ProcedureTypeSelector,
   RecordPhotoUploader,

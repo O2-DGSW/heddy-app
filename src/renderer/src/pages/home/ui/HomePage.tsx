@@ -1,8 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 
-import { SHORTCUT_CARDS } from "../model/constants";
+import { HOME_RECENT_RECORD_PARAMS, SHORTCUT_CARDS } from "../model/constants";
+import { mapTreatmentRecordToRecentRecord } from "../model/mapTreatmentRecordToRecentRecord";
 
+import { useGetTreatmentRecords } from "@/entities";
 import HomeHeader from "@/features/home/ui/HomeHeader.tsx";
 import RecentRecordCard from "@/features/home/ui/RecentRecordCard.tsx";
 import RecommendationSection from "@/features/home/ui/RecommendationSection.tsx";
@@ -10,9 +12,27 @@ import ShortcutCard from "@/features/home/ui/ShortcutCard.tsx";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const {
+    data: recentRecordData,
+    isPending: isRecentRecordPending,
+    isError: isRecentRecordError,
+    refetch: refetchRecentRecord,
+  } = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
+  const recentRecord = recentRecordData?.items[0]
+    ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
+    : undefined;
 
   const handleNavigate = (to: string) => {
     navigate(to);
+  };
+
+  const handleRecentRecordClick = () => {
+    if (isRecentRecordError) {
+      void refetchRecentRecord();
+      return;
+    }
+
+    navigate(recentRecord ? `/cuts/${recentRecord.id}` : "/cuts/add");
   };
 
   return (
@@ -37,7 +57,12 @@ const HomePage = () => {
       </div>
 
       <div className="mx-auto mt-[32px] grid w-[calc(100%_-_42px)] max-w-[359px] grid-cols-[1.041fr_1fr] gap-3">
-        <RecentRecordCard onClick={() => handleNavigate("/cuts/record-1")} />
+        <RecentRecordCard
+          record={recentRecord}
+          isLoading={isRecentRecordPending}
+          isError={isRecentRecordError}
+          onClick={handleRecentRecordClick}
+        />
 
         <div className="grid h-[228px] grid-rows-2 gap-2">
           {SHORTCUT_CARDS.map(card => (

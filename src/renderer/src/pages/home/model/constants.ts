@@ -6,19 +6,21 @@ import logoPart4 from "../assets/logo-e.svg";
 import logoPart5 from "../assets/logo-d2.svg";
 import shareScissorsImage from "../assets/share-scissors.png";
 
-import type {
-  LogoPartType,
-  RecommendationCardType,
-  RecentRecordType,
-  ShortcutCardType,
-} from "./types";
+import type { LogoPartType, RecommendationCardType, ShortcutCardType } from "./types";
+import type { ServiceType, TreatmentRecordListParams } from "@/entities";
 
-export const RECENT_RECORD: RecentRecordType = {
-  date: "2026-07-18",
-  procedureName: "다운펌",
-  salonName: "준오헤어 강남점",
-  designerName: "오용준",
-  rating: 5,
+export const HOME_RECENT_RECORD_PARAMS: TreatmentRecordListParams = {
+  sort: "performedAt,desc",
+};
+
+export const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
+  CUT: "커트",
+  PERM: "펌",
+  COLOR: "염색",
+  BLEACH: "탈색",
+  CLINIC: "클리닉",
+  STYLING: "스타일링",
+  OTHER: "기타",
 };
 
 export const SHORTCUT_CARDS: ShortcutCardType[] = [
