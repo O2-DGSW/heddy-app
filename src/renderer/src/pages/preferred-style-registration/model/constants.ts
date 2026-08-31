@@ -4,6 +4,8 @@ export const SELECTED_BACKGROUND_COLOR = "#F4FBF8";
 
 export const MAX_VISIBLE_RESULT_TAGS = 2;
 
+export const MAX_STYLE_TAG_SELECTION = 10;
+
 export const PREFERRED_STYLE_TABS = [
   "preferred",
   "excluded",

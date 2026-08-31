@@ -5,7 +5,6 @@ import { AppRoutes } from "./routes";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
 
 // setupInterceptor();
-//
 // const shouldRestoreAuthSession = () => {
 //     if (typeof window === "undefined") {
 //         return false;
