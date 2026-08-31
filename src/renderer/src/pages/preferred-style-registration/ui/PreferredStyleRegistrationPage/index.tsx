@@ -1,76 +1,41 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { arrowIcon } from "@/entities/record";
 import { cn } from "@/shared";
 
-import { getIsTagDisabled, getNextTagStatus } from "../../lib/styleTag";
-import {
-  INITIAL_STYLE_TAGS,
-  PREFERRED_STYLE_TABS,
-  TAB_LABEL_BY_TYPE,
-  TITLE_BY_TAB,
-} from "../../model/constants";
-import type { PreferredStyleTabType, StyleTag } from "../../model/types";
+import { getIsTagDisabled } from "../../lib/styleTag";
+import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
+import { usePreferredStyleRegistration } from "../../model/usePreferredStyleRegistration";
 import StyleTagButton from "../StyleTagButton";
 import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<PreferredStyleTabType>("preferred");
-  const [styleTags, setStyleTags] = useState<StyleTag[]>(INITIAL_STYLE_TAGS);
-  const [isPreferredSummaryExpanded, setIsPreferredSummaryExpanded] = useState(false);
-  const [isExcludedSummaryExpanded, setIsExcludedSummaryExpanded] = useState(false);
-
-  const preferredTags = useMemo(
-    () => styleTags.filter(tag => tag.status === "preferred"),
-    [styleTags]
-  );
-  const excludedTags = useMemo(
-    () => styleTags.filter(tag => tag.status === "excluded"),
-    [styleTags]
-  );
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleTabClick = (tab: PreferredStyleTabType) => {
-    setActiveTab(tab);
-  };
-
-  const handleTagClick = (tagId: string) => {
-    setStyleTags(currentTags =>
-      currentTags.map(tag => {
-        if (tag.id !== tagId || getIsTagDisabled(tag.status, activeTab)) {
-          return tag;
-        }
-
-        return { ...tag, status: getNextTagStatus(tag.status, activeTab) };
-      })
-    );
-  };
-
-  const handlePreferredSummaryToggle = () => {
-    setIsPreferredSummaryExpanded(isExpanded => !isExpanded);
-  };
-
-  const handleExcludedSummaryToggle = () => {
-    setIsExcludedSummaryExpanded(isExpanded => !isExpanded);
-  };
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  const handleSave = () => {
-    navigate(-1);
-  };
+  const {
+    activeTab,
+    actionErrorMessage,
+    excludedTags,
+    handleBack,
+    handleCancel,
+    handleExcludedSummaryToggle,
+    handlePreferredSummaryToggle,
+    handleRetry,
+    handleSave,
+    handleTabClick,
+    handleTagClick,
+    isExcludedSummaryExpanded,
+    isFetching,
+    isPreferredSummaryExpanded,
+    isSaveDisabled,
+    isSaving,
+    loadErrorMessage,
+    preferredTags,
+    styleTags,
+  } = usePreferredStyleRegistration();
 
   return (
     <section
       aria-labelledby="preferred-style-registration-title"
+      aria-busy={isFetching || isSaving}
       className="flex min-h-full flex-col overflow-x-clip"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
@@ -146,15 +111,24 @@ const PreferredStyleRegistrationPage = () => {
             </h2>
 
             <div className="flex flex-wrap gap-[4px]">
-              {styleTags.map(tag => (
-                <StyleTagButton
-                  disabled={getIsTagDisabled(tag.status, activeTab)}
-                  key={tag.id}
-                  label={tag.label}
-                  onClick={() => handleTagClick(tag.id)}
-                  status={tag.status}
-                />
-              ))}
+              {isFetching && styleTags.length === 0 ? (
+                <p
+                  className={`px-[10px] py-[8px] ${font.label.regular}`}
+                  style={{ color: lightTheme.label.assistive }}
+                >
+                  스타일 태그를 불러오는 중입니다.
+                </p>
+              ) : (
+                styleTags.map(tag => (
+                  <StyleTagButton
+                    disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
+                    key={tag.id}
+                    label={tag.label}
+                    onClick={() => handleTagClick(tag.id)}
+                    status={tag.status}
+                  />
+                ))
+              )}
             </div>
           </section>
 
@@ -201,6 +175,31 @@ const PreferredStyleRegistrationPage = () => {
             >
               ※제외한 스타일은 추천에 나오지 않아요.
             </p>
+
+            {actionErrorMessage && (
+              <div className="mt-[12px] flex flex-col items-center gap-[8px]" role="alert">
+                <p
+                  className={`text-center ${font.caption.regular}`}
+                  style={{ color: lightTheme.status.error }}
+                >
+                  {actionErrorMessage}
+                </p>
+                {loadErrorMessage && (
+                  <button
+                    className={`h-[34px] rounded-[8px] border px-[14px] ${font.label.medium}`}
+                    onClick={handleRetry}
+                    style={{
+                      backgroundColor: lightTheme.background.normal,
+                      borderColor: lightTheme.fill.neutral,
+                      color: lightTheme.label.alternative,
+                    }}
+                    type="button"
+                  >
+                    다시 시도
+                  </button>
+                )}
+              </div>
+            )}
           </section>
         </div>
 
@@ -219,14 +218,15 @@ const PreferredStyleRegistrationPage = () => {
           </button>
           <button
             className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
+            disabled={isSaveDisabled}
             onClick={handleSave}
             style={{
-              backgroundColor: lightTheme.primary.normal,
+              backgroundColor: isSaveDisabled ? lightTheme.fill.neutral : lightTheme.primary.normal,
               color: lightTheme.label.buttonText,
             }}
             type="button"
           >
-            저장
+            {isSaving ? "저장 중" : "저장"}
           </button>
         </div>
       </div>
