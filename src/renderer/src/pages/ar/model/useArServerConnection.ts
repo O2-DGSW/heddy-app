@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
+import type { HairstyleOptionId } from "./types";
+
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
 
 interface ArServerAnswer {
@@ -62,16 +64,48 @@ const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) =>
 };
 
 export const useArServerConnection = (
-  previewVideoRef: RefObject<HTMLVideoElement | null>
+  previewVideoRef: RefObject<HTMLVideoElement | null>,
+  hairstyleId: HairstyleOptionId
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const statsChannelRef = useRef<RTCDataChannel | null>(null);
+  const hairstyleIdRef = useRef(hairstyleId);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const sendHairstyleMode = useCallback((nextHairstyleId: HairstyleOptionId) => {
+    const statsChannel = statsChannelRef.current;
+
+    if (statsChannel?.readyState !== "open") {
+      return;
+    }
+
+    const isOriginalStyle = nextHairstyleId === "none";
+    statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
+
+    if (isOriginalStyle) {
+      return;
+    }
+
+    statsChannel.send(
+      JSON.stringify({
+        type: "fit",
+        asset: "korean-frontal",
+        blend: 0,
+        harmonize: true,
+        offset: 0,
+        scale: 1,
+        shadow: 0.35,
+        smooth: 1,
+      })
+    );
+  }, []);
 
   const stopConnection = useCallback(() => {
     peerConnectionRef.current?.close();
     peerConnectionRef.current = null;
+    statsChannelRef.current = null;
     localStreamRef.current?.getTracks().forEach(track => track.stop());
     localStreamRef.current = null;
 
@@ -118,20 +152,9 @@ export const useArServerConnection = (
       const peerConnection = new RTCPeerConnection();
       peerConnectionRef.current = peerConnection;
       const statsChannel = peerConnection.createDataChannel("stats");
+      statsChannelRef.current = statsChannel;
       statsChannel.addEventListener("open", () => {
-        statsChannel.send(JSON.stringify({ type: "mode", mode: "tryon" }));
-        statsChannel.send(
-          JSON.stringify({
-            type: "fit",
-            asset: "korean-frontal",
-            blend: 0,
-            harmonize: true,
-            offset: 0,
-            scale: 1,
-            shadow: 0.35,
-            smooth: 1,
-          })
-        );
+        sendHairstyleMode(hairstyleIdRef.current);
       });
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
@@ -176,7 +199,12 @@ export const useArServerConnection = (
       setConnectionStatus("error");
       setErrorMessage("AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요.");
     }
-  }, [previewVideoRef, stopConnection]);
+  }, [previewVideoRef, sendHairstyleMode, stopConnection]);
+
+  useEffect(() => {
+    hairstyleIdRef.current = hairstyleId;
+    sendHairstyleMode(hairstyleId);
+  }, [hairstyleId, sendHairstyleMode]);
 
   useEffect(() => {
     const startTimer = window.setTimeout(() => {

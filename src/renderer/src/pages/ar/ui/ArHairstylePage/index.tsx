@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 
 import { useArServerConnection } from "../../model/useArServerConnection";
 import { useArHairstyle } from "../../model/useArHairstyle";
+import { getCircularHairstyleOption } from "../../model/constants";
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArCaptureModal from "../ArCaptureModal";
@@ -15,7 +16,6 @@ import ArRecognitionBadge from "../ArRecognitionBadge";
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
-  const { connectionStatus, errorMessage } = useArServerConnection(cameraPreviewRef);
   const {
     activeHairstylePosition,
     activeModal,
@@ -30,6 +30,11 @@ const ArHairstylePage = () => {
     setCandidateMemo,
     setSelectedColorId,
   } = useArHairstyle();
+  const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition);
+  const { connectionStatus, errorMessage } = useArServerConnection(
+    cameraPreviewRef,
+    selectedHairstyle.id
+  );
 
   useEffect(() => {
     setIsBottomBarHidden(isExpanded);
