@@ -1,3 +1,4 @@
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 import type { HairstyleOptionId } from "./types";
@@ -32,6 +33,42 @@ const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
   const answer = value as Record<string, unknown>;
 
   return typeof answer.sdp === "string" && answer.type === "answer";
+};
+
+const requestArServerOffer = async (
+  serverBaseUrl: string,
+  offer: RTCSessionDescriptionInit
+): Promise<unknown> => {
+  const url = `${serverBaseUrl}/offer`;
+
+  if (Capacitor.isNativePlatform()) {
+    const response = await CapacitorHttp.post({
+      connectTimeout: 10000,
+      data: offer,
+      headers: { "Content-Type": "application/json" },
+      readTimeout: 10000,
+      url,
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
+    }
+
+    return response.data;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(offer),
+  });
+  const answer: unknown = await response.json();
+
+  if (!response.ok) {
+    throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
+  }
+
+  return answer;
 };
 
 const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) => {
@@ -181,15 +218,15 @@ export const useArServerConnection = (
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       await waitForIceGatheringComplete(peerConnection);
+      const localDescription = peerConnection.localDescription;
 
-      const response = await fetch(`${serverBaseUrl}/offer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(peerConnection.localDescription),
-      });
-      const answer: unknown = await response.json();
+      if (!localDescription) {
+        throw new Error("AR 연결 offer를 생성하지 못했습니다.");
+      }
 
-      if (!response.ok || !isArServerAnswer(answer)) {
+      const answer = await requestArServerOffer(serverBaseUrl, localDescription);
+
+      if (!isArServerAnswer(answer)) {
         throw new Error("AR 서버가 유효한 WebRTC 응답을 반환하지 않았습니다.");
       }
 
