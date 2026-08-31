@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
+import minimizeIcon from "../../assets/minimize.svg";
 import modalCloseImage from "../../assets/modal-close.png";
 import noStyleIcon from "../../assets/no-style.svg";
 import refreshIcon from "../../assets/refresh.svg";
@@ -18,6 +19,8 @@ const HAIRSTYLE_OPTIONS = [
 ] as const;
 
 const HAIRSTYLE_SIZES = [50, 62, 80, 62, 50] as const;
+
+const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
 
 type HairstyleOption = (typeof HAIRSTYLE_OPTIONS)[number];
 
@@ -184,7 +187,8 @@ const ArHairstylePage = () => {
 
         <span
           className={cn(
-            "absolute right-[16px] top-[15px] rounded-[5px] px-[8px] py-[4px]",
+            "absolute right-[16px] rounded-[5px] px-[8px] py-[4px]",
+            isExpanded ? "top-[24px]" : "top-[15px]",
             font.label.medium
           )}
           style={{
@@ -197,7 +201,10 @@ const ArHairstylePage = () => {
 
         <div
           aria-label="헤어 컬러 선택"
-          className="absolute left-[31px] top-[172px] flex flex-col gap-[11px]"
+          className={cn(
+            "absolute left-[31px] flex flex-col gap-[11px]",
+            isExpanded ? "top-[185px]" : "top-[172px]"
+          )}
         >
           {HAIR_COLOR_OPTIONS.map(option => {
             const isSelected = option.id === selectedColorId;
@@ -223,7 +230,7 @@ const ArHairstylePage = () => {
         <div
           className={cn(
             "absolute left-1/2 flex w-[332px] -translate-x-1/2 items-center gap-[8px]",
-            isExpanded ? "bottom-[252px]" : "bottom-[142px]"
+            isExpanded ? "top-[549px]" : "bottom-[142px]"
           )}
         >
           <button
@@ -257,7 +264,11 @@ const ArHairstylePage = () => {
             onClick={handleExpandedToggle}
             type="button"
           >
-            <img alt="" className="h-[17px] w-[17px]" src={resizeIcon} />
+            <img
+              alt=""
+              className="h-[20.5px] w-[20.5px]"
+              src={isExpanded ? minimizeIcon : resizeIcon}
+            />
           </button>
         </div>
 
@@ -265,7 +276,7 @@ const ArHairstylePage = () => {
           aria-label="헤어스타일 선택"
           className={cn(
             "absolute left-1/2 flex w-[404px] -translate-x-1/2 items-center gap-[25px]",
-            isExpanded ? "bottom-[123px]" : "bottom-[24px]"
+            isExpanded ? "top-[626px]" : "bottom-[24px]"
           )}
         >
           {hairstyleOptions.map((option, index) => {
@@ -309,6 +320,30 @@ const ArHairstylePage = () => {
             );
           })}
         </div>
+
+        {isExpanded && (
+          <div
+            aria-label="확대 AR 하단 메뉴"
+            className={cn(
+              "absolute left-1/2 top-[746px] flex -translate-x-1/2 items-center gap-[33px]",
+              font.label.medium
+            )}
+            style={{ color: lightTheme.label.assistive }}
+          >
+            {EXPANDED_BOTTOM_ITEMS.map((item, index) => (
+              <span
+                className={cn(
+                  "text-center",
+                  index < 3 && "w-[35px]",
+                  index === 3 && "whitespace-nowrap"
+                )}
+                key={item}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        )}
 
         {isExpanded && (
           <div
