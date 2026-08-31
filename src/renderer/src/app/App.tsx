@@ -1,12 +1,10 @@
 // import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
-import { setupApiAuth } from "./setupApiAuth";
 // import { restoreAuthSession } from "@/entities/auth/model/session";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
 
-setupApiAuth();
-//
+// setupInterceptor();
 // const shouldRestoreAuthSession = () => {
 //     if (typeof window === "undefined") {
 //         return false;

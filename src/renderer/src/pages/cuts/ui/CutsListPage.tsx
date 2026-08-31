@@ -13,7 +13,8 @@ import {
   isCutsCategory,
   type CutsCategoryFilterValue,
 } from "@/features/cuts/constrants/categories";
-import { dummyCutsRecords } from "@/features/cuts/constrants/dummyRecords";
+import { useCutsRecords } from "@/features/cuts/model/hooks/useCutsRecords";
+import { CutsRecordListStatus } from "@/features/cuts/ui/CutsRecordListStatus";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 const matchesStatusFilter = (record: CutsRecord, statusFilter: CutsStatusFilter) => {
@@ -33,15 +34,18 @@ export const CutsListPage = () => {
   const [statusFilter, setStatusFilter] = useState<CutsStatusFilter>(CUTS_TABS[0].label);
   const [categoryFilter, setCategoryFilter] = useState<CutsCategoryFilterValue>(CUTS_CATEGORIES[0]);
 
+  const { records, isPending, isError, error, refetch } = useCutsRecords();
+
+  // 서버는 첫 페이지만 내려주고, 탭·카테고리 필터는 받아온 목록에서 걸러 보여준다.
   const filteredRecords = useMemo(
     () =>
-      dummyCutsRecords.filter(record => {
+      records.filter(record => {
         const matchesCategory =
           !isCutsCategory(categoryFilter) || record.category === categoryFilter;
 
         return matchesCategory && matchesStatusFilter(record, statusFilter);
       }),
-    [statusFilter, categoryFilter]
+    [records, statusFilter, categoryFilter]
   );
 
   const handleRecordClick = (record: CutsRecord) => {
@@ -59,7 +63,11 @@ export const CutsListPage = () => {
           </>
         }
       >
-        <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+        {isPending || isError ? (
+          <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
+        ) : (
+          <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+        )}
         <CutsAddButton />
       </CutsLayout>
     </cap-page>
