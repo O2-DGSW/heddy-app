@@ -1,37 +1,61 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { getTreatmentRecordsApi } from "@/entities";
-import type { TreatmentRecordListParams } from "@/entities";
+import type { ServiceType } from "@/entities";
 import { mapTreatmentRecordToCutsRecord } from "@/features/cuts/model/mapTreatmentRecord";
 
 export const CUTS_RECORDS_QUERY_KEY = "cuts-records";
 
-/** 목록 첫 페이지 조회 기준. 페이지네이션은 아직 화면에 붙이지 않았다. */
-const DEFAULT_LIST_PARAMS: TreatmentRecordListParams = {
-  page: 0,
-  size: 20,
-  sort: "performedAt,desc",
-};
+const PAGE_SIZE = 20;
+const FIRST_PAGE = 0;
 
-/** 시술기록 목록을 불러와 카드에서 쓰는 형태로 변환해 돌려준다 */
-export const useCutsRecords = () => {
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [CUTS_RECORDS_QUERY_KEY, DEFAULT_LIST_PARAMS],
-    queryFn: () => getTreatmentRecordsApi(DEFAULT_LIST_PARAMS),
-  });
+interface UseCutsRecordsOptions {
+  /** 카테고리 필터. 값을 주면 서버가 해당 시술 종류만 걸러서 내려준다 */
+  serviceType?: ServiceType;
+}
 
-  const records = useMemo(
-    () => (data?.items ?? []).map(mapTreatmentRecordToCutsRecord),
-    [data?.items]
-  );
-
-  return {
-    records,
-    page: data?.page,
+/**
+ * 시술기록 목록을 페이지 단위로 불러와 카드에서 쓰는 형태로 변환해 돌려준다.
+ * 화면을 아래로 내리면 다음 페이지를 이어 붙이는 방식이라 페이지 번호는 훅이 관리한다.
+ */
+export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
+  const {
+    data,
     isPending,
     isError,
     error,
     refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    // 필터가 바뀌면 서버에 다시 물어야 하므로 키에 함께 넣는다.
+    queryKey: [CUTS_RECORDS_QUERY_KEY, serviceType ?? "ALL"],
+    queryFn: ({ pageParam }) =>
+      getTreatmentRecordsApi({
+        ...(serviceType ? { service_type: serviceType } : {}),
+        page: pageParam,
+        size: PAGE_SIZE,
+        sort: "performedAt,desc",
+      }),
+    initialPageParam: FIRST_PAGE,
+    getNextPageParam: lastPage => (lastPage.page?.has_next ? lastPage.page.number + 1 : undefined),
+  });
+
+  const records = useMemo(
+    () => (data?.pages ?? []).flatMap(page => page.items.map(mapTreatmentRecordToCutsRecord)),
+    [data?.pages]
+  );
+
+  return {
+    records,
+    isPending,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 };

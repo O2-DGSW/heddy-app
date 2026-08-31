@@ -14,7 +14,9 @@ import {
   type CutsCategoryFilterValue,
 } from "@/features/cuts/constrants/categories";
 import { useCutsRecords } from "@/features/cuts/model/hooks/useCutsRecords";
+import { SERVICE_TYPE_BY_CATEGORY } from "@/features/cuts/model/mapTreatmentRecord";
 import { CutsRecordListStatus } from "@/features/cuts/ui/CutsRecordListStatus";
+import { CutsLoadMoreTrigger } from "@/features/cuts/ui/CutsLoadMoreTrigger";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 const matchesStatusFilter = (record: CutsRecord, statusFilter: CutsStatusFilter) => {
@@ -34,18 +36,25 @@ export const CutsListPage = () => {
   const [statusFilter, setStatusFilter] = useState<CutsStatusFilter>(CUTS_TABS[0].label);
   const [categoryFilter, setCategoryFilter] = useState<CutsCategoryFilterValue>(CUTS_CATEGORIES[0]);
 
-  const { records, isPending, isError, error, refetch } = useCutsRecords();
+  // 카테고리는 서버가 걸러 주고, 분석 상태는 조회 조건이 없어 받아온 목록에서 거른다.
+  const {
+    records,
+    isPending,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCutsRecords({
+    serviceType: isCutsCategory(categoryFilter)
+      ? SERVICE_TYPE_BY_CATEGORY[categoryFilter]
+      : undefined,
+  });
 
-  // 서버는 첫 페이지만 내려주고, 탭·카테고리 필터는 받아온 목록에서 걸러 보여준다.
   const filteredRecords = useMemo(
-    () =>
-      records.filter(record => {
-        const matchesCategory =
-          !isCutsCategory(categoryFilter) || record.category === categoryFilter;
-
-        return matchesCategory && matchesStatusFilter(record, statusFilter);
-      }),
-    [records, statusFilter, categoryFilter]
+    () => records.filter(record => matchesStatusFilter(record, statusFilter)),
+    [records, statusFilter]
   );
 
   const handleRecordClick = (record: CutsRecord) => {
@@ -66,7 +75,14 @@ export const CutsListPage = () => {
         {isPending || isError ? (
           <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
         ) : (
-          <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+          <>
+            <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+            <CutsLoadMoreTrigger
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
+          </>
         )}
         <CutsAddButton />
       </CutsLayout>

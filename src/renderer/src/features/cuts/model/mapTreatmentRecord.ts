@@ -21,6 +21,18 @@ const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
 };
 
 /**
+ * 카테고리 칩을 목록 조회 파라미터(service_type)로 바꾼다.
+ * 서버는 service_type을 하나만 받기 때문에 칩 하나당 시술 종류 하나만 대응시킨다
+ * (염색 칩은 COLOR만 조회하며, 탈색 BLEACH은 "전체"에서만 보인다).
+ */
+export const SERVICE_TYPE_BY_CATEGORY: Record<CutsCategory, ServiceType> = {
+  커트: "CUT",
+  펌: "PERM",
+  염색: "COLOR",
+  클리닉: "CLINIC",
+};
+
+/**
  * 카테고리 필터(커트·펌·염색·클리닉)에 대응하는 시술 종류.
  * 탈색·스타일링·기타는 대응하는 필터 칩이 없어 목록에서 "전체"로만 보인다.
  */
