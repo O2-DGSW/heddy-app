@@ -7,6 +7,15 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, new URL(".", import.meta.url).pathname, "");
   const arServerUrl = env.VITE_AR_SERVER_URL?.trim();
+  const arServerProxy = arServerUrl
+    ? {
+        "/ar-server": {
+          target: arServerUrl,
+          changeOrigin: true,
+          rewrite: (path: string) => path.replace(/^\/ar-server/, ""),
+        },
+      }
+    : undefined;
 
   return {
     root: new URL("src/renderer/src", import.meta.url).pathname,
@@ -18,16 +27,7 @@ export default defineConfig(({ mode }) => {
         "@": new URL("src/renderer/src", import.meta.url).pathname,
       },
     },
-    server: arServerUrl
-      ? {
-          proxy: {
-            "/ar-server": {
-              target: arServerUrl,
-              changeOrigin: true,
-              rewrite: path => path.replace(/^\/ar-server/, ""),
-            },
-          },
-        }
-      : undefined,
+    server: arServerProxy ? { proxy: arServerProxy } : undefined,
+    preview: arServerProxy ? { proxy: arServerProxy } : undefined,
   };
 });

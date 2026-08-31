@@ -22,7 +22,7 @@ const getArServerBaseUrl = () => {
     return "";
   }
 
-  return import.meta.env.DEV ? "/ar-server" : configuredUrl;
+  return Capacitor.isNativePlatform() ? configuredUrl : "/ar-server";
 };
 
 const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
