@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
@@ -20,6 +20,9 @@ const HAIRSTYLE_OPTIONS = [
 
 const HAIRSTYLE_SIZES = [50, 62, 80, 62, 50] as const;
 
+const HAIRSTYLE_GAP = 25;
+const HAIRSTYLE_CENTER_POSITION = 202;
+
 const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
 
 type HairstyleOption = (typeof HAIRSTYLE_OPTIONS)[number];
@@ -38,10 +41,28 @@ type PlaceholderStyle = CSSProperties & {
   "--placeholder-color": string;
 };
 
-type HairstyleItemPosition = {
-  height: number;
-  left: number;
-  width: number;
+const getHairstyleSizes = (selectedIndex: number) =>
+  HAIRSTYLE_OPTIONS.map((_, index) => {
+    const distance = Math.abs(index - selectedIndex);
+
+    if (distance === 0) {
+      return HAIRSTYLE_SIZES[2];
+    }
+
+    if (distance === 1) {
+      return HAIRSTYLE_SIZES[1];
+    }
+
+    return HAIRSTYLE_SIZES[0];
+  });
+
+const getHairstyleTrackOffset = (sizes: number[], selectedIndex: number) => {
+  const selectedCenter =
+    sizes.slice(0, selectedIndex).reduce((total, size) => total + size, 0) +
+    HAIRSTYLE_GAP * selectedIndex +
+    sizes[selectedIndex] / 2;
+
+  return HAIRSTYLE_CENTER_POSITION - selectedCenter;
 };
 
 const CANDIDATE_MEMO_STYLE = {
@@ -52,16 +73,9 @@ const CANDIDATE_MEMO_STYLE = {
 
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
-  const hairstyleItemRefs = useRef(new Map<string, HTMLDivElement>());
-  const hairstyleItemPositionsRef = useRef(new Map<string, HairstyleItemPosition>());
-  const hairstyleAnimationFrameRef = useRef<number | null>(null);
-  const hairstyleAnimationTimeoutRef = useRef<number | null>(null);
-  const shouldAnimateHairstyleTransitionRef = useRef(false);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
-  const [selectedHairstyleId, setSelectedHairstyleId] = useState<string>("down-perm-2");
-  const [hairstyleOptions, setHairstyleOptions] = useState<HairstyleOption[]>(() => [
-    ...HAIRSTYLE_OPTIONS,
-  ]);
+  const [selectedHairstyleId, setSelectedHairstyleId] =
+    useState<HairstyleOption["id"]>("down-perm-2");
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModal | null>(null);
@@ -75,43 +89,13 @@ const ArHairstylePage = () => {
     setActiveModal(null);
   };
 
-  const captureHairstyleItemPositions = () => {
-    hairstyleItemPositionsRef.current = new Map(
-      [...hairstyleItemRefs.current.entries()].map(([id, element]) => {
-        const { height, left, width } = element.getBoundingClientRect();
-
-        return [id, { height, left, width }];
-      })
-    );
-    shouldAnimateHairstyleTransitionRef.current = true;
-  };
-
   const handleStyleReset = () => {
-    captureHairstyleItemPositions();
     setSelectedHairstyleId("down-perm-2");
-    setHairstyleOptions([...HAIRSTYLE_OPTIONS]);
     setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
   };
 
-  const handleHairstyleSelect = (selectedId: string) => {
-    captureHairstyleItemPositions();
+  const handleHairstyleSelect = (selectedId: HairstyleOption["id"]) => {
     setSelectedHairstyleId(selectedId);
-    setHairstyleOptions(currentOptions => {
-      const selectedOption = currentOptions.find(option => option.id === selectedId);
-
-      if (!selectedOption) {
-        return currentOptions;
-      }
-
-      const unselectedOptions = currentOptions.filter(option => option.id !== selectedId);
-      const centerIndex = Math.floor(currentOptions.length / 2);
-
-      return [
-        ...unselectedOptions.slice(0, centerIndex),
-        selectedOption,
-        ...unselectedOptions.slice(centerIndex),
-      ];
-    });
   };
 
   const handleExpandedToggle = () => {
@@ -163,94 +147,11 @@ const ArHairstylePage = () => {
     };
   }, [isExpanded, setIsBottomBarHidden]);
 
-  useLayoutEffect(() => {
-    if (!shouldAnimateHairstyleTransitionRef.current) {
-      return;
-    }
-
-    shouldAnimateHairstyleTransitionRef.current = false;
-
-    if (
-      typeof window === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-
-    if (hairstyleAnimationFrameRef.current !== null) {
-      window.cancelAnimationFrame(hairstyleAnimationFrameRef.current);
-    }
-
-    if (hairstyleAnimationTimeoutRef.current !== null) {
-      window.clearTimeout(hairstyleAnimationTimeoutRef.current);
-    }
-
-    const animatedItems = [...hairstyleItemRefs.current.entries()].flatMap(([id, element]) => {
-      const previousPosition = hairstyleItemPositionsRef.current.get(id);
-      const { height, left, width } = element.getBoundingClientRect();
-
-      if (!previousPosition) {
-        return [];
-      }
-
-      const translateX = previousPosition.left - left;
-      const scaleX = previousPosition.width / width;
-      const scaleY = previousPosition.height / height;
-
-      if (Math.abs(translateX) < 0.5 && scaleX === 1 && scaleY === 1) {
-        return [];
-      }
-
-      element.style.transitionDuration = "0ms";
-      element.style.transform = `translateX(${translateX}px) scale(${scaleX}, ${scaleY})`;
-      element.style.transformOrigin = "center";
-      element.style.willChange = "transform";
-
-      return [element];
-    });
-
-    if (animatedItems.length === 0) {
-      return;
-    }
-
-    void document.body.offsetHeight;
-
-    hairstyleAnimationFrameRef.current = window.requestAnimationFrame(() => {
-      animatedItems.forEach(element => {
-        element.style.removeProperty("transition-duration");
-      });
-
-      void document.body.offsetHeight;
-
-      hairstyleAnimationFrameRef.current = window.requestAnimationFrame(() => {
-        animatedItems.forEach(element => {
-          element.style.transform = "translateX(0) scale(1)";
-        });
-
-        hairstyleAnimationTimeoutRef.current = window.setTimeout(() => {
-          animatedItems.forEach(element => {
-            element.style.removeProperty("transform");
-            element.style.removeProperty("transform-origin");
-            element.style.removeProperty("will-change");
-          });
-          hairstyleAnimationTimeoutRef.current = null;
-        }, 280);
-        hairstyleAnimationFrameRef.current = null;
-      });
-    });
-  }, [hairstyleOptions]);
-
-  useEffect(() => {
-    return () => {
-      if (hairstyleAnimationFrameRef.current !== null) {
-        window.cancelAnimationFrame(hairstyleAnimationFrameRef.current);
-      }
-
-      if (hairstyleAnimationTimeoutRef.current !== null) {
-        window.clearTimeout(hairstyleAnimationTimeoutRef.current);
-      }
-    };
-  }, []);
+  const selectedHairstyleIndex = HAIRSTYLE_OPTIONS.findIndex(
+    option => option.id === selectedHairstyleId
+  );
+  const hairstyleSizes = getHairstyleSizes(selectedHairstyleIndex);
+  const hairstyleTrackOffset = getHairstyleTrackOffset(hairstyleSizes, selectedHairstyleIndex);
 
   return (
     <section
@@ -388,62 +289,59 @@ const ArHairstylePage = () => {
         <div
           aria-label="헤어스타일 선택"
           className={cn(
-            "absolute left-1/2 flex w-[404px] -translate-x-1/2 items-center gap-[25px]",
+            "absolute left-1/2 w-[404px] -translate-x-1/2",
             isExpanded ? "top-[626px]" : "bottom-[24px]"
           )}
         >
-          {hairstyleOptions.map((option, index) => {
-            const isSelected = option.id === selectedHairstyleId;
-            const isNoStyle = option.id === "none";
-            const size = HAIRSTYLE_SIZES[index];
+          <div
+            className="flex items-center gap-[25px] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            style={{ transform: `translateX(${hairstyleTrackOffset}px)` }}
+          >
+            {HAIRSTYLE_OPTIONS.map((option, index) => {
+              const isSelected = option.id === selectedHairstyleId;
+              const isNoStyle = option.id === "none";
+              const size = hairstyleSizes[index];
 
-            return (
-              <div
-                className="shrink-0 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-                key={option.id}
-                ref={element => {
-                  if (element) {
-                    hairstyleItemRefs.current.set(option.id, element);
-                    return;
-                  }
-
-                  hairstyleItemRefs.current.delete(option.id);
-                }}
-                style={{ height: size, width: size }}
-              >
-                <button
-                  aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
-                    size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
-                    isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
-                  )}
-                  onClick={() => handleHairstyleSelect(option.id)}
-                  type="button"
+              return (
+                <div
+                  className="shrink-0 transition-[width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                  key={option.id}
+                  style={{ height: size, width: size }}
                 >
-                  {isNoStyle ? (
-                    <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
-                      <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
-                    </span>
-                  ) : (
-                    <span
-                      className={cn(
-                        "block h-full w-full overflow-hidden rounded-full",
-                        size === 80 && "border-[2.5px] border-black"
-                      )}
-                    >
-                      <img
-                        alt="다운펌 헤어스타일"
-                        className="h-full w-full object-cover"
-                        src={downPermImage}
-                      />
-                    </span>
-                  )}
-                </button>
-              </div>
-            );
-          })}
+                  <button
+                    aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
+                      size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
+                      isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
+                    )}
+                    onClick={() => handleHairstyleSelect(option.id)}
+                    type="button"
+                  >
+                    {isNoStyle ? (
+                      <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
+                        <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
+                      </span>
+                    ) : (
+                      <span
+                        className={cn(
+                          "block h-full w-full overflow-hidden rounded-full",
+                          size === 80 && "border-[2.5px] border-black"
+                        )}
+                      >
+                        <img
+                          alt="다운펌 헤어스타일"
+                          className="h-full w-full object-cover"
+                          src={downPermImage}
+                        />
+                      </span>
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {isExpanded && (
