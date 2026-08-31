@@ -4,7 +4,7 @@ export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idl
 
 interface ArServerAnswer {
   sdp: string;
-  type: RTCSdpType;
+  type: "answer";
 }
 
 interface UseArServerConnectionResult {
@@ -29,13 +29,7 @@ const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
 
   const answer = value as Record<string, unknown>;
 
-  return (
-    typeof answer.sdp === "string" &&
-    (answer.type === "answer" ||
-      answer.type === "offer" ||
-      answer.type === "pranswer" ||
-      answer.type === "rollback")
-  );
+  return typeof answer.sdp === "string" && answer.type === "answer";
 };
 
 const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) => {
@@ -43,14 +37,24 @@ const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) =>
     return;
   }
 
-  await new Promise<void>(resolve => {
+  await new Promise<void>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("ICE candidate 수집 시간이 초과되었습니다."));
+    }, 10000);
+
     const handleIceGatheringStateChange = () => {
       if (peerConnection.iceGatheringState !== "complete") {
         return;
       }
 
-      peerConnection.removeEventListener("icegatheringstatechange", handleIceGatheringStateChange);
+      cleanup();
       resolve();
+    };
+
+    const cleanup = () => {
+      window.clearTimeout(timeout);
+      peerConnection.removeEventListener("icegatheringstatechange", handleIceGatheringStateChange);
     };
 
     peerConnection.addEventListener("icegatheringstatechange", handleIceGatheringStateChange);
