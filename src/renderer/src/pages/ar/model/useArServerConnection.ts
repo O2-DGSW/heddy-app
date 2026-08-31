@@ -155,6 +155,22 @@ const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) =>
   });
 };
 
+const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStreamTrack) => {
+  const transceiver = peerConnection.addTransceiver(track, { direction: "sendonly" });
+  const vp8Codecs = RTCRtpSender.getCapabilities("video")?.codecs.filter(codec =>
+    codec.mimeType.toLowerCase().includes("video/vp8")
+  );
+
+  if (vp8Codecs?.length) {
+    transceiver.setCodecPreferences(vp8Codecs);
+  }
+
+  const parameters = transceiver.sender.getParameters();
+  const encoding = parameters.encodings?.[0] ?? {};
+  parameters.encodings = [{ ...encoding, maxBitrate: 4_000_000, maxFramerate: 30 }];
+  void transceiver.sender.setParameters(parameters);
+};
+
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
   hairstyleId: HairstyleOptionId
@@ -230,9 +246,9 @@ export const useArServerConnection = (
         audio: false,
         video: {
           facingMode: { ideal: "user" },
-          frameRate: { ideal: 30 },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          frameRate: { ideal: 30, max: 30 },
+          width: { ideal: 1920, max: 1920 },
+          height: { ideal: 1080, max: 1080 },
         },
       });
       localStreamRef.current = localStream;
@@ -268,7 +284,7 @@ export const useArServerConnection = (
           // Ignore malformed diagnostic events so media playback remains uninterrupted.
         }
       });
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      localStream.getVideoTracks().forEach(track => configureVideoSender(peerConnection, track));
 
       peerConnection.addEventListener("track", event => {
         if (event.track.kind !== "video" || !previewVideoRef.current) {
