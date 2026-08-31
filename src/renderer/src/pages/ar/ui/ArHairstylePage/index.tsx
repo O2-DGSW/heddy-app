@@ -1,12 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type TransitionEvent,
-} from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
@@ -29,21 +22,16 @@ const HAIRSTYLE_SIZES = [50, 62, 80, 62, 50] as const;
 
 const HAIRSTYLE_GAP = 25;
 const HAIRSTYLE_CENTER_POSITION = 202;
-const HAIRSTYLE_CYCLE_COUNT = 3;
+const HAIRSTYLE_VISIBLE_RANGE = 4;
 
 const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
 
 type HairstyleOption = (typeof HAIRSTYLE_OPTIONS)[number];
 
-const HAIRSTYLE_TRACK_OPTIONS = Array.from(
-  { length: HAIRSTYLE_OPTIONS.length * HAIRSTYLE_CYCLE_COUNT },
-  (_, trackIndex) => ({
-    option: HAIRSTYLE_OPTIONS[trackIndex % HAIRSTYLE_OPTIONS.length],
-    trackIndex,
-  })
+const HAIRSTYLE_VISIBLE_OFFSETS = Array.from(
+  { length: HAIRSTYLE_VISIBLE_RANGE * 2 + 1 },
+  (_, index) => index - HAIRSTYLE_VISIBLE_RANGE
 );
-const HAIRSTYLE_TRACK_START_INDEX =
-  HAIRSTYLE_OPTIONS.length + Math.floor(HAIRSTYLE_OPTIONS.length / 2);
 
 const HAIR_COLOR_OPTIONS = [
   { id: "natural-black", color: lightTheme.label.strong },
@@ -59,28 +47,43 @@ type PlaceholderStyle = CSSProperties & {
   "--placeholder-color": string;
 };
 
-const getHairstyleSizes = (selectedTrackIndex: number) =>
-  HAIRSTYLE_TRACK_OPTIONS.map((_, index) => {
-    const distance = Math.abs(index - selectedTrackIndex);
+const getCircularHairstyleOption = (position: number) => {
+  const optionIndex =
+    ((position % HAIRSTYLE_OPTIONS.length) + HAIRSTYLE_OPTIONS.length) % HAIRSTYLE_OPTIONS.length;
 
-    if (distance === 0) {
-      return HAIRSTYLE_SIZES[2];
-    }
+  return HAIRSTYLE_OPTIONS[optionIndex];
+};
 
-    if (distance === 1) {
-      return HAIRSTYLE_SIZES[1];
-    }
+const getHairstyleSize = (offset: number) => {
+  const distance = Math.abs(offset);
 
-    return HAIRSTYLE_SIZES[0];
-  });
+  if (distance === 0) {
+    return HAIRSTYLE_SIZES[2];
+  }
 
-const getHairstyleTrackOffset = (sizes: number[], selectedIndex: number) => {
-  const selectedCenter =
-    sizes.slice(0, selectedIndex).reduce((total, size) => total + size, 0) +
-    HAIRSTYLE_GAP * selectedIndex +
-    sizes[selectedIndex] / 2;
+  if (distance === 1) {
+    return HAIRSTYLE_SIZES[1];
+  }
 
-  return HAIRSTYLE_CENTER_POSITION - selectedCenter;
+  return HAIRSTYLE_SIZES[0];
+};
+
+const getHairstyleItemLeft = (offset: number) => {
+  if (offset === 0) {
+    return HAIRSTYLE_CENTER_POSITION - getHairstyleSize(0) / 2;
+  }
+
+  const direction = Math.sign(offset);
+  let center = HAIRSTYLE_CENTER_POSITION;
+
+  for (let step = 1; step <= Math.abs(offset); step += 1) {
+    const previousSize = getHairstyleSize(step - 1);
+    const currentSize = getHairstyleSize(step);
+
+    center += direction * (previousSize / 2 + HAIRSTYLE_GAP + currentSize / 2);
+  }
+
+  return center - getHairstyleSize(offset) / 2;
 };
 
 const CANDIDATE_MEMO_STYLE = {
@@ -92,10 +95,7 @@ const CANDIDATE_MEMO_STYLE = {
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
-  const [activeHairstyleTrackIndex, setActiveHairstyleTrackIndex] = useState(
-    HAIRSTYLE_TRACK_START_INDEX
-  );
-  const [isTrackRecentering, setIsTrackRecentering] = useState(false);
+  const [activeHairstylePosition, setActiveHairstylePosition] = useState(2);
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModal | null>(null);
@@ -117,8 +117,10 @@ const ArHairstylePage = () => {
   const handleHairstyleSelect = (selectedId: HairstyleOption["id"]) => {
     const selectedIndex = HAIRSTYLE_OPTIONS.findIndex(option => option.id === selectedId);
 
-    setActiveHairstyleTrackIndex(currentTrackIndex => {
-      const currentIndex = currentTrackIndex % HAIRSTYLE_OPTIONS.length;
+    setActiveHairstylePosition(currentPosition => {
+      const currentIndex =
+        ((currentPosition % HAIRSTYLE_OPTIONS.length) + HAIRSTYLE_OPTIONS.length) %
+        HAIRSTYLE_OPTIONS.length;
       const forwardDistance =
         (selectedIndex - currentIndex + HAIRSTYLE_OPTIONS.length) % HAIRSTYLE_OPTIONS.length;
       const movement =
@@ -126,33 +128,7 @@ const ArHairstylePage = () => {
           ? forwardDistance - HAIRSTYLE_OPTIONS.length
           : forwardDistance;
 
-      return currentTrackIndex + movement;
-    });
-  };
-
-  const handleTrackTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget || event.propertyName !== "transform") {
-      return;
-    }
-
-    const shouldMoveForward = activeHairstyleTrackIndex <= HAIRSTYLE_OPTIONS.length / 2;
-    const shouldMoveBackward =
-      activeHairstyleTrackIndex >=
-      HAIRSTYLE_TRACK_OPTIONS.length - 1 - Math.floor(HAIRSTYLE_OPTIONS.length / 2);
-
-    if (!shouldMoveForward && !shouldMoveBackward) {
-      return;
-    }
-
-    setIsTrackRecentering(true);
-    setActiveHairstyleTrackIndex(currentTrackIndex =>
-      shouldMoveForward
-        ? currentTrackIndex + HAIRSTYLE_OPTIONS.length
-        : currentTrackIndex - HAIRSTYLE_OPTIONS.length
-    );
-
-    window.requestAnimationFrame(() => {
-      setIsTrackRecentering(false);
+      return currentPosition + movement;
     });
   };
 
@@ -204,32 +180,6 @@ const ArHairstylePage = () => {
       setIsBottomBarHidden(false);
     };
   }, [isExpanded, setIsBottomBarHidden]);
-
-  useLayoutEffect(() => {
-    if (!isTrackRecentering) {
-      return;
-    }
-
-    let secondFrame: number | null = null;
-    const firstFrame = window.requestAnimationFrame(() => {
-      void document.body.offsetHeight;
-
-      secondFrame = window.requestAnimationFrame(() => {
-        setIsTrackRecentering(false);
-      });
-    });
-
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-
-      if (secondFrame !== null) {
-        window.cancelAnimationFrame(secondFrame);
-      }
-    };
-  }, [isTrackRecentering]);
-
-  const hairstyleSizes = getHairstyleSizes(activeHairstyleTrackIndex);
-  const hairstyleTrackOffset = getHairstyleTrackOffset(hairstyleSizes, activeHairstyleTrackIndex);
 
   return (
     <section
@@ -367,65 +317,58 @@ const ArHairstylePage = () => {
         <div
           aria-label="헤어스타일 선택"
           className={cn(
-            "absolute left-1/2 w-[404px] -translate-x-1/2 overflow-hidden",
+            "absolute left-1/2 h-[80px] w-[404px] -translate-x-1/2 overflow-hidden",
             isExpanded ? "top-[626px]" : "bottom-[24px]"
           )}
         >
-          <div
-            className={cn(
-              "flex items-center gap-[25px] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-              isTrackRecentering && "transition-none"
-            )}
-            onTransitionEnd={handleTrackTransitionEnd}
-            style={{ transform: `translateX(${hairstyleTrackOffset}px)` }}
-          >
-            {HAIRSTYLE_TRACK_OPTIONS.map(({ option, trackIndex }, index) => {
-              const isSelected = trackIndex === activeHairstyleTrackIndex;
-              const isNoStyle = option.id === "none";
-              const size = hairstyleSizes[index];
-              const isFocusable = Math.abs(trackIndex - activeHairstyleTrackIndex) <= 2;
+          {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {
+            const position = activeHairstylePosition + offset;
+            const option = getCircularHairstyleOption(position);
+            const isSelected = offset === 0;
+            const isNoStyle = option.id === "none";
+            const size = getHairstyleSize(offset);
+            const isFocusable = Math.abs(offset) <= 2;
 
-              return (
-                <div
-                  className="shrink-0 transition-[width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-                  key={trackIndex}
-                  style={{ height: size, width: size }}
+            return (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 transition-[left,width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                key={position}
+                style={{ height: size, left: getHairstyleItemLeft(offset), width: size }}
+              >
+                <button
+                  aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
+                    size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
+                    isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
+                  )}
+                  onClick={() => handleHairstyleSelect(option.id)}
+                  tabIndex={isFocusable ? 0 : -1}
+                  type="button"
                 >
-                  <button
-                    aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
-                    aria-pressed={isSelected}
-                    className={cn(
-                      "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
-                      size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
-                      isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
-                    )}
-                    onClick={() => handleHairstyleSelect(option.id)}
-                    tabIndex={isFocusable ? 0 : -1}
-                    type="button"
-                  >
-                    {isNoStyle ? (
-                      <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
-                        <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
-                      </span>
-                    ) : (
-                      <span
-                        className={cn(
-                          "block h-full w-full overflow-hidden rounded-full",
-                          size === 80 && "border-[2.5px] border-black"
-                        )}
-                      >
-                        <img
-                          alt="다운펌 헤어스타일"
-                          className="h-full w-full object-cover"
-                          src={downPermImage}
-                        />
-                      </span>
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                  {isNoStyle ? (
+                    <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
+                      <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
+                    </span>
+                  ) : (
+                    <span
+                      className={cn(
+                        "block h-full w-full overflow-hidden rounded-full",
+                        size === 80 && "border-[2.5px] border-black"
+                      )}
+                    >
+                      <img
+                        alt="다운펌 헤어스타일"
+                        className="h-full w-full object-cover"
+                        src={downPermImage}
+                      />
+                    </span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {isExpanded && (
