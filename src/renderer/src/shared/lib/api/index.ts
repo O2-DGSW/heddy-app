@@ -1,3 +1,2 @@
-export { api, setAccessTokenGetter } from "./axios.ts";
-export { getApiErrorMessage } from "./error.ts";
+export { api } from "./axios.ts";
 export * from "./type.ts";

@@ -22,12 +22,3 @@ export type {
   RecordFormValues,
 } from "./types";
 export type { ProcedureType } from "./constants";
-export type {
-  PageApiData,
-  ServiceType,
-  TreatmentRecordListApiData,
-  TreatmentRecordListApiResponse,
-  TreatmentRecordListParams,
-  TreatmentRecordSort,
-  TreatmentRecordSummaryApiData,
-} from "./treatmentRecord.types";

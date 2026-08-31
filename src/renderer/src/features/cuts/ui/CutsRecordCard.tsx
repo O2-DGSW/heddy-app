@@ -55,7 +55,7 @@ export const CutsRecordCard = ({ record, onClick }: CutsRecordCardProps) => {
         <div className="flex flex-wrap items-center gap-1.5 pt-0.5 max-[400px]:gap-1">
           <CutsRatingStars rating={record.rating} />
           {record.isSharing && <CutsStatusBadge variant="sharing" />}
-          {record.analysisStatus && <CutsStatusBadge variant={record.analysisStatus} />}
+          <CutsStatusBadge variant={record.analysisStatus} />
         </div>
       </div>
 

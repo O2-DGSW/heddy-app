@@ -1,6 +1,24 @@
 import { getAccessToken } from "@/entities/auth";
-import { setAccessTokenGetter } from "@/shared/lib/api";
+import { api } from "@/shared/lib/api";
+
+let isApiAuthSetup = false;
 
 export const setupApiAuth = () => {
-  setAccessTokenGetter(getAccessToken);
+  if (isApiAuthSetup) {
+    return;
+  }
+
+  api.interceptors.request.use(async config => {
+    const accessToken = await getAccessToken();
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      delete config.headers.Authorization;
+    }
+
+    return config;
+  });
+
+  isApiAuthSetup = true;
 };

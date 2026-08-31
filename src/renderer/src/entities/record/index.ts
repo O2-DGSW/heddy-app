@@ -25,19 +25,11 @@ export {
 } from "./model";
 export type {
   CalendarDay,
-  PageApiData,
   PhotoItem,
   ProcedureType,
   RecordFieldNameType,
   RecordFormValues,
-  ServiceType,
-  TreatmentRecordListApiData,
-  TreatmentRecordListApiResponse,
-  TreatmentRecordListParams,
-  TreatmentRecordSort,
-  TreatmentRecordSummaryApiData,
 } from "./model";
-export { getTreatmentRecordsApi } from "./api";
 export {
   ProcedureTypeSelector,
   RecordPhotoUploader,

@@ -1,1 +1,0 @@
-export { getTreatmentRecordsApi } from "./treatmentRecordApi";
