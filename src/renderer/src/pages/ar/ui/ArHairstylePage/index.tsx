@@ -8,6 +8,7 @@ import modalCloseImage from "../../assets/modal-close.png";
 import noStyleIcon from "../../assets/no-style.svg";
 import refreshIcon from "../../assets/refresh.svg";
 import resizeIcon from "../../assets/resize.svg";
+import { useArServerConnection } from "../../model/useArServerConnection";
 import { cn, useBottomBarVisibility } from "@/shared";
 
 const HAIRSTYLE_OPTIONS = [
@@ -95,6 +96,7 @@ const CANDIDATE_MEMO_STYLE = {
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
+  const { connectionStatus, errorMessage } = useArServerConnection(cameraPreviewRef);
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(2);
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -137,49 +139,19 @@ const ArHairstylePage = () => {
   };
 
   useEffect(() => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      return;
-    }
-
-    let isUnmounted = false;
-    let cameraStream: MediaStream | null = null;
-
-    const startCameraPreview = async () => {
-      try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: { facingMode: { ideal: "user" } },
-        });
-
-        if (isUnmounted) {
-          cameraStream.getTracks().forEach(track => track.stop());
-          return;
-        }
-
-        if (cameraPreviewRef.current) {
-          cameraPreviewRef.current.srcObject = cameraStream;
-          void cameraPreviewRef.current.play().catch(() => undefined);
-        }
-      } catch {
-        // 카메라 권한을 거부했거나 사용할 수 없는 경우 검은 AR 미리보기 화면을 유지한다.
-      }
-    };
-
-    void startCameraPreview();
-
-    return () => {
-      isUnmounted = true;
-      cameraStream?.getTracks().forEach(track => track.stop());
-    };
-  }, []);
-
-  useEffect(() => {
     setIsBottomBarHidden(isExpanded);
 
     return () => {
       setIsBottomBarHidden(false);
     };
   }, [isExpanded, setIsBottomBarHidden]);
+
+  const recognitionLabel =
+    connectionStatus === "connected"
+      ? "얼굴 인식 중"
+      : connectionStatus === "connecting"
+        ? "AR 연결 중"
+        : "AR 연결 실패";
 
   return (
     <section
@@ -228,6 +200,7 @@ const ArHairstylePage = () => {
         />
 
         <span
+          aria-label={errorMessage ?? recognitionLabel}
           className={cn(
             "absolute right-[16px] rounded-[5px] px-[8px] py-[4px]",
             isExpanded ? "top-[24px]" : "top-[15px]",
@@ -238,7 +211,7 @@ const ArHairstylePage = () => {
             color: lightTheme.label.buttonText,
           }}
         >
-          얼굴 인식 중
+          {recognitionLabel}
         </span>
 
         <div
