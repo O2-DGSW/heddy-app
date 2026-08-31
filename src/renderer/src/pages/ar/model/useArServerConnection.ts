@@ -167,7 +167,10 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
   const parameters = transceiver.sender.getParameters();
   const encoding = parameters.encodings?.[0] ?? {};
-  parameters.encodings = [{ ...encoding, maxBitrate: 4_000_000, maxFramerate: 30 }];
+  parameters.degradationPreference = "maintain-resolution";
+  parameters.encodings = [
+    { ...encoding, maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 },
+  ];
   void transceiver.sender.setParameters(parameters);
 };
 
@@ -249,6 +252,7 @@ export const useArServerConnection = (
           frameRate: { ideal: 30, max: 30 },
           width: { ideal: 1920, max: 1920 },
           height: { ideal: 1080, max: 1080 },
+          resizeMode: "none",
         },
       });
       localStreamRef.current = localStream;
