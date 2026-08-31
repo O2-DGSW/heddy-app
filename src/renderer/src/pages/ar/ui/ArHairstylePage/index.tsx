@@ -1,5 +1,12 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef, useState, type CSSProperties, type TransitionEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type TransitionEvent,
+} from "react";
 
 import bookmarkIcon from "../../assets/bookmark.svg";
 import downPermImage from "../../assets/down-perm.png";
@@ -197,6 +204,29 @@ const ArHairstylePage = () => {
       setIsBottomBarHidden(false);
     };
   }, [isExpanded, setIsBottomBarHidden]);
+
+  useLayoutEffect(() => {
+    if (!isTrackRecentering) {
+      return;
+    }
+
+    let secondFrame: number | null = null;
+    const firstFrame = window.requestAnimationFrame(() => {
+      void document.body.offsetHeight;
+
+      secondFrame = window.requestAnimationFrame(() => {
+        setIsTrackRecentering(false);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+
+      if (secondFrame !== null) {
+        window.cancelAnimationFrame(secondFrame);
+      }
+    };
+  }, [isTrackRecentering]);
 
   const hairstyleSizes = getHairstyleSizes(activeHairstyleTrackIndex);
   const hairstyleTrackOffset = getHairstyleTrackOffset(hairstyleSizes, activeHairstyleTrackIndex);
