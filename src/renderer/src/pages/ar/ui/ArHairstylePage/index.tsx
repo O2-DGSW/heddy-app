@@ -10,12 +10,16 @@ import resizeIcon from "../../assets/resize.svg";
 import { cn, useBottomBarVisibility } from "@/shared";
 
 const HAIRSTYLE_OPTIONS = [
-  { id: "down-perm-1", size: 50 },
-  { id: "none", size: 62 },
-  { id: "down-perm-2", size: 80 },
-  { id: "down-perm-3", size: 62 },
-  { id: "down-perm-4", size: 50 },
+  { id: "down-perm-1" },
+  { id: "none" },
+  { id: "down-perm-2" },
+  { id: "down-perm-3" },
+  { id: "down-perm-4" },
 ] as const;
+
+const HAIRSTYLE_SIZES = [50, 62, 80, 62, 50] as const;
+
+type HairstyleOption = (typeof HAIRSTYLE_OPTIONS)[number];
 
 const HAIR_COLOR_OPTIONS = [
   { id: "natural-black", color: lightTheme.label.strong },
@@ -41,6 +45,9 @@ const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const [selectedHairstyleId, setSelectedHairstyleId] = useState<string>("down-perm-2");
+  const [hairstyleOptions, setHairstyleOptions] = useState<HairstyleOption[]>(() => [
+    ...HAIRSTYLE_OPTIONS,
+  ]);
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModal | null>(null);
@@ -56,7 +63,28 @@ const ArHairstylePage = () => {
 
   const handleStyleReset = () => {
     setSelectedHairstyleId("down-perm-2");
+    setHairstyleOptions([...HAIRSTYLE_OPTIONS]);
     setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
+  };
+
+  const handleHairstyleSelect = (selectedId: string) => {
+    setSelectedHairstyleId(selectedId);
+    setHairstyleOptions(currentOptions => {
+      const selectedOption = currentOptions.find(option => option.id === selectedId);
+
+      if (!selectedOption) {
+        return currentOptions;
+      }
+
+      const unselectedOptions = currentOptions.filter(option => option.id !== selectedId);
+      const centerIndex = Math.floor(currentOptions.length / 2);
+
+      return [
+        ...unselectedOptions.slice(0, centerIndex),
+        selectedOption,
+        ...unselectedOptions.slice(centerIndex),
+      ];
+    });
   };
 
   const handleExpandedToggle = () => {
@@ -240,9 +268,10 @@ const ArHairstylePage = () => {
             isExpanded ? "bottom-[123px]" : "bottom-[24px]"
           )}
         >
-          {HAIRSTYLE_OPTIONS.map(option => {
+          {hairstyleOptions.map((option, index) => {
             const isSelected = option.id === selectedHairstyleId;
             const isNoStyle = option.id === "none";
+            const size = HAIRSTYLE_SIZES[index];
 
             return (
               <button
@@ -250,12 +279,12 @@ const ArHairstylePage = () => {
                 aria-pressed={isSelected}
                 className={cn(
                   "ar-motion-press shrink-0 overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
-                  option.size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
-                  isSelected && option.size !== 80 && "ring-[2px] ring-[#F4FBF8]"
+                  size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
+                  isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
                 )}
                 key={option.id}
-                onClick={() => setSelectedHairstyleId(option.id)}
-                style={{ height: option.size, width: option.size }}
+                onClick={() => handleHairstyleSelect(option.id)}
+                style={{ height: size, width: size }}
                 type="button"
               >
                 {isNoStyle ? (
@@ -266,7 +295,7 @@ const ArHairstylePage = () => {
                   <span
                     className={cn(
                       "block h-full w-full overflow-hidden rounded-full",
-                      option.size === 80 && "border-[2.5px] border-black"
+                      size === 80 && "border-[2.5px] border-black"
                     )}
                   >
                     <img
