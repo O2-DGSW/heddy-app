@@ -52,3 +52,35 @@ export type TreatmentRecordListApiResponse = {
   data: TreatmentRecordListApiData;
   request_id: string;
 };
+
+export type TreatmentRecordPhotoApiData = {
+  photo_id: string;
+  image_type: "BEFORE" | "AFTER" | "OTHER";
+  sort_order: number;
+  photo_url?: string | null;
+};
+
+export type TreatmentRecordPriceApiData = {
+  amount: number;
+  currency: string;
+};
+
+export type TreatmentRecordDetailApiData = {
+  record_id: string;
+  service_types: ServiceType[];
+  salon_name?: string | null;
+  designer_name?: string | null;
+  performed_at: string;
+  satisfaction?: number | null;
+  price?: TreatmentRecordPriceApiData | null;
+  appointment_id?: string | null;
+  memo?: string | null;
+  next_visit_cautions?: string | null;
+  created_at: string;
+  photos?: TreatmentRecordPhotoApiData[];
+};
+
+export type TreatmentRecordDetailApiResponse = {
+  data: TreatmentRecordDetailApiData;
+  request_id: string;
+};

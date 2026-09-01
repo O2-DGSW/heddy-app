@@ -31,14 +31,18 @@ export type {
   RecordFieldNameType,
   RecordFormValues,
   ServiceType,
+  TreatmentRecordDetailApiData,
+  TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
+  TreatmentRecordPhotoApiData,
+  TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
 } from "./model";
-export { getTreatmentRecordsApi } from "./api";
-export { recordQueryKeys, useGetTreatmentRecords } from "./api";
+export { getTreatmentRecordApi, getTreatmentRecordsApi } from "./api";
+export { recordQueryKeys, useGetTreatmentRecord, useGetTreatmentRecords } from "./api";
 export {
   ProcedureTypeSelector,
   RecordPhotoUploader,
