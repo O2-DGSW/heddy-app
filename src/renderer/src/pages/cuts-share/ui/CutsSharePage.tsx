@@ -1,28 +1,62 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
+import { useGetTreatmentRecords } from "@/entities/record";
+import { useCreateShare } from "@/entities/share";
+import type { ShareField } from "@/entities/share";
 import { CutsShareRecordList } from "@/features/cuts/ui/share/CutsShareRecordList";
 import { CutsShareItemList } from "@/features/cuts/ui/share/CutsShareItemList";
-import { dummyCutsRecords } from "@/features/cuts/constrants/dummyRecords";
+import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts/constrants/shareItems";
+import { mapTreatmentRecordToCutsRecord } from "@/features/cuts/model/mapTreatmentRecord";
 
 export const CutsSharePage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [selectedId, setSelectedId] = useState(id ?? dummyCutsRecords[0]?.id ?? "");
+
+  const { data, isPending, isError, error } = useGetTreatmentRecords({ page: 0, size: 20 });
+  const records = useMemo(
+    () => (data?.items ?? []).map(mapTreatmentRecordToCutsRecord),
+    [data?.items]
+  );
+
+  // 상세에서 넘어왔으면 그 기록을, 아니면 목록 첫 기록을 기본 선택으로 둔다.
+  const [pickedId, setPickedId] = useState(id ?? "");
+  const selectedId = pickedId || records[0]?.id || "";
+
+  const [selectedFields, setSelectedFields] = useState<ShareField[]>(DEFAULT_CUTS_SHARE_FIELDS);
+  const createShare = useCreateShare();
+
+  const handleToggleField = (field: ShareField) => {
+    setSelectedFields(current =>
+      current.includes(field) ? current.filter(item => item !== field) : [...current, field]
+    );
+  };
 
   const handleBack = () => {
     setDirection("back");
     navigate(-1);
   };
 
-  /** 공유 링크를 만들고 선택한 시술기록 상세로 이동해 QR 모달을 띄운다 */
+  /** 공유 링크를 만들고, 생성 때만 내려오는 링크를 들고 상세로 이동해 QR 모달을 띄운다 */
   const handleCreateShareLink = () => {
-    setDirection("back");
-    navigate(`/cuts/${selectedId}/info`, { state: { isShareModalOpen: true } });
+    createShare.mutate(
+      { record_ids: [selectedId], fields: selectedFields },
+      {
+        onSuccess: share => {
+          setDirection("back");
+          navigate(`/cuts/${selectedId}/info`, {
+            state: { isShareModalOpen: true, shareUrl: share.share_url },
+          });
+        },
+      }
+    );
   };
+
+  // 서버가 기록·항목 각각 1개 이상을 요구하므로 그 전에는 버튼을 막는다.
+  const canCreateShare = Boolean(selectedId) && selectedFields.length > 0 && !createShare.isPending;
 
   return (
     <cap-page>
@@ -54,12 +88,36 @@ export const CutsSharePage = () => {
           className="flex flex-1 flex-col overflow-y-auto overscroll-none pb-[calc(28px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] no-scrollbar [-webkit-overflow-scrolling:touch]"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
-          <CutsShareRecordList
-            records={dummyCutsRecords}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-          <CutsShareItemList />
+          {(isPending || isError) && (
+            <p
+              className={`px-4 pt-6 text-center ${font.label.regular}`}
+              style={{ color: lightTheme.label.assistive }}
+            >
+              {isError
+                ? (error?.message ?? "시술기록을 불러오지 못했습니다.")
+                : "시술기록을 불러오는 중"}
+            </p>
+          )}
+
+          {!isPending && !isError && (
+            <>
+              <CutsShareRecordList
+                records={records}
+                selectedId={selectedId}
+                onSelect={setPickedId}
+              />
+              <CutsShareItemList selectedFields={selectedFields} onToggle={handleToggleField} />
+            </>
+          )}
+
+          {createShare.isError && (
+            <p
+              className={`px-4 pt-4 text-center ${font.caption.regular}`}
+              style={{ color: lightTheme.status.error }}
+            >
+              {createShare.error.message}
+            </p>
+          )}
 
           <div className="mt-auto grid grid-cols-2 gap-2 px-4 pt-6">
             <button
@@ -77,13 +135,14 @@ export const CutsSharePage = () => {
             <button
               type="button"
               onClick={handleCreateShareLink}
-              className={`h-[46px] rounded-xl border border-transparent ${font.headline2.semiBold}`}
+              disabled={!canCreateShare}
+              className={`h-[46px] rounded-xl border border-transparent disabled:opacity-60 ${font.headline2.semiBold}`}
               style={{
                 backgroundColor: lightTheme.primary.normal,
                 color: lightTheme.label.buttonText,
               }}
             >
-              공유 링크 생성
+              {createShare.isPending ? "만드는 중" : "공유 링크 생성"}
             </button>
           </div>
         </div>
