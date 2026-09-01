@@ -25,9 +25,13 @@ export type { ProcedureType } from "./constants";
 export type {
   PageApiData,
   ServiceType,
+  TreatmentRecordDetailApiData,
+  TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
+  TreatmentRecordPhotoApiData,
+  TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
 } from "./treatmentRecord.types";

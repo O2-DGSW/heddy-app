@@ -1,9 +1,25 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type {
+  TreatmentRecordDetailApiData,
+  TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
 } from "@/entities/record/model/treatmentRecord.types";
+
+export const getTreatmentRecordApi = async (
+  recordId: string
+): Promise<TreatmentRecordDetailApiData> => {
+  try {
+    const res = await api.get<TreatmentRecordDetailApiResponse>(`/treatment-records/${recordId}`);
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록을 불러오지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
 
 /**
  * 시술기록 목록 조회
