@@ -1,0 +1,1 @@
+export { getMyProfileApi } from "./profileApi";
