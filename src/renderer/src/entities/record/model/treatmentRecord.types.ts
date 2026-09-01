@@ -84,3 +84,21 @@ export type TreatmentRecordDetailApiResponse = {
   data: TreatmentRecordDetailApiData;
   request_id: string;
 };
+
+/**
+ * 시술기록 부분 수정 요청
+ * - 전달한 필드만 수정되고, nullable 필드에 null을 보내면 값이 지워진다.
+ * - price_amount와 price_currency는 함께 넣거나 함께 빼야 한다.
+ */
+export type UpdateTreatmentRecordRequest = {
+  service_types?: ServiceType[];
+  salon_name?: string | null;
+  designer_name?: string | null;
+  performed_at?: string;
+  satisfaction?: number | null;
+  price_amount?: number | null;
+  price_currency?: string | null;
+  appointment_id?: string | null;
+  memo?: string | null;
+  next_visit_cautions?: string | null;
+};

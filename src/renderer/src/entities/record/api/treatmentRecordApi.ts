@@ -5,6 +5,7 @@ import type {
   TreatmentRecordListApiData,
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
+  UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
 
 export const getTreatmentRecordApi = async (
@@ -35,6 +36,28 @@ export const getTreatmentRecordsApi = async (
     return res.data.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록을 불러오지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+/**
+ * 시술기록 부분 수정
+ * - 전달한 필드만 반영되므로, 바뀐 값만 담아 보내면 된다.
+ */
+export const updateTreatmentRecordApi = async (
+  recordId: string,
+  body: UpdateTreatmentRecordRequest
+): Promise<TreatmentRecordDetailApiData> => {
+  try {
+    const res = await api.patch<TreatmentRecordDetailApiResponse>(
+      `/treatment-records/${recordId}`,
+      body
+    );
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록을 수정하지 못했습니다."), {
       cause: error,
     });
   }
