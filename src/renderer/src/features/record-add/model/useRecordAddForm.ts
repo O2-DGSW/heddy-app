@@ -15,16 +15,34 @@ import type {
   RecordFormValues,
 } from "@/entities/record";
 
-export const useRecordAddForm = () => {
+interface UseRecordAddFormOptions {
+  /** 수정 화면처럼 기존 값에서 시작해야 할 때 넘긴다 */
+  initialValues?: RecordFormValues;
+  initialProcedureType?: ProcedureType;
+  initialRating?: number;
+  onSubmit?: () => void;
+}
+
+export const useRecordAddForm = ({
+  initialValues,
+  initialProcedureType,
+  initialRating,
+  onSubmit,
+}: UseRecordAddFormOptions = {}) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photoIdSequenceRef = useRef(1);
   const objectUrlsRef = useRef(new Set<string>());
-  const [formValues, setFormValues] = useState<RecordFormValues>(INITIAL_FORM_VALUES);
+  const [formValues, setFormValues] = useState<RecordFormValues>(
+    initialValues ?? INITIAL_FORM_VALUES
+  );
   const [photos, setPhotos] = useState<PhotoItem[]>(INITIAL_PHOTOS);
   const [selectedProcedureType, setSelectedProcedureType] = useState<ProcedureType>(
-    PROCEDURE_TYPES[0]
+    initialProcedureType ?? PROCEDURE_TYPES[0]
   );
-  const [rating, setRating] = useState(4);
+  const [rating, setRating] = useState(initialRating ?? 4);
+
+  // 초기값 동기화는 따로 하지 않는다. 수정 화면이 서버 값을 받은 뒤에 폼을 렌더하므로
+  // 위 useState 초기값만으로 충분하고, 편집 중에 값이 덮어써지는 사고도 막을 수 있다.
 
   const isPhotoLimitReached = photos.length >= MAX_PHOTO_COUNT;
 
@@ -94,6 +112,7 @@ export const useRecordAddForm = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    onSubmit?.();
   };
 
   useEffect(() => {
