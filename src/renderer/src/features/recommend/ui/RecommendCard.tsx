@@ -38,8 +38,10 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-1.5 max-[400px]:gap-1">
           <RecommendRankBadge rank={rank} />
-          <RecommendReasonBadge reasonType={recommendation.reasonType} />
-          <RecommendRiskBadge riskLevel={recommendation.riskLevel} />
+          {recommendation.reasonType && (
+            <RecommendReasonBadge reasonType={recommendation.reasonType} />
+          )}
+          {recommendation.riskLevel && <RecommendRiskBadge riskLevel={recommendation.riskLevel} />}
         </div>
 
         <div className="flex flex-col gap-0.5">
@@ -49,18 +51,23 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
           >
             {recommendation.styleName}
           </span>
-          <p
-            className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
-            style={{ color: lightTheme.label.alternative }}
-          >
-            근거: {recommendation.reasonDescription}
-          </p>
-          <p
-            className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
-            style={{ color: lightTheme.label.assistive }}
-          >
-            참고기록: {recommendation.referenceRecordLabel}
-          </p>
+          {/* 서버가 근거·참고기록을 안 줄 수도 있어, 값이 없으면 라벨만 남지 않도록 줄째로 숨긴다 */}
+          {recommendation.reasonDescription && (
+            <p
+              className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
+              style={{ color: lightTheme.label.alternative }}
+            >
+              근거: {recommendation.reasonDescription}
+            </p>
+          )}
+          {recommendation.referenceRecordLabel && (
+            <p
+              className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
+              style={{ color: lightTheme.label.assistive }}
+            >
+              참고기록: {recommendation.referenceRecordLabel}
+            </p>
+          )}
         </div>
 
         {/* 사진이 텍스트보다 높으면 버튼을 아래로 밀어 사진 하단과 나란히 맞춘다 */}
