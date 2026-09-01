@@ -252,7 +252,6 @@ export const useArServerConnection = (
           frameRate: { ideal: 30, max: 30 },
           width: { ideal: 1920, max: 1920 },
           height: { ideal: 1080, max: 1080 },
-          resizeMode: "none",
         },
       });
       localStreamRef.current = localStream;
