@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -11,28 +12,46 @@ const getLocalStorage = () => {
   }
 };
 
+const shouldUseNativeSecureStorage = () => Capacitor.isNativePlatform();
+
 const setToken = async (key: string, token: string) => {
-  try {
+  if (shouldUseNativeSecureStorage()) {
     await SecureStoragePlugin.set({ key, value: token });
-  } catch {
-    getLocalStorage()?.setItem(key, token);
+    getLocalStorage()?.removeItem(key);
+    return;
   }
+
+  getLocalStorage()?.setItem(key, token);
 };
 
 const getToken = async (key: string) => {
+  if (!shouldUseNativeSecureStorage()) {
+    return getLocalStorage()?.getItem(key) ?? null;
+  }
+
   try {
     const { value } = await SecureStoragePlugin.get({ key });
     return value;
   } catch {
-    return getLocalStorage()?.getItem(key) ?? null;
+    const fallbackToken = getLocalStorage()?.getItem(key) ?? null;
+
+    if (!fallbackToken) {
+      return null;
+    }
+
+    await SecureStoragePlugin.set({ key, value: fallbackToken });
+    getLocalStorage()?.removeItem(key);
+    return fallbackToken;
   }
 };
 
 const clearToken = async (key: string) => {
-  try {
-    await SecureStoragePlugin.remove({ key });
-  } catch {
-    // Ignore storage plugin failures and still clear the web fallback below.
+  if (shouldUseNativeSecureStorage()) {
+    try {
+      await SecureStoragePlugin.remove({ key });
+    } catch {
+      // 이미 삭제된 토큰은 무시한다.
+    }
   }
 
   getLocalStorage()?.removeItem(key);

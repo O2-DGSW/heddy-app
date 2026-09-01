@@ -17,11 +17,13 @@ export interface RecommendationCardType {
 }
 
 export interface RecentRecordType {
+  id: string;
   date: string;
   procedureName: string;
   salonName: string;
   designerName: string;
   rating: number;
+  thumbnailUrl: string;
 }
 
 export interface LogoPartType {
@@ -34,6 +36,9 @@ export interface HomeHeaderProps {
 }
 
 export interface RecentRecordCardProps {
+  record?: RecentRecordType;
+  isLoading?: boolean;
+  isError?: boolean;
   onClick: () => void;
 }
 
@@ -54,6 +59,7 @@ export interface RecommendationCardProps {
 
 export interface CroppedHairImageProps {
   alt: string;
+  src?: string;
 }
 
 export interface RatingStarsProps {
