@@ -2,7 +2,6 @@ import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
-import { BottomBarVisibilityProvider, useBottomBarVisibility } from "@/shared";
 import {
   PAGE_SCROLL_PATHS,
   BOTTOM_BAR_HIDDEN_PREFIXES,
@@ -44,9 +43,8 @@ const useBrowserDevicePreview = () => {
   return { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale };
 };
 
-const MobileLayoutContent = () => {
+const MobileLayout = () => {
   const location = useLocation();
-  const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale } =
     useBrowserDevicePreview();
 
@@ -64,9 +62,7 @@ const MobileLayoutContent = () => {
 
   const hideBottomBar =
     BOTTOM_BAR_HIDDEN_PATHS.includes(location.pathname) ||
-    BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix)) ||
-    isBottomBarHidden;
-  const reserveBottomSafeArea = hideBottomBar && location.pathname !== "/ar";
+    BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
 
   return (
     <div
@@ -119,7 +115,7 @@ const MobileLayoutContent = () => {
             className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white ${isBrowserDevicePreview ? "sm:h-auto sm:min-h-0 sm:flex-1 sm:rounded-[51px] sm:border sm:border-white/70 sm:shadow-none sm:[--safe-area-inset-top:59px] sm:[--safe-area-inset-bottom:34px]" : "sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)]"}`}
           >
             <main
-              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${reserveBottomSafeArea ? "pb-safe" : "pb-0"}`}
+              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${hideBottomBar ? "pb-safe" : "pb-0"}`}
             >
               <Outlet />
             </main>
@@ -188,14 +184,6 @@ const MobileLayoutContent = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const MobileLayout = () => {
-  return (
-    <BottomBarVisibilityProvider>
-      <MobileLayoutContent />
-    </BottomBarVisibilityProvider>
   );
 };
 

@@ -41,21 +41,6 @@
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  *,
-  *::before,
-  *::after {
-    -webkit-user-drag: none;
-  }
-
-  input,
-  textarea,
-  select {
-    -webkit-user-select: text;
-    user-select: text;
   }
 
   #root {

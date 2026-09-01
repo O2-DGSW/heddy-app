@@ -1,1 +1,0 @@
-export { getMyProfileApi } from "./profileApi";

@@ -7,11 +7,10 @@ import heartIcon from "../../assets/heart.svg";
 import profileAvatar from "../../assets/profile-avatar.png";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
-import { useProfile } from "../../model/useProfile";
 
 interface ProfileStat {
   label: string;
-  value: string;
+  value: number;
 }
 
 interface ProfileMenuItem {
@@ -20,11 +19,13 @@ interface ProfileMenuItem {
   to?: string;
 }
 
+const PROFILE_NAME = "오용준";
+
 const PROFILE_STATS: ProfileStat[] = [
-  { label: "시술 기록", value: "-" },
-  { label: "AI 분석", value: "-" },
-  { label: "AR 후보", value: "-" },
-  { label: "공유 중", value: "-" },
+  { label: "시술 기록", value: 4 },
+  { label: "AI 분석", value: 2 },
+  { label: "AR 후보", value: 3 },
+  { label: "공유 중", value: 1 },
 ];
 
 const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
@@ -77,8 +78,6 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { data: profile, isLoading } = useProfile();
-  const profileName = profile?.nickname ?? (isLoading ? "불러오는 중" : "사용자");
 
   const handleMenuClick = (to?: string) => {
     if (to) {
@@ -102,7 +101,7 @@ const ProfilePage = () => {
                 id="profile-title"
                 style={{ color: lightTheme.label.neutral }}
               >
-                {profileName}님
+                {PROFILE_NAME}님
               </h1>
             </div>
 
