@@ -12,7 +12,7 @@ const ArColorPicker = ({ isExpanded, selectedColorId, setSelectedColorId }: ArCo
     aria-label="헤어 컬러 선택"
     className={cn(
       "absolute left-[31px] flex flex-col gap-[11px]",
-      isExpanded ? "top-[185px]" : "top-[172px]"
+      isExpanded ? "top-[clamp(76px,20%,185px)]" : "top-[clamp(96px,30%,172px)]"
     )}
   >
     {HAIR_COLOR_OPTIONS.map(option => {

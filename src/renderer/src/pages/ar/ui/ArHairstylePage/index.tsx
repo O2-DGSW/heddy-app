@@ -47,7 +47,7 @@ const ArHairstylePage = () => {
   return (
     <section
       aria-labelledby="ar-hairstyle-title"
-      className="ar-motion-page-enter flex min-h-full flex-col overflow-hidden"
+      className="ar-motion-page-enter flex h-full min-h-0 flex-col overflow-hidden"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       {!isExpanded && (
@@ -65,7 +65,7 @@ const ArHairstylePage = () => {
       <main
         aria-label="AR 미리보기"
         className={cn(
-          "relative min-h-[656px] flex-1 overflow-hidden",
+          "relative min-h-0 flex-1 overflow-hidden",
           isExpanded && "fixed inset-x-0 z-[25] min-h-0"
         )}
         style={{

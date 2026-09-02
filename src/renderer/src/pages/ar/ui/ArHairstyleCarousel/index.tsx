@@ -25,7 +25,7 @@ const ArHairstyleCarousel = ({
     aria-label="헤어스타일 선택"
     className={cn(
       "absolute left-1/2 h-[80px] w-[404px] -translate-x-1/2 overflow-hidden",
-      isExpanded ? "top-[626px]" : "bottom-[24px]"
+      isExpanded ? "bottom-[clamp(178px,22%,194px)]" : "bottom-[clamp(12px,4%,24px)]"
     )}
   >
     {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {

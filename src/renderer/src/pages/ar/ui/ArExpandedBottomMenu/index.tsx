@@ -8,7 +8,7 @@ const ArExpandedBottomMenu = () => (
     <div
       aria-label="확대 AR 하단 메뉴"
       className={cn(
-        "absolute left-1/2 top-[746px] flex -translate-x-1/2 items-center gap-[33px]",
+        "absolute bottom-[clamp(96px,15%,140px)] left-1/2 flex -translate-x-1/2 items-center gap-[33px]",
         font.label.medium
       )}
       style={{ color: lightTheme.label.assistive }}
@@ -21,12 +21,6 @@ const ArExpandedBottomMenu = () => (
           {item}
         </span>
       ))}
-    </div>
-    <div
-      aria-hidden="true"
-      className="absolute inset-x-0 bottom-0 flex h-[34px] items-end justify-center bg-white pb-[8px]"
-    >
-      <span className="h-[5px] w-[144px] rounded-full bg-black" />
     </div>
   </>
 );

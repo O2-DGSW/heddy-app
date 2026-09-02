@@ -22,7 +22,7 @@ const ArControlBar = ({
   <div
     className={cn(
       "absolute left-1/2 flex w-[332px] -translate-x-1/2 items-center gap-[8px]",
-      isExpanded ? "top-[549px]" : "bottom-[142px]"
+      isExpanded ? "bottom-[clamp(270px,35%,314px)]" : "bottom-[clamp(112px,26%,142px)]"
     )}
   >
     <button
