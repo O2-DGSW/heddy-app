@@ -1,7 +1,6 @@
 import { Capacitor, CapacitorHttp } from "@capacitor/core";
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 
-import { LIVEBANK_CAPTURE_YAWS, LIVEBANK_CAPTURE_YAW_THRESHOLD } from "./constants";
 import type { ArHairstyleOption } from "./types";
 
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
@@ -16,16 +15,24 @@ export interface ArStats {
 }
 
 export interface ArLivebankProgress {
-  status: "started" | "running" | "generating" | "complete" | "stopped" | "error";
+  bank?: string;
+  banks: string[];
+  buckets: ArLivebankBucket[];
+  capturedYaw?: number;
+  currentYaw?: number;
   done?: number;
+  filledYaw?: number;
+  index?: number;
   total?: number;
+  nextYaw?: number;
+  status:
+    "started" | "running" | "captured" | "generating" | "filled" | "complete" | "stopped" | "error";
   message?: string;
 }
 
-export interface ArCaptureResult {
+export interface ArLivebankBucket {
   status: string;
-  url?: string;
-  asset?: string;
+  yaw: number;
 }
 
 interface ArServerAnswer {
@@ -34,14 +41,13 @@ interface ArServerAnswer {
 }
 
 interface ArServerReferencesResponse {
-  references: unknown[];
+  references?: unknown[];
+  styles?: unknown[];
 }
 
 interface UseArServerConnectionResult {
   connectionStatus: ArConnectionStatusType;
   errorMessage: string | null;
-  capture: () => void;
-  captureResult: ArCaptureResult | null;
   capturedYawTargets: number[];
   livebankProgress: ArLivebankProgress | null;
   stats: ArStats | null;
@@ -58,7 +64,34 @@ export const getArServerBaseUrl = () => {
 };
 
 const isArServerReferencesResponse = (value: unknown): value is ArServerReferencesResponse =>
-  isRecord(value) && Array.isArray(value.references);
+  isRecord(value) && (Array.isArray(value.references) || Array.isArray(value.styles));
+
+const parseHairstyleOption = (value: unknown): ArHairstyleOption | null => {
+  if (typeof value === "string" && value.trim()) {
+    return { id: value, label: value };
+  }
+
+  if (!isRecord(value) || typeof value.id !== "string" || !value.id.trim()) {
+    return null;
+  }
+
+  const label =
+    typeof value.display_name === "string"
+      ? value.display_name
+      : typeof value.name === "string"
+        ? value.name
+        : value.id;
+  const imageUrl =
+    typeof value.image_url === "string"
+      ? value.image_url
+      : typeof value.thumbnail_url === "string"
+        ? value.thumbnail_url
+        : typeof value.image === "string"
+          ? value.image
+          : undefined;
+
+  return { id: value.id, imageUrl, label };
+};
 
 export const getArHairstyleReferences = async (): Promise<ArHairstyleOption[]> => {
   const serverBaseUrl = getArServerBaseUrl();
@@ -96,9 +129,13 @@ export const getArHairstyleReferences = async (): Promise<ArHairstyleOption[]> =
     throw new Error("AR 서버의 헤어스타일 목록 형식이 올바르지 않습니다.");
   }
 
-  return responseData.references.flatMap(reference =>
-    typeof reference === "string" && reference.trim() ? [{ id: reference, label: reference }] : []
-  );
+  const references = responseData.styles ?? responseData.references ?? [];
+
+  return references.flatMap(reference => {
+    const hairstyleOption = parseHairstyleOption(reference);
+
+    return hairstyleOption ? [hairstyleOption] : [];
+  });
 };
 
 const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
@@ -136,10 +173,52 @@ const getOptionalNumber = (value: unknown) =>
 const isArLivebankStatus = (value: unknown): value is ArLivebankProgress["status"] =>
   value === "started" ||
   value === "running" ||
+  value === "captured" ||
   value === "generating" ||
+  value === "filled" ||
   value === "complete" ||
   value === "stopped" ||
   value === "error";
+
+const getLivebankYaw = (value: unknown) => {
+  if (isRecord(value)) {
+    return (
+      getOptionalNumber(value.yaw) ??
+      getOptionalNumber(value.target_yaw) ??
+      getOptionalNumber(value.angle)
+    );
+  }
+
+  return getOptionalNumber(value);
+};
+
+const parseLivebankBuckets = (value: unknown): ArLivebankBucket[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap(bucket => {
+    const yaw = getLivebankYaw(bucket);
+
+    if (yaw === undefined) {
+      return [];
+    }
+
+    return [
+      {
+        status: isRecord(bucket) && typeof bucket.status === "string" ? bucket.status : "pending",
+        yaw,
+      },
+    ];
+  });
+};
+
+const parseLivebankBanks = (value: unknown) =>
+  Array.isArray(value)
+    ? value.flatMap(bank => (typeof bank === "string" && bank.trim() ? [bank] : []))
+    : [];
+
+const getLivebankNextYaw = (value: unknown) => getLivebankYaw(value);
 
 const parseArStats = (value: Record<string, unknown>): ArStats => ({
   asset_used: typeof value.asset_used === "string" ? value.asset_used : undefined,
@@ -189,11 +268,7 @@ const parseDataChannelPayload = async (value: unknown): Promise<unknown> => {
 
 const parseServerEvent = (
   value: unknown
-):
-  | { type: "stats"; data: ArStats }
-  | { type: "livebank"; data: ArLivebankProgress }
-  | { type: "capture"; data: ArCaptureResult }
-  | null => {
+): { type: "stats"; data: ArStats } | { type: "livebank"; data: ArLivebankProgress } | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -209,21 +284,18 @@ const parseServerEvent = (
     return {
       type: "livebank",
       data: {
+        bank: typeof data.bank === "string" ? data.bank : undefined,
+        banks: parseLivebankBanks(data.banks),
+        buckets: parseLivebankBuckets(data.buckets),
+        capturedYaw: getOptionalNumber(data.captured_yaw),
+        currentYaw: getOptionalNumber(data.current_yaw),
         done: getOptionalNumber(data.done),
+        filledYaw: getOptionalNumber(data.filled_yaw),
+        index: getOptionalNumber(data.index),
         message: typeof data.message === "string" ? data.message : undefined,
+        nextYaw: getLivebankNextYaw(data.next),
         status: data.status,
         total: getOptionalNumber(data.total),
-      },
-    };
-  }
-
-  if (value.type === "capture" && typeof data.status === "string") {
-    return {
-      type: "capture",
-      data: {
-        asset: typeof data.asset === "string" ? data.asset : undefined,
-        status: data.status,
-        url: typeof data.url === "string" ? data.url : undefined,
       },
     };
   }
@@ -265,6 +337,46 @@ const requestArServerOffer = async (
   }
 
   return answer;
+};
+
+const isCapturedLivebankBucket = (status: string) =>
+  status === "captured" || status === "generating" || status === "filled" || status === "complete";
+
+const mergeLivebankProgress = (
+  previousProgress: ArLivebankProgress | null,
+  nextProgress: ArLivebankProgress
+): ArLivebankProgress => {
+  const buckets =
+    nextProgress.buckets.length > 0 ? nextProgress.buckets : (previousProgress?.buckets ?? []);
+
+  if (nextProgress.status !== "captured" || nextProgress.capturedYaw === undefined) {
+    return { ...nextProgress, buckets };
+  }
+
+  const capturedYaw = nextProgress.capturedYaw;
+  const hasCapturedBucket = buckets.some(
+    bucket => bucket.yaw === capturedYaw && isCapturedLivebankBucket(bucket.status)
+  );
+
+  if (hasCapturedBucket) {
+    return { ...nextProgress, buckets };
+  }
+
+  const matchingBucketIndex = buckets.findIndex(bucket => bucket.yaw === capturedYaw);
+
+  if (matchingBucketIndex === -1) {
+    return {
+      ...nextProgress,
+      buckets: [...buckets, { status: "captured", yaw: capturedYaw }],
+    };
+  }
+
+  return {
+    ...nextProgress,
+    buckets: buckets.map((bucket, index) =>
+      index === matchingBucketIndex ? { ...bucket, status: "captured" } : bucket
+    ),
+  };
 };
 
 const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) => {
@@ -317,84 +429,43 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
-  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
-  hairstyleId: string,
-  livebankReferenceId: string | null,
-  faceYaw: number | null
+  livebankReferenceId: string | null
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
-  const hairstyleIdRef = useRef(hairstyleId);
   const livebankReferenceIdRef = useRef(livebankReferenceId);
   const isLivebankStartedRef = useRef(false);
-  const capturedYawTargetsRef = useRef(new Set<number>());
   const [stats, setStats] = useState<ArStats | null>(null);
   const [livebankProgress, setLivebankProgress] = useState<ArLivebankProgress | null>(null);
-  const [captureResult, setCaptureResult] = useState<ArCaptureResult | null>(null);
-  const [capturedYawTargets, setCapturedYawTargets] = useState<number[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const sendHairstyleMode = useCallback(
-    (nextHairstyleId: string, nextLivebankReferenceId: string | null) => {
-      const statsChannel = statsChannelRef.current;
-
-      if (statsChannel?.readyState !== "open") {
-        return;
-      }
-
-      const isOriginalStyle = nextHairstyleId === "none";
-      const livebankReferenceId = nextLivebankReferenceId ?? nextHairstyleId;
-
-      if (!livebankReferenceId) {
-        return;
-      }
-
-      if (!isLivebankStartedRef.current) {
-        // Livebank가 먼저 기준 프레임을 수집한 후 스타일 합성을 시작해야 한다.
-        statsChannel.send(
-          JSON.stringify({ type: "livebank", on: true, reference: livebankReferenceId })
-        );
-        isLivebankStartedRef.current = true;
-        capturedYawTargetsRef.current.clear();
-        setCapturedYawTargets([]);
-      }
-
-      if (capturedYawTargetsRef.current.size !== LIVEBANK_CAPTURE_YAWS.length) {
-        return;
-      }
-
-      statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
-
-      if (isOriginalStyle) {
-        return;
-      }
-
-      statsChannel.send(
-        JSON.stringify({ type: "fit", bank: nextHairstyleId, harmonize: true, scale: 1 })
-      );
-    },
-    []
+  const capturedYawTargets = useMemo(
+    () =>
+      livebankProgress?.buckets
+        .filter(bucket => isCapturedLivebankBucket(bucket.status))
+        .map(bucket => bucket.yaw) ?? [],
+    [livebankProgress]
   );
 
-  const requestCapture = useCallback((targetYaw?: number) => {
-    if (statsChannelRef.current?.readyState !== "open") {
+  const startLivebank = useCallback((nextLivebankReferenceId: string | null) => {
+    const statsChannel = statsChannelRef.current;
+
+    if (
+      statsChannel?.readyState !== "open" ||
+      !nextLivebankReferenceId ||
+      isLivebankStartedRef.current
+    ) {
       return;
     }
 
-    statsChannelRef.current.send(
-      JSON.stringify({
-        type: "capture",
-        reference: true,
-        ...(targetYaw !== undefined && { yaw: targetYaw }),
-      })
+    statsChannel.send(
+      JSON.stringify({ type: "livebank", on: true, reference: nextLivebankReferenceId })
     );
+    isLivebankStartedRef.current = true;
+    setLivebankProgress(null);
   }, []);
-
-  const capture = useCallback(() => {
-    requestCapture();
-  }, [requestCapture]);
 
   const stopConnection = useCallback(
     (shouldStopCamera = true) => {
@@ -402,7 +473,7 @@ export const useArServerConnection = (
       peerConnectionRef.current = null;
       statsChannelRef.current = null;
       isLivebankStartedRef.current = false;
-      capturedYawTargetsRef.current.clear();
+      setLivebankProgress(null);
 
       if (shouldStopCamera) {
         localStreamRef.current?.getTracks().forEach(track => track.stop());
@@ -411,13 +482,9 @@ export const useArServerConnection = (
         if (previewVideoRef.current) {
           previewVideoRef.current.srcObject = null;
         }
-
-        if (faceTrackingVideoRef.current) {
-          faceTrackingVideoRef.current.srcObject = null;
-        }
       }
     },
-    [faceTrackingVideoRef, previewVideoRef]
+    [previewVideoRef]
   );
 
   const startConnection = useCallback(async () => {
@@ -449,14 +516,9 @@ export const useArServerConnection = (
         void previewVideoRef.current.play().catch(() => undefined);
       }
 
-      if (faceTrackingVideoRef.current) {
-        faceTrackingVideoRef.current.srcObject = localStream;
-        void faceTrackingVideoRef.current.play().catch(() => undefined);
-      }
-
       if (!serverBaseUrl) {
         setConnectionStatus("error");
-        setErrorMessage("AR 서버 주소가 설정되지 않았습니다. 얼굴 방향 안내만 사용할 수 있습니다.");
+        setErrorMessage("AR 서버 주소가 설정되지 않았습니다.");
         return;
       }
 
@@ -466,7 +528,7 @@ export const useArServerConnection = (
       statsChannelRef.current = statsChannel;
       statsChannel.binaryType = "arraybuffer";
       statsChannel.addEventListener("open", () => {
-        sendHairstyleMode(hairstyleIdRef.current, livebankReferenceIdRef.current);
+        startLivebank(livebankReferenceIdRef.current);
       });
       statsChannel.addEventListener("message", event => {
         const handleServerEvent = async () => {
@@ -479,10 +541,10 @@ export const useArServerConnection = (
 
             if (serverEvent.type === "stats") {
               setStats(serverEvent.data);
-            } else if (serverEvent.type === "livebank") {
-              setLivebankProgress(serverEvent.data);
             } else {
-              setCaptureResult(serverEvent.data);
+              setLivebankProgress(previousProgress =>
+                mergeLivebankProgress(previousProgress, serverEvent.data)
+              );
             }
           } catch {
             // Ignore malformed diagnostic events so media playback remains uninterrupted.
@@ -538,30 +600,12 @@ export const useArServerConnection = (
           : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
       );
     }
-  }, [faceTrackingVideoRef, previewVideoRef, sendHairstyleMode, stopConnection]);
+  }, [previewVideoRef, startLivebank, stopConnection]);
 
   useEffect(() => {
-    hairstyleIdRef.current = hairstyleId;
     livebankReferenceIdRef.current = livebankReferenceId;
-    sendHairstyleMode(hairstyleId, livebankReferenceId);
-  }, [capturedYawTargets, hairstyleId, livebankReferenceId, sendHairstyleMode]);
-
-  useEffect(() => {
-    const nextTargetYaw = LIVEBANK_CAPTURE_YAWS[capturedYawTargetsRef.current.size];
-
-    if (
-      !isLivebankStartedRef.current ||
-      faceYaw === null ||
-      nextTargetYaw === undefined ||
-      Math.abs(faceYaw - nextTargetYaw) > LIVEBANK_CAPTURE_YAW_THRESHOLD
-    ) {
-      return;
-    }
-
-    capturedYawTargetsRef.current.add(nextTargetYaw);
-    setCapturedYawTargets([...capturedYawTargetsRef.current]);
-    requestCapture(nextTargetYaw);
-  }, [faceYaw, requestCapture]);
+    startLivebank(livebankReferenceId);
+  }, [livebankReferenceId, startLivebank]);
 
   useEffect(() => {
     const startTimer = window.setTimeout(() => {
@@ -575,8 +619,6 @@ export const useArServerConnection = (
   }, [startConnection, stopConnection]);
 
   return {
-    capture,
-    captureResult,
     capturedYawTargets,
     connectionStatus,
     errorMessage,

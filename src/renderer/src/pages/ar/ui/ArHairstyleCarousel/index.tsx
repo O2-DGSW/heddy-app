@@ -137,6 +137,12 @@ const ArHairstyleCarousel = ({
                 <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
                   <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
                 </span>
+              ) : option.imageUrl ? (
+                <img
+                  alt={`${option.label} 참고 이미지`}
+                  className="h-full w-full object-cover"
+                  src={option.imageUrl}
+                />
               ) : (
                 <span
                   className={cn(

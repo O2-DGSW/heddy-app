@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useArServerConnection } from "../../model/useArServerConnection";
 import { useArHairstyleReferences } from "../../model/useArHairstyleReferences";
 import { useArHairstyle } from "../../model/useArHairstyle";
-import { useFaceYaw } from "../../model/useFaceYaw";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
@@ -18,7 +17,6 @@ import ArRecognitionBadge from "../ArRecognitionBadge";
 
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
-  const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     errorMessage: hairstyleReferencesErrorMessage,
@@ -41,15 +39,9 @@ const ArHairstylePage = () => {
     setSelectedColorId,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
-  const { yaw: faceYaw } = useFaceYaw(faceTrackingVideoRef);
-  const { capturedYawTargets, connectionStatus, errorMessage } = useArServerConnection(
-    cameraPreviewRef,
-    faceTrackingVideoRef,
-    selectedHairstyle.id,
-    serverHairstyleOptions[0]?.id ?? null,
-    faceYaw
-  );
-  const isFaceTracked = faceYaw !== null;
+  const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress, stats } =
+    useArServerConnection(cameraPreviewRef, serverHairstyleOptions[0]?.id ?? null);
+  const isFaceTracked = typeof stats?.yaw === "number";
 
   useEffect(() => {
     setIsBottomBarHidden(isExpanded);
@@ -102,15 +94,6 @@ const ArHairstylePage = () => {
             playsInline
             ref={cameraPreviewRef}
           />
-          <video
-            aria-hidden="true"
-            autoPlay
-            className="pointer-events-none absolute h-px w-px opacity-0"
-            muted
-            playsInline
-            ref={faceTrackingVideoRef}
-          />
-
           <ArRecognitionBadge
             connectionStatus={connectionStatus}
             errorMessage={errorMessage}
@@ -120,7 +103,8 @@ const ArHairstylePage = () => {
           <ArHeadTurnGuide
             capturedYawTargets={capturedYawTargets}
             isExpanded={isExpanded}
-            yaw={faceYaw ?? undefined}
+            livebankProgress={livebankProgress}
+            yaw={stats?.yaw}
           />
           <ArColorPicker
             isExpanded={isExpanded}

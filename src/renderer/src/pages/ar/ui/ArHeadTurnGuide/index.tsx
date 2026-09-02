@@ -1,7 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { motion } from "motion/react";
 
-import { LIVEBANK_CAPTURE_YAWS } from "../../model/constants";
+import type { ArLivebankProgress } from "../../model/useArServerConnection";
 import { cn } from "@/shared";
 
 const getHeadTurnInstruction = (targetYaw: number) => {
@@ -19,29 +19,43 @@ const getHeadTurnStep = (targetYaw: number) => ({
   targetYaw,
 });
 
-const HEAD_TURN_STEPS = LIVEBANK_CAPTURE_YAWS.map(getHeadTurnStep);
-
 interface ArHeadTurnGuideProps {
   capturedYawTargets: number[];
   isExpanded: boolean;
+  livebankProgress: ArLivebankProgress | null;
   yaw?: number;
 }
 
-const ArHeadTurnGuide = ({ capturedYawTargets, isExpanded, yaw }: ArHeadTurnGuideProps) => {
-  const activeStepIndex = HEAD_TURN_STEPS.findIndex(
-    step => !capturedYawTargets.includes(step.targetYaw)
-  );
-  const isAngleGuideCompleted = activeStepIndex === -1;
-  const activeStep =
-    HEAD_TURN_STEPS[isAngleGuideCompleted ? HEAD_TURN_STEPS.length - 1 : activeStepIndex];
-  const previousStep = HEAD_TURN_STEPS[Math.max(activeStepIndex - 1, 0)];
-  const progressLabel = isAngleGuideCompleted ? "스타일을 생성하고 있어요" : activeStep.label;
+const ArHeadTurnGuide = ({
+  capturedYawTargets,
+  isExpanded,
+  livebankProgress,
+  yaw,
+}: ArHeadTurnGuideProps) => {
+  const nextYaw = livebankProgress?.nextYaw;
+  const activeStep = nextYaw === undefined ? null : getHeadTurnStep(nextYaw);
+  const isGenerating =
+    livebankProgress?.status === "generating" || livebankProgress?.status === "filled";
+  const isAngleGuideCompleted =
+    livebankProgress?.status === "complete" ||
+    (livebankProgress?.total !== undefined && capturedYawTargets.length >= livebankProgress.total);
+  const isInTargetRange =
+    activeStep !== null && typeof yaw === "number" && Math.abs(yaw - activeStep.targetYaw) <= 7;
+  const progressLabel = isGenerating
+    ? "헤어를 만들고 있어요"
+    : isAngleGuideCompleted
+      ? "스타일을 생성하고 있어요"
+      : (activeStep?.label ?? "고개를 천천히 좌우로 돌려주세요");
   const detailLabel =
     typeof yaw !== "number"
       ? "얼굴 방향 데이터를 기다리고 있어요"
-      : isAngleGuideCompleted
+      : isGenerating
         ? "원하는 스타일을 확인해 보세요"
-        : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
+        : isInTargetRange
+          ? "좋아요, 그 방향에서 잠깐만 멈춰주세요"
+          : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
+  const guideRotation = activeStep?.rotation ?? (yaw ?? 0) * (3 / 4);
+  const previousRotation = activeStep ? (yaw ?? activeStep.targetYaw) * (3 / 4) : guideRotation;
 
   return (
     <section
@@ -55,15 +69,15 @@ const ArHeadTurnGuide = ({ capturedYawTargets, isExpanded, yaw }: ArHeadTurnGuid
       <div className="[perspective:700px]">
         <motion.div
           initial={{
-            rotateY: isAngleGuideCompleted ? activeStep.rotation : previousStep.rotation,
-            x: isAngleGuideCompleted ? activeStep.rotation / 1.8 : previousStep.rotation / 1.8,
+            rotateY: previousRotation,
+            x: previousRotation / 1.8,
           }}
           animate={{
-            rotateY: isAngleGuideCompleted ? 0 : activeStep.rotation,
-            x: isAngleGuideCompleted ? 0 : activeStep.rotation / 1.8,
+            rotateY: isAngleGuideCompleted || isGenerating ? 0 : guideRotation,
+            x: isAngleGuideCompleted || isGenerating ? 0 : guideRotation / 1.8,
           }}
           className="relative flex h-[104px] w-[82px] items-center justify-center rounded-[46%] border border-white/75 bg-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm"
-          key={activeStep.id}
+          key={activeStep?.id ?? livebankProgress?.status ?? "waiting"}
           style={{ transformOrigin: "center center" }}
           transition={{ damping: 18, mass: 0.9, stiffness: 90, type: "spring" }}
         >

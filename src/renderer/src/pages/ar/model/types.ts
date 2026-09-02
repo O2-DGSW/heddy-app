@@ -1,5 +1,6 @@
 export interface ArHairstyleOption {
   id: string;
+  imageUrl?: string;
   label: string;
 }
 
