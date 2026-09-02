@@ -64,6 +64,38 @@ const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
+const getEventData = (value: Record<string, unknown>) => {
+  if (isRecord(value.data)) {
+    return value.data;
+  }
+
+  if (isRecord(value.payload)) {
+    return value.payload;
+  }
+
+  return value;
+};
+
+const getOptionalNumber = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
+const isArLivebankStatus = (value: unknown): value is ArLivebankProgress["status"] =>
+  value === "started" ||
+  value === "running" ||
+  value === "generating" ||
+  value === "complete" ||
+  value === "stopped" ||
+  value === "error";
+
+const parseArStats = (value: Record<string, unknown>): ArStats => ({
+  asset_used: typeof value.asset_used === "string" ? value.asset_used : undefined,
+  bank: typeof value.bank === "string" ? value.bank : undefined,
+  errors: getOptionalNumber(value.errors),
+  server_fps: getOptionalNumber(value.server_fps),
+  yaw: getOptionalNumber(value.yaw),
+  yaw_ema: getOptionalNumber(value.yaw_ema),
+});
+
 const parseServerEvent = (
   value: unknown
 ):
@@ -75,16 +107,33 @@ const parseServerEvent = (
     return null;
   }
 
+  const data = getEventData(value);
+
   if (value.type === "stats") {
-    return { type: "stats", data: value as ArStats };
+    return { type: "stats", data: parseArStats(data) };
   }
 
-  if (value.type === "livebank" && typeof value.status === "string") {
-    return { type: "livebank", data: value as unknown as ArLivebankProgress };
+  if (value.type === "livebank" && isArLivebankStatus(data.status)) {
+    return {
+      type: "livebank",
+      data: {
+        done: getOptionalNumber(data.done),
+        message: typeof data.message === "string" ? data.message : undefined,
+        status: data.status,
+        total: getOptionalNumber(data.total),
+      },
+    };
   }
 
-  if (value.type === "capture" && typeof value.status === "string") {
-    return { type: "capture", data: value as unknown as ArCaptureResult };
+  if (value.type === "capture" && typeof data.status === "string") {
+    return {
+      type: "capture",
+      data: {
+        asset: typeof data.asset === "string" ? data.asset : undefined,
+        status: data.status,
+        url: typeof data.url === "string" ? data.url : undefined,
+      },
+    };
   }
 
   return null;
@@ -325,10 +374,14 @@ export const useArServerConnection = (
       }
 
       await peerConnection.setRemoteDescription(answer);
-    } catch {
+    } catch (error: unknown) {
       stopConnection();
       setConnectionStatus("error");
-      setErrorMessage("AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요.");
+      setErrorMessage(
+        error instanceof DOMException && error.name === "NotAllowedError"
+          ? "카메라 권한이 필요합니다. 기기 설정에서 Heddy의 카메라 접근을 허용해 주세요."
+          : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
+      );
     }
   }, [previewVideoRef, sendHairstyleMode, stopConnection]);
 

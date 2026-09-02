@@ -36,6 +36,7 @@ const ArHairstylePage = () => {
     cameraPreviewRef,
     selectedHairstyle.id
   );
+  const isFaceTracked = typeof stats?.yaw_ema === "number" || typeof stats?.yaw === "number";
 
   useEffect(() => {
     setIsBottomBarHidden(isExpanded);
@@ -92,6 +93,7 @@ const ArHairstylePage = () => {
           <ArRecognitionBadge
             connectionStatus={connectionStatus}
             errorMessage={errorMessage}
+            isFaceTracked={isFaceTracked}
             isExpanded={isExpanded}
           />
           {connectionStatus === "connected" && (
