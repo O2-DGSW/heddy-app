@@ -1,4 +1,9 @@
-export { generateRecommendationApi, getLatestRecommendationApi } from "./api";
+export {
+  generateRecommendationApi,
+  getLatestRecommendationApi,
+  recommendationQueryKeys,
+  useGetLatestRecommendation,
+} from "./api";
 export type {
   GenerateRecommendationRequest,
   RecommendationApiData,

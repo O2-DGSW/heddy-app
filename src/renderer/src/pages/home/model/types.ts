@@ -12,6 +12,7 @@ export interface RecommendationCardType {
   id: string;
   rank: number;
   title: string;
+  imageUrl: string;
   colorName: string;
   tags: string[];
 }
@@ -48,6 +49,9 @@ export interface ShortcutCardProps {
 }
 
 export interface RecommendationSectionProps {
+  recommendations: RecommendationCardType[];
+  isLoading?: boolean;
+  isError?: boolean;
   onMoreClick: () => void;
   onRecommendationClick: () => void;
 }

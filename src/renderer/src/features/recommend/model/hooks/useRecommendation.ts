@@ -1,10 +1,12 @@
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { generateRecommendationApi, getLatestRecommendationApi } from "@/entities";
+import {
+  generateRecommendationApi,
+  recommendationQueryKeys,
+  useGetLatestRecommendation,
+} from "@/entities";
 import { mapRecommendationToItems } from "@/features/recommend/model/mapRecommendation";
-
-export const LATEST_RECOMMENDATION_QUERY_KEY = "latest-recommendation";
 
 /**
  * 화면에 보여줄 추천을 관리한다.
@@ -14,16 +16,13 @@ export const LATEST_RECOMMENDATION_QUERY_KEY = "latest-recommendation";
 export const useRecommendation = () => {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: [LATEST_RECOMMENDATION_QUERY_KEY],
-    queryFn: getLatestRecommendationApi,
-  });
+  const { data, isPending, isError, error, refetch } = useGetLatestRecommendation();
 
   const generate = useMutation({
     mutationFn: () => generateRecommendationApi({ force_refresh: true }),
     onSuccess: generated => {
       // 생성 결과가 곧 최신 추천이므로 다시 받아오지 않고 캐시에 바로 반영한다.
-      queryClient.setQueryData([LATEST_RECOMMENDATION_QUERY_KEY], generated);
+      queryClient.setQueryData(recommendationQueryKeys.latest(), generated);
     },
   });
 
