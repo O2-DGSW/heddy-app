@@ -1,5 +1,8 @@
 export type {
   CreateShareRequest,
+  PublicShareRecord,
+  PublicShareResponse,
+  PublicShareSavedStyle,
   ShareApiResponse,
   ShareDetailResponse,
   ShareField,

@@ -1,11 +1,13 @@
 export {
   createShareApi,
+  getPublicShareApi,
   getShareApi,
   getSharesApi,
   revokeShareApi,
   shareQueryKeys,
   updateShareApi,
   useCreateShare,
+  useGetPublicShare,
   useGetShare,
   useGetShares,
   useRevokeShare,
@@ -13,6 +15,9 @@ export {
 } from "./api";
 export type {
   CreateShareRequest,
+  PublicShareRecord,
+  PublicShareResponse,
+  PublicShareSavedStyle,
   ShareApiResponse,
   ShareDetailResponse,
   ShareField,

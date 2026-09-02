@@ -6,4 +6,5 @@ export const shareQueryKeys = {
   list: (params: ShareListParams) => [...shareQueryKeys.lists(), params] as const,
   details: () => [...shareQueryKeys.all, "detail"] as const,
   detail: (shareId: string) => [...shareQueryKeys.details(), shareId] as const,
+  publicShare: (shareToken: string) => [...shareQueryKeys.all, "public", shareToken] as const,
 };

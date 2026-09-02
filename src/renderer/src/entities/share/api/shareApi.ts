@@ -1,6 +1,7 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type {
   CreateShareRequest,
+  PublicShareResponse,
   ShareApiResponse,
   ShareDetailResponse,
   ShareListApiData,
@@ -30,7 +31,9 @@ export const getSharesApi = async (params: ShareListParams = {}): Promise<ShareL
 
     return res.data.data;
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, "공유 목록을 불러오지 못했습니다."), { cause: error });
+    throw new Error(getApiErrorMessage(error, "공유 목록을 불러오지 못했습니다."), {
+      cause: error,
+    });
   }
 };
 
@@ -41,7 +44,9 @@ export const getShareApi = async (shareId: string): Promise<ShareDetailResponse>
 
     return res.data.data;
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, "공유 설정을 불러오지 못했습니다."), { cause: error });
+    throw new Error(getApiErrorMessage(error, "공유 설정을 불러오지 못했습니다."), {
+      cause: error,
+    });
   }
 };
 
@@ -55,7 +60,9 @@ export const updateShareApi = async (
 
     return res.data.data;
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, "공유 설정을 수정하지 못했습니다."), { cause: error });
+    throw new Error(getApiErrorMessage(error, "공유 설정을 수정하지 못했습니다."), {
+      cause: error,
+    });
   }
 };
 
@@ -65,5 +72,24 @@ export const revokeShareApi = async (shareId: string): Promise<void> => {
     await api.delete(`/shares/${shareId}`);
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유를 철회하지 못했습니다."), { cause: error });
+  }
+};
+
+/**
+ * 공개 공유 조회
+ * - 링크를 받은 사람이 로그인 없이 보는 화면이라 인증이 필요 없다.
+ * - 철회(SHARE_REVOKED)·만료(SHARE_EXPIRED)는 422로, 없는 토큰은 404로 구분해서 내려온다.
+ */
+export const getPublicShareApi = async (shareToken: string): Promise<PublicShareResponse> => {
+  try {
+    const res = await api.get<ShareApiResponse<PublicShareResponse>>(
+      `/public/shares/${shareToken}`
+    );
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "공유된 기록을 불러오지 못했습니다."), {
+      cause: error,
+    });
   }
 };

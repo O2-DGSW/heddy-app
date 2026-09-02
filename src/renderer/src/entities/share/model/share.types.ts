@@ -1,11 +1,6 @@
 /** 공유에서 노출할 항목 6종 */
 export type ShareField =
-  | "PHOTOS"
-  | "TREATMENT_DETAILS"
-  | "SATISFACTION"
-  | "CAUTIONS"
-  | "MEMO"
-  | "SAVED_STYLES";
+  "PHOTOS" | "TREATMENT_DETAILS" | "SATISFACTION" | "CAUTIONS" | "MEMO" | "SAVED_STYLES";
 
 export type ShareStatus = "ACTIVE" | "REVOKED";
 
@@ -80,4 +75,37 @@ export type UpdateShareRequest = {
   fields?: ShareField[];
   /** 교체할 만료 시각. 현재보다 미래여야 한다 */
   expires_at?: string;
+};
+
+/** 공개 공유 조회 응답. 공유에서 선택하지 않은 항목은 키 자체가 내려오지 않는다 */
+export type PublicSharePhoto = {
+  image_type?: string | null;
+  display_url?: string | null;
+};
+
+export type PublicShareRecord = {
+  performed_at?: string | null;
+  salon_name?: string | null;
+  designer_name?: string | null;
+  service_types?: string[];
+  satisfaction?: number | null;
+  memo?: string | null;
+  next_visit_cautions?: string | null;
+  photos?: PublicSharePhoto[];
+};
+
+export type PublicShareSavedStyle = {
+  style_name?: string | null;
+  image_url?: string | null;
+  reason?: string | null;
+};
+
+export type PublicShareResponse = {
+  share: {
+    expires_at?: string | null;
+    /** 공유한 사람의 표시 이름. 사용자 식별자는 내려오지 않는다 */
+    owner_display_name?: string | null;
+  };
+  records?: PublicShareRecord[];
+  saved_styles?: PublicShareSavedStyle[];
 };

@@ -1,5 +1,6 @@
 export {
   createShareApi,
+  getPublicShareApi,
   getShareApi,
   getSharesApi,
   revokeShareApi,
@@ -9,5 +10,6 @@ export { useCreateShare } from "./mutation/useCreateShare.mutation";
 export { useRevokeShare } from "./mutation/useRevokeShare.mutation";
 export { useUpdateShare } from "./mutation/useUpdateShare.mutation";
 export { shareQueryKeys } from "./query/shareQueryKeys";
+export { useGetPublicShare } from "./query/useGetPublicShare.query";
 export { useGetShare } from "./query/useGetShare.query";
 export { useGetShares } from "./query/useGetShares.query";
