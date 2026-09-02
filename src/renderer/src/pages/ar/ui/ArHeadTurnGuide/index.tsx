@@ -22,14 +22,18 @@ const getHeadTurnStep = (targetYaw: number) => ({
 interface ArHeadTurnGuideProps {
   capturedYawTargets: number[];
   isExpanded: boolean;
+  isLivebankRequested: boolean;
   livebankProgress: ArLivebankProgress | null;
+  serverYaw?: number;
   yaw?: number;
 }
 
 const ArHeadTurnGuide = ({
   capturedYawTargets,
   isExpanded,
+  isLivebankRequested,
   livebankProgress,
+  serverYaw,
   yaw,
 }: ArHeadTurnGuideProps) => {
   const nextYaw = livebankProgress?.nextYaw;
@@ -41,19 +45,26 @@ const ArHeadTurnGuide = ({
     (livebankProgress?.total !== undefined && capturedYawTargets.length >= livebankProgress.total);
   const isInTargetRange =
     activeStep !== null && typeof yaw === "number" && Math.abs(yaw - activeStep.targetYaw) <= 7;
-  const progressLabel = isGenerating
-    ? "헤어를 만들고 있어요"
-    : isAngleGuideCompleted
-      ? "스타일을 생성하고 있어요"
-      : (activeStep?.label ?? "고개를 천천히 좌우로 돌려주세요");
-  const detailLabel =
-    typeof yaw !== "number"
-      ? "얼굴 방향 데이터를 기다리고 있어요"
-      : isGenerating
-        ? "원하는 스타일을 확인해 보세요"
-        : isInTargetRange
-          ? "좋아요, 그 방향에서 잠깐만 멈춰주세요"
-          : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
+  const isWaitingForServerDirection =
+    isLivebankRequested && livebankProgress !== null && typeof serverYaw !== "number";
+  const progressLabel = !isLivebankRequested
+    ? "헤어스타일을 선택해 주세요"
+    : isGenerating
+      ? "헤어를 만들고 있어요"
+      : isAngleGuideCompleted
+        ? "스타일을 생성하고 있어요"
+        : (activeStep?.label ?? "수집 준비 중이에요");
+  const detailLabel = !isLivebankRequested
+    ? "선택한 스타일의 AR 영상을 만들기 위해 필요해요"
+    : isWaitingForServerDirection
+      ? "AR 서버에서 얼굴 방향 데이터를 확인하고 있어요"
+      : typeof yaw !== "number"
+        ? "얼굴 방향 데이터를 기다리고 있어요"
+        : isGenerating
+          ? "원하는 스타일을 확인해 보세요"
+          : isInTargetRange
+            ? "좋아요, 그 방향에서 잠깐만 멈춰주세요"
+            : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
   const guideRotation = activeStep?.rotation ?? (yaw ?? 0) * (3 / 4);
   const previousRotation = activeStep ? (yaw ?? activeStep.targetYaw) * (3 / 4) : guideRotation;
 

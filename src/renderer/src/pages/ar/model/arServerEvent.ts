@@ -183,7 +183,11 @@ export const parseArServerEvent = (value: unknown): ArServerEvent | null => {
 };
 
 export const isCapturedLivebankBucket = (status: string): boolean =>
-  status === "captured" || status === "generating" || status === "filled" || status === "complete";
+  status === "captured" ||
+  status === "generating" ||
+  status === "filled" ||
+  status === "done" ||
+  status === "complete";
 
 export const mergeLivebankProgress = (
   previousProgress: ArLivebankProgress | null,

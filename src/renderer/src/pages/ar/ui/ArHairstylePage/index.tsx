@@ -46,7 +46,8 @@ const ArHairstylePage = () => {
   const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
   const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress, stats } =
     useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedLivebankReferenceId);
-  const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw ?? livebankProgress?.currentYaw;
+  const serverYaw = stats?.yaw_ema ?? stats?.yaw;
+  const faceYaw = serverYaw ?? clientFaceYaw ?? livebankProgress?.currentYaw;
   const isFaceTracked = typeof faceYaw === "number";
 
   useEffect(() => {
@@ -117,7 +118,9 @@ const ArHairstylePage = () => {
           <ArHeadTurnGuide
             capturedYawTargets={capturedYawTargets}
             isExpanded={isExpanded}
+            isLivebankRequested={selectedLivebankReferenceId !== null}
             livebankProgress={livebankProgress}
+            serverYaw={serverYaw}
             yaw={faceYaw}
           />
           <ArColorPicker
