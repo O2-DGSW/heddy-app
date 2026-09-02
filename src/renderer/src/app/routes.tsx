@@ -17,6 +17,7 @@ import { RecommendPage } from "@/pages/recommend";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 import { ProfilePage } from "@/pages/profile";
 import { HomePage } from "@/pages/home";
+import { PublicSharePage } from "@/pages/public-share";
 
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
 
@@ -63,6 +64,8 @@ const EntryRedirect = () => {
 export const AppRoutes = () => {
   return (
     <Routes>
+      {/* 공유 링크로 들어온 사람이 로그인 없이 보는 웹 화면이라 앱 셸 밖에 둔다 */}
+      <Route path="/s/:shareToken" element={<PublicSharePage />} />
       <Route element={<MobileLayout />}>
         <Route path="/" element={<EntryRedirect />} />
         <Route path="/home" element={<HomePage />} />
