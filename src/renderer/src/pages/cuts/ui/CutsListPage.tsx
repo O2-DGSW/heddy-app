@@ -65,6 +65,7 @@ export const CutsListPage = () => {
   return (
     <cap-page>
       <CutsLayout
+        floatingAction={<CutsAddButton />}
         header={
           <>
             <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
@@ -84,7 +85,6 @@ export const CutsListPage = () => {
             />
           </>
         )}
-        <CutsAddButton />
       </CutsLayout>
     </cap-page>
   );
