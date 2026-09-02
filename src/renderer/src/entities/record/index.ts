@@ -48,13 +48,20 @@ export type {
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
+  UpdateTreatmentRecordRequest,
 } from "./model";
-export { getLatestAnalysisApi, getTreatmentRecordApi, getTreatmentRecordsApi } from "./api";
+export {
+  getLatestAnalysisApi,
+  getTreatmentRecordApi,
+  getTreatmentRecordsApi,
+  updateTreatmentRecordApi,
+} from "./api";
 export {
   recordQueryKeys,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
   useGetTreatmentRecords,
+  useUpdateTreatmentRecord,
 } from "./api";
 export {
   ProcedureTypeSelector,

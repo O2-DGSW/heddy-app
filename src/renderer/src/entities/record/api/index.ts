@@ -1,5 +1,10 @@
-export { getTreatmentRecordApi, getTreatmentRecordsApi } from "./treatmentRecordApi";
+export {
+  getTreatmentRecordApi,
+  getTreatmentRecordsApi,
+  updateTreatmentRecordApi,
+} from "./treatmentRecordApi";
 export { getLatestAnalysisApi } from "./analysisApi";
+export { useUpdateTreatmentRecord } from "./mutation/useUpdateTreatmentRecord.mutation";
 export { recordQueryKeys } from "./query/recordQueryKeys";
 export { useGetLatestAnalysis } from "./query/useGetLatestAnalysis.query";
 export { useGetTreatmentRecord } from "./query/useGetTreatmentRecord.query";

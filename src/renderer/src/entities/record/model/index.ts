@@ -44,4 +44,5 @@ export type {
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
+  UpdateTreatmentRecordRequest,
 } from "./treatmentRecord.types";
