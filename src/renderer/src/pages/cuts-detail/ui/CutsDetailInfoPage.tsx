@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import ratingStar from "../assets/rating-star.svg";
+import ratingStar from "@/shared/assets/rating-star.svg";
 import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
