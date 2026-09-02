@@ -42,14 +42,13 @@ const ArHairstylePage = () => {
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const { yaw: faceYaw } = useFaceYaw(faceTrackingVideoRef);
-  const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress } =
-    useArServerConnection(
-      cameraPreviewRef,
-      faceTrackingVideoRef,
-      selectedHairstyle.id,
-      serverHairstyleOptions[0]?.id ?? null,
-      faceYaw
-    );
+  const { capturedYawTargets, connectionStatus, errorMessage } = useArServerConnection(
+    cameraPreviewRef,
+    faceTrackingVideoRef,
+    selectedHairstyle.id,
+    serverHairstyleOptions[0]?.id ?? null,
+    faceYaw
+  );
   const isFaceTracked = faceYaw !== null;
 
   useEffect(() => {
@@ -121,7 +120,6 @@ const ArHairstylePage = () => {
           <ArHeadTurnGuide
             capturedYawTargets={capturedYawTargets}
             isExpanded={isExpanded}
-            livebankProgress={livebankProgress}
             yaw={faceYaw ?? undefined}
           />
           <ArColorPicker

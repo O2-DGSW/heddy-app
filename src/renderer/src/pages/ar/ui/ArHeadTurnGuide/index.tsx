@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { motion } from "motion/react";
 
-import type { ArLivebankProgress } from "../../model/useArServerConnection";
 import { LIVEBANK_CAPTURE_YAWS } from "../../model/constants";
 import { cn } from "@/shared";
 
@@ -25,41 +24,24 @@ const HEAD_TURN_STEPS = LIVEBANK_CAPTURE_YAWS.map(getHeadTurnStep);
 interface ArHeadTurnGuideProps {
   capturedYawTargets: number[];
   isExpanded: boolean;
-  livebankProgress: ArLivebankProgress | null;
   yaw?: number;
 }
 
-const ArHeadTurnGuide = ({
-  capturedYawTargets,
-  isExpanded,
-  livebankProgress,
-  yaw,
-}: ArHeadTurnGuideProps) => {
+const ArHeadTurnGuide = ({ capturedYawTargets, isExpanded, yaw }: ArHeadTurnGuideProps) => {
   const activeStepIndex = HEAD_TURN_STEPS.findIndex(
     step => !capturedYawTargets.includes(step.targetYaw)
   );
   const isAngleGuideCompleted = activeStepIndex === -1;
   const activeStep =
     HEAD_TURN_STEPS[isAngleGuideCompleted ? HEAD_TURN_STEPS.length - 1 : activeStepIndex];
-  const isGenerating =
-    livebankProgress?.status === "started" ||
-    livebankProgress?.status === "running" ||
-    livebankProgress?.status === "generating";
-  const isGenerationCompleted = livebankProgress?.status === "complete";
-
-  const progressLabel = isGenerationCompleted
-    ? "스타일 생성이 완료됐어요"
-    : isAngleGuideCompleted
-      ? "스타일을 생성하고 있어요"
-      : activeStep.label;
+  const previousStep = HEAD_TURN_STEPS[Math.max(activeStepIndex - 1, 0)];
+  const progressLabel = isAngleGuideCompleted ? "스타일을 생성하고 있어요" : activeStep.label;
   const detailLabel =
     typeof yaw !== "number"
       ? "얼굴 방향 데이터를 기다리고 있어요"
-      : isGenerating && livebankProgress?.total
-        ? `${livebankProgress.done ?? 0}/${livebankProgress.total} 방향 생성 중`
-        : isGenerationCompleted
-          ? "원하는 스타일을 확인해 보세요"
-          : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
+      : isAngleGuideCompleted
+        ? "원하는 스타일을 확인해 보세요"
+        : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
 
   return (
     <section
@@ -72,13 +54,18 @@ const ArHeadTurnGuide = ({
     >
       <div className="[perspective:700px]">
         <motion.div
+          initial={{
+            rotateY: isAngleGuideCompleted ? activeStep.rotation : previousStep.rotation,
+            x: isAngleGuideCompleted ? activeStep.rotation / 1.8 : previousStep.rotation / 1.8,
+          }}
           animate={{
-            rotateY: isGenerationCompleted ? 0 : activeStep.rotation,
-            x: isGenerationCompleted ? 0 : activeStep.rotation / 1.8,
+            rotateY: isAngleGuideCompleted ? 0 : activeStep.rotation,
+            x: isAngleGuideCompleted ? 0 : activeStep.rotation / 1.8,
           }}
           className="relative flex h-[104px] w-[82px] items-center justify-center rounded-[46%] border border-white/75 bg-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm"
+          key={activeStep.id}
           style={{ transformOrigin: "center center" }}
-          transition={{ damping: 18, stiffness: 90, type: "spring" }}
+          transition={{ damping: 18, mass: 0.9, stiffness: 90, type: "spring" }}
         >
           <span className="absolute -left-[5px] top-[43px] h-[17px] w-[8px] rounded-l-full border border-white/70 bg-white/20" />
           <span className="absolute -right-[5px] top-[43px] h-[17px] w-[8px] rounded-r-full border border-white/70 bg-white/20" />
@@ -105,17 +92,6 @@ const ArHeadTurnGuide = ({
         </strong>
         <span className={font.caption.medium} style={{ color: lightTheme.label.disable }}>
           {detailLabel}
-        </span>
-        <span aria-hidden="true" className="mt-2 flex gap-1.5">
-          {HEAD_TURN_STEPS.map(step => (
-            <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full transition-colors duration-200",
-                capturedYawTargets.includes(step.targetYaw) ? "bg-white" : "bg-white/35"
-              )}
-              key={step.id}
-            />
-          ))}
         </span>
       </div>
     </section>
