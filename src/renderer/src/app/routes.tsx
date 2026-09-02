@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { MobileLayout, CutsTransitionOutlet, MainTransitionOutlet } from "./layouts";
+import { MobileLayout, MainTransitionOutlet } from "./layouts";
 import { getRefreshToken } from "@/entities/auth";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
@@ -70,8 +70,6 @@ export const AppRoutes = () => {
           <Route path="/ar" element={<ArHairstylePage />} />
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-        </Route>
-        <Route element={<CutsTransitionOutlet />}>
           <Route path="/cuts" element={<CutsListPage />} />
           <Route path="/cuts/add" element={<RecordAddPage />} />
           <Route path="/cuts/:id" element={<CutsDetailPage />}>
