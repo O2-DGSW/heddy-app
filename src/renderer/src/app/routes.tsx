@@ -1,8 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { MobileLayout, MainTransitionOutlet } from "./layouts";
-import { getRefreshToken } from "@/entities/auth";
+import { AuthTransitionOutlet, MobileLayout, MainTransitionOutlet } from "./layouts";
+import { RequireAuth, RequireGuest } from "./routes/AuthRouteGuard";
+import { restoreAuthSession } from "@/entities/auth";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
 import { CutsSharePage } from "@/pages/cuts-share";
@@ -22,24 +23,18 @@ import { PublicSharePage } from "@/pages/public-share";
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
 
 const EntryRedirect = () => {
-  const [entryStatus, setEntryStatus] = useState<EntryStatusType>(
-    import.meta.env.DEV ? "unauthenticated" : "checking"
-  );
+  const [entryStatus, setEntryStatus] = useState<EntryStatusType>("checking");
 
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      return;
-    }
-
     let isMounted = true;
 
-    void getRefreshToken()
-      .then(refreshToken => {
+    void restoreAuthSession()
+      .then(isAuthenticated => {
         if (!isMounted) {
           return;
         }
 
-        setEntryStatus(refreshToken ? "authenticated" : "unauthenticated");
+        setEntryStatus(isAuthenticated ? "authenticated" : "unauthenticated");
       })
       .catch(() => {
         if (!isMounted) {
@@ -68,27 +63,34 @@ export const AppRoutes = () => {
       <Route path="/s/:shareToken" element={<PublicSharePage />} />
       <Route element={<MobileLayout />}>
         <Route path="/" element={<EntryRedirect />} />
-        <Route element={<MainTransitionOutlet />}>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/ar" element={<ArHairstylePage />} />
-          <Route path="/recommend" element={<RecommendPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cuts" element={<CutsListPage />} />
-          <Route path="/cuts/add" element={<RecordAddPage />} />
-          <Route path="/cuts/:id" element={<CutsDetailPage />}>
-            <Route index element={<Navigate replace to="info" />} />
-            <Route path="info" element={<CutsDetailInfoPage />} />
-            <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+        <Route element={<RequireAuth />}>
+          <Route element={<MainTransitionOutlet />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/ar" element={<ArHairstylePage />} />
+            <Route path="/recommend" element={<RecommendPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/cuts" element={<CutsListPage />} />
+            <Route path="/cuts/add" element={<RecordAddPage />} />
+            <Route path="/cuts/:id" element={<CutsDetailPage />}>
+              <Route index element={<Navigate replace to="info" />} />
+              <Route path="info" element={<CutsDetailInfoPage />} />
+              <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+            </Route>
+            <Route path="/cuts/:id/share" element={<CutsSharePage />} />
           </Route>
-          <Route path="/cuts/:id/share" element={<CutsSharePage />} />
+          <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
+          <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
+          <Route path="*" element={<>404p</>} />
         </Route>
-        <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
-        <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
-        <Route path="/welcome" element={<WelcomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/find-id" element={<FindPage />} />
-        <Route path="/find-password" element={<FindPage />} />
+        <Route element={<RequireGuest />}>
+          <Route element={<AuthTransitionOutlet />}>
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/find-id" element={<FindPage />} />
+            <Route path="/find-password" element={<FindPage />} />
+          </Route>
+        </Route>
 
         {/*<Route element={<RequireAuth />}>*/}
         {/*    <Route path="/" element={<MainPage />} />*/}
@@ -105,7 +107,6 @@ export const AppRoutes = () => {
         {/*    />*/}
         {/*    <Route path="*" element={<Navigate replace to="/" />} />*/}
         {/*</Route>*/}
-        <Route path="*" element={<>404p</>} />
       </Route>
     </Routes>
   );
