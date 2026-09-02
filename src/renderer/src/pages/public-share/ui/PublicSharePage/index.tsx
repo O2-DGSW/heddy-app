@@ -210,14 +210,18 @@ const PublicSharePage = () => {
   const hasContent = records.length > 0 || savedStyles.length > 0;
 
   return (
+    // 상세(정보 탭)와 같이 흰 배경 위에 올린다. 시술 정보 카드도 흰색이라 구분선만 남아 납작하게 보인다.
     <main
       className="min-h-dvh w-full px-safe py-safe"
-      style={{ backgroundColor: lightTheme.fill.normal }}
+      style={{ backgroundColor: lightTheme.background.normal }}
     >
       <div className="mx-auto w-full max-w-[430px]">
         <header
-          className="flex flex-col items-center gap-[4px] px-[19px] py-[18px]"
-          style={{ backgroundColor: lightTheme.background.normal }}
+          className="flex flex-col items-center gap-[4px] border-b px-[19px] py-[18px]"
+          style={{
+            backgroundColor: lightTheme.background.normal,
+            borderColor: lightTheme.line.alternative,
+          }}
         >
           <h1 className={font.headline1.bold} style={{ color: lightTheme.label.neutral }}>
             공유된 시술기록
