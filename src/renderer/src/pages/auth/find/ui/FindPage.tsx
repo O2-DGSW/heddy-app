@@ -15,26 +15,28 @@ const FindPage = () => {
     <cap-page>
       <section
         aria-labelledby="find-title"
-        className="flex min-h-full flex-col items-center px-6 pb-8"
+        className="flex h-full min-h-0 flex-col items-center overflow-hidden px-6"
         style={pageStyle}
       >
         <header className="flex h-[58px] w-full shrink-0 items-center">
           <BackButton fallbackPath="/login" />
         </header>
 
-        <div className="mb-10 flex flex-col items-center gap-2 pt-[36px]">
-          <img src="/heddyIcon.svg" alt="heddy" className="w-50" />
+        <div className="flex min-h-0 w-full flex-1 flex-col items-center touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
+          <div className="mb-10 flex flex-col items-center gap-2 pt-[36px]">
+            <img src="/heddyIcon.svg" alt="heddy" className="w-50" />
 
-          <h1
-            className={font.body.medium}
-            id="find-title"
-            style={{ color: lightTheme.label.assistive }}
-          >
-            {title}
-          </h1>
+            <h1
+              className={font.body.medium}
+              id="find-title"
+              style={{ color: lightTheme.label.assistive }}
+            >
+              {title}
+            </h1>
+          </div>
+
+          {isPassword ? <FindPasswordForm /> : <FindIdForm />}
         </div>
-
-        {isPassword ? <FindPasswordForm /> : <FindIdForm />}
       </section>
     </cap-page>
   );

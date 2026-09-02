@@ -10,55 +10,57 @@ const WelcomePage = () => {
     <cap-page>
       <section
         aria-labelledby="welcome-title"
-        className="flex min-h-full flex-col items-center justify-between px-6 py-24"
+        className="h-full touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
         style={pageStyle}
       >
-        <div className="flex flex-col items-center gap-2.5">
-          <img src="/heddyIcon.svg" alt="heddy" className="mb-3 w-64" />
-          <h1
-            className={font.headline1.semiBold}
-            id="welcome-title"
-            style={{ color: lightTheme.label.neutral }}
-          >
-            헤디에 오신 것을 환영해요!
-          </h1>
+        <div className="flex min-h-full flex-col items-center justify-between px-6 py-24">
+          <div className="flex flex-col items-center gap-2.5">
+            <img src="/heddyIcon.svg" alt="heddy" className="mb-3 w-64" />
+            <h1
+              className={font.headline1.semiBold}
+              id="welcome-title"
+              style={{ color: lightTheme.label.neutral }}
+            >
+              헤디에 오신 것을 환영해요!
+            </h1>
 
-          <div
-            className={`${font.label.medium} text-center`}
-            style={{ color: lightTheme.label.assistive }}
-          >
-            <p>시술기록 저장부터 나에게</p>
-            <p>맞는 머리 추천까지, 헤디로 시작하세요</p>
+            <div
+              className={`${font.label.medium} text-center`}
+              style={{ color: lightTheme.label.assistive }}
+            >
+              <p>시술기록 저장부터 나에게</p>
+              <p>맞는 머리 추천까지, 헤디로 시작하세요</p>
+            </div>
           </div>
-        </div>
 
-        <img src="/agua.svg" alt="아거!" className="w-35" />
+          <img src="/agua.svg" alt="아거!" className="w-35" />
 
-        <div className="flex w-full flex-col items-center gap-6">
-          <button
-            className={`w-full rounded-2xl py-4 ${font.headline2.semiBold}`}
-            style={{
-              backgroundColor: lightTheme.primary.normal,
-              color: lightTheme.fill.normal,
-            }}
-            onClick={() => navigate("/login")}
-            type="button"
-          >
-            로그인
-          </button>
-
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-              계정이 없으시다면?
-            </p>
+          <div className="flex w-full flex-col items-center gap-6">
             <button
-              className={`${font.label.medium} border-0 bg-transparent p-0 underline`}
-              style={{ color: lightTheme.primary.normal }}
-              onClick={() => navigate("/signup")}
+              className={`w-full rounded-2xl py-4 ${font.headline2.semiBold}`}
+              style={{
+                backgroundColor: lightTheme.primary.normal,
+                color: lightTheme.fill.normal,
+              }}
+              onClick={() => navigate("/login")}
               type="button"
             >
-              회원가입
+              로그인
             </button>
+
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+                계정이 없으시다면?
+              </p>
+              <button
+                className={`${font.label.medium} border-0 bg-transparent p-0 underline`}
+                style={{ color: lightTheme.primary.normal }}
+                onClick={() => navigate("/signup")}
+                type="button"
+              >
+                회원가입
+              </button>
+            </div>
           </div>
         </div>
       </section>
