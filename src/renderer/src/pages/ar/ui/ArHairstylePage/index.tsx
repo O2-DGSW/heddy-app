@@ -41,13 +41,11 @@ const ArHairstylePage = () => {
     setSelectedColorId,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
+  const selectedLivebankReferenceId =
+    selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? null : selectedHairstyle.id;
   const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
   const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress, stats } =
-    useArServerConnection(
-      cameraPreviewRef,
-      faceTrackingVideoRef,
-      serverHairstyleOptions[0]?.id ?? null
-    );
+    useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedLivebankReferenceId);
   const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw ?? livebankProgress?.currentYaw;
   const isFaceTracked = typeof faceYaw === "number";
 

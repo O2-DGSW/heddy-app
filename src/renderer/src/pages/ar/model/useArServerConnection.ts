@@ -79,6 +79,7 @@ export const useArServerConnection = (
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
   const livebankReferenceIdRef = useRef(livebankReferenceId);
+  const activeLivebankReferenceIdRef = useRef<string | null>(null);
   const isLivebankStartedRef = useRef(false);
   const [stats, setStats] = useState<ArStats | null>(null);
   const [livebankProgress, setLivebankProgress] = useState<ArLivebankProgress | null>(null);
@@ -96,18 +97,36 @@ export const useArServerConnection = (
   const startLivebank = useCallback((nextLivebankReferenceId: string | null) => {
     const statsChannel = statsChannelRef.current;
 
+    if (statsChannel?.readyState !== "open") {
+      return;
+    }
+
     if (
-      statsChannel?.readyState !== "open" ||
-      !nextLivebankReferenceId ||
-      isLivebankStartedRef.current
+      isLivebankStartedRef.current &&
+      activeLivebankReferenceIdRef.current === nextLivebankReferenceId
     ) {
       return;
     }
 
+    if (isLivebankStartedRef.current) {
+      statsChannel.send(JSON.stringify({ type: "livebank", on: false }));
+      isLivebankStartedRef.current = false;
+      activeLivebankReferenceIdRef.current = null;
+    }
+
+    if (!nextLivebankReferenceId) {
+      statsChannel.send(JSON.stringify({ type: "mode", mode: "raw" }));
+      setLivebankProgress(null);
+      return;
+    }
+
+    // 새 reference를 수집하는 동안 이전 스타일이 남지 않도록 원본 모드로 되돌린다.
+    statsChannel.send(JSON.stringify({ type: "mode", mode: "raw" }));
     statsChannel.send(
       JSON.stringify({ type: "livebank", on: true, reference: nextLivebankReferenceId })
     );
     isLivebankStartedRef.current = true;
+    activeLivebankReferenceIdRef.current = nextLivebankReferenceId;
     setLivebankProgress(null);
   }, []);
 
@@ -117,6 +136,7 @@ export const useArServerConnection = (
       peerConnectionRef.current = null;
       statsChannelRef.current = null;
       isLivebankStartedRef.current = false;
+      activeLivebankReferenceIdRef.current = null;
       setLivebankProgress(null);
 
       if (shouldStopCamera) {
@@ -252,7 +272,14 @@ export const useArServerConnection = (
 
   useEffect(() => {
     livebankReferenceIdRef.current = livebankReferenceId;
-    startLivebank(livebankReferenceId);
+
+    const startTimer = window.setTimeout(() => {
+      startLivebank(livebankReferenceId);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(startTimer);
+    };
   }, [livebankReferenceId, startLivebank]);
 
   useEffect(() => {
