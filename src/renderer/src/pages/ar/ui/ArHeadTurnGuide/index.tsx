@@ -5,10 +5,18 @@ import type { ArLivebankProgress } from "../../model/useArServerConnection";
 import { LIVEBANK_CAPTURE_YAWS } from "../../model/constants";
 import { cn } from "@/shared";
 
+const getHeadTurnInstruction = (targetYaw: number) => {
+  if (targetYaw === 0) {
+    return "정면을 바라봐 주세요";
+  }
+
+  return targetYaw < 0 ? "고개를 왼쪽으로 돌려주세요" : "고개를 오른쪽으로 돌려주세요";
+};
+
 const getHeadTurnStep = (targetYaw: number) => ({
   id: `yaw-${targetYaw}`,
-  label: targetYaw === 0 ? "정면을 바라봐 주세요" : `고개를 ${targetYaw}°로 돌려주세요`,
-  rotation: targetYaw * (2 / 3),
+  label: getHeadTurnInstruction(targetYaw),
+  rotation: targetYaw * (3 / 4),
   targetYaw,
 });
 
@@ -51,7 +59,7 @@ const ArHeadTurnGuide = ({
         ? `${livebankProgress.done ?? 0}/${livebankProgress.total} 방향 생성 중`
         : isGenerationCompleted
           ? "원하는 스타일을 확인해 보세요"
-          : `현재 각도 ${Math.round(yaw)}°`;
+          : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
 
   return (
     <section
@@ -66,10 +74,11 @@ const ArHeadTurnGuide = ({
         <motion.div
           animate={{
             rotateY: isGenerationCompleted ? 0 : activeStep.rotation,
-            x: activeStep.rotation / 2,
+            x: isGenerationCompleted ? 0 : activeStep.rotation / 1.8,
           }}
           className="relative flex h-[104px] w-[82px] items-center justify-center rounded-[46%] border border-white/75 bg-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm"
-          transition={{ damping: 16, stiffness: 120, type: "spring" }}
+          style={{ transformOrigin: "center center" }}
+          transition={{ damping: 18, stiffness: 90, type: "spring" }}
         >
           <span className="absolute -left-[5px] top-[43px] h-[17px] w-[8px] rounded-l-full border border-white/70 bg-white/20" />
           <span className="absolute -right-[5px] top-[43px] h-[17px] w-[8px] rounded-r-full border border-white/70 bg-white/20" />
