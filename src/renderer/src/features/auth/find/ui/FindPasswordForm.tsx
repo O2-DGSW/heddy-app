@@ -139,7 +139,7 @@ export const FindPasswordForm = () => {
             아이디
           </p>
           <input
-            className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+            className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
             style={inputStyle}
             placeholder="아이디"
             value={idField.value}
@@ -161,7 +161,7 @@ export const FindPasswordForm = () => {
               />
             ))}
             <select
-              className={`focus:outline-none bg-transparent ${font.caption.medium}`}
+              className={`focus:outline-none bg-transparent ${font.body.medium}`}
               style={{
                 color: isMvno(carrierField.value)
                   ? lightTheme.primary.normal
@@ -182,7 +182,7 @@ export const FindPasswordForm = () => {
           </div>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={inputStyle}
               placeholder="전화번호"
               value={phoneField.value}
@@ -209,7 +209,7 @@ export const FindPasswordForm = () => {
           {sms.isSent && !sms.isVerified && (
             <div className="flex gap-2 mb-1">
               <input
-                className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+                className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
                 style={inputStyle}
                 placeholder="인증번호"
                 value={verificationField.value}
