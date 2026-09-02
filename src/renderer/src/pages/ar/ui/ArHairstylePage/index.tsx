@@ -11,6 +11,7 @@ import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
 import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
+import ArHeadTurnGuide from "../ArHeadTurnGuide";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 
 const ArHairstylePage = () => {
@@ -31,7 +32,7 @@ const ArHairstylePage = () => {
     setSelectedColorId,
   } = useArHairstyle();
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition);
-  const { connectionStatus, errorMessage } = useArServerConnection(
+  const { connectionStatus, errorMessage, livebankProgress, stats } = useArServerConnection(
     cameraPreviewRef,
     selectedHairstyle.id
   );
@@ -93,6 +94,13 @@ const ArHairstylePage = () => {
             errorMessage={errorMessage}
             isExpanded={isExpanded}
           />
+          {connectionStatus === "connected" && (
+            <ArHeadTurnGuide
+              isExpanded={isExpanded}
+              livebankProgress={livebankProgress}
+              yaw={stats?.yaw_ema ?? stats?.yaw}
+            />
+          )}
           <ArColorPicker
             isExpanded={isExpanded}
             selectedColorId={selectedColorId}
