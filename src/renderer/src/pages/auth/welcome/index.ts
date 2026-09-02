@@ -1,3 +1,1 @@
-import { WelcomePage } from "@/pages/auth/welcome/ui/WelcomePage.tsx";
-
-export { WelcomePage };
+export { default as WelcomePage } from "./ui/WelcomePage";

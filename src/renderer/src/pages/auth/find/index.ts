@@ -1,1 +1,1 @@
-export { FindPage } from "./ui/FindPage.tsx";
+export { default as FindPage } from "./ui/FindPage";
