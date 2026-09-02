@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { EXPANDED_AR_MENU_ITEMS } from "../../model/constants";
 import { cn } from "@/shared";
 
-const ROUTE_TRANSITION_DURATION = 180;
+const ROUTE_TRANSITION_DURATION = 220;
 
 const ArExpandedBottomMenu = () => {
   const navigate = useNavigate();
@@ -29,8 +29,8 @@ const ArExpandedBottomMenu = () => {
     <nav
       aria-label="확대 AR 하단 메뉴"
       className={cn(
-        "mt-3 flex items-center gap-[33px] transition-[opacity,transform] duration-[180ms] ease-out motion-reduce:transition-none",
-        isNavigating && "translate-y-3 opacity-0"
+        "mt-3 flex items-center gap-[33px] transition-[opacity,transform] duration-[220ms] ease-out motion-reduce:transition-none",
+        isNavigating && "translate-y-2 opacity-0 delay-[80ms]"
       )}
       style={{ color: lightTheme.label.assistive }}
     >
@@ -38,12 +38,15 @@ const ArExpandedBottomMenu = () => {
         <button
           aria-label={`${label}으로 이동`}
           className={cn(
-            "ar-motion-press min-w-[35px] text-center transition-[color,transform] duration-150 motion-reduce:transition-none",
-            selectedPath === to && "scale-95"
+            "ar-motion-press min-w-[35px] text-center transition-[color,transform] duration-[180ms] ease-out motion-reduce:transition-none",
+            selectedPath === to && "scale-110"
           )}
           disabled={isNavigating}
           key={to}
           onClick={() => handleNavigate(to)}
+          style={{
+            color: selectedPath === to ? lightTheme.label.buttonText : lightTheme.label.assistive,
+          }}
           type="button"
         >
           <span className={font.label.medium}>{label}</span>
