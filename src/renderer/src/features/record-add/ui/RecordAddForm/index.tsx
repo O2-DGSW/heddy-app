@@ -8,27 +8,13 @@ import {
   RecordRatingField,
   RecordTextField,
 } from "@/entities/record";
-import type { ProcedureType, RecordFormValues } from "@/entities/record";
 import { cn } from "@/shared";
 
 import { useRecordAddForm } from "../../model";
 import RecordDatePickerField from "../RecordDatePickerField";
 
-export interface RecordFormSubmitValues {
-  formValues: RecordFormValues;
-  procedureType: ProcedureType;
-  rating: number;
-}
-
 interface RecordAddFormProps {
   onCancel: () => void;
-  /** 수정 화면이면 기존 값에서 시작하고 버튼 문구가 바뀐다 */
-  mode?: "create" | "edit";
-  initialValues?: RecordFormValues;
-  initialProcedureType?: ProcedureType;
-  initialRating?: number;
-  isSubmitting?: boolean;
-  onSubmitValues?: (values: RecordFormSubmitValues) => void;
 }
 
 const closeButtonStyle = {
@@ -41,17 +27,7 @@ const saveButtonStyle = {
   color: lightTheme.label.buttonText,
 };
 
-const RecordAddForm = ({
-  onCancel,
-  mode = "create",
-  initialValues,
-  initialProcedureType,
-  initialRating,
-  isSubmitting,
-  onSubmitValues,
-}: RecordAddFormProps) => {
-  const isEditMode = mode === "edit";
-
+const RecordAddForm = ({ onCancel }: RecordAddFormProps) => {
   const {
     formValues,
     isPhotoLimitReached,
@@ -68,12 +44,7 @@ const RecordAddForm = ({
     handleRatingChange,
     handleRemovePhoto,
     handleSubmit,
-  } = useRecordAddForm({
-    initialValues,
-    initialProcedureType,
-    initialRating,
-    onSubmit: () => onSubmitValues?.({ formValues, procedureType: selectedProcedureType, rating }),
-  });
+  } = useRecordAddForm();
 
   return (
     <form
@@ -139,15 +110,14 @@ const RecordAddForm = ({
           style={closeButtonStyle}
           type="button"
         >
-          {isEditMode ? "취소" : "닫기"}
+          닫기
         </button>
         <button
           className={cn(font.headline2.semiBold, "h-[42px] rounded-[10px] border-0")}
-          disabled={isSubmitting}
           style={saveButtonStyle}
           type="submit"
         >
-          {isSubmitting ? "저장 중" : isEditMode ? "수정 완료" : "저장"}
+          저장
         </button>
       </div>
     </form>

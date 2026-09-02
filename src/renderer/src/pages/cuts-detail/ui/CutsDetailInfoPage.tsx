@@ -74,10 +74,6 @@ const CutsDetailInfoPage = () => {
     navigate("../share");
   };
 
-  const handleEdit = () => {
-    navigate("../edit");
-  };
-
   return (
     <div className="flex flex-col gap-[52px] px-[19px] pb-[30px] pt-[29px]">
       <section className="flex flex-col gap-[6px]" aria-labelledby="record-photo-title">
@@ -177,7 +173,6 @@ const CutsDetailInfoPage = () => {
             borderColor: lightTheme.fill.neutral,
             color: lightTheme.label.alternative,
           }}
-          onClick={handleEdit}
           type="button"
         >
           수정

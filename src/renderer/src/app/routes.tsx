@@ -11,7 +11,6 @@ import { LoginPage } from "@/pages/auth/login";
 import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
 import { SignupPage } from "@/pages/auth/signup";
 import { RecordAddPage } from "@/pages/record-add";
-import { RecordEditPage } from "@/pages/record-edit";
 import { FindPage } from "@/pages/auth/find";
 import { ArHairstylePage } from "@/pages/ar";
 import { RecommendPage } from "@/pages/recommend";
@@ -75,7 +74,6 @@ export const AppRoutes = () => {
             <Route path="info" element={<CutsDetailInfoPage />} />
             <Route path="analysis" element={<CutsDetailAnalysisPage />} />
           </Route>
-          <Route path="/cuts/:id/edit" element={<RecordEditPage />} />
           <Route path="/cuts/:id/share" element={<CutsSharePage />} />
         </Route>
         <Route path="/ar" element={<ArHairstylePage />} />
