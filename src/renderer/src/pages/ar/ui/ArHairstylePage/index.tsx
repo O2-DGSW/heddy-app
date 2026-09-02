@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useArServerConnection } from "../../model/useArServerConnection";
 import { useArHairstyleReferences } from "../../model/useArHairstyleReferences";
 import { useArHairstyle } from "../../model/useArHairstyle";
+import { useFaceYaw } from "../../model/useFaceYaw";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
@@ -17,6 +18,7 @@ import ArRecognitionBadge from "../ArRecognitionBadge";
 
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
+  const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     errorMessage: hairstyleReferencesErrorMessage,
@@ -39,9 +41,14 @@ const ArHairstylePage = () => {
     setSelectedColorId,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
+  const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
   const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress, stats } =
-    useArServerConnection(cameraPreviewRef, serverHairstyleOptions[0]?.id ?? null);
-  const faceYaw = stats?.yaw ?? stats?.yaw_ema ?? livebankProgress?.currentYaw;
+    useArServerConnection(
+      cameraPreviewRef,
+      faceTrackingVideoRef,
+      serverHairstyleOptions[0]?.id ?? null
+    );
+  const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw ?? livebankProgress?.currentYaw;
   const isFaceTracked = typeof faceYaw === "number";
 
   useEffect(() => {
@@ -94,6 +101,14 @@ const ArHairstylePage = () => {
             muted
             playsInline
             ref={cameraPreviewRef}
+          />
+          <video
+            aria-hidden="true"
+            autoPlay
+            className="pointer-events-none absolute h-px w-px opacity-0"
+            muted
+            playsInline
+            ref={faceTrackingVideoRef}
           />
           <ArRecognitionBadge
             connectionStatus={connectionStatus}

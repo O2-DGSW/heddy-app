@@ -72,6 +72,7 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
+  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
   livebankReferenceId: string | null
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -125,9 +126,13 @@ export const useArServerConnection = (
         if (previewVideoRef.current) {
           previewVideoRef.current.srcObject = null;
         }
+
+        if (faceTrackingVideoRef.current) {
+          faceTrackingVideoRef.current.srcObject = null;
+        }
       }
     },
-    [previewVideoRef]
+    [faceTrackingVideoRef, previewVideoRef]
   );
 
   const startConnection = useCallback(async () => {
@@ -157,6 +162,11 @@ export const useArServerConnection = (
       if (previewVideoRef.current) {
         previewVideoRef.current.srcObject = localStream;
         void previewVideoRef.current.play().catch(() => undefined);
+      }
+
+      if (faceTrackingVideoRef.current) {
+        faceTrackingVideoRef.current.srcObject = localStream;
+        void faceTrackingVideoRef.current.play().catch(() => undefined);
       }
 
       if (!serverBaseUrl) {
@@ -238,7 +248,7 @@ export const useArServerConnection = (
           : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
       );
     }
-  }, [previewVideoRef, startLivebank, stopConnection]);
+  }, [faceTrackingVideoRef, previewVideoRef, startLivebank, stopConnection]);
 
   useEffect(() => {
     livebankReferenceIdRef.current = livebankReferenceId;
