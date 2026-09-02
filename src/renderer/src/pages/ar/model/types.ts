@@ -1,4 +1,8 @@
-import type { HAIRSTYLE_OPTIONS } from "./constants";
+export interface ArHairstyleOption {
+  id: string;
+  imageUrl?: string;
+  label: string;
+}
 
-export type HairstyleOptionId = (typeof HAIRSTYLE_OPTIONS)[number]["id"];
+export type HairstyleOptionId = string;
 export type ArModalType = "candidate-save" | "capture";

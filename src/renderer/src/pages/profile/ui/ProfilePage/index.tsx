@@ -87,93 +87,98 @@ const ProfilePage = () => {
   };
 
   return (
-    <section
-      aria-labelledby="profile-title"
-      className="flex min-h-full flex-col"
-      style={{ backgroundColor: lightTheme.fill.normal }}
-    >
-      <div style={{ backgroundColor: lightTheme.background.normal }}>
-        <div className="mx-[26px] flex flex-col gap-[28px] pb-[25px] pt-[22px]">
-          <header className="flex flex-col gap-[28px]">
-            <div className="flex items-center gap-[20px]">
-              <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
-              <h1
-                className={font.headline1.bold}
-                id="profile-title"
-                style={{ color: lightTheme.label.neutral }}
+    <cap-page>
+      <section
+        aria-labelledby="profile-title"
+        className="flex min-h-full flex-col"
+        style={{ backgroundColor: lightTheme.fill.normal }}
+      >
+        <div style={{ backgroundColor: lightTheme.background.normal }}>
+          <div className="mx-[26px] flex flex-col gap-[28px] pb-[25px] pt-[22px]">
+            <header className="flex flex-col gap-[28px]">
+              <div className="flex items-center gap-[20px]">
+                <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
+                <h1
+                  className={font.headline1.bold}
+                  id="profile-title"
+                  style={{ color: lightTheme.label.neutral }}
+                >
+                  {profileName}님
+                </h1>
+              </div>
+
+              <dl
+                className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
+                style={{ backgroundColor: "#F4FBF8" }}
               >
-                {profileName}님
-              </h1>
-            </div>
-
-            <dl
-              className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
-              style={{ backgroundColor: "#F4FBF8" }}
-            >
-              {PROFILE_STATS.map(stat => (
-                <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
-                  <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
-                    <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
-                    <span style={{ color: lightTheme.label.alternative }}>건</span>
-                  </dd>
-                  <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-                    {stat.label}
-                  </dt>
-                </div>
-              ))}
-            </dl>
-          </header>
+                {PROFILE_STATS.map(stat => (
+                  <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
+                    <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
+                      <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
+                      <span style={{ color: lightTheme.label.alternative }}>건</span>
+                    </dd>
+                    <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+                      {stat.label}
+                    </dt>
+                  </div>
+                ))}
+              </dl>
+            </header>
+          </div>
         </div>
-      </div>
 
-      <div className="flex px-[22px] py-[37px]" style={{ backgroundColor: lightTheme.fill.normal }}>
-        <section
-          aria-labelledby="profile-settings-title"
-          className="flex h-[390px] w-full flex-col items-center justify-between rounded-[15px] px-[22px] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
-          style={{ backgroundColor: lightTheme.background.normal }}
+        <div
+          className="flex px-[22px] py-[37px]"
+          style={{ backgroundColor: lightTheme.fill.normal }}
         >
-          <div className="flex w-full max-w-[300px] flex-col gap-[24px]">
-            <h2
-              className={font.headline1.semiBold}
-              id="profile-settings-title"
-              style={{ color: lightTheme.label.assistive }}
-            >
-              설정
-            </h2>
-            <div className="flex flex-col gap-[36px]">
-              {PROFILE_MENU_ITEMS.map(item => (
-                <ProfileMenuRow
-                  item={item}
-                  key={item.label}
-                  onClick={item.to ? () => handleMenuClick(item.to) : undefined}
-                />
-              ))}
+          <section
+            aria-labelledby="profile-settings-title"
+            className="flex h-[390px] w-full flex-col items-center justify-between rounded-[15px] px-[22px] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
+            style={{ backgroundColor: lightTheme.background.normal }}
+          >
+            <div className="flex w-full max-w-[300px] flex-col gap-[24px]">
+              <h2
+                className={font.headline1.semiBold}
+                id="profile-settings-title"
+                style={{ color: lightTheme.label.assistive }}
+              >
+                설정
+              </h2>
+              <div className="flex flex-col gap-[36px]">
+                {PROFILE_MENU_ITEMS.map(item => (
+                  <ProfileMenuRow
+                    item={item}
+                    key={item.label}
+                    onClick={item.to ? () => handleMenuClick(item.to) : undefined}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="grid w-full max-w-[300px] grid-cols-2 gap-[6px]">
-            <div
-              className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
-              style={{
-                backgroundColor: lightTheme.label.disable,
-                color: lightTheme.label.alternative,
-              }}
-            >
-              로그아웃
+            <div className="grid w-full max-w-[300px] grid-cols-2 gap-[6px]">
+              <div
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+                style={{
+                  backgroundColor: lightTheme.label.disable,
+                  color: lightTheme.label.alternative,
+                }}
+              >
+                로그아웃
+              </div>
+              <div
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+                style={{
+                  backgroundColor: lightTheme.status.error,
+                  color: lightTheme.label.buttonText,
+                }}
+              >
+                회원 탈퇴
+              </div>
             </div>
-            <div
-              className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
-              style={{
-                backgroundColor: lightTheme.status.error,
-                color: lightTheme.label.buttonText,
-              }}
-            >
-              회원 탈퇴
-            </div>
-          </div>
-        </section>
-      </div>
-    </section>
+          </section>
+        </div>
+      </section>
+    </cap-page>
   );
 };
 

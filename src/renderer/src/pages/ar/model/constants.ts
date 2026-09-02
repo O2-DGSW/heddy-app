@@ -1,12 +1,14 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-export const HAIRSTYLE_OPTIONS = [
-  { id: "down-perm-1" },
-  { id: "none" },
-  { id: "down-perm-2" },
-  { id: "down-perm-3" },
-  { id: "down-perm-4" },
-] as const;
+import type { ArHairstyleOption } from "./types";
+
+export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
+  id: "none",
+  label: "원본 스타일",
+};
+
+export const LIVEBANK_CAPTURE_YAWS = [-36, -24, -12, 0, 12, 24, 36] as const;
+export const LIVEBANK_CAPTURE_YAW_THRESHOLD = 5;
 
 export const HAIR_COLOR_OPTIONS = [
   { id: "natural-black", color: lightTheme.label.strong },
@@ -16,7 +18,12 @@ export const HAIR_COLOR_OPTIONS = [
   { id: "ash-brown", color: "#342D2D" },
 ] as const;
 
-export const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
+export const EXPANDED_AR_MENU_ITEMS = [
+  { label: "홈", to: "/home" },
+  { label: "기록", to: "/cuts" },
+  { label: "추천", to: "/recommend" },
+  { label: "프로필", to: "/profile" },
+] as const;
 
 export const HAIRSTYLE_GAP = 25;
 export const HAIRSTYLE_CENTER_POSITION = 202;
@@ -26,11 +33,14 @@ export const HAIRSTYLE_VISIBLE_OFFSETS = Array.from(
   (_, index) => index - HAIRSTYLE_VISIBLE_RANGE
 );
 
-export const getCircularHairstyleOption = (position: number) => {
+export const getCircularHairstyleOption = (
+  position: number,
+  hairstyleOptions: ArHairstyleOption[]
+) => {
   const optionIndex =
-    ((position % HAIRSTYLE_OPTIONS.length) + HAIRSTYLE_OPTIONS.length) % HAIRSTYLE_OPTIONS.length;
+    ((position % hairstyleOptions.length) + hairstyleOptions.length) % hairstyleOptions.length;
 
-  return HAIRSTYLE_OPTIONS[optionIndex];
+  return hairstyleOptions[optionIndex];
 };
 
 export const getHairstyleSize = (offset: number) => {

@@ -7,11 +7,10 @@ import "@capgo/capacitor-transitions";
 initTransitions({ platform: "auto" });
 
 /**
- * 시술기록(/cuts) 구간 전용 라우트 전환 컨테이너
- * - cap-router-outlet이 push/pop 시 iOS 스타일 슬라이드 애니메이션과
- *   엣지 스와이프 뒤로가기(swipeGesture: "auto", 네이티브 iOS에서만 자동 활성화)를 담당한다.
+ * AR 확대 메뉴와 시술기록이 공유하는 라우트 전환 컨테이너
+ * - 두 경로가 같은 cap-router-outlet 안에 있어야 경로 간 슬라이드 전환이 유지된다.
  */
-export const CutsTransitionOutlet = () => {
+export const MainTransitionOutlet = () => {
   const outletRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
