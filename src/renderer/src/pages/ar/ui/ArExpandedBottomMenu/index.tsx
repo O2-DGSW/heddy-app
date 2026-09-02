@@ -1,17 +1,14 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import { EXPANDED_AR_MENU_ITEMS } from "../../model/constants";
 import { cn } from "@/shared";
 
 const ROUTE_TRANSITION_DURATION = 220;
 
-interface ArExpandedBottomMenuProps {
-  onNavigateStart: () => void;
-}
-
-const ArExpandedBottomMenu = ({ onNavigateStart }: ArExpandedBottomMenuProps) => {
+const ArExpandedBottomMenu = () => {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
@@ -23,10 +20,10 @@ const ArExpandedBottomMenu = ({ onNavigateStart }: ArExpandedBottomMenuProps) =>
 
     setSelectedPath(to);
     setIsNavigating(true);
-    onNavigateStart();
 
     window.setTimeout(() => {
-      navigate(to, { state: { transition: "slide-from-right" } });
+      setDirection("forward");
+      navigate(to);
     }, ROUTE_TRANSITION_DURATION);
   };
 

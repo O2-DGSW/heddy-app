@@ -36,46 +36,48 @@ const HomePage = () => {
   };
 
   return (
-    <section
-      aria-labelledby="home-greeting"
-      className="flex min-h-full flex-col"
-      style={{ backgroundColor: lightTheme.background.normal }}
-    >
-      <HomeHeader onProfileClick={() => handleNavigate("/profile")} />
+    <cap-page>
+      <section
+        aria-labelledby="home-greeting"
+        className="flex min-h-full flex-col"
+        style={{ backgroundColor: lightTheme.background.normal }}
+      >
+        <HomeHeader onProfileClick={() => handleNavigate("/profile")} />
 
-      <div className="mx-auto mt-[24px] w-[calc(100%_-_52px)] max-w-[350px]">
-        <h1
-          id="home-greeting"
-          className={font.title2.bold}
-          style={{ color: lightTheme.label.neutral }}
-        >
-          오용준님, 안녕하세요
-        </h1>
-        <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-          시술 기록을 저장하고, 스타일을 추천받으세요
-        </p>
-      </div>
-
-      <div className="mx-auto mt-[32px] grid w-[calc(100%_-_42px)] max-w-[359px] grid-cols-[1.041fr_1fr] gap-3">
-        <RecentRecordCard
-          record={recentRecord}
-          isLoading={isRecentRecordPending}
-          isError={isRecentRecordError}
-          onClick={handleRecentRecordClick}
-        />
-
-        <div className="grid h-[228px] grid-rows-2 gap-2">
-          {SHORTCUT_CARDS.map(card => (
-            <ShortcutCard key={card.id} card={card} onClick={() => handleNavigate(card.to)} />
-          ))}
+        <div className="mx-auto mt-[24px] w-[calc(100%_-_52px)] max-w-[350px]">
+          <h1
+            id="home-greeting"
+            className={font.title2.bold}
+            style={{ color: lightTheme.label.neutral }}
+          >
+            오용준님, 안녕하세요
+          </h1>
+          <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+            시술 기록을 저장하고, 스타일을 추천받으세요
+          </p>
         </div>
-      </div>
 
-      <RecommendationSection
-        onMoreClick={() => handleNavigate("/recommend")}
-        onRecommendationClick={() => handleNavigate("/recommend")}
-      />
-    </section>
+        <div className="mx-auto mt-[32px] grid w-[calc(100%_-_42px)] max-w-[359px] grid-cols-[1.041fr_1fr] gap-3">
+          <RecentRecordCard
+            record={recentRecord}
+            isLoading={isRecentRecordPending}
+            isError={isRecentRecordError}
+            onClick={handleRecentRecordClick}
+          />
+
+          <div className="grid h-[228px] grid-rows-2 gap-2">
+            {SHORTCUT_CARDS.map(card => (
+              <ShortcutCard key={card.id} card={card} onClick={() => handleNavigate(card.to)} />
+            ))}
+          </div>
+        </div>
+
+        <RecommendationSection
+          onMoreClick={() => handleNavigate("/recommend")}
+          onRecommendationClick={() => handleNavigate("/recommend")}
+        />
+      </section>
+    </cap-page>
   );
 };
 
