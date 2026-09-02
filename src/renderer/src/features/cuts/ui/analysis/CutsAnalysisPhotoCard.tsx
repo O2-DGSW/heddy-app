@@ -14,9 +14,6 @@ export const CutsAnalysisPhotoCard = ({ photoUrl, overlays }: CutsAnalysisPhotoC
     overlays.filter(overlay => overlay.defaultActive && overlay.imageUrl).map(overlay => overlay.id)
   );
 
-  // 그릴 이미지가 하나도 없으면 토글을 켜도 사진에 변화가 없어, 그 사실을 화면에 알린다.
-  const hasOverlayImage = overlays.some(overlay => Boolean(overlay.imageUrl));
-
   const handleToggle = (overlayId: string) => {
     setActiveOverlayIds(current =>
       current.includes(overlayId) ? current.filter(id => id !== overlayId) : [...current, overlayId]
