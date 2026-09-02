@@ -46,7 +46,7 @@ export const FindIdForm = () => {
           </p>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={{
                 backgroundColor: lightTheme.background.neutral,
                 color: lightTheme.label.normal,
@@ -69,7 +69,7 @@ export const FindIdForm = () => {
             </button>
           </div>
           <input
-            className={`w-full px-4 py-4 rounded-xl focus:outline-none mb-3 ${font.caption.regular}`}
+            className={`w-full px-4 py-4 rounded-xl focus:outline-none mb-3 ${font.body.regular}`}
             style={{
               backgroundColor: lightTheme.background.neutral,
               color: lightTheme.label.normal,

@@ -34,7 +34,7 @@ export const AccountFormFields = ({
           name="email"
           type="email"
           autoComplete="email"
-          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.caption.regular}`}
+          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder="이메일"
           value={form.id}
@@ -56,7 +56,7 @@ export const AccountFormFields = ({
         </p>
 
         <input
-          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.caption.regular}`}
+          className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder={nameLabel}
           value={form.name}

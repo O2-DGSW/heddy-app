@@ -6,7 +6,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { arrowIcon } from "@/entities/record";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useCreateShare } from "@/entities/share";
-import type { ShareField } from "@/entities/share";
+import type { ShareFieldType } from "@/entities/share";
 import { CutsShareRecordList } from "@/features/cuts/ui/share/CutsShareRecordList";
 import { CutsShareItemList } from "@/features/cuts/ui/share/CutsShareItemList";
 import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts/constrants/shareItems";
@@ -26,10 +26,10 @@ export const CutsSharePage = () => {
   const [pickedId, setPickedId] = useState(id ?? "");
   const selectedId = pickedId || records[0]?.id || "";
 
-  const [selectedFields, setSelectedFields] = useState<ShareField[]>(DEFAULT_CUTS_SHARE_FIELDS);
+  const [selectedFields, setSelectedFields] = useState<ShareFieldType[]>(DEFAULT_CUTS_SHARE_FIELDS);
   const createShare = useCreateShare();
 
-  const handleToggleField = (field: ShareField) => {
+  const handleToggleField = (field: ShareFieldType) => {
     setSelectedFields(current =>
       current.includes(field) ? current.filter(item => item !== field) : [...current, field]
     );

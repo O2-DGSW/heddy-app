@@ -1,15 +1,19 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import arrowIcon from "@/pages/home/assets/arrow.svg";
-import { RECOMMENDATION_CARDS } from "@/pages/home/model/constants.ts";
 import type { RecommendationSectionProps } from "@/pages/home/model/types.ts";
 
 import RecommendationCard from "./RecommendationCard.tsx";
 
 const RecommendationSection = ({
+  recommendations,
+  isLoading = false,
+  isError = false,
   onMoreClick,
   onRecommendationClick,
 }: RecommendationSectionProps) => {
+  const hasRecommendations = recommendations.length > 0;
+
   return (
     <section
       aria-labelledby="home-recommendation-title"
@@ -36,9 +40,25 @@ const RecommendationSection = ({
       </div>
 
       <div className="mx-auto mt-[14px] grid w-[calc(100%_-_42px)] max-w-[360px] grid-cols-2 gap-3">
-        {RECOMMENDATION_CARDS.map(card => (
-          <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
-        ))}
+        {hasRecommendations ? (
+          recommendations.map(card => (
+            <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
+          ))
+        ) : (
+          <div
+            className={`col-span-2 flex h-[180px] items-center justify-center rounded-[12px] text-center ${font.label.medium}`}
+            style={{
+              backgroundColor: lightTheme.background.normal,
+              color: lightTheme.label.assistive,
+            }}
+          >
+            {isLoading
+              ? "추천을 불러오는 중입니다"
+              : isError
+                ? "추천을 불러오지 못했습니다"
+                : "아직 추천 결과가 없습니다"}
+          </div>
+        )}
       </div>
     </section>
   );

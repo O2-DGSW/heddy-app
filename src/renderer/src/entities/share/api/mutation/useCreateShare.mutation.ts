@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import type { CreateShareRequest } from "../../model";
 import { createShareApi } from "../shareApi";
 import { shareQueryKeys } from "../query/shareQueryKeys";
-import type { CreateShareRequest } from "@/entities/share/model/share.types";
 
 export const useCreateShare = () => {
   const queryClient = useQueryClient();

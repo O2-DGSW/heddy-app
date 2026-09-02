@@ -16,7 +16,7 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
     >
       <span className="flex h-full flex-col gap-4">
         <span className="relative block h-[95px] overflow-hidden rounded-[12px]">
-          <CroppedHairImage alt={`${card.title} 추천 사진`} />
+          <CroppedHairImage alt={`${card.title} 추천 사진`} src={card.imageUrl || undefined} />
           <span
             aria-hidden="true"
             className="absolute bottom-[5px] right-[5px] flex size-[23px] items-center justify-center rounded-full"

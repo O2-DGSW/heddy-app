@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { revokeShareApi } from "../shareApi";
+import { deleteShareApi } from "../shareApi";
 import { shareQueryKeys } from "../query/shareQueryKeys";
 
-export const useRevokeShare = () => {
+export const useDeleteShare = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (shareId: string) => revokeShareApi(shareId),
+    mutationFn: (shareId: string) => deleteShareApi(shareId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: shareQueryKeys.all });
     },

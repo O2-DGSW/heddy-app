@@ -1,4 +1,5 @@
 export * from "./auth";
+export * from "./consent";
 export * from "./profile";
 export * from "./record";
 export * from "./recommendation";

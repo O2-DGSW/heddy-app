@@ -2,12 +2,12 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CutsShareItemToggle } from "@/features/cuts/ui/share/CutsShareItemToggle";
 import { CUTS_SHARE_ITEMS } from "@/features/cuts/constrants/shareItems";
-import type { ShareField } from "@/entities/share/model/share.types";
+import type { ShareFieldType } from "@/entities/share";
 
 interface CutsShareItemListProps {
   /** 선택한 노출 항목. 그대로 공유 생성 요청의 fields로 나간다 */
-  selectedFields: ShareField[];
-  onToggle: (field: ShareField) => void;
+  selectedFields: ShareFieldType[];
+  onToggle: (field: ShareFieldType) => void;
 }
 
 export const CutsShareItemList = ({ selectedFields, onToggle }: CutsShareItemListProps) => {

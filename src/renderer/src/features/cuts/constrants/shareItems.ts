@@ -1,7 +1,7 @@
-import type { ShareField } from "@/entities/share/model/share.types";
+import type { ShareFieldType } from "@/entities/share";
 
 export type CutsShareItem = {
-  id: ShareField;
+  id: ShareFieldType;
   label: string;
   defaultEnabled: boolean;
 };
