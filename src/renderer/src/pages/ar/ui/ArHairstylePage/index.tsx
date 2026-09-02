@@ -41,7 +41,8 @@ const ArHairstylePage = () => {
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const { capturedYawTargets, connectionStatus, errorMessage, livebankProgress, stats } =
     useArServerConnection(cameraPreviewRef, serverHairstyleOptions[0]?.id ?? null);
-  const isFaceTracked = typeof stats?.yaw === "number";
+  const faceYaw = stats?.yaw ?? stats?.yaw_ema ?? livebankProgress?.currentYaw;
+  const isFaceTracked = typeof faceYaw === "number";
 
   useEffect(() => {
     setIsBottomBarHidden(isExpanded);
@@ -104,7 +105,7 @@ const ArHairstylePage = () => {
             capturedYawTargets={capturedYawTargets}
             isExpanded={isExpanded}
             livebankProgress={livebankProgress}
-            yaw={stats?.yaw}
+            yaw={faceYaw}
           />
           <ArColorPicker
             isExpanded={isExpanded}

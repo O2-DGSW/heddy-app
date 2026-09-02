@@ -276,10 +276,6 @@ const parseServerEvent = (
   const data = getEventData(value);
   const statsData = getStatsData(value);
 
-  if (value.type === "stats" || hasFaceDirection(statsData)) {
-    return { type: "stats", data: parseArStats(statsData) };
-  }
-
   if (value.type === "livebank" && isArLivebankStatus(data.status)) {
     return {
       type: "livebank",
@@ -288,7 +284,7 @@ const parseServerEvent = (
         banks: parseLivebankBanks(data.banks),
         buckets: parseLivebankBuckets(data.buckets),
         capturedYaw: getOptionalNumber(data.captured_yaw),
-        currentYaw: getOptionalNumber(data.current_yaw),
+        currentYaw: getOptionalNumber(data.current_yaw) ?? getOptionalNumber(data.yaw),
         done: getOptionalNumber(data.done),
         filledYaw: getOptionalNumber(data.filled_yaw),
         index: getOptionalNumber(data.index),
@@ -298,6 +294,10 @@ const parseServerEvent = (
         total: getOptionalNumber(data.total),
       },
     };
+  }
+
+  if (value.type === "stats" || hasFaceDirection(statsData)) {
+    return { type: "stats", data: parseArStats(statsData) };
   }
 
   return null;
