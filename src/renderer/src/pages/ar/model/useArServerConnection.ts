@@ -246,12 +246,12 @@ export const useArServerConnection = (
 
     const isOriginalStyle = nextHairstyleId === "none";
     statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
+    statsChannel.send(JSON.stringify({ type: "livebank", on: true, reference: "korean-layered" }));
 
     if (isOriginalStyle) {
       return;
     }
 
-    statsChannel.send(JSON.stringify({ type: "livebank", on: true, reference: "korean-layered" }));
     statsChannel.send(
       JSON.stringify({ type: "fit", bank: "korean-layered", harmonize: true, scale: 1 })
     );
