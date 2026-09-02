@@ -11,6 +11,7 @@ interface ArControlBarProps {
   handleModalOpen: () => void;
   handleStyleReset: () => void;
   isExpanded: boolean;
+  selectedHairstyleLabel: string;
 }
 
 const ArControlBar = ({
@@ -18,6 +19,7 @@ const ArControlBar = ({
   handleModalOpen,
   handleStyleReset,
   isExpanded,
+  selectedHairstyleLabel,
 }: ArControlBarProps) => (
   <div className="flex w-[calc(100%-24px)] max-w-[332px] items-center gap-[8px]">
     <button
@@ -35,7 +37,7 @@ const ArControlBar = ({
       )}
       style={{ color: lightTheme.label.disable }}
     >
-      다운펌 - 내추럴 블랙
+      {selectedHairstyleLabel}
     </span>
     <button
       aria-label="스타일 선택 초기화"

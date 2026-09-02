@@ -3,7 +3,6 @@ import type { TouchEvent, WheelEvent } from "react";
 
 import { cn } from "@/shared";
 
-import downPermImage from "../../assets/down-perm.png";
 import noStyleIcon from "../../assets/no-style.svg";
 import {
   getCircularHairstyleOption,
@@ -11,23 +10,30 @@ import {
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
 } from "../../model/constants";
-import type { HairstyleOptionId } from "../../model/types";
+import type { ArHairstyleOption, HairstyleOptionId } from "../../model/types";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
+  hairstyleOptions: ArHairstyleOption[];
+  loadingMessage: string | null;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
 }
 
 const SWIPE_THRESHOLD = 24;
 const WHEEL_STEP_INTERVAL = 280;
 
-const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleCarouselProps) => {
+const ArHairstyleCarousel = ({
+  activeHairstylePosition,
+  hairstyleOptions,
+  loadingMessage,
+  onSelect,
+}: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
   const lastWheelAtRef = useRef(0);
 
   const handleMove = (offset: -1 | 1) => {
-    onSelect(getCircularHairstyleOption(activeHairstylePosition + offset).id);
+    onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
@@ -82,6 +88,17 @@ const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleC
     onSelect(hairstyleId);
   };
 
+  if (loadingMessage || hairstyleOptions.length === 0) {
+    return (
+      <div
+        aria-live="polite"
+        className="flex h-[80px] w-[404px] shrink-0 items-center justify-center text-center text-[13px] text-white/80"
+      >
+        {loadingMessage ?? "서버에 등록된 헤어스타일이 없습니다."}
+      </div>
+    );
+  }
+
   return (
     <div
       aria-label="헤어스타일 선택"
@@ -92,7 +109,7 @@ const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleC
     >
       {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {
         const position = activeHairstylePosition + offset;
-        const option = getCircularHairstyleOption(position);
+        const option = getCircularHairstyleOption(position, hairstyleOptions);
         const isSelected = offset === 0;
         const isNoStyle = option.id === "none";
         const size = getHairstyleSize(offset);
@@ -105,7 +122,7 @@ const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleC
             style={{ height: size, left: getHairstyleItemLeft(offset), width: size }}
           >
             <button
-              aria-label={isNoStyle ? "헤어스타일 적용 안 함" : "다운펌 선택"}
+              aria-label={isNoStyle ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
               aria-pressed={isSelected}
               className={cn(
                 "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
@@ -123,15 +140,11 @@ const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleC
               ) : (
                 <span
                   className={cn(
-                    "block h-full w-full overflow-hidden rounded-full",
+                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/20 px-1 text-center text-[9px] font-semibold leading-tight text-white backdrop-blur",
                     size === 80 && "border-[2.5px] border-black"
                   )}
                 >
-                  <img
-                    alt="다운펌 헤어스타일"
-                    className="h-full w-full object-cover"
-                    src={downPermImage}
-                  />
+                  {option.label}
                 </span>
               )}
             </button>

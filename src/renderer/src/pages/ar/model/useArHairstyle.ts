@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import { HAIR_COLOR_OPTIONS, HAIRSTYLE_OPTIONS } from "./constants";
-import type { ArModalType, HairstyleOptionId } from "./types";
+import { HAIR_COLOR_OPTIONS } from "./constants";
+import type { ArHairstyleOption, ArModalType, HairstyleOptionId } from "./types";
 
-export const useArHairstyle = () => {
-  const [activeHairstylePosition, setActiveHairstylePosition] = useState(2);
+export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
+  const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
   const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
@@ -19,17 +19,21 @@ export const useArHairstyle = () => {
   };
 
   const handleHairstyleSelect = (selectedId: HairstyleOptionId) => {
-    const selectedIndex = HAIRSTYLE_OPTIONS.findIndex(option => option.id === selectedId);
+    const selectedIndex = hairstyleOptions.findIndex(option => option.id === selectedId);
+
+    if (selectedIndex < 0 || hairstyleOptions.length === 0) {
+      return;
+    }
 
     setActiveHairstylePosition(currentPosition => {
       const currentIndex =
-        ((currentPosition % HAIRSTYLE_OPTIONS.length) + HAIRSTYLE_OPTIONS.length) %
-        HAIRSTYLE_OPTIONS.length;
+        ((currentPosition % hairstyleOptions.length) + hairstyleOptions.length) %
+        hairstyleOptions.length;
       const forwardDistance =
-        (selectedIndex - currentIndex + HAIRSTYLE_OPTIONS.length) % HAIRSTYLE_OPTIONS.length;
+        (selectedIndex - currentIndex + hairstyleOptions.length) % hairstyleOptions.length;
       const movement =
-        forwardDistance > HAIRSTYLE_OPTIONS.length / 2
-          ? forwardDistance - HAIRSTYLE_OPTIONS.length
+        forwardDistance > hairstyleOptions.length / 2
+          ? forwardDistance - hairstyleOptions.length
           : forwardDistance;
 
       return currentPosition + movement;
@@ -37,7 +41,7 @@ export const useArHairstyle = () => {
   };
 
   const handleStyleReset = () => {
-    handleHairstyleSelect("down-perm-2");
+    setActiveHairstylePosition(0);
     setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
   };
 

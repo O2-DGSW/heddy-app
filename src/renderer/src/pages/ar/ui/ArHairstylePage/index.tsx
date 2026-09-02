@@ -2,8 +2,9 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect, useRef } from "react";
 
 import { useArServerConnection } from "../../model/useArServerConnection";
+import { useArHairstyleReferences } from "../../model/useArHairstyleReferences";
 import { useArHairstyle } from "../../model/useArHairstyle";
-import { getCircularHairstyleOption } from "../../model/constants";
+import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArCaptureModal from "../ArCaptureModal";
@@ -18,6 +19,12 @@ const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
+    errorMessage: hairstyleReferencesErrorMessage,
+    hairstyleOptions: serverHairstyleOptions,
+    status: hairstyleReferencesStatus,
+  } = useArHairstyleReferences();
+  const hairstyleOptions = [ORIGINAL_HAIRSTYLE_OPTION, ...serverHairstyleOptions];
+  const {
     activeHairstylePosition,
     activeModal,
     candidateMemo,
@@ -30,11 +37,12 @@ const ArHairstylePage = () => {
     selectedColorId,
     setCandidateMemo,
     setSelectedColorId,
-  } = useArHairstyle();
-  const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition);
+  } = useArHairstyle(hairstyleOptions);
+  const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const { connectionStatus, errorMessage, livebankProgress, stats } = useArServerConnection(
     cameraPreviewRef,
-    selectedHairstyle.id
+    selectedHairstyle.id,
+    serverHairstyleOptions[0]?.id ?? null
   );
   const isFaceTracked = typeof stats?.yaw_ema === "number" || typeof stats?.yaw === "number";
 
@@ -119,9 +127,16 @@ const ArHairstylePage = () => {
               handleModalOpen={() => handleModalOpen("candidate-save")}
               handleStyleReset={handleStyleReset}
               isExpanded={isExpanded}
+              selectedHairstyleLabel={selectedHairstyle.label}
             />
             <ArHairstyleCarousel
               activeHairstylePosition={activeHairstylePosition}
+              hairstyleOptions={hairstyleOptions}
+              loadingMessage={
+                hairstyleReferencesStatus === "loading"
+                  ? "헤어스타일을 불러오는 중"
+                  : hairstyleReferencesErrorMessage
+              }
               onSelect={handleHairstyleSelect}
             />
             {isExpanded && <ArExpandedBottomMenu />}

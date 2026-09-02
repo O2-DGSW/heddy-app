@@ -1,7 +1,7 @@
 import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
-import type { HairstyleOptionId } from "./types";
+import type { ArHairstyleOption } from "./types";
 
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
 
@@ -32,6 +32,10 @@ interface ArServerAnswer {
   type: "answer";
 }
 
+interface ArServerReferencesResponse {
+  references: unknown[];
+}
+
 interface UseArServerConnectionResult {
   connectionStatus: ArConnectionStatusType;
   errorMessage: string | null;
@@ -41,7 +45,7 @@ interface UseArServerConnectionResult {
   stats: ArStats | null;
 }
 
-const getArServerBaseUrl = () => {
+export const getArServerBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_AR_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
 
   if (!configuredUrl) {
@@ -49,6 +53,50 @@ const getArServerBaseUrl = () => {
   }
 
   return Capacitor.isNativePlatform() ? configuredUrl : "/ar-server";
+};
+
+const isArServerReferencesResponse = (value: unknown): value is ArServerReferencesResponse =>
+  isRecord(value) && Array.isArray(value.references);
+
+export const getArHairstyleReferences = async (): Promise<ArHairstyleOption[]> => {
+  const serverBaseUrl = getArServerBaseUrl();
+
+  if (!serverBaseUrl) {
+    throw new Error("AR 서버 주소가 설정되지 않았습니다.");
+  }
+
+  const url = `${serverBaseUrl}/references`;
+  let responseData: unknown;
+
+  if (Capacitor.isNativePlatform()) {
+    const response = await CapacitorHttp.get({
+      connectTimeout: 10000,
+      readTimeout: 10000,
+      url,
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
+    }
+
+    responseData = response.data;
+  } else {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
+    }
+
+    responseData = (await response.json()) as unknown;
+  }
+
+  if (!isArServerReferencesResponse(responseData)) {
+    throw new Error("AR 서버의 헤어스타일 목록 형식이 올바르지 않습니다.");
+  }
+
+  return responseData.references.flatMap(reference =>
+    typeof reference === "string" && reference.trim() ? [{ id: reference, label: reference }] : []
+  );
 };
 
 const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
@@ -225,37 +273,48 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
-  hairstyleId: HairstyleOptionId
+  hairstyleId: string,
+  livebankReferenceId: string | null
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
   const hairstyleIdRef = useRef(hairstyleId);
+  const livebankReferenceIdRef = useRef(livebankReferenceId);
   const [stats, setStats] = useState<ArStats | null>(null);
   const [livebankProgress, setLivebankProgress] = useState<ArLivebankProgress | null>(null);
   const [captureResult, setCaptureResult] = useState<ArCaptureResult | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const sendHairstyleMode = useCallback((nextHairstyleId: HairstyleOptionId) => {
-    const statsChannel = statsChannelRef.current;
+  const sendHairstyleMode = useCallback(
+    (nextHairstyleId: string, nextLivebankReferenceId: string | null) => {
+      const statsChannel = statsChannelRef.current;
 
-    if (statsChannel?.readyState !== "open") {
-      return;
-    }
+      if (statsChannel?.readyState !== "open") {
+        return;
+      }
 
-    const isOriginalStyle = nextHairstyleId === "none";
-    statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
-    statsChannel.send(JSON.stringify({ type: "livebank", on: true, reference: "korean-layered" }));
+      const isOriginalStyle = nextHairstyleId === "none";
+      const referenceId = isOriginalStyle ? nextLivebankReferenceId : nextHairstyleId;
+      statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
 
-    if (isOriginalStyle) {
-      return;
-    }
+      if (!referenceId) {
+        return;
+      }
 
-    statsChannel.send(
-      JSON.stringify({ type: "fit", bank: "korean-layered", harmonize: true, scale: 1 })
-    );
-  }, []);
+      statsChannel.send(JSON.stringify({ type: "livebank", on: true, reference: referenceId }));
+
+      if (isOriginalStyle) {
+        return;
+      }
+
+      statsChannel.send(
+        JSON.stringify({ type: "fit", bank: referenceId, harmonize: true, scale: 1 })
+      );
+    },
+    []
+  );
 
   const capture = useCallback(() => {
     if (statsChannelRef.current?.readyState === "open") {
@@ -315,7 +374,7 @@ export const useArServerConnection = (
       const statsChannel = peerConnection.createDataChannel("stats");
       statsChannelRef.current = statsChannel;
       statsChannel.addEventListener("open", () => {
-        sendHairstyleMode(hairstyleIdRef.current);
+        sendHairstyleMode(hairstyleIdRef.current, livebankReferenceIdRef.current);
       });
       statsChannel.addEventListener("message", event => {
         try {
@@ -387,8 +446,9 @@ export const useArServerConnection = (
 
   useEffect(() => {
     hairstyleIdRef.current = hairstyleId;
-    sendHairstyleMode(hairstyleId);
-  }, [hairstyleId, sendHairstyleMode]);
+    livebankReferenceIdRef.current = livebankReferenceId;
+    sendHairstyleMode(hairstyleId, livebankReferenceId);
+  }, [hairstyleId, livebankReferenceId, sendHairstyleMode]);
 
   useEffect(() => {
     const startTimer = window.setTimeout(() => {
