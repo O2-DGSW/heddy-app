@@ -16,11 +16,10 @@ const ArRecognitionBadge = ({
   isFaceTracked,
   isExpanded,
 }: ArRecognitionBadgeProps) => {
-  const label =
-    connectionStatus === "connected"
-      ? isFaceTracked
-        ? "얼굴 인식 완료"
-        : "얼굴 위치 확인 중"
+  const label = isFaceTracked
+    ? "얼굴 인식 완료"
+    : connectionStatus === "connected"
+      ? "얼굴 위치 확인 중"
       : connectionStatus === "connecting"
         ? "AR 연결 중"
         : "AR 연결 실패";

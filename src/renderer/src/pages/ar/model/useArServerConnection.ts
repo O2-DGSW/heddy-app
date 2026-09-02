@@ -1,6 +1,7 @@
 import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
+import { LIVEBANK_CAPTURE_YAWS, LIVEBANK_CAPTURE_YAW_THRESHOLD } from "./constants";
 import type { ArHairstyleOption } from "./types";
 
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
@@ -41,6 +42,7 @@ interface UseArServerConnectionResult {
   errorMessage: string | null;
   capture: () => void;
   captureResult: ArCaptureResult | null;
+  capturedYawTargets: number[];
   livebankProgress: ArLivebankProgress | null;
   stats: ArStats | null;
 }
@@ -315,17 +317,22 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
+  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
   hairstyleId: string,
-  livebankReferenceId: string | null
+  livebankReferenceId: string | null,
+  faceYaw: number | null
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
   const hairstyleIdRef = useRef(hairstyleId);
   const livebankReferenceIdRef = useRef(livebankReferenceId);
+  const isLivebankStartedRef = useRef(false);
+  const capturedYawTargetsRef = useRef(new Set<number>());
   const [stats, setStats] = useState<ArStats | null>(null);
   const [livebankProgress, setLivebankProgress] = useState<ArLivebankProgress | null>(null);
   const [captureResult, setCaptureResult] = useState<ArCaptureResult | null>(null);
+  const [capturedYawTargets, setCapturedYawTargets] = useState<number[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -338,52 +345,83 @@ export const useArServerConnection = (
       }
 
       const isOriginalStyle = nextHairstyleId === "none";
-      const referenceId = isOriginalStyle ? nextLivebankReferenceId : nextHairstyleId;
-      statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
+      const livebankReferenceId = nextLivebankReferenceId ?? nextHairstyleId;
 
-      if (!referenceId) {
+      if (!livebankReferenceId) {
         return;
       }
 
-      statsChannel.send(JSON.stringify({ type: "livebank", on: true, reference: referenceId }));
+      if (!isLivebankStartedRef.current) {
+        // Livebank가 먼저 기준 프레임을 수집한 후 스타일 합성을 시작해야 한다.
+        statsChannel.send(
+          JSON.stringify({ type: "livebank", on: true, reference: livebankReferenceId })
+        );
+        isLivebankStartedRef.current = true;
+        capturedYawTargetsRef.current.clear();
+        setCapturedYawTargets([]);
+      }
+
+      if (capturedYawTargetsRef.current.size !== LIVEBANK_CAPTURE_YAWS.length) {
+        return;
+      }
+
+      statsChannel.send(JSON.stringify({ type: "mode", mode: isOriginalStyle ? "raw" : "tryon" }));
 
       if (isOriginalStyle) {
         return;
       }
 
       statsChannel.send(
-        JSON.stringify({ type: "fit", bank: referenceId, harmonize: true, scale: 1 })
+        JSON.stringify({ type: "fit", bank: nextHairstyleId, harmonize: true, scale: 1 })
       );
     },
     []
   );
 
-  const capture = useCallback(() => {
-    if (statsChannelRef.current?.readyState === "open") {
-      statsChannelRef.current.send(JSON.stringify({ type: "capture", reference: true }));
+  const requestCapture = useCallback((targetYaw?: number) => {
+    if (statsChannelRef.current?.readyState !== "open") {
+      return;
     }
+
+    statsChannelRef.current.send(
+      JSON.stringify({
+        type: "capture",
+        reference: true,
+        ...(targetYaw !== undefined && { yaw: targetYaw }),
+      })
+    );
   }, []);
 
-  const stopConnection = useCallback(() => {
-    peerConnectionRef.current?.close();
-    peerConnectionRef.current = null;
-    statsChannelRef.current = null;
-    localStreamRef.current?.getTracks().forEach(track => track.stop());
-    localStreamRef.current = null;
+  const capture = useCallback(() => {
+    requestCapture();
+  }, [requestCapture]);
 
-    if (previewVideoRef.current) {
-      previewVideoRef.current.srcObject = null;
-    }
-  }, [previewVideoRef]);
+  const stopConnection = useCallback(
+    (shouldStopCamera = true) => {
+      peerConnectionRef.current?.close();
+      peerConnectionRef.current = null;
+      statsChannelRef.current = null;
+      isLivebankStartedRef.current = false;
+      capturedYawTargetsRef.current.clear();
+
+      if (shouldStopCamera) {
+        localStreamRef.current?.getTracks().forEach(track => track.stop());
+        localStreamRef.current = null;
+
+        if (previewVideoRef.current) {
+          previewVideoRef.current.srcObject = null;
+        }
+
+        if (faceTrackingVideoRef.current) {
+          faceTrackingVideoRef.current.srcObject = null;
+        }
+      }
+    },
+    [faceTrackingVideoRef, previewVideoRef]
+  );
 
   const startConnection = useCallback(async () => {
     const serverBaseUrl = getArServerBaseUrl();
-
-    if (!serverBaseUrl) {
-      setConnectionStatus("error");
-      setErrorMessage("AR 서버 주소가 설정되지 않았습니다.");
-      return;
-    }
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setConnectionStatus("error");
@@ -409,6 +447,17 @@ export const useArServerConnection = (
       if (previewVideoRef.current) {
         previewVideoRef.current.srcObject = localStream;
         void previewVideoRef.current.play().catch(() => undefined);
+      }
+
+      if (faceTrackingVideoRef.current) {
+        faceTrackingVideoRef.current.srcObject = localStream;
+        void faceTrackingVideoRef.current.play().catch(() => undefined);
+      }
+
+      if (!serverBaseUrl) {
+        setConnectionStatus("error");
+        setErrorMessage("AR 서버 주소가 설정되지 않았습니다. 얼굴 방향 안내만 사용할 수 있습니다.");
+        return;
       }
 
       const peerConnection = new RTCPeerConnection();
@@ -481,7 +530,7 @@ export const useArServerConnection = (
 
       await peerConnection.setRemoteDescription(answer);
     } catch (error: unknown) {
-      stopConnection();
+      stopConnection(false);
       setConnectionStatus("error");
       setErrorMessage(
         error instanceof DOMException && error.name === "NotAllowedError"
@@ -489,13 +538,30 @@ export const useArServerConnection = (
           : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
       );
     }
-  }, [previewVideoRef, sendHairstyleMode, stopConnection]);
+  }, [faceTrackingVideoRef, previewVideoRef, sendHairstyleMode, stopConnection]);
 
   useEffect(() => {
     hairstyleIdRef.current = hairstyleId;
     livebankReferenceIdRef.current = livebankReferenceId;
     sendHairstyleMode(hairstyleId, livebankReferenceId);
-  }, [hairstyleId, livebankReferenceId, sendHairstyleMode]);
+  }, [capturedYawTargets, hairstyleId, livebankReferenceId, sendHairstyleMode]);
+
+  useEffect(() => {
+    const nextTargetYaw = LIVEBANK_CAPTURE_YAWS[capturedYawTargetsRef.current.size];
+
+    if (
+      !isLivebankStartedRef.current ||
+      faceYaw === null ||
+      nextTargetYaw === undefined ||
+      Math.abs(faceYaw - nextTargetYaw) > LIVEBANK_CAPTURE_YAW_THRESHOLD
+    ) {
+      return;
+    }
+
+    capturedYawTargetsRef.current.add(nextTargetYaw);
+    setCapturedYawTargets([...capturedYawTargetsRef.current]);
+    requestCapture(nextTargetYaw);
+  }, [faceYaw, requestCapture]);
 
   useEffect(() => {
     const startTimer = window.setTimeout(() => {
@@ -508,5 +574,13 @@ export const useArServerConnection = (
     };
   }, [startConnection, stopConnection]);
 
-  return { capture, captureResult, connectionStatus, errorMessage, livebankProgress, stats };
+  return {
+    capture,
+    captureResult,
+    capturedYawTargets,
+    connectionStatus,
+    errorMessage,
+    livebankProgress,
+    stats,
+  };
 };

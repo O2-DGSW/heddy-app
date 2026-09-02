@@ -7,6 +7,9 @@ export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
   label: "원본 스타일",
 };
 
+export const LIVEBANK_CAPTURE_YAWS = [-36, -24, -12, 0, 12, 24, 36] as const;
+export const LIVEBANK_CAPTURE_YAW_THRESHOLD = 5;
+
 export const HAIR_COLOR_OPTIONS = [
   { id: "natural-black", color: lightTheme.label.strong },
   { id: "dark-brown", color: "#100604" },

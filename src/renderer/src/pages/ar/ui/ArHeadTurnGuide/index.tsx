@@ -1,68 +1,43 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
 
 import type { ArLivebankProgress } from "../../model/useArServerConnection";
+import { LIVEBANK_CAPTURE_YAWS } from "../../model/constants";
 import { cn } from "@/shared";
 
-const HEAD_TURN_STEPS = [
-  { id: "front", label: "정면을 바라봐 주세요", targetYaw: 0, threshold: 10, rotation: 0 },
-  { id: "left", label: "고개를 왼쪽으로 돌려주세요", targetYaw: -36, threshold: 12, rotation: -24 },
-  {
-    id: "right",
-    label: "고개를 오른쪽으로 돌려주세요",
-    targetYaw: 36,
-    threshold: 12,
-    rotation: 24,
-  },
-] as const;
+const getHeadTurnStep = (targetYaw: number) => ({
+  id: `yaw-${targetYaw}`,
+  label: targetYaw === 0 ? "정면을 바라봐 주세요" : `고개를 ${targetYaw}°로 돌려주세요`,
+  rotation: targetYaw * (2 / 3),
+  targetYaw,
+});
 
-const isTargetYawReached = (yaw: number, targetYaw: number, threshold: number) =>
-  Math.abs(yaw - targetYaw) <= threshold;
+const HEAD_TURN_STEPS = LIVEBANK_CAPTURE_YAWS.map(getHeadTurnStep);
 
 interface ArHeadTurnGuideProps {
+  capturedYawTargets: number[];
   isExpanded: boolean;
   livebankProgress: ArLivebankProgress | null;
   yaw?: number;
 }
 
-const ArHeadTurnGuide = ({ isExpanded, livebankProgress, yaw }: ArHeadTurnGuideProps) => {
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const activeStep = HEAD_TURN_STEPS[Math.min(activeStepIndex, HEAD_TURN_STEPS.length - 1)];
-  const isAngleGuideCompleted = activeStepIndex === HEAD_TURN_STEPS.length;
+const ArHeadTurnGuide = ({
+  capturedYawTargets,
+  isExpanded,
+  livebankProgress,
+  yaw,
+}: ArHeadTurnGuideProps) => {
+  const activeStepIndex = HEAD_TURN_STEPS.findIndex(
+    step => !capturedYawTargets.includes(step.targetYaw)
+  );
+  const isAngleGuideCompleted = activeStepIndex === -1;
+  const activeStep =
+    HEAD_TURN_STEPS[isAngleGuideCompleted ? HEAD_TURN_STEPS.length - 1 : activeStepIndex];
   const isGenerating =
     livebankProgress?.status === "started" ||
     livebankProgress?.status === "running" ||
     livebankProgress?.status === "generating";
   const isGenerationCompleted = livebankProgress?.status === "complete";
-
-  useEffect(() => {
-    if (livebankProgress?.status !== "started") {
-      return;
-    }
-
-    const animationFrame = window.requestAnimationFrame(() => {
-      setActiveStepIndex(0);
-    });
-
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [livebankProgress?.status]);
-
-  useEffect(() => {
-    if (
-      typeof yaw !== "number" ||
-      activeStepIndex >= HEAD_TURN_STEPS.length ||
-      !isTargetYawReached(yaw, activeStep.targetYaw, activeStep.threshold)
-    ) {
-      return;
-    }
-
-    const animationFrame = window.requestAnimationFrame(() => {
-      setActiveStepIndex(currentStepIndex => currentStepIndex + 1);
-    });
-
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [activeStep, activeStepIndex, yaw]);
 
   const progressLabel = isGenerationCompleted
     ? "스타일 생성이 완료됐어요"
@@ -71,7 +46,7 @@ const ArHeadTurnGuide = ({ isExpanded, livebankProgress, yaw }: ArHeadTurnGuideP
       : activeStep.label;
   const detailLabel =
     typeof yaw !== "number"
-      ? "고개 움직임을 감지하고 있어요"
+      ? "얼굴 방향 데이터를 기다리고 있어요"
       : isGenerating && livebankProgress?.total
         ? `${livebankProgress.done ?? 0}/${livebankProgress.total} 방향 생성 중`
         : isGenerationCompleted
@@ -123,11 +98,11 @@ const ArHeadTurnGuide = ({ isExpanded, livebankProgress, yaw }: ArHeadTurnGuideP
           {detailLabel}
         </span>
         <span aria-hidden="true" className="mt-2 flex gap-1.5">
-          {HEAD_TURN_STEPS.map((step, index) => (
+          {HEAD_TURN_STEPS.map(step => (
             <span
               className={cn(
                 "h-1.5 w-1.5 rounded-full transition-colors duration-200",
-                index < activeStepIndex ? "bg-white" : "bg-white/35"
+                capturedYawTargets.includes(step.targetYaw) ? "bg-white" : "bg-white/35"
               )}
               key={step.id}
             />
