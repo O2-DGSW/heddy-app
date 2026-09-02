@@ -1,5 +1,5 @@
 import { Capacitor } from "@capacitor/core";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
 import { BottomBarVisibilityProvider, useBottomBarVisibility } from "@/shared";
@@ -49,14 +49,8 @@ const MobileLayoutContent = () => {
   const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale } =
     useBrowserDevicePreview();
-
-  if (isUnsupportedViewport) {
-    return (
-      <div className="flex min-h-dvh w-full items-center justify-center bg-gray-100 px-6">
-        <p className="text-center text-sm font-medium text-gray-600">지원하지 않는 크기입니다.</p>
-      </div>
-    );
-  }
+  const wasBottomBarHiddenRef = useRef(false);
+  const [isBottomBarEntering, setIsBottomBarEntering] = useState(false);
 
   const usePageScroll = PAGE_SCROLL_PATHS.some(pathPrefix =>
     location.pathname.startsWith(pathPrefix)
@@ -67,6 +61,41 @@ const MobileLayoutContent = () => {
     BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix)) ||
     isBottomBarHidden;
   const reserveBottomSafeArea = hideBottomBar && location.pathname !== "/ar";
+
+  useLayoutEffect(() => {
+    const shouldAnimateBottomBar = wasBottomBarHiddenRef.current && !hideBottomBar;
+
+    wasBottomBarHiddenRef.current = hideBottomBar;
+
+    if (!shouldAnimateBottomBar) {
+      return;
+    }
+
+    setIsBottomBarEntering(true);
+
+    let enterAnimationFrame: number | null = null;
+    const initialAnimationFrame = window.requestAnimationFrame(() => {
+      enterAnimationFrame = window.requestAnimationFrame(() => {
+        setIsBottomBarEntering(false);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(initialAnimationFrame);
+
+      if (enterAnimationFrame !== null) {
+        window.cancelAnimationFrame(enterAnimationFrame);
+      }
+    };
+  }, [hideBottomBar]);
+
+  if (isUnsupportedViewport) {
+    return (
+      <div className="flex min-h-dvh w-full items-center justify-center bg-gray-100 px-6">
+        <p className="text-center text-sm font-medium text-gray-600">지원하지 않는 크기입니다.</p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -180,7 +209,9 @@ const MobileLayoutContent = () => {
               </>
             )}
             {!hideBottomBar && (
-              <div className="w-full shrink-0">
+              <div
+                className={`w-full shrink-0 transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isBottomBarEntering ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
+              >
                 <NavBar />
               </div>
             )}
