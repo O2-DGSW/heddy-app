@@ -31,21 +31,21 @@ export const WelcomePage = () => {
             backgroundColor: lightTheme.primary.normal,
             color: lightTheme.fill.normal,
           }}
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate("/login")}
         >
-          시작하기
+          로그인
         </button>
 
         <div className="flex flex-row items-center justify-center gap-2">
           <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-            이미 계정이 있으신가요?
+            계정이 없으시다면?
           </p>
           <p
             className={`${font.label.medium} underline`}
             style={{ color: lightTheme.primary.normal }}
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/signup")}
           >
-            로그인
+            회원가입
           </p>
         </div>
       </div>
