@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
-import { initTransitions, setupRouterOutlet } from "@capgo/capacitor-transitions/react";
-import "@capgo/capacitor-transitions";
+import { setupRouterOutlet } from "@capgo/capacitor-transitions/react";
 
-// 앱 시작 시 한 번만 초기화하면 되므로 모듈 스코프에서 호출한다.
-initTransitions({ platform: "auto" });
+import { initCapgoTransitions } from "./initCapgoTransitions";
+
+initCapgoTransitions();
 
 /**
  * 시술기록(/cuts) 구간 전용 라우트 전환 컨테이너

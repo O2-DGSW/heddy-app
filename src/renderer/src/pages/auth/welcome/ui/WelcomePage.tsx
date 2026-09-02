@@ -39,7 +39,7 @@ export const WelcomePage = () => {
 
         <div className="flex flex-row items-center justify-center gap-2">
           <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-            아직 계정이 없으신가요?
+            계정이 없으시다면?
           </p>
           <button
             type="button"
