@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
-import { initTransitions, setupRouterOutlet } from "@capgo/capacitor-transitions/react";
-import "@capgo/capacitor-transitions";
+import { setupRouterOutlet } from "@capgo/capacitor-transitions/react";
+
+import { initCapgoTransitions } from "./initCapgoTransitions";
 
 // 앱 시작 시 한 번만 초기화하면 되므로 모듈 스코프에서 호출한다.
-initTransitions({ platform: "auto" });
+initCapgoTransitions();
 
 /**
  * AR 확대 메뉴와 시술기록이 공유하는 라우트 전환 컨테이너

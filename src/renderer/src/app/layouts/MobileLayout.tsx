@@ -5,6 +5,7 @@ import { NavBar } from "../../widgets/nav-bar";
 import { BottomBarVisibilityProvider, useBottomBarVisibility } from "@/shared";
 import {
   PAGE_SCROLL_PATHS,
+  PAGE_SCROLL_PREFIXES,
   BOTTOM_BAR_HIDDEN_PREFIXES,
   BOTTOM_BAR_HIDDEN_PATHS,
 } from "@/app/layouts/constant/layout.ts";
@@ -48,9 +49,9 @@ const MobileLayoutContent = () => {
   const location = useLocation();
   const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, devicePreviewScale } = useBrowserDevicePreview();
-  const usePageScroll = PAGE_SCROLL_PATHS.some(pathPrefix =>
-    location.pathname.startsWith(pathPrefix)
-  );
+  const usePageScroll =
+    PAGE_SCROLL_PATHS.includes(location.pathname) ||
+    PAGE_SCROLL_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
 
   const hideBottomBar =
     BOTTOM_BAR_HIDDEN_PATHS.includes(location.pathname) ||
