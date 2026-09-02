@@ -24,6 +24,14 @@ export {
   parseDateValue,
 } from "./model";
 export type {
+  AnalysisApiData,
+  AnalysisApiResponse,
+  AnalysisGrade,
+  AnalysisMetricApiData,
+  AnalysisMetricType,
+  AnalysisOverlayApiData,
+  AnalysisOverlayType,
+  AnalysisStatus,
   CalendarDay,
   PageApiData,
   PhotoItem,
@@ -41,8 +49,13 @@ export type {
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
 } from "./model";
-export { getTreatmentRecordApi, getTreatmentRecordsApi } from "./api";
-export { recordQueryKeys, useGetTreatmentRecord, useGetTreatmentRecords } from "./api";
+export { getLatestAnalysisApi, getTreatmentRecordApi, getTreatmentRecordsApi } from "./api";
+export {
+  recordQueryKeys,
+  useGetLatestAnalysis,
+  useGetTreatmentRecord,
+  useGetTreatmentRecords,
+} from "./api";
 export {
   ProcedureTypeSelector,
   RecordPhotoUploader,

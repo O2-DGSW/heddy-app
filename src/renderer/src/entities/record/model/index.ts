@@ -23,6 +23,16 @@ export type {
 } from "./types";
 export type { ProcedureType } from "./constants";
 export type {
+  AnalysisApiData,
+  AnalysisApiResponse,
+  AnalysisGrade,
+  AnalysisMetricApiData,
+  AnalysisMetricType,
+  AnalysisOverlayApiData,
+  AnalysisOverlayType,
+  AnalysisStatus,
+} from "./analysis.types";
+export type {
   PageApiData,
   ServiceType,
   TreatmentRecordDetailApiData,
