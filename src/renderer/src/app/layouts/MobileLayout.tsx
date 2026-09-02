@@ -36,20 +36,19 @@ const useBrowserDevicePreview = () => {
   }, []);
 
   const isBrowserDevelopment = import.meta.env.DEV && !Capacitor.isNativePlatform();
-  const isUnsupportedViewport = isBrowserDevelopment && viewport.width < 640;
-  const isBrowserDevicePreview = isBrowserDevelopment && !isUnsupportedViewport;
+  // 좁은 브라우저 폭에서는 기기 프레임만 숨기고 실제 웹 화면은 그대로 렌더링한다.
+  const isBrowserDevicePreview = isBrowserDevelopment && viewport.width >= 640;
   const devicePreviewScale = isBrowserDevicePreview
     ? Math.min(1, Math.max(0, (viewport.height - DEVICE_PREVIEW_PADDING) / DEVICE_FRAME_HEIGHT))
     : 1;
 
-  return { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale };
+  return { isBrowserDevicePreview, devicePreviewScale };
 };
 
 const MobileLayoutContent = () => {
   const location = useLocation();
   const { isBottomBarHidden } = useBottomBarVisibility();
-  const { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale } =
-    useBrowserDevicePreview();
+  const { isBrowserDevicePreview, devicePreviewScale } = useBrowserDevicePreview();
   const usePageScroll =
     PAGE_SCROLL_PATHS.includes(location.pathname) ||
     PAGE_SCROLL_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
@@ -59,14 +58,6 @@ const MobileLayoutContent = () => {
     BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix)) ||
     isBottomBarHidden;
   const reserveBottomSafeArea = hideBottomBar && location.pathname !== "/ar";
-
-  if (isUnsupportedViewport) {
-    return (
-      <div className="flex min-h-dvh w-full items-center justify-center bg-gray-100 px-6">
-        <p className="text-center text-sm font-medium text-gray-600">지원하지 않는 크기입니다.</p>
-      </div>
-    );
-  }
 
   return (
     <div

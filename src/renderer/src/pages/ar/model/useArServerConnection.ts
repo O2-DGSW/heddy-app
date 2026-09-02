@@ -72,12 +72,14 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
 
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
+  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
   livebankReferenceId: string | null
 ): UseArServerConnectionResult => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
   const livebankReferenceIdRef = useRef(livebankReferenceId);
+  const activeLivebankReferenceIdRef = useRef<string | null>(null);
   const isLivebankStartedRef = useRef(false);
   const [stats, setStats] = useState<ArStats | null>(null);
   const [livebankProgress, setLivebankProgress] = useState<ArLivebankProgress | null>(null);
@@ -95,18 +97,36 @@ export const useArServerConnection = (
   const startLivebank = useCallback((nextLivebankReferenceId: string | null) => {
     const statsChannel = statsChannelRef.current;
 
+    if (statsChannel?.readyState !== "open") {
+      return;
+    }
+
     if (
-      statsChannel?.readyState !== "open" ||
-      !nextLivebankReferenceId ||
-      isLivebankStartedRef.current
+      isLivebankStartedRef.current &&
+      activeLivebankReferenceIdRef.current === nextLivebankReferenceId
     ) {
       return;
     }
 
+    if (isLivebankStartedRef.current) {
+      statsChannel.send(JSON.stringify({ type: "livebank", on: false }));
+      isLivebankStartedRef.current = false;
+      activeLivebankReferenceIdRef.current = null;
+    }
+
+    if (!nextLivebankReferenceId) {
+      statsChannel.send(JSON.stringify({ type: "mode", mode: "raw" }));
+      setLivebankProgress(null);
+      return;
+    }
+
+    // 새 reference를 수집하는 동안 이전 스타일이 남지 않도록 원본 모드로 되돌린다.
+    statsChannel.send(JSON.stringify({ type: "mode", mode: "raw" }));
     statsChannel.send(
       JSON.stringify({ type: "livebank", on: true, reference: nextLivebankReferenceId })
     );
     isLivebankStartedRef.current = true;
+    activeLivebankReferenceIdRef.current = nextLivebankReferenceId;
     setLivebankProgress(null);
   }, []);
 
@@ -116,6 +136,7 @@ export const useArServerConnection = (
       peerConnectionRef.current = null;
       statsChannelRef.current = null;
       isLivebankStartedRef.current = false;
+      activeLivebankReferenceIdRef.current = null;
       setLivebankProgress(null);
 
       if (shouldStopCamera) {
@@ -125,9 +146,13 @@ export const useArServerConnection = (
         if (previewVideoRef.current) {
           previewVideoRef.current.srcObject = null;
         }
+
+        if (faceTrackingVideoRef.current) {
+          faceTrackingVideoRef.current.srcObject = null;
+        }
       }
     },
-    [previewVideoRef]
+    [faceTrackingVideoRef, previewVideoRef]
   );
 
   const startConnection = useCallback(async () => {
@@ -157,6 +182,11 @@ export const useArServerConnection = (
       if (previewVideoRef.current) {
         previewVideoRef.current.srcObject = localStream;
         void previewVideoRef.current.play().catch(() => undefined);
+      }
+
+      if (faceTrackingVideoRef.current) {
+        faceTrackingVideoRef.current.srcObject = localStream;
+        void faceTrackingVideoRef.current.play().catch(() => undefined);
       }
 
       if (!serverBaseUrl) {
@@ -238,11 +268,18 @@ export const useArServerConnection = (
           : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
       );
     }
-  }, [previewVideoRef, startLivebank, stopConnection]);
+  }, [faceTrackingVideoRef, previewVideoRef, startLivebank, stopConnection]);
 
   useEffect(() => {
     livebankReferenceIdRef.current = livebankReferenceId;
-    startLivebank(livebankReferenceId);
+
+    const startTimer = window.setTimeout(() => {
+      startLivebank(livebankReferenceId);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(startTimer);
+    };
   }, [livebankReferenceId, startLivebank]);
 
   useEffect(() => {
