@@ -3,7 +3,6 @@ import type {
   AnalysisGrade,
   AnalysisMetricApiData,
   AnalysisMetricType,
-  AnalysisOverlayApiData,
   AnalysisOverlayType,
   TreatmentRecordPhotoApiData,
 } from "@/entities/record";
@@ -32,6 +31,9 @@ const OVERLAY_LABEL: Record<AnalysisOverlayType, string> = {
   COLOR_DIFFERENCE: "색상 차이",
   VOLUME_GUIDE: "좌우 볼륨",
 };
+
+/** 화면에 두는 오버레이 종류와 순서 */
+const OVERLAY_ORDER: AnalysisOverlayType[] = ["HAIR_MASK", "COLOR_DIFFERENCE", "VOLUME_GUIDE"];
 
 /** 처음부터 켜 두는 오버레이. 나머지는 사용자가 직접 켠다 */
 const DEFAULT_ACTIVE_OVERLAY_TYPES: AnalysisOverlayType[] = ["HAIR_MASK", "COLOR_DIFFERENCE"];
@@ -64,31 +66,28 @@ const toIndicator = (metric: AnalysisMetricApiData): CutsAnalysisIndicator | nul
   };
 };
 
-const toOverlay = (overlay: AnalysisOverlayApiData): CutsAnalysisOverlay | null => {
-  const label = OVERLAY_LABEL[overlay.type];
-
-  if (!label) {
-    return null;
-  }
-
-  return {
-    id: overlay.type,
-    label,
-    defaultActive: DEFAULT_ACTIVE_OVERLAY_TYPES.includes(overlay.type),
+/**
+ * 오버레이 토글 목록.
+ * 서버는 분석 서버가 오버레이를 만들기 전까지 빈 배열을 주는데, 그때 버튼을 감추면
+ * 이 영역이 아예 없는 기능처럼 보인다. 그래서 종류 3종은 응답과 무관하게 늘 그리고,
+ * 겹쳐 그릴 이미지가 없는 동안만 토글을 열 수 없게 둔다.
+ */
+const toOverlays = (): CutsAnalysisOverlay[] =>
+  OVERLAY_ORDER.map(type => ({
+    id: type,
+    label: OVERLAY_LABEL[type],
+    defaultActive: DEFAULT_ACTIVE_OVERLAY_TYPES.includes(type),
     // 서버는 file_id만 주고 이를 이미지 URL로 바꾸는 API가 아직 없다.
-    // 백엔드가 URL을 내려주기 시작하면 이 한 줄만 그 값으로 바꾸면 된다.
+    // 백엔드가 URL을 내려주기 시작하면 analysis.overlays에서 같은 type을 찾아 그 값을 넣으면 된다.
     imageUrl: null,
-  };
-};
+  }));
 
 /** 분석 응답을 분석완료 화면이 쓰는 형태로 바꾼다 */
 export const mapAnalysisToResult = (analysis: AnalysisApiData): CutsAnalysisResult => {
   const grade = analysis.confidence?.grade;
 
   return {
-    overlays: (analysis.overlays ?? [])
-      .map(toOverlay)
-      .filter((overlay): overlay is CutsAnalysisOverlay => overlay !== null),
+    overlays: toOverlays(),
     confidencePercent: Math.round(analysis.confidence?.score ?? 0),
     confidenceDescription:
       analysis.summary?.trim() ||

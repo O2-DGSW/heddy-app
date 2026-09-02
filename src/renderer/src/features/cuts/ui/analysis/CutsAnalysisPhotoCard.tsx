@@ -71,12 +71,6 @@ export const CutsAnalysisPhotoCard = ({ photoUrl, overlays }: CutsAnalysisPhotoC
               />
             ))}
           </div>
-
-          {!hasOverlayImage && (
-            <p className={font.caption.regular} style={{ color: lightTheme.label.assistive }}>
-              오버레이 이미지는 아직 서버에서 내려오지 않아요
-            </p>
-          )}
         </div>
       )}
     </section>
