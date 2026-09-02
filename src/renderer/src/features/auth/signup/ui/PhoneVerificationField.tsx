@@ -45,7 +45,7 @@ export const PhoneVerificationField = ({
           />
         ))}
         <select
-          className={`focus:outline-none bg-transparent ${font.caption.medium}`}
+          className={`focus:outline-none bg-transparent ${font.body.medium}`}
           style={{
             color: isAlddulSelected ? lightTheme.primary.normal : lightTheme.label.assistive,
           }}
@@ -64,7 +64,7 @@ export const PhoneVerificationField = ({
       </div>
       <div className="flex gap-2">
         <input
-          className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+          className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder="휴대폰 번호"
           value={phone}
@@ -91,7 +91,7 @@ export const PhoneVerificationField = ({
       {isSent && !isVerified && (
         <div className="flex gap-2">
           <input
-            className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+            className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
             style={inputStyle}
             placeholder="인증번호"
             value={verificationCode}

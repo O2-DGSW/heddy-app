@@ -1,6 +1,7 @@
-import { refreshTokenApi } from "@/entities";
-import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "./token";
 import { isAxiosError } from "axios";
+
+import { refreshTokenApi } from "../api";
+import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "./token";
 
 let refreshTokenRequest: Promise<Awaited<ReturnType<typeof refreshTokenApi>>> | null = null;
 let restoreSessionRequest: Promise<boolean> | null = null;

@@ -26,7 +26,7 @@ export const LoginForm = () => {
           id="login-email"
           name="email"
           type="email"
-          className={`w-full px-4 py-4 rounded-xl  focus:outline-none ${font.caption.regular}`}
+          className={`w-full px-4 py-4 rounded-xl  focus:outline-none ${font.body.regular}`}
           style={{
             backgroundColor: lightTheme.background.neutral,
             color: lightTheme.label.normal,

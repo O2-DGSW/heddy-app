@@ -1,10 +1,12 @@
+import { useMemo } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 
 import { HOME_RECENT_RECORD_PARAMS, SHORTCUT_CARDS } from "../model/constants";
+import { mapRecommendationToHomeCards } from "../model/mapRecommendationToHomeCards";
 import { mapTreatmentRecordToRecentRecord } from "../model/mapTreatmentRecordToRecentRecord";
 
-import { useGetTreatmentRecords } from "@/entities";
+import { useGetLatestRecommendation, useGetTreatmentRecords } from "@/entities";
 import HomeHeader from "@/features/home/ui/HomeHeader.tsx";
 import RecentRecordCard from "@/features/home/ui/RecentRecordCard.tsx";
 import RecommendationSection from "@/features/home/ui/RecommendationSection.tsx";
@@ -21,6 +23,15 @@ const HomePage = () => {
   const recentRecord = recentRecordData?.items[0]
     ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
     : undefined;
+  const {
+    data: recommendationData,
+    isPending: isRecommendationPending,
+    isError: isRecommendationError,
+  } = useGetLatestRecommendation();
+  const recommendations = useMemo(
+    () => mapRecommendationToHomeCards(recommendationData ?? null),
+    [recommendationData]
+  );
 
   const handleNavigate = (to: string) => {
     navigate(to);
@@ -73,6 +84,9 @@ const HomePage = () => {
         </div>
 
         <RecommendationSection
+          recommendations={recommendations}
+          isLoading={isRecommendationPending}
+          isError={isRecommendationError}
           onMoreClick={() => handleNavigate("/recommend")}
           onRecommendationClick={() => handleNavigate("/recommend")}
         />

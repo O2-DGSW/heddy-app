@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import agerSad from "@/features/cuts/assets/agerSad.svg";
+import agerSad from "@/shared/assets/agerSad.svg";
 
 export const CutsEmptyState = () => {
   return (

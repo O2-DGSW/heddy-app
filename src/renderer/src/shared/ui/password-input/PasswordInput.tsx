@@ -30,7 +30,7 @@ export const PasswordInput = ({
         id={id}
         name={name}
         type={show ? "text" : "password"}
-        className={`w-full px-4 py-4 pr-12 rounded-xl focus:outline-none ${font.caption.regular} ${className}`}
+        className={`w-full px-4 py-4 pr-12 rounded-xl focus:outline-none ${font.body.regular} ${className}`}
         style={{
           backgroundColor: lightTheme.background.neutral,
           color: lightTheme.label.normal,

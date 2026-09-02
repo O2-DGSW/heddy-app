@@ -3,7 +3,6 @@ import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { CutsDetailLayout } from "@/features/cuts/ui/CutsDetailLayout";
 import { CutsShareQrModal } from "@/features/cuts/ui/share/CutsShareQrModal";
-import { DEFAULT_SHARE_LINK, dummyShareLinks } from "@/features/cuts/constrants/dummyShareLinks";
 import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
@@ -23,9 +22,11 @@ export const CutsDetailPage = () => {
   const { data: record } = useGetTreatmentRecord(id);
 
   // 공유 화면에서 링크를 생성하고 넘어온 경우에만 모달을 띄운다.
-  const [isShareModalOpen, setIsShareModalOpen] = useState(
-    Boolean((location.state as { isShareModalOpen?: boolean } | null)?.isShareModalOpen)
-  );
+  // 공유 링크는 생성 응답으로만 내려오므로 다시 조회할 수 없어, 넘어올 때 함께 받아 들고 있는다.
+  const shareState = location.state as
+    { isShareModalOpen?: boolean; shareUrl?: string } | null | undefined;
+  const [isShareModalOpen, setIsShareModalOpen] = useState(Boolean(shareState?.isShareModalOpen));
+  const [shareUrl] = useState(shareState?.shareUrl ?? "");
 
   /** 모달을 닫고, 뒤로가기나 새로고침 때 다시 열리지 않도록 라우터 state를 비운다 */
   const handleCloseShareModal = () => {
@@ -43,11 +44,8 @@ export const CutsDetailPage = () => {
       >
         <Outlet />
 
-        {isShareModalOpen && (
-          <CutsShareQrModal
-            shareLink={(id && dummyShareLinks[id]) || DEFAULT_SHARE_LINK}
-            onClose={handleCloseShareModal}
-          />
+        {isShareModalOpen && shareUrl && (
+          <CutsShareQrModal shareLink={shareUrl} onClose={handleCloseShareModal} />
         )}
       </CutsDetailLayout>
     </cap-page>
