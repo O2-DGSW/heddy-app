@@ -12,22 +12,11 @@ import type { HairstyleOptionId } from "../../model/types";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
-  isExpanded: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
 }
 
-const ArHairstyleCarousel = ({
-  activeHairstylePosition,
-  isExpanded,
-  onSelect,
-}: ArHairstyleCarouselProps) => (
-  <div
-    aria-label="헤어스타일 선택"
-    className={cn(
-      "absolute left-1/2 h-[80px] w-[404px] -translate-x-1/2 overflow-hidden",
-      isExpanded ? "bottom-[clamp(178px,22%,194px)]" : "bottom-[clamp(12px,4%,24px)]"
-    )}
-  >
+const ArHairstyleCarousel = ({ activeHairstylePosition, onSelect }: ArHairstyleCarouselProps) => (
+  <div aria-label="헤어스타일 선택" className="h-[80px] w-[404px] shrink-0 overflow-hidden">
     {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {
       const position = activeHairstylePosition + offset;
       const option = getCircularHairstyleOption(position);

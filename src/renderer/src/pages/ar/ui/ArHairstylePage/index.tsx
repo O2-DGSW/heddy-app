@@ -9,7 +9,6 @@ import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArCaptureModal from "../ArCaptureModal";
 import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
-import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 
@@ -97,18 +96,23 @@ const ArHairstylePage = () => {
           selectedColorId={selectedColorId}
           setSelectedColorId={setSelectedColorId}
         />
-        <ArControlBar
-          handleExpandedToggle={handleExpandedToggle}
-          handleModalOpen={() => handleModalOpen("candidate-save")}
-          handleStyleReset={handleStyleReset}
-          isExpanded={isExpanded}
-        />
-        <ArHairstyleCarousel
-          activeHairstylePosition={activeHairstylePosition}
-          isExpanded={isExpanded}
-          onSelect={handleHairstyleSelect}
-        />
-        {isExpanded && <ArExpandedBottomMenu />}
+        <div
+          className={cn(
+            "absolute inset-x-0 bottom-0 flex flex-col items-center gap-4",
+            isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
+          )}
+        >
+          <ArControlBar
+            handleExpandedToggle={handleExpandedToggle}
+            handleModalOpen={() => handleModalOpen("candidate-save")}
+            handleStyleReset={handleStyleReset}
+            isExpanded={isExpanded}
+          />
+          <ArHairstyleCarousel
+            activeHairstylePosition={activeHairstylePosition}
+            onSelect={handleHairstyleSelect}
+          />
+        </div>
       </main>
 
       {activeModal === "candidate-save" && (

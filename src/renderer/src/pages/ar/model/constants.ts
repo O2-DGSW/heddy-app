@@ -16,8 +16,6 @@ export const HAIR_COLOR_OPTIONS = [
   { id: "ash-brown", color: "#342D2D" },
 ] as const;
 
-export const EXPANDED_BOTTOM_ITEMS = ["홈", "기록", "추천", "프로필"] as const;
-
 export const HAIRSTYLE_GAP = 25;
 export const HAIRSTYLE_CENTER_POSITION = 202;
 export const HAIRSTYLE_VISIBLE_RANGE = 4;
