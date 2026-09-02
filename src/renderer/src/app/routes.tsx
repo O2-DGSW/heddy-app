@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { MobileLayout, CutsTransitionOutlet } from "./layouts";
+import { MobileLayout, CutsTransitionOutlet, AuthTransitionOutlet } from "./layouts";
 import { getRefreshToken } from "@/entities/auth";
 import { CutsListPage } from "@/pages/cuts";
 import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
@@ -84,11 +84,13 @@ export const AppRoutes = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
         <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
-        <Route path="/welcome" element={<WelcomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/find-id" element={<FindPage />} />
-        <Route path="/find-password" element={<FindPage />} />
+        <Route element={<AuthTransitionOutlet />}>
+          <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/find-id" element={<FindPage />} />
+          <Route path="/find-password" element={<FindPage />} />
+        </Route>
 
         {/*<Route element={<RequireAuth />}>*/}
         {/*    <Route path="/" element={<MainPage />} />*/}

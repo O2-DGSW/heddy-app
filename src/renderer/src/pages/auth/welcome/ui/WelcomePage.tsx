@@ -26,27 +26,29 @@ export const WelcomePage = () => {
 
       <div className="w-full flex flex-col items-center gap-6">
         <button
+          type="button"
           className={`w-full py-4 rounded-2xl ${font.headline2.semiBold}`}
           style={{
             backgroundColor: lightTheme.primary.normal,
             color: lightTheme.fill.normal,
           }}
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate("/login")}
         >
-          시작하기
+          로그인
         </button>
 
         <div className="flex flex-row items-center justify-center gap-2">
           <p className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-            이미 계정이 있으신가요?
+            아직 계정이 없으신가요?
           </p>
-          <p
-            className={`${font.label.medium} underline`}
+          <button
+            type="button"
+            className={`${font.label.medium} border-0 bg-transparent p-0 underline`}
             style={{ color: lightTheme.primary.normal }}
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/signup")}
           >
-            로그인
-          </p>
+            회원가입
+          </button>
         </div>
       </div>
     </div>
