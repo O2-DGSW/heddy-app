@@ -6,7 +6,7 @@ import logoPart4 from "../assets/logo-e.svg";
 import logoPart5 from "../assets/logo-d2.svg";
 import shareScissorsImage from "../assets/share-scissors.png";
 
-import type { LogoPartType, RecommendationCardType, ShortcutCardType } from "./types";
+import type { LogoPartType, ShortcutCardType } from "./types";
 import type { ServiceType, TreatmentRecordListParams } from "@/entities";
 
 export const HOME_RECENT_RECORD_PARAMS: TreatmentRecordListParams = {
@@ -41,23 +41,6 @@ export const SHORTCUT_CARDS: ShortcutCardType[] = [
     imageAlt: "시술기록 공유 가위",
     imageClassName: "right-[11px] top-[20px] h-[70px] w-[67px] rotate-[-7deg]",
     to: "/cuts/record-1/share",
-  },
-];
-
-export const RECOMMENDATION_CARDS: RecommendationCardType[] = [
-  {
-    id: "recommend-1",
-    rank: 1,
-    title: "남자 다운펌",
-    colorName: "내추럴 블랙",
-    tags: ["남자", "다운펌"],
-  },
-  {
-    id: "recommend-2",
-    rank: 1,
-    title: "남자 다운펌",
-    colorName: "내추럴 블랙",
-    tags: ["남자", "다운펌"],
   },
 ];
 
