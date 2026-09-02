@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getArHairstyleReferences } from "./useArServerConnection";
+import { getArHairstyleReferences } from "./arServerApi";
 import type { ArHairstyleOption } from "./types";
 
 type ArHairstyleReferencesStatusType = "loading" | "success" | "error";

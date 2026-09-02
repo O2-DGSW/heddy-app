@@ -1,49 +1,18 @@
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 
-import type { ArHairstyleOption } from "./types";
+import { getArServerBaseUrl, requestArServerOffer } from "./arServerApi";
+import {
+  isCapturedLivebankBucket,
+  mergeLivebankProgress,
+  parseArServerEvent,
+  parseDataChannelPayload,
+  type ArLivebankProgress,
+  type ArStats,
+} from "./arServerEvent";
+
+export type { ArLivebankProgress, ArStats } from "./arServerEvent";
 
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
-
-export interface ArStats {
-  yaw?: number;
-  yaw_ema?: number;
-  bank?: string;
-  asset_used?: string;
-  server_fps?: number;
-  errors?: number;
-}
-
-export interface ArLivebankProgress {
-  bank?: string;
-  banks: string[];
-  buckets: ArLivebankBucket[];
-  capturedYaw?: number;
-  currentYaw?: number;
-  done?: number;
-  filledYaw?: number;
-  index?: number;
-  total?: number;
-  nextYaw?: number;
-  status:
-    "started" | "running" | "captured" | "generating" | "filled" | "complete" | "stopped" | "error";
-  message?: string;
-}
-
-export interface ArLivebankBucket {
-  status: string;
-  yaw: number;
-}
-
-interface ArServerAnswer {
-  sdp: string;
-  type: "answer";
-}
-
-interface ArServerReferencesResponse {
-  references?: unknown[];
-  styles?: unknown[];
-}
 
 interface UseArServerConnectionResult {
   connectionStatus: ArConnectionStatusType;
@@ -53,333 +22,7 @@ interface UseArServerConnectionResult {
   stats: ArStats | null;
 }
 
-export const getArServerBaseUrl = () => {
-  const configuredUrl = import.meta.env.VITE_AR_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
-
-  if (!configuredUrl) {
-    return "";
-  }
-
-  return Capacitor.isNativePlatform() ? configuredUrl : "/ar-server";
-};
-
-const isArServerReferencesResponse = (value: unknown): value is ArServerReferencesResponse =>
-  isRecord(value) && (Array.isArray(value.references) || Array.isArray(value.styles));
-
-const parseHairstyleOption = (value: unknown): ArHairstyleOption | null => {
-  if (typeof value === "string" && value.trim()) {
-    return { id: value, label: value };
-  }
-
-  if (!isRecord(value) || typeof value.id !== "string" || !value.id.trim()) {
-    return null;
-  }
-
-  const label =
-    typeof value.display_name === "string"
-      ? value.display_name
-      : typeof value.name === "string"
-        ? value.name
-        : value.id;
-  const imageUrl =
-    typeof value.image_url === "string"
-      ? value.image_url
-      : typeof value.thumbnail_url === "string"
-        ? value.thumbnail_url
-        : typeof value.image === "string"
-          ? value.image
-          : undefined;
-
-  return { id: value.id, imageUrl, label };
-};
-
-export const getArHairstyleReferences = async (): Promise<ArHairstyleOption[]> => {
-  const serverBaseUrl = getArServerBaseUrl();
-
-  if (!serverBaseUrl) {
-    throw new Error("AR 서버 주소가 설정되지 않았습니다.");
-  }
-
-  const url = `${serverBaseUrl}/references`;
-  let responseData: unknown;
-
-  if (Capacitor.isNativePlatform()) {
-    const response = await CapacitorHttp.get({
-      connectTimeout: 10000,
-      readTimeout: 10000,
-      url,
-    });
-
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
-    }
-
-    responseData = response.data;
-  } else {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
-    }
-
-    responseData = (await response.json()) as unknown;
-  }
-
-  if (!isArServerReferencesResponse(responseData)) {
-    throw new Error("AR 서버의 헤어스타일 목록 형식이 올바르지 않습니다.");
-  }
-
-  const references = responseData.styles ?? responseData.references ?? [];
-
-  return references.flatMap(reference => {
-    const hairstyleOption = parseHairstyleOption(reference);
-
-    return hairstyleOption ? [hairstyleOption] : [];
-  });
-};
-
-const isArServerAnswer = (value: unknown): value is ArServerAnswer => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const answer = value as Record<string, unknown>;
-
-  return typeof answer.sdp === "string" && answer.type === "answer";
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const getEventData = (value: Record<string, unknown>) => {
-  if (isRecord(value.data)) {
-    return value.data;
-  }
-
-  if (isRecord(value.payload)) {
-    return value.payload;
-  }
-
-  return value;
-};
-
-const getOptionalNumber = (value: unknown) =>
-  typeof value === "number" && Number.isFinite(value)
-    ? value
-    : typeof value === "string" && value.trim() && Number.isFinite(Number(value))
-      ? Number(value)
-      : undefined;
-
-const isArLivebankStatus = (value: unknown): value is ArLivebankProgress["status"] =>
-  value === "started" ||
-  value === "running" ||
-  value === "captured" ||
-  value === "generating" ||
-  value === "filled" ||
-  value === "complete" ||
-  value === "stopped" ||
-  value === "error";
-
-const getLivebankYaw = (value: unknown) => {
-  if (isRecord(value)) {
-    return (
-      getOptionalNumber(value.yaw) ??
-      getOptionalNumber(value.target_yaw) ??
-      getOptionalNumber(value.angle)
-    );
-  }
-
-  return getOptionalNumber(value);
-};
-
-const parseLivebankBuckets = (value: unknown): ArLivebankBucket[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value.flatMap(bucket => {
-    const yaw = getLivebankYaw(bucket);
-
-    if (yaw === undefined) {
-      return [];
-    }
-
-    return [
-      {
-        status: isRecord(bucket) && typeof bucket.status === "string" ? bucket.status : "pending",
-        yaw,
-      },
-    ];
-  });
-};
-
-const parseLivebankBanks = (value: unknown) =>
-  Array.isArray(value)
-    ? value.flatMap(bank => (typeof bank === "string" && bank.trim() ? [bank] : []))
-    : [];
-
-const getLivebankNextYaw = (value: unknown) => getLivebankYaw(value);
-
-const parseArStats = (value: Record<string, unknown>): ArStats => ({
-  asset_used: typeof value.asset_used === "string" ? value.asset_used : undefined,
-  bank: typeof value.bank === "string" ? value.bank : undefined,
-  errors: getOptionalNumber(value.errors),
-  server_fps: getOptionalNumber(value.server_fps),
-  yaw: getOptionalNumber(value.yaw),
-  yaw_ema: getOptionalNumber(value.yaw_ema),
-});
-
-const getStatsData = (value: Record<string, unknown>) => {
-  const eventData = getEventData(value);
-
-  if (isRecord(eventData.stats)) {
-    return eventData.stats;
-  }
-
-  if (isRecord(eventData.head_pose)) {
-    return eventData.head_pose;
-  }
-
-  return eventData;
-};
-
-const hasFaceDirection = (value: Record<string, unknown>) =>
-  getOptionalNumber(value.yaw) !== undefined || getOptionalNumber(value.yaw_ema) !== undefined;
-
-const parseDataChannelPayload = async (value: unknown): Promise<unknown> => {
-  if (typeof value === "string") {
-    return JSON.parse(value) as unknown;
-  }
-
-  if (value instanceof ArrayBuffer) {
-    return JSON.parse(new TextDecoder().decode(value)) as unknown;
-  }
-
-  if (ArrayBuffer.isView(value)) {
-    return JSON.parse(new TextDecoder().decode(value)) as unknown;
-  }
-
-  if (value instanceof Blob) {
-    return JSON.parse(await value.text()) as unknown;
-  }
-
-  throw new Error("지원하지 않는 AR DataChannel 메시지 형식입니다.");
-};
-
-const parseServerEvent = (
-  value: unknown
-): { type: "stats"; data: ArStats } | { type: "livebank"; data: ArLivebankProgress } | null => {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  const data = getEventData(value);
-  const statsData = getStatsData(value);
-
-  if (value.type === "livebank" && isArLivebankStatus(data.status)) {
-    return {
-      type: "livebank",
-      data: {
-        bank: typeof data.bank === "string" ? data.bank : undefined,
-        banks: parseLivebankBanks(data.banks),
-        buckets: parseLivebankBuckets(data.buckets),
-        capturedYaw: getOptionalNumber(data.captured_yaw),
-        currentYaw: getOptionalNumber(data.current_yaw) ?? getOptionalNumber(data.yaw),
-        done: getOptionalNumber(data.done),
-        filledYaw: getOptionalNumber(data.filled_yaw),
-        index: getOptionalNumber(data.index),
-        message: typeof data.message === "string" ? data.message : undefined,
-        nextYaw: getLivebankNextYaw(data.next),
-        status: data.status,
-        total: getOptionalNumber(data.total),
-      },
-    };
-  }
-
-  if (value.type === "stats" || hasFaceDirection(statsData)) {
-    return { type: "stats", data: parseArStats(statsData) };
-  }
-
-  return null;
-};
-
-const requestArServerOffer = async (
-  serverBaseUrl: string,
-  offer: RTCSessionDescriptionInit
-): Promise<unknown> => {
-  const url = `${serverBaseUrl}/offer`;
-
-  if (Capacitor.isNativePlatform()) {
-    const response = await CapacitorHttp.post({
-      connectTimeout: 10000,
-      data: offer,
-      headers: { "Content-Type": "application/json" },
-      readTimeout: 10000,
-      url,
-    });
-
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
-    }
-
-    return response.data;
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(offer),
-  });
-  const answer: unknown = await response.json();
-
-  if (!response.ok) {
-    throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
-  }
-
-  return answer;
-};
-
-const isCapturedLivebankBucket = (status: string) =>
-  status === "captured" || status === "generating" || status === "filled" || status === "complete";
-
-const mergeLivebankProgress = (
-  previousProgress: ArLivebankProgress | null,
-  nextProgress: ArLivebankProgress
-): ArLivebankProgress => {
-  const buckets =
-    nextProgress.buckets.length > 0 ? nextProgress.buckets : (previousProgress?.buckets ?? []);
-
-  if (nextProgress.status !== "captured" || nextProgress.capturedYaw === undefined) {
-    return { ...nextProgress, buckets };
-  }
-
-  const capturedYaw = nextProgress.capturedYaw;
-  const hasCapturedBucket = buckets.some(
-    bucket => bucket.yaw === capturedYaw && isCapturedLivebankBucket(bucket.status)
-  );
-
-  if (hasCapturedBucket) {
-    return { ...nextProgress, buckets };
-  }
-
-  const matchingBucketIndex = buckets.findIndex(bucket => bucket.yaw === capturedYaw);
-
-  if (matchingBucketIndex === -1) {
-    return {
-      ...nextProgress,
-      buckets: [...buckets, { status: "captured", yaw: capturedYaw }],
-    };
-  }
-
-  return {
-    ...nextProgress,
-    buckets: buckets.map((bucket, index) =>
-      index === matchingBucketIndex ? { ...bucket, status: "captured" } : bucket
-    ),
-  };
-};
-
-const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) => {
+const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection): Promise<void> => {
   if (peerConnection.iceGatheringState === "complete") {
     return;
   }
@@ -408,7 +51,7 @@ const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection) =>
   });
 };
 
-const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStreamTrack) => {
+const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStreamTrack): void => {
   const transceiver = peerConnection.addTransceiver(track, { direction: "sendonly" });
   const vp8Codecs = RTCRtpSender.getCapabilities("video")?.codecs.filter(codec =>
     codec.mimeType.toLowerCase().includes("video/vp8")
@@ -533,7 +176,7 @@ export const useArServerConnection = (
       statsChannel.addEventListener("message", event => {
         const handleServerEvent = async () => {
           try {
-            const serverEvent = parseServerEvent(await parseDataChannelPayload(event.data));
+            const serverEvent = parseArServerEvent(await parseDataChannelPayload(event.data));
 
             if (!serverEvent) {
               return;
@@ -585,11 +228,6 @@ export const useArServerConnection = (
       }
 
       const answer = await requestArServerOffer(serverBaseUrl, localDescription);
-
-      if (!isArServerAnswer(answer)) {
-        throw new Error("AR 서버가 유효한 WebRTC 응답을 반환하지 않았습니다.");
-      }
-
       await peerConnection.setRemoteDescription(answer);
     } catch (error: unknown) {
       stopConnection(false);
