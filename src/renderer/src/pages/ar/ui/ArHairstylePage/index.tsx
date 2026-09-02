@@ -9,6 +9,7 @@ import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArCaptureModal from "../ArCaptureModal";
 import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
+import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 
@@ -112,6 +113,7 @@ const ArHairstylePage = () => {
             activeHairstylePosition={activeHairstylePosition}
             onSelect={handleHairstyleSelect}
           />
+          {isExpanded && <ArExpandedBottomMenu />}
         </div>
       </main>
 
