@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useArServerConnection } from "../../model/useArServerConnection";
 import { useArHairstyle } from "../../model/useArHairstyle";
@@ -16,6 +16,7 @@ import ArRecognitionBadge from "../ArRecognitionBadge";
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
+  const [isRouteExiting, setIsRouteExiting] = useState(false);
   const {
     activeHairstylePosition,
     activeModal,
@@ -44,10 +45,17 @@ const ArHairstylePage = () => {
     };
   }, [isExpanded, setIsBottomBarHidden]);
 
+  const handleRouteNavigationStart = () => {
+    setIsRouteExiting(true);
+  };
+
   return (
     <section
       aria-labelledby="ar-hairstyle-title"
-      className="ar-motion-page-enter flex h-full min-h-0 flex-col overflow-hidden"
+      className={cn(
+        "ar-motion-page-enter flex h-full min-h-0 flex-col overflow-hidden transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+        isRouteExiting && "-translate-x-[12%] opacity-0"
+      )}
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       {!isExpanded && (
@@ -113,7 +121,7 @@ const ArHairstylePage = () => {
             activeHairstylePosition={activeHairstylePosition}
             onSelect={handleHairstyleSelect}
           />
-          {isExpanded && <ArExpandedBottomMenu />}
+          {isExpanded && <ArExpandedBottomMenu onNavigateStart={handleRouteNavigationStart} />}
         </div>
       </main>
 

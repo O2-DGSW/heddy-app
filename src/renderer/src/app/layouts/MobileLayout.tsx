@@ -13,6 +13,16 @@ const DEVICE_FRAME_WIDTH = 430;
 const DEVICE_FRAME_HEIGHT = 900;
 const DEVICE_PREVIEW_PADDING = 48;
 
+type RouteTransitionState = {
+  transition?: "slide-from-right";
+};
+
+const isSlideFromRightTransition = (state: unknown): state is RouteTransitionState =>
+  typeof state === "object" &&
+  state !== null &&
+  "transition" in state &&
+  state.transition === "slide-from-right";
+
 const getBrowserViewport = () => ({
   width: typeof window === "undefined" ? 0 : window.innerWidth,
   height: typeof window === "undefined" ? 0 : window.innerHeight,
@@ -49,8 +59,8 @@ const MobileLayoutContent = () => {
   const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, isUnsupportedViewport, devicePreviewScale } =
     useBrowserDevicePreview();
-  const wasBottomBarHiddenRef = useRef(false);
-  const [isBottomBarEntering, setIsBottomBarEntering] = useState(false);
+  const previousPathRef = useRef(location.pathname);
+  const [isRouteEntering, setIsRouteEntering] = useState(false);
 
   const usePageScroll = PAGE_SCROLL_PATHS.some(pathPrefix =>
     location.pathname.startsWith(pathPrefix)
@@ -63,20 +73,21 @@ const MobileLayoutContent = () => {
   const reserveBottomSafeArea = hideBottomBar && location.pathname !== "/ar";
 
   useLayoutEffect(() => {
-    const shouldAnimateBottomBar = wasBottomBarHiddenRef.current && !hideBottomBar;
+    const shouldAnimateRoute =
+      previousPathRef.current !== location.pathname && isSlideFromRightTransition(location.state);
 
-    wasBottomBarHiddenRef.current = hideBottomBar;
+    previousPathRef.current = location.pathname;
 
-    if (!shouldAnimateBottomBar) {
+    if (!shouldAnimateRoute) {
       return;
     }
 
-    setIsBottomBarEntering(true);
+    setIsRouteEntering(true);
 
     let enterAnimationFrame: number | null = null;
     const initialAnimationFrame = window.requestAnimationFrame(() => {
       enterAnimationFrame = window.requestAnimationFrame(() => {
-        setIsBottomBarEntering(false);
+        setIsRouteEntering(false);
       });
     });
 
@@ -87,7 +98,7 @@ const MobileLayoutContent = () => {
         window.cancelAnimationFrame(enterAnimationFrame);
       }
     };
-  }, [hideBottomBar]);
+  }, [location.pathname, location.state]);
 
   if (isUnsupportedViewport) {
     return (
@@ -96,6 +107,10 @@ const MobileLayoutContent = () => {
       </div>
     );
   }
+
+  const routeTransitionClass = isRouteEntering
+    ? "translate-x-[12%] opacity-0"
+    : "translate-x-0 opacity-100";
 
   return (
     <div
@@ -148,7 +163,7 @@ const MobileLayoutContent = () => {
             className={`relative flex h-dvh w-full transform-gpu flex-col overflow-hidden bg-white ${isBrowserDevicePreview ? "sm:h-auto sm:min-h-0 sm:flex-1 sm:rounded-[51px] sm:border sm:border-white/70 sm:shadow-none sm:[--safe-area-inset-top:59px] sm:[--safe-area-inset-bottom:34px]" : "sm:border-x sm:border-gray-200 sm:shadow-[0_0_24px_rgba(0,0,0,0.05)]"}`}
           >
             <main
-              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${reserveBottomSafeArea ? "pb-safe" : "pb-0"}`}
+              className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${reserveBottomSafeArea ? "pb-safe" : "pb-0"} ${routeTransitionClass}`}
             >
               <Outlet />
             </main>
@@ -210,7 +225,7 @@ const MobileLayoutContent = () => {
             )}
             {!hideBottomBar && (
               <div
-                className={`w-full shrink-0 transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isBottomBarEntering ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
+                className={`w-full shrink-0 transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${routeTransitionClass}`}
               >
                 <NavBar />
               </div>

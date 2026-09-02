@@ -7,7 +7,11 @@ import { cn } from "@/shared";
 
 const ROUTE_TRANSITION_DURATION = 220;
 
-const ArExpandedBottomMenu = () => {
+interface ArExpandedBottomMenuProps {
+  onNavigateStart: () => void;
+}
+
+const ArExpandedBottomMenu = ({ onNavigateStart }: ArExpandedBottomMenuProps) => {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
@@ -19,9 +23,10 @@ const ArExpandedBottomMenu = () => {
 
     setSelectedPath(to);
     setIsNavigating(true);
+    onNavigateStart();
 
     window.setTimeout(() => {
-      navigate(to);
+      navigate(to, { state: { transition: "slide-from-right" } });
     }, ROUTE_TRANSITION_DURATION);
   };
 
@@ -30,7 +35,7 @@ const ArExpandedBottomMenu = () => {
       aria-label="확대 AR 하단 메뉴"
       className={cn(
         "mt-3 flex items-center gap-[33px] transition-[opacity,transform] duration-[220ms] ease-out motion-reduce:transition-none",
-        isNavigating && "translate-y-2 opacity-0 delay-[80ms]"
+        isNavigating && "opacity-0 delay-[80ms]"
       )}
       style={{ color: lightTheme.label.assistive }}
     >
