@@ -125,7 +125,11 @@ const getEventData = (value: Record<string, unknown>) => {
 };
 
 const getOptionalNumber = (value: unknown) =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  typeof value === "number" && Number.isFinite(value)
+    ? value
+    : typeof value === "string" && value.trim() && Number.isFinite(Number(value))
+      ? Number(value)
+      : undefined;
 
 const isArLivebankStatus = (value: unknown): value is ArLivebankProgress["status"] =>
   value === "started" ||
@@ -144,6 +148,43 @@ const parseArStats = (value: Record<string, unknown>): ArStats => ({
   yaw_ema: getOptionalNumber(value.yaw_ema),
 });
 
+const getStatsData = (value: Record<string, unknown>) => {
+  const eventData = getEventData(value);
+
+  if (isRecord(eventData.stats)) {
+    return eventData.stats;
+  }
+
+  if (isRecord(eventData.head_pose)) {
+    return eventData.head_pose;
+  }
+
+  return eventData;
+};
+
+const hasFaceDirection = (value: Record<string, unknown>) =>
+  getOptionalNumber(value.yaw) !== undefined || getOptionalNumber(value.yaw_ema) !== undefined;
+
+const parseDataChannelPayload = async (value: unknown): Promise<unknown> => {
+  if (typeof value === "string") {
+    return JSON.parse(value) as unknown;
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return JSON.parse(new TextDecoder().decode(value)) as unknown;
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return JSON.parse(new TextDecoder().decode(value)) as unknown;
+  }
+
+  if (value instanceof Blob) {
+    return JSON.parse(await value.text()) as unknown;
+  }
+
+  throw new Error("지원하지 않는 AR DataChannel 메시지 형식입니다.");
+};
+
 const parseServerEvent = (
   value: unknown
 ):
@@ -151,14 +192,15 @@ const parseServerEvent = (
   | { type: "livebank"; data: ArLivebankProgress }
   | { type: "capture"; data: ArCaptureResult }
   | null => {
-  if (!isRecord(value) || typeof value.type !== "string") {
+  if (!isRecord(value)) {
     return null;
   }
 
   const data = getEventData(value);
+  const statsData = getStatsData(value);
 
-  if (value.type === "stats") {
-    return { type: "stats", data: parseArStats(data) };
+  if (value.type === "stats" || hasFaceDirection(statsData)) {
+    return { type: "stats", data: parseArStats(statsData) };
   }
 
   if (value.type === "livebank" && isArLivebankStatus(data.status)) {
@@ -373,27 +415,32 @@ export const useArServerConnection = (
       peerConnectionRef.current = peerConnection;
       const statsChannel = peerConnection.createDataChannel("stats");
       statsChannelRef.current = statsChannel;
+      statsChannel.binaryType = "arraybuffer";
       statsChannel.addEventListener("open", () => {
         sendHairstyleMode(hairstyleIdRef.current, livebankReferenceIdRef.current);
       });
       statsChannel.addEventListener("message", event => {
-        try {
-          const serverEvent = parseServerEvent(JSON.parse(event.data as string) as unknown);
+        const handleServerEvent = async () => {
+          try {
+            const serverEvent = parseServerEvent(await parseDataChannelPayload(event.data));
 
-          if (!serverEvent) {
-            return;
-          }
+            if (!serverEvent) {
+              return;
+            }
 
-          if (serverEvent.type === "stats") {
-            setStats(serverEvent.data);
-          } else if (serverEvent.type === "livebank") {
-            setLivebankProgress(serverEvent.data);
-          } else {
-            setCaptureResult(serverEvent.data);
+            if (serverEvent.type === "stats") {
+              setStats(serverEvent.data);
+            } else if (serverEvent.type === "livebank") {
+              setLivebankProgress(serverEvent.data);
+            } else {
+              setCaptureResult(serverEvent.data);
+            }
+          } catch {
+            // Ignore malformed diagnostic events so media playback remains uninterrupted.
           }
-        } catch {
-          // Ignore malformed diagnostic events so media playback remains uninterrupted.
-        }
+        };
+
+        void handleServerEvent();
       });
       localStream.getVideoTracks().forEach(track => configureVideoSender(peerConnection, track));
 
