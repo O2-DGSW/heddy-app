@@ -8,7 +8,7 @@ import {
   RecordRatingField,
   RecordTextField,
 } from "@/entities/record";
-import type { ProcedureType, RecordFormValues } from "@/entities/record";
+import type { PhotoItem, ProcedureType, RecordFormValues } from "@/entities/record";
 import { cn } from "@/shared";
 
 import { useRecordAddForm } from "../../model";
@@ -25,6 +25,7 @@ interface RecordAddFormProps {
   /** 수정 화면이면 기존 값에서 시작하고 버튼 문구가 바뀐다 */
   mode?: "create" | "edit";
   initialValues?: RecordFormValues;
+  initialPhotos?: PhotoItem[];
   initialProcedureType?: ProcedureType;
   initialRating?: number;
   isSubmitting?: boolean;
@@ -45,6 +46,7 @@ const RecordAddForm = ({
   onCancel,
   mode = "create",
   initialValues,
+  initialPhotos,
   initialProcedureType,
   initialRating,
   isSubmitting,
@@ -53,6 +55,7 @@ const RecordAddForm = ({
   const isEditMode = mode === "edit";
 
   const {
+    formErrors,
     formValues,
     isPhotoLimitReached,
     photoInputRef,
@@ -70,9 +73,16 @@ const RecordAddForm = ({
     handleSubmit,
   } = useRecordAddForm({
     initialValues,
+    initialPhotos,
     initialProcedureType,
     initialRating,
-    onSubmit: () => onSubmitValues?.({ formValues, procedureType: selectedProcedureType, rating }),
+    onSubmit: () => {
+      if (!selectedProcedureType) {
+        return;
+      }
+
+      onSubmitValues?.({ formValues, procedureType: selectedProcedureType, rating });
+    },
   });
 
   return (
@@ -81,6 +91,7 @@ const RecordAddForm = ({
       onSubmit={handleSubmit}
     >
       <RecordPhotoUploader
+        errorMessage={formErrors.photos}
         inputRef={photoInputRef}
         isPhotoLimitReached={isPhotoLimitReached}
         onOpenPhotoPicker={handleOpenPhotoPicker}
@@ -89,10 +100,15 @@ const RecordAddForm = ({
         photos={photos}
       />
 
-      <RecordDatePickerField onChange={handleDateChange} value={formValues.date} />
+      <RecordDatePickerField
+        errorMessage={formErrors.date}
+        onChange={handleDateChange}
+        value={formValues.date}
+      />
 
       {RECORD_FIELDS.map(field => (
         <RecordTextField
+          errorMessage={formErrors[field.id]}
           inputMode={field.inputMode}
           key={field.id}
           label={field.label}
@@ -104,14 +120,20 @@ const RecordAddForm = ({
       ))}
 
       <ProcedureTypeSelector
+        errorMessage={formErrors.procedureType}
         onChange={handleProcedureTypeChange}
         selectedProcedureType={selectedProcedureType}
       />
 
-      <RecordRatingField onChange={handleRatingChange} rating={rating} />
+      <RecordRatingField
+        errorMessage={formErrors.rating}
+        onChange={handleRatingChange}
+        rating={rating}
+      />
 
       {RECORD_DETAIL_FIELDS.map(field => (
         <RecordTextField
+          errorMessage={formErrors[field.id]}
           inputMode={field.inputMode}
           key={field.id}
           label={field.label}

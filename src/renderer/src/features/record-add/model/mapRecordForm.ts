@@ -1,10 +1,11 @@
 import { createDateValue, parseDateValue } from "@/entities/record/model/date";
 import type { ProcedureType } from "@/entities/record/model/constants";
-import type { RecordFormValues } from "@/entities/record/model/types";
+import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
 import type {
   CreateTreatmentRecordRequest,
   ServiceType,
   TreatmentRecordDetailApiData,
+  TreatmentRecordPhotoApiData,
   UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
 
@@ -61,6 +62,11 @@ const toPriceAmount = (price: string) => {
   return digitsOnly ? Number(digitsOnly) : null;
 };
 
+const hasPhotoUrl = (
+  photo: TreatmentRecordPhotoApiData
+): photo is TreatmentRecordPhotoApiData & { photo_url: string } =>
+  typeof photo.photo_url === "string" && photo.photo_url.length > 0;
+
 /** 서버 상세 응답을 수정 폼의 초기값으로 바꾼다 */
 export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): RecordFormValues => ({
   date: toFormDate(detail.performed_at),
@@ -77,6 +83,16 @@ export const mapDetailToProcedureType = (
   detail: TreatmentRecordDetailApiData
 ): ProcedureType | undefined =>
   detail.service_types.map(type => PROCEDURE_TYPE_BY_SERVICE_TYPE[type]).find(Boolean);
+
+export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): PhotoItem[] =>
+  [...(detail.photos ?? [])]
+    .filter(hasPhotoUrl)
+    .sort((firstPhoto, secondPhoto) => firstPhoto.sort_order - secondPhoto.sort_order)
+    .map(photo => ({
+      id: photo.photo_id,
+      src: photo.photo_url,
+      isObjectUrl: false,
+    }));
 
 /**
  * 폼 값을 수정 요청 본문으로 바꾼다.

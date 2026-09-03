@@ -1,5 +1,6 @@
 export {
   mapDetailToFormValues,
+  mapDetailToPhotoItems,
   mapDetailToProcedureType,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
