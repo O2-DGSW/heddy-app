@@ -1,13 +1,33 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type {
+  AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   TreatmentRecordDetailApiData,
   TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
+  TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
   UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
+
+const createPhotoFormData = ({
+  file,
+  image_type = "OTHER",
+  sort_order,
+}: AddTreatmentRecordPhotoRequest) => {
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("image_type", image_type);
+
+  if (sort_order !== undefined) {
+    formData.append("sort_order", String(sort_order));
+  }
+
+  return formData;
+};
 
 /**
  * 시술기록 생성
@@ -36,6 +56,29 @@ export const getTreatmentRecordApi = async (
     return res.data.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록을 불러오지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+/**
+ * 시술기록 사진 추가
+ * - 선택한 사진 파일을 기록 생성/수정 후 별도 업로드한다.
+ */
+export const addTreatmentRecordPhotoApi = async (
+  recordId: string,
+  body: AddTreatmentRecordPhotoRequest
+): Promise<TreatmentRecordPhotoApiData> => {
+  try {
+    const res = await api.post<TreatmentRecordPhotoApiResponse>(
+      `/treatment-records/${recordId}/photos`,
+      createPhotoFormData(body),
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록 사진을 저장하지 못했습니다."), {
       cause: error,
     });
   }

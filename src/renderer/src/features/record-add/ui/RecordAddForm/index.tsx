@@ -16,6 +16,7 @@ import RecordDatePickerField from "../RecordDatePickerField";
 
 export interface RecordFormSubmitValues {
   formValues: RecordFormValues;
+  photos: PhotoItem[];
   procedureType: ProcedureType;
   rating: number;
 }
@@ -81,7 +82,7 @@ const RecordAddForm = ({
         return;
       }
 
-      onSubmitValues?.({ formValues, procedureType: selectedProcedureType, rating });
+      onSubmitValues?.({ formValues, photos, procedureType: selectedProcedureType, rating });
     },
   });
 
@@ -91,7 +92,6 @@ const RecordAddForm = ({
       onSubmit={handleSubmit}
     >
       <RecordPhotoUploader
-        errorMessage={formErrors.photos}
         inputRef={photoInputRef}
         isPhotoLimitReached={isPhotoLimitReached}
         onOpenPhotoPicker={handleOpenPhotoPicker}
@@ -108,7 +108,6 @@ const RecordAddForm = ({
 
       {RECORD_FIELDS.map(field => (
         <RecordTextField
-          errorMessage={formErrors[field.id]}
           inputMode={field.inputMode}
           key={field.id}
           label={field.label}
@@ -125,15 +124,10 @@ const RecordAddForm = ({
         selectedProcedureType={selectedProcedureType}
       />
 
-      <RecordRatingField
-        errorMessage={formErrors.rating}
-        onChange={handleRatingChange}
-        rating={rating}
-      />
+      <RecordRatingField onChange={handleRatingChange} rating={rating} />
 
       {RECORD_DETAIL_FIELDS.map(field => (
         <RecordTextField
-          errorMessage={formErrors[field.id]}
           inputMode={field.inputMode}
           key={field.id}
           label={field.label}
