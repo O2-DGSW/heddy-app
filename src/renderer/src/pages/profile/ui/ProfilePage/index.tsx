@@ -161,12 +161,12 @@ const ProfilePage = () => {
         </div>
 
         <div
-          className="flex justify-center px-[clamp(16px,5.47vw,22px)] py-[clamp(24px,9.2vw,37px)]"
+          className="flex flex-1 justify-center px-[clamp(16px,5.47vw,22px)] py-[clamp(24px,9.2vw,37px)]"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
           <section
             aria-labelledby="profile-settings-title"
-            className="flex min-h-[410px] w-full max-w-[349px] flex-col items-center justify-between rounded-[15px] px-[clamp(16px,5.47vw,22px)] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
+            className="flex min-h-[410px] w-full max-w-[349px] self-stretch flex-col items-center justify-between rounded-[15px] px-[clamp(16px,5.47vw,22px)] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
             style={{ backgroundColor: lightTheme.background.normal }}
           >
             <div className="flex w-full max-w-[300px] flex-col gap-[24px]">
