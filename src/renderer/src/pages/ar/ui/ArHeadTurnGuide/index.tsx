@@ -110,9 +110,9 @@ const ArHeadTurnGuide = ({
                   : activeStep && typeof serverYaw === "number"
                     ? getTurnCorrectionLabel(activeStep.targetYaw, serverYaw)
                     : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
-  const currentRotation = -(yaw ?? 0) * (3 / 4);
-  const guideRotation = activeStep?.rotation ?? currentRotation;
-  const previousRotation = activeStep ? currentRotation : guideRotation;
+  // 가이드 얼굴은 사용자의 현재 움직임이 아니라 서버가 요청한 목표 방향을 보여준다.
+  // 실제 yaw는 위의 보정 문구를 계산하는 데만 사용한다.
+  const guideRotation = activeStep?.rotation ?? 0;
 
   return (
     <section
@@ -130,16 +130,12 @@ const ArHeadTurnGuide = ({
       {!isStyleGenerationCompleted && (
         <div className="[perspective:700px]">
           <motion.div
-            initial={{
-              rotateY: previousRotation,
-              x: previousRotation / 1.8,
-            }}
+            initial={false}
             animate={{
               rotateY: isAngleCollectionCompleted || isGenerating ? 0 : guideRotation,
               x: isAngleCollectionCompleted || isGenerating ? 0 : guideRotation / 1.8,
             }}
             className="relative flex h-[104px] w-[82px] items-center justify-center rounded-[46%] border border-white/75 bg-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm"
-            key={activeStep?.id ?? livebankProgress?.status ?? "waiting"}
             style={{ transformOrigin: "center center" }}
             transition={{ damping: 18, mass: 0.9, stiffness: 90, type: "spring" }}
           >
