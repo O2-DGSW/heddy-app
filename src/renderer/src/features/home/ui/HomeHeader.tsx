@@ -5,7 +5,7 @@ import HeddyLogo from "./HeddyLogo.tsx";
 
 const HomeHeader = ({ onProfileClick }: HomeHeaderProps) => {
   return (
-    <header className="mx-auto flex h-[36px] w-[calc(100%_-_58px)] max-w-[343px] items-center justify-between">
+    <header className="mx-auto flex h-[clamp(34px,4.3svh,36px)] w-[calc(100%_-_42px)] max-w-[360px] items-center justify-between">
       <HeddyLogo />
 
       <div className="flex items-center gap-3">
