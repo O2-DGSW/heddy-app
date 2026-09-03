@@ -87,7 +87,7 @@ const RecordEditPage = () => {
         style={pageStyle}
       >
         <header
-          className="relative z-10 flex h-[58px] shrink-0 items-center justify-center"
+          className="relative z-10 flex h-[clamp(54px,7dvh,58px)] shrink-0 items-center justify-center"
           style={pageStyle}
         >
           <button
@@ -104,7 +104,7 @@ const RecordEditPage = () => {
           </h1>
         </header>
 
-        <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[clamp(18px,3dvh,26px)] no-scrollbar [-webkit-overflow-scrolling:touch]">
           {(isPending || isError) && (
             <p
               className={`px-4 pt-6 text-center ${font.label.regular}`}

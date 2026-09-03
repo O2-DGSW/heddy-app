@@ -36,7 +36,7 @@ const RecordPhotoUploader = ({
   const errorId = "record-photos-error";
 
   return (
-    <div className="flex w-full flex-col gap-[6px]">
+    <div className="flex w-full flex-col gap-[6px] [--record-photo-size:clamp(82px,26vw,100px)]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         사진
       </h2>
@@ -50,12 +50,12 @@ const RecordPhotoUploader = ({
         type="file"
       />
 
-      <div className="w-[calc(100%+14px)] overflow-x-auto pb-[2px] scrollbar-hidden">
-        <div className="flex w-max items-end gap-[11px]">
+      <div className="w-full overflow-x-auto pb-[2px] scrollbar-hidden">
+        <div className="flex w-max items-end gap-[clamp(8px,2.8vw,11px)]">
           <button
             aria-describedby={hasError ? errorId : undefined}
             aria-label="사진 추가"
-            className="flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-[10px] border border-solid p-0 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-[var(--record-photo-size)] w-[var(--record-photo-size)] shrink-0 items-center justify-center rounded-[10px] border border-solid p-0 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isPhotoLimitReached}
             onClick={onOpenPhotoPicker}
             style={{
@@ -64,8 +64,12 @@ const RecordPhotoUploader = ({
             }}
             type="button"
           >
-            <span className="flex w-[49px] flex-col items-center">
-              <img alt="" className="h-[49px] w-[49px]" src={pictureIcon} />
+            <span className="flex w-[clamp(44px,13vw,49px)] flex-col items-center">
+              <img
+                alt=""
+                className="h-[clamp(44px,13vw,49px)] w-[clamp(44px,13vw,49px)]"
+                src={pictureIcon}
+              />
               <span className={font.caption.regular} style={{ color: lightTheme.line.normal }}>
                 사진 {photos.length}/{MAX_PHOTO_COUNT}
               </span>
@@ -73,10 +77,13 @@ const RecordPhotoUploader = ({
           </button>
 
           {photos.map((photo, index) => (
-            <div className="relative h-[106px] w-[100px] shrink-0" key={photo.id}>
+            <div
+              className="relative h-[calc(var(--record-photo-size)+6px)] w-[var(--record-photo-size)] shrink-0"
+              key={photo.id}
+            >
               <img
                 alt={`선택된 시술 사진 ${index + 1}`}
-                className="absolute bottom-0 left-0 h-[100px] w-[100px] rounded-[10px] object-cover"
+                className="absolute bottom-0 left-0 h-[var(--record-photo-size)] w-[var(--record-photo-size)] rounded-[10px] object-cover"
                 src={photo.src}
               />
               <button
