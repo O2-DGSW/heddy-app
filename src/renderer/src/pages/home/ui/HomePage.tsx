@@ -20,9 +20,6 @@ const HomePage = () => {
     isError: isRecentRecordError,
     refetch: refetchRecentRecord,
   } = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
-  const recentRecord = recentRecordData?.items[0]
-    ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
-    : undefined;
   const {
     data: recommendationData,
     isPending: isRecommendationPending,
@@ -32,6 +29,9 @@ const HomePage = () => {
     () => mapRecommendationToHomeCards(recommendationData ?? null),
     [recommendationData]
   );
+  const recentRecord = recentRecordData?.items[0]
+    ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
+    : undefined;
 
   const handleNavigate = (to: string) => {
     navigate(to);
@@ -50,7 +50,7 @@ const HomePage = () => {
     <cap-page>
       <section
         aria-labelledby="home-greeting"
-        className="flex h-full flex-col overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
+        className="flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
         <HomeHeader onProfileClick={() => handleNavigate("/profile")} />
