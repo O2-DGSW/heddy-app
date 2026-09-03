@@ -1,6 +1,8 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { AccountDeletionModal } from "@/features/auth/delete-account";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetShares } from "@/entities/share";
@@ -93,6 +95,7 @@ const getProfileName = (nickname: unknown, isLoading: boolean) => {
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const [isAccountDeletionModalOpen, setIsAccountDeletionModalOpen] = useState(false);
   const { data: profile, isLoading } = useProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
@@ -113,6 +116,14 @@ const ProfilePage = () => {
     if (to) {
       navigate(to);
     }
+  };
+
+  const handleAccountDeletionModalClose = () => {
+    setIsAccountDeletionModalOpen(false);
+  };
+
+  const handleAccountDeletionModalOpen = () => {
+    setIsAccountDeletionModalOpen(true);
   };
 
   return (
@@ -206,9 +217,9 @@ const ProfilePage = () => {
                 {isLogoutPending ? "로그아웃 중" : "로그아웃"}
               </button>
               <button
-                aria-label="회원 탈퇴 기능 준비 중"
-                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium} cursor-not-allowed opacity-50`}
-                disabled
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+                disabled={isLogoutPending}
+                onClick={handleAccountDeletionModalOpen}
                 type="button"
                 style={{
                   backgroundColor: lightTheme.status.error,
@@ -229,6 +240,9 @@ const ProfilePage = () => {
             )}
           </section>
         </div>
+        {isAccountDeletionModalOpen && (
+          <AccountDeletionModal onClose={handleAccountDeletionModalClose} />
+        )}
       </section>
     </cap-page>
   );

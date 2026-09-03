@@ -20,3 +20,16 @@ export interface UpdateMyProfileRequest {
 }
 
 export type UpdateMyProfileApiResponse = ApiResponse<GetMyProfileResponse | null>;
+
+export interface DeleteMyAccountRequest {
+  reauthentication_token: string;
+  reason?: string;
+}
+
+export interface DeleteMyAccountResponse {
+  deletion_request_id: string;
+  requested_at: string;
+  status: "COMPLETED" | "FAILED" | "PROCESSING" | "REQUESTED";
+}
+
+export type DeleteMyAccountApiResponse = ApiResponse<DeleteMyAccountResponse>;

@@ -13,6 +13,9 @@ import type {
   LoginResponse,
   LogoutRequest,
   RefreshTokenRequest,
+  ReauthenticateApiResponse,
+  ReauthenticateRequest,
+  ReauthenticateResponse,
   ResetPasswordApiResponse,
   ResetPasswordRequest,
   SignupApiResponse,
@@ -124,6 +127,19 @@ export const resetPasswordApi = async (body: ResetPasswordRequest): Promise<void
     await api.post<ResetPasswordApiResponse>("/auth/password/reset", body);
   } catch (error) {
     throw new Error(getAuthApiErrorMessage(error, "비밀번호 재설정에 실패했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+export const reauthenticateApi = async (
+  body: ReauthenticateRequest
+): Promise<ReauthenticateResponse> => {
+  try {
+    const res = await api.post<ReauthenticateApiResponse>("/auth/reauthenticate", body);
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getAuthApiErrorMessage(error, "비밀번호를 확인하지 못했습니다."), {
       cause: error,
     });
   }
