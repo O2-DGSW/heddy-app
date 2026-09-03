@@ -10,7 +10,7 @@ export type RecommendationItem = {
   reasonType: RecommendReasonType | null;
   /** 서버 관리 난이도 값을 모르면 null이라 배지를 숨긴다 */
   riskLevel: RecommendRiskLevel | null;
-  reasonDescription: string;
+  reasonDescriptions: string[];
   referenceRecordLabel: string;
 };
 

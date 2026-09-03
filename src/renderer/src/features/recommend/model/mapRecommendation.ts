@@ -72,7 +72,10 @@ const mapRecommendationItem = (
     // 추천 방식·난이도는 값이 확정되지 않아 모르면 배지를 숨긴다.
     reasonType: strategy ? (REASON_TYPE_BY_STRATEGY[strategy.toUpperCase()] ?? null) : null,
     riskLevel: difficulty ? (RISK_LEVEL_BY_API_VALUE[difficulty] ?? null) : null,
-    reasonDescription: item.reasons?.[0]?.message ?? "",
+    // 서버가 이유를 여러 개 줄 수 있어 전부 보여준다. 메시지가 없는 항목은 뺀다.
+    reasonDescriptions: (item.reasons ?? [])
+      .map(reason => reason.message)
+      .filter((message): message is string => Boolean(message)),
     referenceRecordLabel: buildReferenceRecordLabel(item),
   };
 };
