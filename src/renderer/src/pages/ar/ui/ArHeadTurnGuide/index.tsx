@@ -72,9 +72,7 @@ const ArHeadTurnGuide = ({
   const nextYaw = livebankProgress?.nextYaw;
   const activeStep = nextYaw === undefined ? null : getHeadTurnStep(nextYaw);
   const isGenerating =
-    livebankProgress?.status === "generating" ||
-    livebankProgress?.status === "running" ||
-    livebankProgress?.status === "filled";
+    livebankProgress?.status === "generating" || livebankProgress?.status === "filled";
   const isStyleGenerationCompleted = livebankProgress?.status === "complete";
   const isAngleCollectionCompleted =
     livebankProgress?.total !== undefined && capturedYawTargets.length >= livebankProgress.total;
@@ -121,6 +119,12 @@ const ArHeadTurnGuide = ({
   // 가이드 얼굴은 사용자의 현재 움직임이 아니라 서버가 요청한 목표 방향을 보여준다.
   // 실제 yaw는 위의 보정 문구를 계산하는 데만 사용한다.
   const guideRotation = activeStep?.rotation ?? 0;
+  const shouldRepeatDirectionGuide =
+    activeStep !== null &&
+    !isAngleCollectionCompleted &&
+    !isGenerating &&
+    !isCollectionError &&
+    !isCollectionStopped;
 
   return (
     <section
@@ -139,13 +143,21 @@ const ArHeadTurnGuide = ({
         <div className="[perspective:700px]">
           <motion.div
             initial={false}
-            animate={{
-              rotateY: isAngleCollectionCompleted || isGenerating ? 0 : guideRotation,
-              x: isAngleCollectionCompleted || isGenerating ? 0 : guideRotation / 1.8,
-            }}
+            animate={
+              shouldRepeatDirectionGuide
+                ? {
+                    rotateY: [0, guideRotation, 0],
+                    x: [0, guideRotation / 1.8, 0],
+                  }
+                : { rotateY: 0, x: 0 }
+            }
             className="relative flex h-[104px] w-[82px] items-center justify-center rounded-[46%] border border-white/75 bg-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm"
             style={{ transformOrigin: "center center" }}
-            transition={{ damping: 18, mass: 0.9, stiffness: 90, type: "spring" }}
+            transition={
+              shouldRepeatDirectionGuide
+                ? { duration: 1.1, ease: "easeInOut", repeat: Infinity }
+                : { damping: 18, mass: 0.9, stiffness: 90, type: "spring" }
+            }
           >
             <span className="absolute -left-[5px] top-[43px] h-[17px] w-[8px] rounded-l-full border border-white/70 bg-white/20" />
             <span className="absolute -right-[5px] top-[43px] h-[17px] w-[8px] rounded-r-full border border-white/70 bg-white/20" />
