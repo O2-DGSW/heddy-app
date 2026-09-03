@@ -1,6 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { dropdownIcon } from "@/entities/record";
 import { cn } from "@/shared";
 
 import { MAX_VISIBLE_RESULT_TAGS } from "../../model/constants";
@@ -47,14 +46,17 @@ const StyleTagResultRow = ({
               onClick={onToggleExpand}
               type="button"
             >
-              <img
-                alt=""
+              <svg
+                aria-hidden="true"
                 className={cn(
                   "h-[24px] w-[24px] transition-transform duration-200",
                   isExpanded && "rotate-180"
                 )}
-                src={dropdownIcon}
-              />
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 15L17 10H7L12 15Z" fill={lightTheme.label.assistive} />
+              </svg>
             </button>
           )}
         </div>
