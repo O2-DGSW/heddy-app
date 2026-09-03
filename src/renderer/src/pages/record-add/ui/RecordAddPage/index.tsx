@@ -2,18 +2,26 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { arrowIcon } from "@/entities/record";
-import { RecordAddForm } from "@/features/record-add";
+import { arrowIcon, useCreateTreatmentRecord } from "@/entities/record";
+import { RecordAddForm, mapFormValuesToCreateRequest } from "@/features/record-add";
+import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 const headingStyle = { color: lightTheme.label.neutral };
 
 const RecordAddPage = () => {
   const navigate = useNavigate();
+  const createRecord = useCreateTreatmentRecord();
 
   const handleClose = () => {
     setDirection("back");
     navigate(-1);
+  };
+
+  const handleSubmit = ({ formValues, procedureType, rating }: RecordFormSubmitValues) => {
+    createRecord.mutate(mapFormValuesToCreateRequest(formValues, procedureType, rating), {
+      onSuccess: handleClose,
+    });
   };
 
   return (
@@ -42,7 +50,20 @@ const RecordAddPage = () => {
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
-          <RecordAddForm onCancel={handleClose} />
+          {createRecord.isError && (
+            <p
+              className={`px-4 pt-4 text-center ${font.caption.regular}`}
+              style={{ color: lightTheme.status.error }}
+            >
+              {createRecord.error.message}
+            </p>
+          )}
+
+          <RecordAddForm
+            isSubmitting={createRecord.isPending}
+            onCancel={handleClose}
+            onSubmitValues={handleSubmit}
+          />
         </div>
       </section>
     </cap-page>

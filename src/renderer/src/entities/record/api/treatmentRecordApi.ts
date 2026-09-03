@@ -1,5 +1,6 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type {
+  CreateTreatmentRecordRequest,
   TreatmentRecordDetailApiData,
   TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
@@ -7,6 +8,24 @@ import type {
   TreatmentRecordListParams,
   UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
+
+/**
+ * 시술기록 생성
+ * - 로그인한 사용자 본인의 기록으로 생성된다(Bearer 토큰 필요).
+ */
+export const createTreatmentRecordApi = async (
+  body: CreateTreatmentRecordRequest
+): Promise<TreatmentRecordDetailApiData> => {
+  try {
+    const res = await api.post<TreatmentRecordDetailApiResponse>("/treatment-records", body);
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록을 저장하지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
 
 export const getTreatmentRecordApi = async (
   recordId: string

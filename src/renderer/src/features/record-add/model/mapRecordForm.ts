@@ -2,6 +2,7 @@ import { createDateValue, parseDateValue } from "@/entities/record/model/date";
 import type { ProcedureType } from "@/entities/record/model/constants";
 import type { RecordFormValues } from "@/entities/record/model/types";
 import type {
+  CreateTreatmentRecordRequest,
   ServiceType,
   TreatmentRecordDetailApiData,
   UpdateTreatmentRecordRequest,
@@ -47,6 +48,12 @@ const toPerformedAt = (formDate: string) => {
   return performedDate.toISOString();
 };
 
+const getTodayDateValue = () => {
+  const today = new Date();
+
+  return createDateValue(today.getFullYear(), today.getMonth() + 1, today.getDate());
+};
+
 /** 숫자만 남겨 가격으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
 const toPriceAmount = (price: string) => {
   const digitsOnly = price.replace(/[^0-9]/g, "");
@@ -89,6 +96,26 @@ export const mapFormValuesToUpdateRequest = (
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),
     // 서버가 1~5만 받으므로 그 밖의 값은 보내지 않는다.
     ...(rating >= 1 && rating <= 5 ? { satisfaction: rating } : {}),
+    price_amount: priceAmount,
+    price_currency: priceAmount === null ? null : PRICE_CURRENCY,
+    memo: formValues.details.trim() || null,
+  };
+};
+
+export const mapFormValuesToCreateRequest = (
+  formValues: RecordFormValues,
+  procedureType: ProcedureType,
+  rating: number
+): CreateTreatmentRecordRequest => {
+  const priceAmount = toPriceAmount(formValues.price);
+  const performedAtDate = formValues.date || getTodayDateValue();
+
+  return {
+    service_types: [SERVICE_TYPE_BY_PROCEDURE_TYPE[procedureType]],
+    performed_at: toPerformedAt(performedAtDate),
+    salon_name: formValues.salon.trim() || null,
+    designer_name: formValues.designer.trim() || null,
+    satisfaction: rating >= 1 && rating <= 5 ? rating : null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,
     memo: formValues.details.trim() || null,

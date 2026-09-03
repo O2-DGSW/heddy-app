@@ -33,6 +33,7 @@ export type {
   AnalysisOverlayType,
   AnalysisStatus,
   CalendarDay,
+  CreateTreatmentRecordRequest,
   PageApiData,
   PhotoItem,
   ProcedureType,
@@ -51,6 +52,7 @@ export type {
   UpdateTreatmentRecordRequest,
 } from "./model";
 export {
+  createTreatmentRecordApi,
   getLatestAnalysisApi,
   getTreatmentRecordApi,
   getTreatmentRecordsApi,
@@ -58,6 +60,7 @@ export {
 } from "./api";
 export {
   recordQueryKeys,
+  useCreateTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
   useGetTreatmentRecords,
