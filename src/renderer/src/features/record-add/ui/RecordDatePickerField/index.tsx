@@ -68,6 +68,30 @@ const getCalendarDayStyle = (day: CalendarDay, isSelected: boolean): CSSProperti
 const getClampedDateValue = (year: number, month: number, day: number) =>
   createDateValue(year, month, Math.min(day, getDaysInMonth(year, month)));
 
+const getShiftedMonthDateValue = (dateValue: string, monthOffset: number) => {
+  const { year, month, day } = parseDateValue(dateValue);
+  const shiftedDate = new Date(year, month - 1 + monthOffset, 1);
+
+  return getClampedDateValue(shiftedDate.getFullYear(), shiftedDate.getMonth() + 1, day);
+};
+
+const MonthChevronIcon = ({ direction }: { direction: "previous" | "next" }) => (
+  <svg
+    aria-hidden="true"
+    className={cn("h-[24px] w-[24px]", direction === "next" && "rotate-180")}
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M14.5 6L8.5 12L14.5 18"
+      stroke={lightTheme.label.assistive}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
 const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePickerFieldProps) => {
   const selectedYearRef = useRef<HTMLButtonElement>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -79,6 +103,14 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
   const draftDateParts = parseDateValue(draftDate);
   const calendarDays = createCalendarDays(draftDateParts.year, draftDateParts.month);
   const hasSixCalendarRows = calendarDays.length > 35;
+  const firstYearOption = YEAR_OPTIONS[0] ?? draftDateParts.year;
+  const lastYearOption = YEAR_OPTIONS[YEAR_OPTIONS.length - 1] ?? draftDateParts.year;
+  const canSelectPreviousMonth =
+    draftDateParts.year > firstYearOption ||
+    (draftDateParts.year === firstYearOption && draftDateParts.month > 1);
+  const canSelectNextMonth =
+    draftDateParts.year < lastYearOption ||
+    (draftDateParts.year === lastYearOption && draftDateParts.month < 12);
   const selectedDateLabel = value ? formatDateDisplay(value) : "입력";
   const selectedDateColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
 
@@ -99,6 +131,24 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
 
   const handleYearSelect = (year: number) => {
     setDraftDate(getClampedDateValue(year, draftDateParts.month, draftDateParts.day));
+    setIsYearSelectOpen(false);
+  };
+
+  const handlePreviousMonth = () => {
+    if (!canSelectPreviousMonth) {
+      return;
+    }
+
+    setDraftDate(currentDate => getShiftedMonthDateValue(currentDate, -1));
+    setIsYearSelectOpen(false);
+  };
+
+  const handleNextMonth = () => {
+    if (!canSelectNextMonth) {
+      return;
+    }
+
+    setDraftDate(currentDate => getShiftedMonthDateValue(currentDate, 1));
     setIsYearSelectOpen(false);
   };
 
@@ -216,61 +266,83 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
               </div>
 
               <div className="flex w-full flex-col gap-[24px]">
-                <div className="relative self-start">
+                <div className="flex w-full items-center justify-between">
                   <button
-                    aria-controls="date-picker-year-list"
-                    aria-expanded={isYearSelectOpen}
-                    aria-label="년도 선택"
-                    className="flex items-center gap-[7px] border-0 bg-transparent p-0"
-                    onClick={handleToggleYearSelect}
+                    aria-label="이전 달"
+                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 disabled:opacity-30"
+                    disabled={!canSelectPreviousMonth}
+                    onClick={handlePreviousMonth}
                     type="button"
                   >
-                    <span
-                      className={font.headline1.bold}
-                      style={{ color: lightTheme.label.neutral }}
-                    >
-                      {draftDateParts.year}. {draftDateParts.month}
-                    </span>
-                    <img alt="" className="h-[24px] w-[24px]" src={dropdownIcon} />
+                    <MonthChevronIcon direction="previous" />
                   </button>
 
-                  {isYearSelectOpen && (
-                    <div
-                      className="scrollbar-hidden absolute left-0 top-[34px] z-10 flex h-[81px] w-[96px] flex-col overflow-y-auto rounded-[10px] shadow-[1px_2px_2px_rgba(0,0,0,0.08)]"
-                      id="date-picker-year-list"
-                      role="listbox"
-                      style={{ backgroundColor: lightTheme.background.normal }}
+                  <div className="relative">
+                    <button
+                      aria-controls="date-picker-year-list"
+                      aria-expanded={isYearSelectOpen}
+                      aria-label="년도 선택"
+                      className="flex items-center gap-[7px] border-0 bg-transparent p-0"
+                      onClick={handleToggleYearSelect}
+                      type="button"
                     >
-                      {YEAR_OPTIONS.map(year => {
-                        const isSelected = draftDateParts.year === year;
+                      <span
+                        className={font.headline1.bold}
+                        style={{ color: lightTheme.label.neutral }}
+                      >
+                        {draftDateParts.year}. {draftDateParts.month}
+                      </span>
+                      <img alt="" className="h-[24px] w-[24px]" src={dropdownIcon} />
+                    </button>
 
-                        return (
-                          <button
-                            aria-selected={isSelected}
-                            className={cn(
-                              font.label.medium,
-                              "h-[27px] w-full shrink-0 border-0 text-center"
-                            )}
-                            key={year}
-                            onClick={() => handleYearSelect(year)}
-                            ref={isSelected ? selectedYearRef : null}
-                            role="option"
-                            style={{
-                              backgroundColor: isSelected
-                                ? palette.main[90]
-                                : lightTheme.background.normal,
-                              color: isSelected
-                                ? lightTheme.primary.normal
-                                : lightTheme.line.normal,
-                            }}
-                            type="button"
-                          >
-                            {year}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                    {isYearSelectOpen && (
+                      <div
+                        className="scrollbar-hidden absolute left-1/2 top-[34px] z-10 flex h-[81px] w-[96px] -translate-x-1/2 flex-col overflow-y-auto rounded-[10px] shadow-[1px_2px_2px_rgba(0,0,0,0.08)]"
+                        id="date-picker-year-list"
+                        role="listbox"
+                        style={{ backgroundColor: lightTheme.background.normal }}
+                      >
+                        {YEAR_OPTIONS.map(year => {
+                          const isSelected = draftDateParts.year === year;
+
+                          return (
+                            <button
+                              aria-selected={isSelected}
+                              className={cn(
+                                font.label.medium,
+                                "h-[27px] w-full shrink-0 border-0 text-center"
+                              )}
+                              key={year}
+                              onClick={() => handleYearSelect(year)}
+                              ref={isSelected ? selectedYearRef : null}
+                              role="option"
+                              style={{
+                                backgroundColor: isSelected
+                                  ? palette.main[90]
+                                  : lightTheme.background.normal,
+                                color: isSelected
+                                  ? lightTheme.primary.normal
+                                  : lightTheme.line.normal,
+                              }}
+                              type="button"
+                            >
+                              {year}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    aria-label="다음 달"
+                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 disabled:opacity-30"
+                    disabled={!canSelectNextMonth}
+                    onClick={handleNextMonth}
+                    type="button"
+                  >
+                    <MonthChevronIcon direction="next" />
+                  </button>
                 </div>
 
                 <div className="flex w-full flex-col gap-[8px]">
