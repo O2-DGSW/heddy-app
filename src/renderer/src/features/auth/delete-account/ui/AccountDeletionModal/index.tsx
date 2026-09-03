@@ -36,7 +36,9 @@ const AccountDeletionModal = ({ onClose }: AccountDeletionModalProps) => {
           className={`mt-[10px] ${font.label.regular}`}
           style={{ color: lightTheme.label.alternative }}
         >
-          탈퇴 요청 후 계정 접근이 즉시 차단되며, 삭제된 정보는 복구할 수 없어요.
+          탈퇴 요청 후 계정 접근이 즉시 차단됩니다.
+          <br />
+          삭제된 정보는 복구할 수 없어요.
         </p>
 
         <label className="mt-[20px] flex flex-col gap-[8px]" htmlFor="account-deletion-password">
