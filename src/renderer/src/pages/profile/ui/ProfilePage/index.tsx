@@ -31,7 +31,7 @@ const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { icon: heartIcon, label: "선호 스타일 등록", to: "/profile/preferred-style" },
   { icon: settingsIcon, label: "회원정보 수정" },
   { icon: sharePermissionsIcon, label: "공유 권한 관리", to: "/profile/share-permissions" },
-  { icon: bookmarkIcon, label: "저장한 후보 스타일" },
+  { icon: bookmarkIcon, label: "저장한 후보 스타일", to: "/profile/saved-styles" },
 ];
 
 interface ProfileMenuRowProps {

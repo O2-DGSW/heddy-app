@@ -16,6 +16,7 @@ import { RecordEditPage } from "@/pages/record-edit";
 import { FindPage } from "@/pages/auth/find";
 import { ArHairstylePage } from "@/pages/ar";
 import { RecommendPage } from "@/pages/recommend";
+import { SavedStylesPage } from "@/pages/saved-styles";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 import { ProfilePage } from "@/pages/profile";
 import { HomePage } from "@/pages/home";
@@ -82,6 +83,7 @@ export const AppRoutes = () => {
           </Route>
           <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
           <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
+          <Route path="/profile/saved-styles" element={<SavedStylesPage />} />
           <Route path="*" element={<>404p</>} />
         </Route>
         <Route element={<RequireGuest />}>
