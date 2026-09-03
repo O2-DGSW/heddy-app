@@ -2,10 +2,8 @@ import { lightTheme } from "@heddy/design-tokens";
 
 import { RecommendHeader } from "@/features/recommend/ui/RecommendHeader";
 import { RecommendResultSection } from "@/features/recommend/ui/RecommendResultSection";
-import { RecommendBasisSection } from "@/features/recommend/ui/RecommendBasisSection";
 import { RecommendStatus } from "@/features/recommend/ui/RecommendStatus";
 import { useRecommendation } from "@/features/recommend/model/hooks/useRecommendation";
-import { dummyRecommendationBasisRows } from "@/features/recommend/constants/dummyRecommendationBasis";
 
 export const RecommendPage = () => {
   const { items, isEmpty, isPending, isError, error, generate, isGenerating, generateError } =
@@ -46,12 +44,7 @@ export const RecommendPage = () => {
             />
           )}
 
-          {items.length > 0 && (
-            <>
-              <RecommendResultSection recommendations={items} />
-              <RecommendBasisSection rows={dummyRecommendationBasisRows} />
-            </>
-          )}
+          {items.length > 0 && <RecommendResultSection recommendations={items} />}
         </div>
       </section>
     </cap-page>

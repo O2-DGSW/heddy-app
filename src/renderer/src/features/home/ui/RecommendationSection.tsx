@@ -17,7 +17,7 @@ const RecommendationSection = ({
   return (
     <section
       aria-labelledby="home-recommendation-title"
-      className="mt-9 min-h-[328px] w-full pt-[15px]"
+      className="mt-9 flex min-h-0 flex-1 flex-col pt-[15px]"
       style={{ backgroundColor: lightTheme.fill.normal }}
     >
       <div className="mx-auto flex w-[calc(100%_-_42px)] max-w-[360px] items-center justify-between">
@@ -39,14 +39,14 @@ const RecommendationSection = ({
         </button>
       </div>
 
-      <div className="mx-auto mt-[14px] grid w-[calc(100%_-_42px)] max-w-[360px] grid-cols-2 gap-3">
+      <div className="mx-auto mt-[14px] grid min-h-0 w-[calc(100%_-_42px)] max-w-[360px] flex-1 auto-rows-fr grid-cols-2 gap-3 pb-4">
         {hasRecommendations ? (
           recommendations.map(card => (
             <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
           ))
         ) : (
           <div
-            className={`col-span-2 flex h-[180px] items-center justify-center rounded-[12px] text-center ${font.label.medium}`}
+            className={`col-span-2 flex min-h-[180px] items-center justify-center rounded-[12px] text-center ${font.label.medium}`}
             style={{
               backgroundColor: lightTheme.background.normal,
               color: lightTheme.label.assistive,

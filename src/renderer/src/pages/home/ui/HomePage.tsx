@@ -20,9 +20,6 @@ const HomePage = () => {
     isError: isRecentRecordError,
     refetch: refetchRecentRecord,
   } = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
-  const recentRecord = recentRecordData?.items[0]
-    ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
-    : undefined;
   const {
     data: recommendationData,
     isPending: isRecommendationPending,
@@ -32,6 +29,9 @@ const HomePage = () => {
     () => mapRecommendationToHomeCards(recommendationData ?? null),
     [recommendationData]
   );
+  const recentRecord = recentRecordData?.items[0]
+    ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
+    : undefined;
 
   const handleNavigate = (to: string) => {
     navigate(to);
