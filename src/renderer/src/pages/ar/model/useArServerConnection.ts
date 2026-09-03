@@ -52,7 +52,10 @@ const waitForIceGatheringComplete = async (peerConnection: RTCPeerConnection): P
 };
 
 const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStreamTrack): void => {
-  const transceiver = peerConnection.addTransceiver(track, { direction: "sendonly" });
+  // 서버는 응답 비디오 트랙을 전송하는 시점에 입력 프레임을 소비한다.
+  // sendonly로 협상하면 서버 출력 트랙이 SDP에 포함되지 않아 서버의 recv()가
+  // 호출되지 않고, 결과적으로 yaw·LiveBank 수집이 진행되지 않는다.
+  const transceiver = peerConnection.addTransceiver(track, { direction: "sendrecv" });
   const vp8Codecs = RTCRtpSender.getCapabilities("video")?.codecs.filter(codec =>
     codec.mimeType.toLowerCase().includes("video/vp8")
   );
@@ -68,6 +71,32 @@ const configureVideoSender = (peerConnection: RTCPeerConnection, track: MediaStr
     { ...encoding, maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 },
   ];
   void transceiver.sender.setParameters(parameters);
+};
+
+const getArConnectionErrorMessage = (error: unknown): string => {
+  if (error instanceof DOMException) {
+    if (error.name === "NotAllowedError") {
+      return "카메라 권한이 필요합니다. 브라우저 또는 기기 설정에서 Heddy의 카메라 접근을 허용해 주세요.";
+    }
+
+    if (error.name === "NotFoundError") {
+      return "사용 가능한 카메라를 찾지 못했습니다. 연결 상태를 확인해 주세요.";
+    }
+
+    if (error.name === "NotReadableError") {
+      return "카메라가 다른 앱에서 사용 중입니다. 카메라를 사용하는 앱을 종료한 뒤 다시 시도해 주세요.";
+    }
+
+    if (error.name === "SecurityError") {
+      return "보안 정책으로 카메라에 접근할 수 없습니다. HTTPS 또는 기기 앱에서 다시 시도해 주세요.";
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요.";
 };
 
 export const useArServerConnection = (
@@ -262,11 +291,7 @@ export const useArServerConnection = (
     } catch (error: unknown) {
       stopConnection(false);
       setConnectionStatus("error");
-      setErrorMessage(
-        error instanceof DOMException && error.name === "NotAllowedError"
-          ? "카메라 권한이 필요합니다. 기기 설정에서 Heddy의 카메라 접근을 허용해 주세요."
-          : "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요."
-      );
+      setErrorMessage(getArConnectionErrorMessage(error));
     }
   }, [faceTrackingVideoRef, previewVideoRef, startLivebank, stopConnection]);
 
