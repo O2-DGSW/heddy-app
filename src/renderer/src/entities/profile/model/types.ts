@@ -13,3 +13,23 @@ export interface GetMyProfileResponse {
 }
 
 export type GetMyProfileApiResponse = ApiResponse<GetMyProfileResponse | null>;
+
+export interface UpdateMyProfileRequest {
+  nickname: string;
+  phone?: string;
+}
+
+export type UpdateMyProfileApiResponse = ApiResponse<GetMyProfileResponse | null>;
+
+export interface DeleteMyAccountRequest {
+  reauthentication_token: string;
+  reason?: string;
+}
+
+export interface DeleteMyAccountResponse {
+  deletion_request_id: string;
+  requested_at: string;
+  status: "COMPLETED" | "FAILED" | "PROCESSING" | "REQUESTED";
+}
+
+export type DeleteMyAccountApiResponse = ApiResponse<DeleteMyAccountResponse>;

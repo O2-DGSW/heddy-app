@@ -1,14 +1,15 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { AccountDeletionModal } from "@/features/auth/delete-account";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetShares } from "@/entities/share";
+import { chevronRightIcon, profileAvatar } from "@/shared";
 
-import arrowRightIcon from "../../assets/arrow-right.svg";
 import bookmarkIcon from "../../assets/bookmark.svg";
 import heartIcon from "../../assets/heart.svg";
-import profileAvatar from "../../assets/profile-avatar.png";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
 import { useProfile } from "../../model/useProfile";
@@ -32,7 +33,7 @@ const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     to: "/profile/preferred-style",
     isAvailable: true,
   },
-  { icon: settingsIcon, label: "회원정보 수정", isAvailable: false },
+  { icon: settingsIcon, label: "회원정보 수정", to: "/profile/edit", isAvailable: true },
   {
     icon: sharePermissionsIcon,
     label: "공유 권한 관리",
@@ -62,7 +63,7 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
       <img
         alt=""
         className="h-[14px] w-[14px] shrink-0"
-        src={arrowRightIcon}
+        src={chevronRightIcon}
         style={{ transform: "rotate(180deg)" }}
       />
     </>
@@ -94,6 +95,7 @@ const getProfileName = (nickname: unknown, isLoading: boolean) => {
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const [isAccountDeletionModalOpen, setIsAccountDeletionModalOpen] = useState(false);
   const { data: profile, isLoading } = useProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
@@ -116,6 +118,14 @@ const ProfilePage = () => {
     }
   };
 
+  const handleAccountDeletionModalClose = () => {
+    setIsAccountDeletionModalOpen(false);
+  };
+
+  const handleAccountDeletionModalOpen = () => {
+    setIsAccountDeletionModalOpen(true);
+  };
+
   return (
     <cap-page>
       <section
@@ -127,9 +137,14 @@ const ProfilePage = () => {
           <div className="mx-auto flex w-full max-w-[402px] flex-col gap-[28px] px-[clamp(16px,6.47vw,26px)] pb-[25px] pt-[22px]">
             <header className="flex flex-col gap-[28px]">
               <div className="flex items-center gap-[20px]">
-                <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
+                <div
+                  className="flex h-[68px] w-[68px] shrink-0 items-center justify-center rounded-full p-[12px]"
+                  style={{ backgroundColor: lightTheme.background.neutral }}
+                >
+                  <img alt="" className="h-full w-full object-contain" src={profileAvatar} />
+                </div>
                 <h1
-                  className={`${font.headline1.bold} min-w-0 truncate`}
+                  className={`${font.headline1.semiBold} min-w-0 truncate`}
                   id="profile-title"
                   style={{ color: lightTheme.label.neutral }}
                 >
@@ -202,9 +217,9 @@ const ProfilePage = () => {
                 {isLogoutPending ? "로그아웃 중" : "로그아웃"}
               </button>
               <button
-                aria-label="회원 탈퇴 기능 준비 중"
-                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium} cursor-not-allowed opacity-50`}
-                disabled
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+                disabled={isLogoutPending}
+                onClick={handleAccountDeletionModalOpen}
                 type="button"
                 style={{
                   backgroundColor: lightTheme.status.error,
@@ -225,6 +240,9 @@ const ProfilePage = () => {
             )}
           </section>
         </div>
+        {isAccountDeletionModalOpen && (
+          <AccountDeletionModal onClose={handleAccountDeletionModalClose} />
+        )}
       </section>
     </cap-page>
   );
