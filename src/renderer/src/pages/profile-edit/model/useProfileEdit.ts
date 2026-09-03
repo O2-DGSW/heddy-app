@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getAccessToken } from "@/entities/auth";
 import { getMyProfileApi, profileQueryKeys, usePatchMyProfile } from "@/entities/profile";
+import { showErrorToast, showSuccessToast } from "@/shared";
 
 interface ProfileEditFormValues {
   email: string;
@@ -30,7 +31,6 @@ const getProfileName = (nickname: string | null | undefined, isLoading: boolean)
 export const useProfileEdit = () => {
   const navigate = useNavigate();
   const [accessToken, setAccessToken] = useState<string | null | undefined>(undefined);
-  const [actionMessage, setActionMessage] = useState("");
   const [formValues, setFormValues] = useState<ProfileEditFormValues>(INITIAL_FORM_VALUES);
   const hasInitializedForm = useRef(false);
   const { isPending: isSaving, mutate: patchMyProfile } = usePatchMyProfile();
@@ -74,7 +74,6 @@ export const useProfileEdit = () => {
   };
 
   const handleChange = (field: keyof ProfileEditFormValues, value: string) => {
-    setActionMessage("");
     setFormValues(currentValues => ({ ...currentValues, [field]: value }));
   };
 
@@ -83,7 +82,7 @@ export const useProfileEdit = () => {
     const phone = formValues.phone.trim();
 
     if (!nickname) {
-      setActionMessage("이름 또는 닉네임을 입력해주세요.");
+      showErrorToast("이름 또는 닉네임을 입력해주세요.");
       return;
     }
 
@@ -99,10 +98,10 @@ export const useProfileEdit = () => {
             nickname: updatedProfile?.nickname ?? nickname,
             phone: updatedProfile?.phone ?? currentValues.phone,
           }));
-          setActionMessage("회원정보를 저장했어요.");
+          showSuccessToast("회원정보를 저장했어요.");
         },
         onError: error => {
-          setActionMessage(
+          showErrorToast(
             error instanceof Error ? error.message : "회원정보를 저장하지 못했습니다."
           );
         },
@@ -111,11 +110,10 @@ export const useProfileEdit = () => {
   };
 
   const handleStyleSelect = () => {
-    setActionMessage("머리 스타일 선택 기능을 준비 중입니다.");
+    showErrorToast("머리 스타일 선택 기능을 준비 중입니다.");
   };
 
   return {
-    actionMessage,
     formValues,
     handleBack,
     handleChange,

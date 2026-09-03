@@ -2,6 +2,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { setupApiAuth } from "./setupApiAuth";
+import { ToastProvider } from "@/shared";
 // import { restoreAuthSession } from "@/entities/auth/model/session";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
 
@@ -29,6 +30,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <AppRoutes />
+      <ToastProvider />
     </BrowserRouter>
   );
 };

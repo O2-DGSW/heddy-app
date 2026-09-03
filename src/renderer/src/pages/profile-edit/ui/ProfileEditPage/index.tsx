@@ -58,7 +58,6 @@ const ProfileEditInput = ({
 
 const ProfileEditPage = () => {
   const {
-    actionMessage,
     formValues,
     handleBack,
     handleChange,
@@ -169,7 +168,6 @@ const ProfileEditPage = () => {
                   머리 스타일
                 </span>
                 <button
-                  aria-describedby="profile-edit-action-message"
                   className={`flex h-[42px] w-full items-center justify-between rounded-[10px] border-0 px-[15px] text-left ${font.caption.regular}`}
                   disabled={isSaving}
                   onClick={handleStyleSelect}
@@ -186,14 +184,6 @@ const ProfileEditPage = () => {
             </div>
 
             <div className="mt-auto pt-[36px]">
-              <p
-                className={`mb-[10px] min-h-[18px] text-center ${font.caption.regular}`}
-                id="profile-edit-action-message"
-                role="status"
-                style={{ color: lightTheme.label.assistive }}
-              >
-                {actionMessage}
-              </p>
               <div className="grid grid-cols-2 gap-[7px]">
                 <button
                   className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
