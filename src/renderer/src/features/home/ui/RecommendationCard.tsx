@@ -10,12 +10,12 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
   return (
     <button
       type="button"
-      className="h-[231px] overflow-hidden rounded-[12px] p-[8px] text-left shadow-[0_0_6px_rgba(0,0,0,0.02)] active:scale-[0.99]"
+      className="h-full min-h-0 overflow-hidden rounded-[12px] p-[clamp(6px,1svh,8px)] text-left shadow-[0_0_6px_rgba(0,0,0,0.02)] active:scale-[0.99]"
       style={{ backgroundColor: lightTheme.background.normal }}
       onClick={onClick}
     >
-      <span className="flex h-full flex-col gap-4">
-        <span className="relative block h-[95px] overflow-hidden rounded-[12px]">
+      <span className="flex h-full min-h-0 flex-col gap-[clamp(8px,1.7svh,16px)]">
+        <span className="relative block h-[clamp(56px,10svh,95px)] shrink-0 overflow-hidden rounded-[12px]">
           <CroppedHairImage alt={`${card.title} 추천 사진`} src={card.imageUrl || undefined} />
           <span
             aria-hidden="true"
@@ -26,8 +26,8 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
           </span>
         </span>
 
-        <span className="flex flex-col gap-3">
-          <span className="flex items-center gap-2">
+        <span className="flex min-h-0 flex-1 flex-col gap-[clamp(5px,1.2svh,12px)] overflow-hidden">
+          <span className="flex min-w-0 items-center gap-2">
             <span
               className={`${font.caption.semiBold} flex size-[18px] items-center justify-center rounded-full`}
               style={{

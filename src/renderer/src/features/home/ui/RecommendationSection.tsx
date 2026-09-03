@@ -17,7 +17,7 @@ const RecommendationSection = ({
   return (
     <section
       aria-labelledby="home-recommendation-title"
-      className="mt-9 flex min-h-0 flex-1 flex-col pt-[15px]"
+      className="mt-[clamp(18px,3.7svh,36px)] flex min-h-0 flex-1 flex-col pt-[clamp(12px,1.7svh,15px)]"
       style={{ backgroundColor: lightTheme.fill.normal }}
     >
       <div className="mx-auto flex w-[calc(100%_-_42px)] max-w-[360px] items-center justify-between">
@@ -26,7 +26,7 @@ const RecommendationSection = ({
           className={font.headline2.semiBold}
           style={{ color: lightTheme.label.alternative }}
         >
-          AI 스타일 추천
+          스타일 추천
         </h2>
         <button
           type="button"
@@ -39,14 +39,14 @@ const RecommendationSection = ({
         </button>
       </div>
 
-      <div className="mx-auto mt-[14px] grid min-h-0 w-[calc(100%_-_42px)] max-w-[360px] flex-1 auto-rows-fr grid-cols-2 gap-3 pb-4">
+      <div className="mx-auto mt-[clamp(10px,1.6svh,14px)] grid min-h-0 w-[calc(100%_-_42px)] max-w-[360px] flex-1 auto-rows-[minmax(0,1fr)] grid-cols-2 gap-[clamp(8px,2.8vw,12px)] pb-[clamp(10px,1.8svh,16px)]">
         {hasRecommendations ? (
           recommendations.map(card => (
             <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
           ))
         ) : (
           <div
-            className={`col-span-2 flex min-h-[180px] items-center justify-center rounded-[12px] text-center ${font.label.medium}`}
+            className={`col-span-2 flex h-full min-h-0 items-center justify-center rounded-[12px] text-center ${font.label.medium}`}
             style={{
               backgroundColor: lightTheme.background.normal,
               color: lightTheme.label.assistive,

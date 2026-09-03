@@ -30,7 +30,8 @@ export const SHORTCUT_CARDS: ShortcutCardType[] = [
     title: "AR 스타일",
     imageSrc: arMascotImage,
     imageAlt: "AR 스타일 캐릭터",
-    imageClassName: "right-[13px] top-[38px] h-[52px] w-[52px]",
+    imageClassName:
+      "right-[clamp(8px,3vw,13px)] bottom-[clamp(10px,2.3svh,18px)] h-[clamp(42px,6.2svh,52px)] w-[clamp(42px,6.2svh,52px)]",
     to: "/ar",
   },
   {
@@ -39,7 +40,8 @@ export const SHORTCUT_CARDS: ShortcutCardType[] = [
     title: "시술기록 공유",
     imageSrc: shareScissorsImage,
     imageAlt: "시술기록 공유 가위",
-    imageClassName: "right-[11px] top-[20px] h-[70px] w-[67px] rotate-[-7deg]",
+    imageClassName:
+      "right-[clamp(8px,2.6vw,11px)] bottom-[clamp(6px,1.4svh,12px)] h-[clamp(52px,8.2svh,70px)] w-[clamp(50px,7.8svh,67px)] rotate-[-7deg]",
     to: "/cuts/record-1/share",
   },
 ];
