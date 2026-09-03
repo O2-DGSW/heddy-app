@@ -60,16 +60,19 @@ export type {
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
+  UpdateTreatmentRecordPhotoRequest,
   UploadPurpose,
   UpdateTreatmentRecordRequest,
 } from "./model";
 export {
   addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
+  deleteTreatmentRecordPhotoApi,
   getLatestAnalysisApi,
   getTreatmentRecordApi,
   getTreatmentRecordsApi,
   updateTreatmentRecordApi,
+  updateTreatmentRecordPhotoApi,
 } from "./api";
 export {
   recordQueryKeys,

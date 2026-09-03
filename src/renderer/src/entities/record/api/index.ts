@@ -1,9 +1,11 @@
 export {
   addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
+  deleteTreatmentRecordPhotoApi,
   getTreatmentRecordApi,
   getTreatmentRecordsApi,
   updateTreatmentRecordApi,
+  updateTreatmentRecordPhotoApi,
 } from "./treatmentRecordApi";
 export { getLatestAnalysisApi } from "./analysisApi";
 export { useAddTreatmentRecordPhotos } from "./mutation/useAddTreatmentRecordPhotos.mutation";
