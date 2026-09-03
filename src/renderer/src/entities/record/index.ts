@@ -67,6 +67,7 @@ export type {
 export {
   addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
+  deleteTreatmentRecordApi,
   deleteTreatmentRecordPhotoApi,
   getLatestAnalysisApi,
   getTreatmentRecordApi,
@@ -78,6 +79,7 @@ export {
   recordQueryKeys,
   useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
+  useDeleteTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
   useGetTreatmentRecords,

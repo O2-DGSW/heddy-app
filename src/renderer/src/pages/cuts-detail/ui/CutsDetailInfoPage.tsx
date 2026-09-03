@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import ratingStar from "@/shared/assets/rating-star.svg";
@@ -7,6 +7,7 @@ import {
   useGetTreatmentRecord,
   type ServiceType,
 } from "@/entities/record";
+import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
   CUT: "커트",
@@ -34,7 +35,6 @@ const formatPrice = (price: { amount: number; currency: string } | null | undefi
 };
 
 const CutsDetailInfoPage = () => {
-  const navigate = useNavigate();
   const { id } = useParams();
   const { data: record, isError, isLoading } = useGetTreatmentRecord(id);
 
@@ -73,14 +73,6 @@ const CutsDetailInfoPage = () => {
   const photoUrls = (record.photos ?? [])
     .map(getTreatmentRecordPhotoDisplayUrl)
     .filter((photoUrl): photoUrl is string => Boolean(photoUrl));
-
-  const handleShare = () => {
-    navigate("../share");
-  };
-
-  const handleEdit = () => {
-    navigate("../edit");
-  };
 
   return (
     <div className="flex flex-col gap-[52px] px-[19px] pb-[30px] pt-[29px]">
@@ -173,39 +165,7 @@ const CutsDetailInfoPage = () => {
         </section>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_92px] gap-[7px]">
-        <button
-          className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-          style={{
-            backgroundColor: lightTheme.background.normal,
-            borderColor: lightTheme.fill.neutral,
-            color: lightTheme.label.alternative,
-          }}
-          onClick={handleEdit}
-          type="button"
-        >
-          수정
-        </button>
-        <button
-          className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-          onClick={handleShare}
-          style={{
-            backgroundColor: lightTheme.background.normal,
-            borderColor: lightTheme.fill.neutral,
-            color: lightTheme.label.alternative,
-          }}
-          type="button"
-        >
-          공유
-        </button>
-        <button
-          className={`h-[42px] rounded-[10px] border-0 ${font.headline2.semiBold}`}
-          style={{ backgroundColor: lightTheme.status.error, color: lightTheme.label.buttonText }}
-          type="button"
-        >
-          삭제
-        </button>
-      </div>
+      <CutsRecordActions />
     </div>
   );
 };
