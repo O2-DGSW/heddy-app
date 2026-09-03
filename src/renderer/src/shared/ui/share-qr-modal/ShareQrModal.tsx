@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
@@ -6,13 +7,23 @@ import { CopyIcon } from "@/shared/ui/icons/CopyIcon";
 
 interface ShareQrModalProps {
   shareLink: string;
+  /** 모달 제목. 화면마다 다르게 부를 수 있게 열어 둔다 */
+  title?: string;
   onClose: () => void;
 }
 
-export const ShareQrModal = ({ shareLink, onClose }: ShareQrModalProps) => {
-  /** 공유 링크를 클립보드에 복사한다 */
+export const ShareQrModal = ({ shareLink, title = "공유", onClose }: ShareQrModalProps) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  /**
+   * 공유 링크를 클립보드에 복사한다.
+   * clipboard는 보안 컨텍스트에서만 있어, 없거나 실패하면 복사됐다고 알리지 않는다.
+   */
   const handleCopy = () => {
-    void navigator.clipboard?.writeText(shareLink);
+    navigator.clipboard
+      ?.writeText(shareLink)
+      .then(() => setIsCopied(true))
+      .catch(() => setIsCopied(false));
   };
 
   return (
@@ -41,7 +52,7 @@ export const ShareQrModal = ({ shareLink, onClose }: ShareQrModalProps) => {
               className={font.headline1.bold}
               style={{ color: lightTheme.label.neutral }}
             >
-              공유
+              {title}
             </h2>
             <button
               type="button"
@@ -60,7 +71,7 @@ export const ShareQrModal = ({ shareLink, onClose }: ShareQrModalProps) => {
 
           <div className="flex flex-col gap-2">
             <span className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-              공유 링크
+              {isCopied ? "링크를 복사했어요" : "공유 링크"}
             </span>
             <button
               type="button"
