@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, useBottomBarVisibility } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
 import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
@@ -64,8 +65,8 @@ const PermissionRow = ({ disabled = false, item, onToggle }: PermissionRowProps)
   const canToggle = item.canToggle ?? true;
 
   return (
-    <div className="flex w-full items-center justify-between gap-[16px]">
-      <div className="min-w-0 flex-1">
+    <div className="flex w-full items-start justify-between gap-[clamp(12px,3.2vw,16px)]">
+      <div className="min-w-0 flex-1 pt-[2px]">
         <p className={font.body.medium} style={{ color: lightTheme.label.alternative }}>
           {item.title}
         </p>
@@ -90,7 +91,7 @@ const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSe
   return (
     <section
       aria-labelledby={`${section.id}-title`}
-      className="flex flex-col gap-[36px] px-[25px] py-[46px]"
+      className="flex flex-col gap-[clamp(24px,4.5dvh,36px)] px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)]"
     >
       <h2
         className={font.headline1.semiBold}
@@ -100,7 +101,7 @@ const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSe
         {section.title}
       </h2>
 
-      <div className="flex flex-col gap-[36px]">
+      <div className="flex flex-col gap-[clamp(24px,4.5dvh,36px)]">
         {section.items.map(item => (
           <PermissionRow disabled={disabled} item={item} key={item.id} onToggle={onToggle} />
         ))}
@@ -110,6 +111,7 @@ const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSe
 };
 
 const SharePermissionsPage = () => {
+  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     actionErrorMessage,
     handleBack,
@@ -124,11 +126,19 @@ const SharePermissionsPage = () => {
     sections,
   } = useSharePermissions();
 
+  useEffect(() => {
+    setIsBottomBarHidden(true);
+
+    return () => {
+      setIsBottomBarHidden(false);
+    };
+  }, [setIsBottomBarHidden]);
+
   return (
     <section
       aria-labelledby="share-permissions-title"
       aria-busy={isFetching || isSaving}
-      className="flex min-h-full flex-col overflow-x-clip"
+      className="flex h-full min-h-0 flex-col overflow-x-clip"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <header className="relative flex h-[54px] shrink-0 items-center justify-center px-[20px]">
@@ -150,11 +160,14 @@ const SharePermissionsPage = () => {
         </h1>
       </header>
 
-      <div className="flex flex-1 flex-col" style={{ backgroundColor: lightTheme.fill.normal }}>
-        <div className="flex-1">
+      <div
+        className="flex min-h-0 flex-1 flex-col"
+        style={{ backgroundColor: lightTheme.fill.normal }}
+      >
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
           {isFetching && sections.length === 0 ? (
             <p
-              className={`px-[25px] py-[46px] text-center ${font.body.medium}`}
+              className={`px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)] text-center ${font.body.medium}`}
               style={{ color: lightTheme.label.assistive }}
             >
               공유 권한 정보를 불러오는 중입니다.
@@ -176,7 +189,10 @@ const SharePermissionsPage = () => {
           )}
 
           {actionErrorMessage && (
-            <div className="flex flex-col items-center gap-[8px] px-[25px] pb-[24px]" role="alert">
+            <div
+              className="flex flex-col items-center gap-[8px] px-[clamp(18px,5.8vw,25px)] pb-[clamp(18px,3dvh,24px)]"
+              role="alert"
+            >
               <p
                 className={`text-center ${font.caption.regular}`}
                 style={{ color: lightTheme.status.error }}
@@ -201,7 +217,7 @@ const SharePermissionsPage = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-[7px] px-[18px] pb-[28px]">
+        <div className="grid shrink-0 grid-cols-2 gap-[7px] px-[18px] pb-[clamp(18px,3.4dvh,28px)] pt-[clamp(10px,2dvh,16px)]">
           <button
             className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
             onClick={handleClose}
