@@ -33,7 +33,7 @@ const HomePage = () => {
   const recentRecord = recentRecordData?.items[0]
     ? mapTreatmentRecordToRecentRecord(recentRecordData.items[0])
     : undefined;
-  const profileName = profile?.nickname.trim() || "고객";
+  const profileName = profile?.nickname?.trim() || "고객";
 
   const handleNavigate = (to: string) => {
     navigate(to);
