@@ -20,6 +20,8 @@ export {
   createDateValue,
   formatDateDisplay,
   getDaysInMonth,
+  getTreatmentRecordPhotoDisplayUrl,
+  getTreatmentRecordThumbnailUrl,
   getTodayDateValue,
   parseDateValue,
 } from "./model";
@@ -34,9 +36,15 @@ export type {
   AnalysisOverlayType,
   AnalysisStatus,
   CalendarDay,
+  CompleteUploadApiData,
+  CompleteUploadApiResponse,
+  ConnectTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   PageApiData,
   PhotoItem,
+  PresignUploadApiData,
+  PresignUploadApiResponse,
+  PresignUploadRequest,
   ProcedureType,
   RecordFieldNameType,
   RecordFormValues,
@@ -52,6 +60,7 @@ export type {
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
+  UploadPurpose,
   UpdateTreatmentRecordRequest,
 } from "./model";
 export {

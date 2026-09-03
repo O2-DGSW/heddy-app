@@ -1,10 +1,11 @@
-import type {
-  AnalysisApiData,
-  AnalysisGrade,
-  AnalysisMetricApiData,
-  AnalysisMetricType,
-  AnalysisOverlayType,
-  TreatmentRecordPhotoApiData,
+import {
+  getTreatmentRecordPhotoDisplayUrl,
+  type AnalysisApiData,
+  type AnalysisGrade,
+  type AnalysisMetricApiData,
+  type AnalysisMetricType,
+  type AnalysisOverlayType,
+  type TreatmentRecordPhotoApiData,
 } from "@/entities/record";
 import type {
   CutsAnalysisConfidenceLevel,
@@ -107,9 +108,13 @@ export const mapAnalysisToResult = (analysis: AnalysisApiData): CutsAnalysisResu
 export const pickAnalysisPhotoUrl = (photos: TreatmentRecordPhotoApiData[] = []): string => {
   const usable = [...photos]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .filter(photo => Boolean(photo.photo_url));
+    .filter(photo => Boolean(getTreatmentRecordPhotoDisplayUrl(photo)));
 
   const afterPhoto = usable.find(photo => photo.image_type === "AFTER");
 
-  return afterPhoto?.photo_url ?? usable[0]?.photo_url ?? "";
+  return afterPhoto
+    ? getTreatmentRecordPhotoDisplayUrl(afterPhoto)
+    : usable[0]
+      ? getTreatmentRecordPhotoDisplayUrl(usable[0])
+      : "";
 };

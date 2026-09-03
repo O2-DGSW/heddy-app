@@ -1,4 +1,4 @@
-import { createDateValue } from "@/entities";
+import { createDateValue, getTreatmentRecordThumbnailUrl } from "@/entities";
 import type { TreatmentRecordSummaryApiData } from "@/entities";
 
 import { SERVICE_TYPE_LABEL } from "./constants";
@@ -31,6 +31,6 @@ export const mapTreatmentRecordToRecentRecord = (
     salonName: item.salon_name || "미용실 정보 없음",
     designerName: item.designer_name || "디자이너 정보 없음",
     rating: item.satisfaction ?? 0,
-    thumbnailUrl: item.thumbnail_url ?? "",
+    thumbnailUrl: getTreatmentRecordThumbnailUrl(item),
   };
 };

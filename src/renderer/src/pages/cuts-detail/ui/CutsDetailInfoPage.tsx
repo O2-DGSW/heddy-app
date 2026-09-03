@@ -2,7 +2,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import ratingStar from "@/shared/assets/rating-star.svg";
-import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
+import {
+  getTreatmentRecordPhotoDisplayUrl,
+  useGetTreatmentRecord,
+  type ServiceType,
+} from "@/entities/record";
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
   CUT: "커트",
@@ -67,7 +71,7 @@ const CutsDetailInfoPage = () => {
     { label: "금액", value: formatPrice(record.price) },
   ];
   const photoUrls = (record.photos ?? [])
-    .map(photo => photo.photo_url)
+    .map(getTreatmentRecordPhotoDisplayUrl)
     .filter((photoUrl): photoUrl is string => Boolean(photoUrl));
 
   const handleShare = () => {

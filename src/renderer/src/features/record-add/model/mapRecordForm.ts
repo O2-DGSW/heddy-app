@@ -1,4 +1,5 @@
 import { createDateValue, parseDateValue } from "@/entities/record/model/date";
+import { getTreatmentRecordPhotoDisplayUrl } from "@/entities/record/model/photo";
 import type { ProcedureType } from "@/entities/record/model/constants";
 import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
 import type {
@@ -59,8 +60,8 @@ const toPriceAmount = (price: string) => {
 
 const hasPhotoUrl = (
   photo: TreatmentRecordPhotoApiData
-): photo is TreatmentRecordPhotoApiData & { photo_url: string } =>
-  typeof photo.photo_url === "string" && photo.photo_url.length > 0;
+): photo is TreatmentRecordPhotoApiData & ({ display_url: string } | { photo_url: string }) =>
+  getTreatmentRecordPhotoDisplayUrl(photo).length > 0;
 
 const hasUploadFile = (photo: PhotoItem): photo is PhotoItem & { file: File } =>
   photo.file !== undefined;
@@ -88,7 +89,7 @@ export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): Pho
     .sort((firstPhoto, secondPhoto) => firstPhoto.sort_order - secondPhoto.sort_order)
     .map(photo => ({
       id: photo.photo_id,
-      src: photo.photo_url,
+      src: getTreatmentRecordPhotoDisplayUrl(photo),
       isObjectUrl: false,
     }));
 
@@ -98,7 +99,7 @@ export const mapPhotoItemsToAddRequests = (photos: PhotoItem[]): AddTreatmentRec
       ? [
           {
             file: photo.file,
-            image_type: "OTHER",
+            image_type: "AFTER",
             sort_order: index,
           },
         ]

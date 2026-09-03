@@ -1,7 +1,11 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type {
   AddTreatmentRecordPhotoRequest,
+  CompleteUploadApiResponse,
+  ConnectTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
+  PresignUploadApiResponse,
+  PresignUploadRequest,
   TreatmentRecordDetailApiData,
   TreatmentRecordDetailApiResponse,
   TreatmentRecordListApiData,
@@ -12,21 +16,118 @@ import type {
   UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
 
-const createPhotoFormData = ({
-  file,
-  image_type = "OTHER",
-  sort_order,
-}: AddTreatmentRecordPhotoRequest) => {
-  const formData = new FormData();
+const TREATMENT_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+const ALLOWED_TREATMENT_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/heic"]);
 
-  formData.append("file", file);
-  formData.append("image_type", image_type);
+const arrayBufferToHex = (buffer: ArrayBuffer) =>
+  [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 
-  if (sort_order !== undefined) {
-    formData.append("sort_order", String(sort_order));
+const getFileSha256 = async (file: File) => {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+
+  return arrayBufferToHex(hashBuffer);
+};
+
+const assertUploadableTreatmentPhoto = (file: File) => {
+  if (!ALLOWED_TREATMENT_PHOTO_TYPES.has(file.type)) {
+    throw new Error("jpg, png, heic 사진만 업로드할 수 있습니다.");
   }
 
-  return formData;
+  if (file.size > TREATMENT_PHOTO_MAX_BYTES) {
+    throw new Error("시술기록 사진은 10MB 이하만 업로드할 수 있습니다.");
+  }
+};
+
+const createPresignUploadRequest = async (file: File): Promise<PresignUploadRequest> => ({
+  purpose: "TREATMENT_PHOTO",
+  content_type: file.type,
+  file_name: file.name,
+  file_size: file.size,
+  sha256: await getFileSha256(file),
+});
+
+const presignUploadApi = async (file: File) => {
+  const body = await createPresignUploadRequest(file);
+  const res = await api.post<PresignUploadApiResponse>("/uploads/presign", body);
+
+  return res.data.data;
+};
+
+const createPresignedUploadHeaders = (file: File, requiredHeaders: Record<string, string>) => {
+  const headers = new Headers();
+
+  Object.entries(requiredHeaders).forEach(([name, value]) => {
+    headers.set(name, value);
+  });
+
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", file.type);
+  }
+
+  return headers;
+};
+
+const putFileToPresignedUrl = async (
+  uploadUrl: string,
+  file: File,
+  requiredHeaders: Record<string, string>
+) => {
+  let response: Response;
+
+  try {
+    response = await fetch(uploadUrl, {
+      body: file,
+      headers: createPresignedUploadHeaders(file, requiredHeaders),
+      method: "PUT",
+      mode: "cors",
+    });
+  } catch (error) {
+    throw new Error(
+      error instanceof TypeError
+        ? "사진 저장소 업로드가 CORS 정책에 막혔습니다. 서버의 S3 CORS 설정을 확인해 주세요."
+        : "사진 파일 업로드에 실패했습니다.",
+      { cause: error }
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error("사진 파일 업로드에 실패했습니다.");
+  }
+};
+
+const completeUploadApi = async (uploadId: string) => {
+  const res = await api.post<CompleteUploadApiResponse>(`/uploads/${uploadId}/complete`);
+
+  return res.data.data;
+};
+
+const uploadTreatmentPhotoFile = async (file: File) => {
+  assertUploadableTreatmentPhoto(file);
+
+  const presignedUpload = await presignUploadApi(file);
+
+  await putFileToPresignedUrl(presignedUpload.upload_url, file, presignedUpload.required_headers);
+
+  const completedUpload = await completeUploadApi(presignedUpload.upload_id);
+
+  if (completedUpload.status !== "READY") {
+    throw new Error("사진 업로드가 아직 완료되지 않았습니다.");
+  }
+
+  return completedUpload.file_id;
+};
+
+const connectTreatmentRecordPhotoApi = async (
+  recordId: string,
+  body: ConnectTreatmentRecordPhotoRequest
+) => {
+  const res = await api.post<TreatmentRecordPhotoApiResponse>(
+    `/treatment-records/${recordId}/photos`,
+    body
+  );
+
+  return res.data.data;
 };
 
 /**
@@ -63,20 +164,20 @@ export const getTreatmentRecordApi = async (
 
 /**
  * 시술기록 사진 추가
- * - 선택한 사진 파일을 기록 생성/수정 후 별도 업로드한다.
+ * - Presigned URL로 S3에 파일을 올리고 READY file_id만 시술기록에 연결한다.
  */
 export const addTreatmentRecordPhotoApi = async (
   recordId: string,
   body: AddTreatmentRecordPhotoRequest
 ): Promise<TreatmentRecordPhotoApiData> => {
   try {
-    const res = await api.post<TreatmentRecordPhotoApiResponse>(
-      `/treatment-records/${recordId}/photos`,
-      createPhotoFormData(body),
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    const fileId = await uploadTreatmentPhotoFile(body.file);
 
-    return res.data.data;
+    return await connectTreatmentRecordPhotoApi(recordId, {
+      file_id: fileId,
+      image_type: body.image_type ?? "AFTER",
+      sort_order: body.sort_order,
+    });
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록 사진을 저장하지 못했습니다."), {
       cause: error,
