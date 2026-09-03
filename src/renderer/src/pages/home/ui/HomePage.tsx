@@ -50,7 +50,7 @@ const HomePage = () => {
     <cap-page>
       <section
         aria-labelledby="home-greeting"
-        className="flex h-full flex-col overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
+        className="flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
         <HomeHeader onProfileClick={() => handleNavigate("/profile")} />
