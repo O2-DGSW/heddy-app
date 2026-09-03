@@ -88,7 +88,7 @@ const RecordAddForm = ({
 
   return (
     <form
-      className="mx-auto flex w-full max-w-[391px] flex-col items-center gap-[28px] px-[14px] pt-[10px]"
+      className="mx-auto flex w-full max-w-[391px] flex-col items-center gap-[clamp(22px,3.4dvh,28px)] px-[clamp(14px,4.2vw,20px)] pb-[clamp(20px,3.4dvh,30px)] pt-[clamp(8px,1.5dvh,12px)]"
       onSubmit={handleSubmit}
     >
       <RecordPhotoUploader
@@ -148,7 +148,7 @@ const RecordAddForm = ({
         value={formValues.details}
       />
 
-      <div className="grid w-full grid-cols-2 gap-[7px] pt-[10px]">
+      <div className="grid w-full shrink-0 grid-cols-2 gap-[7px] pt-[clamp(8px,1.6dvh,12px)]">
         <button
           className={cn(font.headline2.semiBold, "h-[42px] rounded-[10px] border border-solid")}
           onClick={onCancel}
