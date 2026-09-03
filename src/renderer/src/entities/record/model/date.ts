@@ -22,8 +22,10 @@ export const getDaysInMonth = (year: number, month: number) => new Date(year, mo
 export const createCalendarDays = (year: number, month: number): CalendarDay[] => {
   const firstDayOfMonth = new Date(year, month - 1, 1);
   const firstWeekday = firstDayOfMonth.getDay();
+  const daysInMonth = getDaysInMonth(year, month);
+  const calendarDayCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 
-  return Array.from({ length: 42 }, (_, index) => {
+  return Array.from({ length: calendarDayCount }, (_, index) => {
     const date = new Date(year, month - 1, index - firstWeekday + 1);
     const dateYear = date.getFullYear();
     const dateMonth = date.getMonth() + 1;

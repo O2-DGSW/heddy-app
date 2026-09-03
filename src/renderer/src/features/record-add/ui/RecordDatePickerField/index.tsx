@@ -78,6 +78,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
   const errorId = "record-date-error";
   const draftDateParts = parseDateValue(draftDate);
   const calendarDays = createCalendarDays(draftDateParts.year, draftDateParts.month);
+  const hasSixCalendarRows = calendarDays.length > 35;
   const selectedDateLabel = value ? formatDateDisplay(value) : "입력";
   const selectedDateColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
 
@@ -189,7 +190,12 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
             className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-40px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[24px] pb-[44px] pt-[22px]"
             style={datePickerPanelStyle}
           >
-            <div className="flex w-full max-w-[354px] flex-col items-center gap-[44px]">
+            <div
+              className={cn(
+                "flex w-full max-w-[354px] flex-col items-center",
+                hasSixCalendarRows ? "gap-[20px]" : "gap-[44px]"
+              )}
+            >
               <div className="flex w-full items-center justify-between">
                 <h2
                   className={font.headline1.bold}
