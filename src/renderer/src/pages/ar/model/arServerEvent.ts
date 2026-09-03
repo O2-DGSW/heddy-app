@@ -184,6 +184,7 @@ export const parseArServerEvent = (value: unknown): ArServerEvent | null => {
 
 export const isCapturedLivebankBucket = (status: string): boolean =>
   status === "captured" ||
+  status === "running" ||
   status === "generating" ||
   status === "filled" ||
   status === "done" ||

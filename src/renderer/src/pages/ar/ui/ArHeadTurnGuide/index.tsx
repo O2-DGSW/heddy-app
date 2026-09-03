@@ -4,6 +4,8 @@ import { motion } from "motion/react";
 import type { ArLivebankProgress } from "../../model/useArServerConnection";
 import { cn } from "@/shared";
 
+const TARGET_YAW_TOLERANCE = 7;
+
 const getHeadTurnInstruction = (targetYaw: number) => {
   if (targetYaw === 0) {
     return "정면을 바라봐 주세요";
@@ -21,6 +23,26 @@ const getHeadTurnStep = (targetYaw: number) => ({
   rotation: -targetYaw * (3 / 4),
   targetYaw,
 });
+
+const getTurnCorrectionLabel = (targetYaw: number, currentYaw: number): string => {
+  if (Math.abs(currentYaw - targetYaw) <= TARGET_YAW_TOLERANCE) {
+    return "좋아요, 움직이지 말고 잠시 유지해 주세요";
+  }
+
+  if (targetYaw === 0) {
+    return "고개를 정면으로 되돌려 주세요";
+  }
+
+  // 서버 yaw는 실제 회전 부호와 반대이므로 yaw가 목표보다 크면 오른쪽으로 더 돌아야 한다.
+  const direction = currentYaw > targetYaw ? "오른쪽" : "왼쪽";
+  const hasPassedTarget =
+    Math.sign(currentYaw) === Math.sign(targetYaw) &&
+    Math.abs(currentYaw) > Math.abs(targetYaw) + TARGET_YAW_TOLERANCE;
+
+  return hasPassedTarget
+    ? `조금 ${direction}으로 되돌아 주세요`
+    : `목표까지 ${direction}으로 더 돌려주세요`;
+};
 
 interface ArHeadTurnGuideProps {
   capturedYawTargets: number[];
@@ -42,34 +64,53 @@ const ArHeadTurnGuide = ({
   const nextYaw = livebankProgress?.nextYaw;
   const activeStep = nextYaw === undefined ? null : getHeadTurnStep(nextYaw);
   const isGenerating =
-    livebankProgress?.status === "generating" || livebankProgress?.status === "filled";
+    livebankProgress?.status === "generating" ||
+    livebankProgress?.status === "running" ||
+    livebankProgress?.status === "filled";
   const isAngleGuideCompleted =
     livebankProgress?.status === "complete" ||
     (livebankProgress?.total !== undefined && capturedYawTargets.length >= livebankProgress.total);
+  const isCollectionError = livebankProgress?.status === "error";
+  const isCollectionStopped = livebankProgress?.status === "stopped";
+  const totalYawTargets = livebankProgress?.total ?? livebankProgress?.buckets.length ?? 0;
+  const completedYawTargets = Math.min(capturedYawTargets.length, totalYawTargets);
   const isInTargetRange =
-    activeStep !== null && typeof yaw === "number" && Math.abs(yaw - activeStep.targetYaw) <= 7;
+    activeStep !== null &&
+    typeof serverYaw === "number" &&
+    Math.abs(serverYaw - activeStep.targetYaw) <= TARGET_YAW_TOLERANCE;
   const isWaitingForServerDirection =
     isLivebankRequested && livebankProgress !== null && typeof serverYaw !== "number";
-  const progressLabel = !isLivebankRequested
-    ? "헤어스타일을 선택해 주세요"
-    : isGenerating
-      ? "헤어를 만들고 있어요"
-      : isAngleGuideCompleted
-        ? "스타일을 생성하고 있어요"
-        : (activeStep?.label ?? "수집 준비 중이에요");
-  const detailLabel = !isLivebankRequested
-    ? "선택한 스타일의 AR 영상을 만들기 위해 필요해요"
-    : isWaitingForServerDirection
-      ? "AR 서버에서 얼굴 방향 데이터를 확인하고 있어요"
-      : typeof yaw !== "number"
-        ? "얼굴 방향 데이터를 기다리고 있어요"
+  const progressLabel = isCollectionError
+    ? "각도 수집을 다시 시작해 주세요"
+    : isCollectionStopped
+      ? "각도 수집이 중지됐어요"
+      : !isLivebankRequested
+        ? "헤어스타일을 선택해 주세요"
         : isGenerating
-          ? "원하는 스타일을 확인해 보세요"
-          : isInTargetRange
-            ? "좋아요, 그 방향에서 잠깐만 멈춰주세요"
-            : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
-  const guideRotation = activeStep?.rotation ?? (yaw ?? 0) * (3 / 4);
-  const previousRotation = activeStep ? (yaw ?? activeStep.targetYaw) * (3 / 4) : guideRotation;
+          ? "헤어를 만들고 있어요"
+          : isAngleGuideCompleted
+            ? "스타일을 생성하고 있어요"
+            : (activeStep?.label ?? "수집 준비 중이에요");
+  const detailLabel = isCollectionError
+    ? (livebankProgress?.message ?? "얼굴이 잘 보이는 곳에서 스타일을 다시 선택해 주세요")
+    : isCollectionStopped
+      ? "원하는 스타일을 다시 선택하면 각도 수집을 시작해요"
+      : !isLivebankRequested
+        ? "선택한 스타일의 AR 영상을 만들기 위해 필요해요"
+        : isWaitingForServerDirection
+          ? "AR 서버에서 얼굴 방향 데이터를 확인하고 있어요"
+          : typeof yaw !== "number"
+            ? "얼굴 방향 데이터를 기다리고 있어요"
+            : isGenerating
+              ? "원하는 스타일을 확인해 보세요"
+              : isInTargetRange
+                ? "좋아요, 그 방향에서 잠깐만 멈춰주세요"
+                : activeStep && typeof serverYaw === "number"
+                  ? getTurnCorrectionLabel(activeStep.targetYaw, serverYaw)
+                  : "가상 얼굴이 향하는 방향으로 천천히 움직여주세요";
+  const currentRotation = -(yaw ?? 0) * (3 / 4);
+  const guideRotation = activeStep?.rotation ?? currentRotation;
+  const previousRotation = activeStep ? currentRotation : guideRotation;
 
   return (
     <section
@@ -121,6 +162,46 @@ const ArHeadTurnGuide = ({
         <span className={font.caption.medium} style={{ color: lightTheme.label.disable }}>
           {detailLabel}
         </span>
+        {isLivebankRequested && totalYawTargets > 0 && (
+          <div
+            className="mt-2 w-full"
+            aria-label={`${completedYawTargets}/${totalYawTargets} 방향 확보`}
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <span className={font.caption.medium} style={{ color: lightTheme.label.disable }}>
+                방향 확보
+              </span>
+              <span className={font.caption.medium} style={{ color: lightTheme.label.buttonText }}>
+                {completedYawTargets}/{totalYawTargets}
+              </span>
+            </div>
+            <div
+              aria-valuemax={totalYawTargets}
+              aria-valuemin={0}
+              aria-valuenow={completedYawTargets}
+              className="flex gap-1"
+              role="progressbar"
+            >
+              {Array.from({ length: totalYawTargets }, (_, index) => {
+                const bucket = livebankProgress?.buckets[index];
+                const isCaptured = bucket
+                  ? capturedYawTargets.includes(bucket.yaw)
+                  : index < completedYawTargets;
+                const isCurrent = bucket?.yaw === activeStep?.targetYaw;
+
+                return (
+                  <span
+                    className={cn(
+                      "h-1.5 flex-1 rounded-full transition-colors duration-300",
+                      isCaptured ? "bg-white" : isCurrent ? "bg-white/75" : "bg-white/25"
+                    )}
+                    key={bucket?.yaw ?? index}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
