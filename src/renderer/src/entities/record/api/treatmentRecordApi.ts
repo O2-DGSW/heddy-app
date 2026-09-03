@@ -54,16 +54,42 @@ const presignUploadApi = async (file: File) => {
   return res.data.data;
 };
 
+const createPresignedUploadHeaders = (file: File, requiredHeaders: Record<string, string>) => {
+  const headers = new Headers();
+
+  Object.entries(requiredHeaders).forEach(([name, value]) => {
+    headers.set(name, value);
+  });
+
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", file.type);
+  }
+
+  return headers;
+};
+
 const putFileToPresignedUrl = async (
   uploadUrl: string,
   file: File,
   requiredHeaders: Record<string, string>
 ) => {
-  const response = await fetch(uploadUrl, {
-    body: file,
-    headers: requiredHeaders,
-    method: "PUT",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(uploadUrl, {
+      body: file,
+      headers: createPresignedUploadHeaders(file, requiredHeaders),
+      method: "PUT",
+      mode: "cors",
+    });
+  } catch (error) {
+    throw new Error(
+      error instanceof TypeError
+        ? "사진 저장소 업로드가 CORS 정책에 막혔습니다. 서버의 S3 CORS 설정을 확인해 주세요."
+        : "사진 파일 업로드에 실패했습니다.",
+      { cause: error }
+    );
+  }
 
   if (!response.ok) {
     throw new Error("사진 파일 업로드에 실패했습니다.");
