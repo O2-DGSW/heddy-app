@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
+import { AuthBackButton } from "@/features/auth/back-button";
 import { FindIdForm, FindPasswordForm } from "@/features/auth/find";
-import { BackButton } from "@/shared";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -15,11 +15,11 @@ const FindPage = () => {
     <cap-page>
       <section
         aria-labelledby="find-title"
-        className="flex h-full min-h-0 flex-col items-center overflow-hidden px-6"
+        className="relative flex h-full min-h-0 flex-col items-center overflow-hidden px-6"
         style={pageStyle}
       >
-        <header className="flex h-[58px] w-full shrink-0 items-center">
-          <BackButton fallbackPath="/login" />
+        <header className="h-[58px] w-full shrink-0">
+          <AuthBackButton fallbackPath="/login" />
         </header>
 
         <div className="flex min-h-0 w-full flex-1 flex-col items-center touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">

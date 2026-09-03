@@ -1,6 +1,6 @@
 import { lightTheme, font } from "@heddy/design-tokens";
+import { AuthBackButton } from "@/features/auth/back-button";
 import { LoginForm, SocialLogin } from "@/features/auth/login";
-import { BackButton } from "@/shared";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -9,11 +9,11 @@ const LoginPage = () => {
     <cap-page>
       <section
         aria-labelledby="login-title"
-        className="flex h-full min-h-0 flex-col overflow-hidden px-6 pb-8"
+        className="relative flex h-full min-h-0 flex-col overflow-hidden px-6 pb-8"
         style={pageStyle}
       >
-        <header className="flex h-[58px] shrink-0 items-center">
-          <BackButton fallbackPath="/welcome" />
+        <header className="h-[58px] shrink-0">
+          <AuthBackButton fallbackPath="/welcome" />
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">

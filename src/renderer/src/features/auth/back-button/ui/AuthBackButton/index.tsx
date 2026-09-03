@@ -1,25 +1,20 @@
 import { setNavigation } from "@capgo/capacitor-transitions/react";
-import { lightTheme } from "@heddy/design-tokens";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { arrowIcon } from "@/entities/record";
 import { cn } from "@/shared/lib";
 
-interface BackButtonProps {
+interface AuthBackButtonProps {
   className?: string;
   fallbackPath?: string;
   label?: string;
 }
 
-const buttonStyle = {
-  backgroundColor: lightTheme.fill.normal,
-  color: lightTheme.label.neutral,
-};
-
-const BackButton = ({
+const AuthBackButton = ({
   className,
   fallbackPath = "/welcome",
   label = "뒤로 가기",
-}: BackButtonProps) => {
+}: AuthBackButtonProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -38,24 +33,15 @@ const BackButton = ({
     <button
       aria-label={label}
       className={cn(
-        "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 p-0 active:scale-[0.98]",
+        "absolute left-6 top-[7px] z-20 flex h-11 w-11 items-center justify-start border-0 bg-transparent p-0 active:scale-[0.98]",
         className
       )}
       onClick={handleBack}
-      style={buttonStyle}
       type="button"
     >
-      <svg aria-hidden="true" className="h-5 w-5" fill="none" focusable="false" viewBox="0 0 20 20">
-        <path
-          d="M12.5 5 7.5 10l5 5"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
-      </svg>
+      <img alt="" aria-hidden="true" className="h-[20px] w-[20px]" src={arrowIcon} />
     </button>
   );
 };
 
-export default BackButton;
+export default AuthBackButton;
