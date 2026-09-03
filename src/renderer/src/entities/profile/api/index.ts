@@ -1,1 +1,2 @@
-export { getMyProfileApi } from "./profileApi";
+export { getMyProfileApi, patchMyProfileApi } from "./profileApi";
+export { usePatchMyProfile } from "./mutation/usePatchMyProfile.mutation";

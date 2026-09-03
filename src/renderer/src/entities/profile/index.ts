@@ -1,3 +1,8 @@
-export { getMyProfileApi } from "./api";
+export { getMyProfileApi, usePatchMyProfile } from "./api";
 export { profileQueryKeys } from "./model";
-export type { GetMyProfileApiResponse, GetMyProfileResponse } from "./model";
+export type {
+  GetMyProfileApiResponse,
+  GetMyProfileResponse,
+  UpdateMyProfileApiResponse,
+  UpdateMyProfileRequest,
+} from "./model";

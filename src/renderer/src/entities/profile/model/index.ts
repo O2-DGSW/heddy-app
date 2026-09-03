@@ -1,2 +1,7 @@
 export { profileQueryKeys } from "./queryKeys";
-export type { GetMyProfileApiResponse, GetMyProfileResponse } from "./types";
+export type {
+  GetMyProfileApiResponse,
+  GetMyProfileResponse,
+  UpdateMyProfileApiResponse,
+  UpdateMyProfileRequest,
+} from "./types";

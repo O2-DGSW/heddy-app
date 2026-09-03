@@ -7,6 +7,7 @@ import { useProfileEdit } from "../../model/useProfileEdit";
 
 interface ProfileEditInputProps {
   autoComplete?: string;
+  disabled?: boolean;
   label: string;
   name: string;
   onChange: (value: string) => void;
@@ -17,6 +18,7 @@ interface ProfileEditInputProps {
 
 const ProfileEditInput = ({
   autoComplete,
+  disabled = false,
   label,
   name,
   onChange,
@@ -37,7 +39,8 @@ const ProfileEditInput = ({
       </label>
       <input
         autoComplete={autoComplete}
-        className={`h-[42px] w-full rounded-[10px] border-0 px-[15px] outline-none placeholder:text-current ${font.caption.regular}`}
+        className={`h-[42px] w-full rounded-[10px] border-0 px-[15px] outline-none placeholder:text-current disabled:cursor-not-allowed disabled:opacity-60 ${font.caption.regular}`}
+        disabled={disabled}
         id={inputId}
         name={name}
         onChange={event => onChange(event.target.value)}
@@ -62,13 +65,14 @@ const ProfileEditPage = () => {
     handleSave,
     handleStyleSelect,
     isLoading,
+    isSaving,
     profileName,
   } = useProfileEdit();
 
   return (
     <cap-page>
       <section
-        aria-busy={isLoading}
+        aria-busy={isLoading || isSaving}
         aria-labelledby="profile-edit-title"
         className="flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
@@ -132,6 +136,7 @@ const ProfileEditPage = () => {
               />
               <ProfileEditInput
                 autoComplete="new-password"
+                disabled
                 label="비밀번호"
                 name="password"
                 onChange={value => handleChange("password", value)}
@@ -150,6 +155,7 @@ const ProfileEditPage = () => {
               />
               <ProfileEditInput
                 autoComplete="email"
+                disabled
                 label="이메일"
                 name="email"
                 onChange={value => handleChange("email", value)}
@@ -165,6 +171,7 @@ const ProfileEditPage = () => {
                 <button
                   aria-describedby="profile-edit-action-message"
                   className={`flex h-[42px] w-full items-center justify-between rounded-[10px] border-0 px-[15px] text-left ${font.caption.regular}`}
+                  disabled={isSaving}
                   onClick={handleStyleSelect}
                   style={{
                     backgroundColor: lightTheme.background.neutral,
@@ -190,6 +197,7 @@ const ProfileEditPage = () => {
               <div className="grid grid-cols-2 gap-[7px]">
                 <button
                   className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
+                  disabled={isSaving}
                   onClick={handleBack}
                   style={{
                     backgroundColor: lightTheme.background.alternative,
@@ -202,13 +210,14 @@ const ProfileEditPage = () => {
                 </button>
                 <button
                   className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
+                  disabled={isSaving}
                   style={{
                     backgroundColor: lightTheme.primary.normal,
                     color: lightTheme.label.buttonText,
                   }}
                   type="submit"
                 >
-                  저장
+                  {isSaving ? "저장 중" : "저장"}
                 </button>
               </div>
             </div>

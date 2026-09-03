@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { getAccessToken } from "@/entities/auth";
-import { getMyProfileApi, profileQueryKeys } from "@/entities/profile";
+import { getMyProfileApi, profileQueryKeys, usePatchMyProfile } from "@/entities/profile";
 
 interface ProfileEditFormValues {
   email: string;
@@ -33,6 +33,7 @@ export const useProfileEdit = () => {
   const [actionMessage, setActionMessage] = useState("");
   const [formValues, setFormValues] = useState<ProfileEditFormValues>(INITIAL_FORM_VALUES);
   const hasInitializedForm = useRef(false);
+  const { isPending: isSaving, mutate: patchMyProfile } = usePatchMyProfile();
 
   useEffect(() => {
     let isMounted = true;
@@ -78,7 +79,35 @@ export const useProfileEdit = () => {
   };
 
   const handleSave = () => {
-    setActionMessage("회원정보 저장 기능을 준비 중입니다.");
+    const nickname = formValues.nickname.trim();
+    const phone = formValues.phone.trim();
+
+    if (!nickname) {
+      setActionMessage("이름 또는 닉네임을 입력해주세요.");
+      return;
+    }
+
+    patchMyProfile(
+      {
+        nickname,
+        ...(phone ? { phone } : {}),
+      },
+      {
+        onSuccess: updatedProfile => {
+          setFormValues(currentValues => ({
+            ...currentValues,
+            nickname: updatedProfile?.nickname ?? nickname,
+            phone: updatedProfile?.phone ?? currentValues.phone,
+          }));
+          setActionMessage("회원정보를 저장했어요.");
+        },
+        onError: error => {
+          setActionMessage(
+            error instanceof Error ? error.message : "회원정보를 저장하지 못했습니다."
+          );
+        },
+      }
+    );
   };
 
   const handleStyleSelect = () => {
@@ -93,6 +122,7 @@ export const useProfileEdit = () => {
     handleSave,
     handleStyleSelect,
     isLoading,
+    isSaving,
     profileName: getProfileName(profile?.nickname, isLoading),
   };
 };

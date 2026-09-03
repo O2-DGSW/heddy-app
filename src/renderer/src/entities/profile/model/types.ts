@@ -13,3 +13,10 @@ export interface GetMyProfileResponse {
 }
 
 export type GetMyProfileApiResponse = ApiResponse<GetMyProfileResponse | null>;
+
+export interface UpdateMyProfileRequest {
+  nickname: string;
+  phone?: string;
+}
+
+export type UpdateMyProfileApiResponse = ApiResponse<GetMyProfileResponse | null>;
