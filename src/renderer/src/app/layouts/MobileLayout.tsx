@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { lightTheme } from "@heddy/design-tokens";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
@@ -171,7 +172,7 @@ const MobileLayoutContent = () => {
               </>
             )}
             {!hideBottomBar && (
-              <div className="w-full shrink-0">
+              <div className="w-full shrink-0" style={{ backgroundColor: lightTheme.fill.normal }}>
                 <NavBar />
               </div>
             )}
