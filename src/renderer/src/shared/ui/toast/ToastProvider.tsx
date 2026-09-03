@@ -6,7 +6,7 @@ const ToastProvider = () => {
   return (
     <ToastContainer
       autoClose={2500}
-      className="!top-[calc(env(safe-area-inset-top)+20px)] !flex !w-full !justify-center !px-[20px]"
+      className="!absolute !top-[calc(var(--safe-area-inset-top,env(safe-area-inset-top,0px))+20px)] !flex !w-full !justify-center !px-[20px]"
       closeButton={false}
       draggable={false}
       hideProgressBar
