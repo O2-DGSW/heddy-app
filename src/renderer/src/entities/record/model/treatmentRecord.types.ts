@@ -139,6 +139,18 @@ export type AddTreatmentRecordPhotoRequest = {
   sort_order?: number;
 };
 
+/**
+ * 시술기록 사진 수정 요청
+ * - 전달한 값만 바뀐다.
+ * - file을 넣으면 파일을 새로 올려 교체한다. photo_id가 유지되므로 지웠다 다시 붙이는 것과 달리
+ *   표시 순서와 이 사진을 참조하는 분석 결과가 끊기지 않는다.
+ */
+export type UpdateTreatmentRecordPhotoRequest = {
+  file?: File;
+  image_type?: TreatmentRecordPhotoImageType;
+  sort_order?: number;
+};
+
 export type ConnectTreatmentRecordPhotoRequest = {
   file_id: string;
   image_type?: TreatmentRecordPhotoImageType;

@@ -3,6 +3,7 @@ import type {
   AddTreatmentRecordPhotoRequest,
   CompleteUploadApiResponse,
   ConnectTreatmentRecordPhotoRequest,
+  UpdateTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   PresignUploadApiResponse,
   PresignUploadRequest,
@@ -180,6 +181,50 @@ export const addTreatmentRecordPhotoApi = async (
     });
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록 사진을 저장하지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+/**
+ * 시술기록 사진 수정
+ * - file을 넘기면 새로 올린 뒤 그 file_id로 교체한다. 지웠다 다시 붙이지 않으므로 photo_id가 유지된다.
+ * - 나머지는 전달한 값만 바뀐다.
+ */
+export const updateTreatmentRecordPhotoApi = async (
+  recordId: string,
+  photoId: string,
+  body: UpdateTreatmentRecordPhotoRequest
+): Promise<TreatmentRecordPhotoApiData> => {
+  try {
+    const fileId = body.file ? await uploadTreatmentPhotoFile(body.file) : undefined;
+
+    const res = await api.patch<TreatmentRecordPhotoApiResponse>(
+      `/treatment-records/${recordId}/photos/${photoId}`,
+      {
+        ...(fileId ? { file_id: fileId } : {}),
+        ...(body.image_type ? { image_type: body.image_type } : {}),
+        ...(body.sort_order !== undefined ? { sort_order: body.sort_order } : {}),
+      }
+    );
+
+    return res.data.data;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록 사진을 수정하지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+/** 시술기록 사진 삭제 */
+export const deleteTreatmentRecordPhotoApi = async (
+  recordId: string,
+  photoId: string
+): Promise<void> => {
+  try {
+    await api.delete(`/treatment-records/${recordId}/photos/${photoId}`);
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록 사진을 삭제하지 못했습니다."), {
       cause: error,
     });
   }
