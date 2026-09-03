@@ -9,13 +9,16 @@ const getHeadTurnInstruction = (targetYaw: number) => {
     return "정면을 바라봐 주세요";
   }
 
-  return targetYaw < 0 ? "고개를 왼쪽으로 돌려주세요" : "고개를 오른쪽으로 돌려주세요";
+  // AR 서버 FacePose의 yaw 부호는 카메라 기준 실제 회전과 반대다.
+  // 서버 내부 수집·에셋 선택은 같은 좌표계를 공유하므로 그대로 두고,
+  // 사용자에게 보여 주는 물리적 방향과 가상 얼굴 회전만 반대로 보정한다.
+  return targetYaw < 0 ? "고개를 오른쪽으로 돌려주세요" : "고개를 왼쪽으로 돌려주세요";
 };
 
 const getHeadTurnStep = (targetYaw: number) => ({
   id: `yaw-${targetYaw}`,
   label: getHeadTurnInstruction(targetYaw),
-  rotation: targetYaw * (3 / 4),
+  rotation: -targetYaw * (3 / 4),
   targetYaw,
 });
 
