@@ -43,25 +43,23 @@ export const SavedStyleCard = ({ isSharing, onDelete, onShare, style }: SavedSty
         {style.name}
       </h3>
 
-      {/* 색을 고르지 않고 저장한 후보는 색상 정보가 없어 칩을 그리지 않는다 */}
-      {style.colorName && (
-        <div
-          className="mt-[8px] flex w-fit items-center gap-[6px] rounded-full border px-[10px] py-[5px]"
-          style={{ borderColor: lightTheme.line.neutral }}
+      {/* 색을 고르지 않고 저장한 후보도 칩을 그려야 카드 높이와 구성이 서로 어긋나지 않는다 */}
+      <div
+        className="mt-[8px] flex w-fit items-center gap-[6px] rounded-full border px-[10px] py-[5px]"
+        style={{ borderColor: lightTheme.line.neutral }}
+      >
+        <span
+          aria-hidden
+          className="h-[12px] w-[12px] shrink-0 rounded-full"
+          style={{ backgroundColor: style.colorHex || lightTheme.fill.neutral }}
+        />
+        <span
+          className={`truncate ${font.caption.regular}`}
+          style={{ color: lightTheme.label.alternative }}
         >
-          <span
-            aria-hidden
-            className="h-[12px] w-[12px] shrink-0 rounded-full"
-            style={{ backgroundColor: style.colorHex }}
-          />
-          <span
-            className={`truncate ${font.caption.regular}`}
-            style={{ color: lightTheme.label.alternative }}
-          >
-            {style.colorName}
-          </span>
-        </div>
-      )}
+          {style.colorName || "색상 미지정"}
+        </span>
+      </div>
 
       <div className="mt-[10px] grid grid-cols-2 gap-[6px]">
         <button
