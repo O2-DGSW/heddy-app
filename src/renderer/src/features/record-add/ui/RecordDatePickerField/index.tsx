@@ -2,8 +2,6 @@ import { font, lightTheme, palette } from "@heddy/design-tokens";
 import { useEffect, useRef, useState } from "react";
 
 import {
-  DEFAULT_DATE_VALUE,
-  DEFAULT_MONTH,
   WEEK_DAYS,
   YEAR_OPTIONS,
   createCalendarDays,
@@ -11,6 +9,8 @@ import {
   dateIcon,
   dropdownIcon,
   formatDateDisplay,
+  getDaysInMonth,
+  getTodayDateValue,
   noIcon,
   parseDateValue,
 } from "@/entities/record";
@@ -65,21 +65,24 @@ const getCalendarDayStyle = (day: CalendarDay, isSelected: boolean): CSSProperti
   return { color: lightTheme.label.alternative };
 };
 
+const getClampedDateValue = (year: number, month: number, day: number) =>
+  createDateValue(year, month, Math.min(day, getDaysInMonth(year, month)));
+
 const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePickerFieldProps) => {
   const selectedYearRef = useRef<HTMLButtonElement>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
-  const [draftDate, setDraftDate] = useState(DEFAULT_DATE_VALUE);
+  const [draftDate, setDraftDate] = useState(() => getTodayDateValue());
 
   const hasError = Boolean(errorMessage);
   const errorId = "record-date-error";
   const draftDateParts = parseDateValue(draftDate);
-  const calendarDays = createCalendarDays(draftDateParts.year);
+  const calendarDays = createCalendarDays(draftDateParts.year, draftDateParts.month);
   const selectedDateLabel = value ? formatDateDisplay(value) : "입력";
   const selectedDateColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
 
   const handleOpenDatePicker = () => {
-    setDraftDate(value || DEFAULT_DATE_VALUE);
+    setDraftDate(value || getTodayDateValue());
     setIsYearSelectOpen(false);
     setIsDatePickerOpen(true);
   };
@@ -94,7 +97,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
   };
 
   const handleYearSelect = (year: number) => {
-    setDraftDate(createDateValue(year, DEFAULT_MONTH, draftDateParts.day));
+    setDraftDate(getClampedDateValue(year, draftDateParts.month, draftDateParts.day));
     setIsYearSelectOpen(false);
   };
 
@@ -103,7 +106,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
       return;
     }
 
-    setDraftDate(createDateValue(draftDateParts.year, DEFAULT_MONTH, day.day));
+    setDraftDate(createDateValue(draftDateParts.year, draftDateParts.month, day.day));
   };
 
   const handleConfirmDate = () => {

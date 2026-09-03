@@ -8,8 +8,6 @@ export {
   starIcon,
 } from "./assets";
 export {
-  DEFAULT_DATE_VALUE,
-  DEFAULT_MONTH,
   INITIAL_FORM_VALUES,
   INITIAL_PHOTOS,
   MAX_PHOTO_COUNT,
@@ -21,6 +19,8 @@ export {
   createCalendarDays,
   createDateValue,
   formatDateDisplay,
+  getDaysInMonth,
+  getTodayDateValue,
   parseDateValue,
 } from "./model";
 export type {
