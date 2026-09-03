@@ -1,3 +1,4 @@
+import { setNavigation } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 
@@ -5,6 +6,16 @@ const pageStyle = { backgroundColor: lightTheme.background.normal };
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    setNavigation("forward", "forward");
+    navigate("/login");
+  };
+
+  const handleSignupClick = () => {
+    setNavigation("forward", "forward");
+    navigate("/signup");
+  };
 
   return (
     <cap-page>
@@ -42,7 +53,7 @@ const WelcomePage = () => {
                 backgroundColor: lightTheme.primary.normal,
                 color: lightTheme.fill.normal,
               }}
-              onClick={() => navigate("/login")}
+              onClick={handleLoginClick}
               type="button"
             >
               로그인
@@ -55,7 +66,7 @@ const WelcomePage = () => {
               <button
                 className={`${font.label.medium} border-0 bg-transparent p-0 underline`}
                 style={{ color: lightTheme.primary.normal }}
-                onClick={() => navigate("/signup")}
+                onClick={handleSignupClick}
                 type="button"
               >
                 회원가입
