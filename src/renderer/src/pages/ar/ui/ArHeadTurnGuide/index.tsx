@@ -6,6 +6,14 @@ import { cn } from "@/shared";
 
 const TARGET_YAW_TOLERANCE = 7;
 const COMPLETION_MESSAGE_DURATION_MS = 3000;
+const GUIDE_ROTATION_MULTIPLIER = 1.8;
+const MAX_GUIDE_ROTATION = 64;
+
+const getGuideRotation = (targetYaw: number): number =>
+  Math.max(
+    -MAX_GUIDE_ROTATION,
+    Math.min(MAX_GUIDE_ROTATION, targetYaw * GUIDE_ROTATION_MULTIPLIER)
+  );
 
 const getHeadTurnInstruction = (targetYaw: number) => {
   if (targetYaw === 0) {
@@ -20,7 +28,7 @@ const getHeadTurnInstruction = (targetYaw: number) => {
 const getHeadTurnStep = (targetYaw: number) => ({
   id: `yaw-${targetYaw}`,
   label: getHeadTurnInstruction(targetYaw),
-  rotation: targetYaw * (3 / 4),
+  rotation: getGuideRotation(targetYaw),
   targetYaw,
 });
 
