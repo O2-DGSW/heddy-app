@@ -1,6 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 
+import { useLogout } from "@/features/auth/logout";
+import { useGetTreatmentRecords } from "@/entities/record";
+import { useGetShares } from "@/entities/share";
+
 import arrowRightIcon from "../../assets/arrow-right.svg";
 import bookmarkIcon from "../../assets/bookmark.svg";
 import heartIcon from "../../assets/heart.svg";
@@ -11,32 +15,36 @@ import { useProfile } from "../../model/useProfile";
 
 interface ProfileStat {
   label: string;
-  value: string;
+  value: number | null;
 }
 
 interface ProfileMenuItem {
   icon: string;
   label: string;
   to?: string;
+  isAvailable: boolean;
 }
 
-const PROFILE_STATS: ProfileStat[] = [
-  { label: "시술 기록", value: "-" },
-  { label: "AI 분석", value: "-" },
-  { label: "AR 후보", value: "-" },
-  { label: "공유 중", value: "-" },
-];
-
 const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  { icon: heartIcon, label: "선호 스타일 등록", to: "/profile/preferred-style" },
-  { icon: settingsIcon, label: "회원정보 수정" },
-  { icon: sharePermissionsIcon, label: "공유 권한 관리", to: "/profile/share-permissions" },
-  { icon: bookmarkIcon, label: "저장한 후보 스타일" },
+  {
+    icon: heartIcon,
+    label: "선호 스타일 등록",
+    to: "/profile/preferred-style",
+    isAvailable: true,
+  },
+  { icon: settingsIcon, label: "회원정보 수정", isAvailable: false },
+  {
+    icon: sharePermissionsIcon,
+    label: "공유 권한 관리",
+    to: "/profile/share-permissions",
+    isAvailable: true,
+  },
+  { icon: bookmarkIcon, label: "저장한 후보 스타일", isAvailable: false },
 ];
 
 interface ProfileMenuRowProps {
   item: ProfileMenuItem;
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
@@ -60,13 +68,11 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
     </>
   );
 
-  if (!onClick) {
-    return <div className="flex h-[21px] items-center justify-between">{content}</div>;
-  }
-
   return (
     <button
-      className="flex h-[21px] w-full items-center justify-between border-0 bg-transparent p-0 text-left"
+      aria-label={item.isAvailable ? item.label : `${item.label} 기능 준비 중`}
+      className="flex h-[21px] w-full items-center justify-between border-0 bg-transparent p-0 text-left disabled:cursor-not-allowed disabled:opacity-40"
+      disabled={!item.isAvailable}
       onClick={onClick}
       type="button"
     >
@@ -75,10 +81,34 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
   );
 };
 
+const getProfileStatCount = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.trunc(value) : 0;
+
+const getProfileName = (nickname: unknown, isLoading: boolean) => {
+  if (typeof nickname === "string" && nickname.trim()) {
+    return nickname;
+  }
+
+  return isLoading ? "불러오는 중" : "사용자";
+};
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfile();
-  const profileName = profile?.nickname ?? (isLoading ? "불러오는 중" : "사용자");
+  const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
+  const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
+  const {
+    errorMessage: logoutErrorMessage,
+    handleLogout,
+    isPending: isLogoutPending,
+  } = useLogout();
+  const profileName = getProfileName(profile?.nickname, isLoading);
+  const profileStats: ProfileStat[] = [
+    { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
+    { label: "AI 분석", value: null },
+    { label: "AR 후보", value: null },
+    { label: "공유 중", value: getProfileStatCount(shares?.page?.total_elements) },
+  ];
 
   const handleMenuClick = (to?: string) => {
     if (to) {
@@ -111,11 +141,17 @@ const ProfilePage = () => {
                 className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
                 style={{ backgroundColor: "#F4FBF8" }}
               >
-                {PROFILE_STATS.map(stat => (
+                {profileStats.map(stat => (
                   <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
                     <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
-                      <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
-                      <span style={{ color: lightTheme.label.alternative }}>건</span>
+                      {stat.value === null ? (
+                        <span style={{ color: lightTheme.label.alternative }}>-</span>
+                      ) : (
+                        <>
+                          <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
+                          <span style={{ color: lightTheme.label.alternative }}>건</span>
+                        </>
+                      )}
                     </dd>
                     <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
                       {stat.label}
@@ -149,32 +185,47 @@ const ProfilePage = () => {
                   <ProfileMenuRow
                     item={item}
                     key={item.label}
-                    onClick={item.to ? () => handleMenuClick(item.to) : undefined}
+                    onClick={() => handleMenuClick(item.to)}
                   />
                 ))}
               </div>
             </div>
 
             <div className="grid w-full max-w-[300px] grid-cols-2 gap-[6px]">
-              <div
-                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+              <button
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium} disabled:cursor-not-allowed`}
+                disabled={isLogoutPending}
+                onClick={() => void handleLogout()}
+                type="button"
                 style={{
                   backgroundColor: lightTheme.label.disable,
                   color: lightTheme.label.alternative,
                 }}
               >
-                로그아웃
-              </div>
-              <div
-                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium}`}
+                {isLogoutPending ? "로그아웃 중" : "로그아웃"}
+              </button>
+              <button
+                aria-label="회원 탈퇴 기능 준비 중"
+                className={`flex h-[30px] items-center justify-center rounded-[5px] ${font.label.medium} cursor-not-allowed opacity-50`}
+                disabled
+                type="button"
                 style={{
                   backgroundColor: lightTheme.status.error,
                   color: lightTheme.label.buttonText,
                 }}
               >
                 회원 탈퇴
-              </div>
+              </button>
             </div>
+            {logoutErrorMessage && (
+              <p
+                className={font.label.medium}
+                role="alert"
+                style={{ color: lightTheme.status.error }}
+              >
+                {logoutErrorMessage}
+              </p>
+            )}
           </section>
         </div>
       </section>
