@@ -1,25 +1,36 @@
+import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { CutsCloseIcon } from "@/features/cuts/ui/icons/CutsCloseIcon";
-import { CutsCopyIcon } from "@/features/cuts/ui/icons/CutsCopyIcon";
+import { CloseIcon } from "@/shared/ui/icons/CloseIcon";
+import { CopyIcon } from "@/shared/ui/icons/CopyIcon";
 
-interface CutsShareQrModalProps {
+interface ShareQrModalProps {
   shareLink: string;
+  /** 모달 제목. 화면마다 다르게 부를 수 있게 열어 둔다 */
+  title?: string;
   onClose: () => void;
 }
 
-export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) => {
-  /** 공유 링크를 클립보드에 복사한다 */
+export const ShareQrModal = ({ shareLink, title = "공유", onClose }: ShareQrModalProps) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  /**
+   * 공유 링크를 클립보드에 복사한다.
+   * clipboard는 보안 컨텍스트에서만 있어, 없거나 실패하면 복사됐다고 알리지 않는다.
+   */
   const handleCopy = () => {
-    void navigator.clipboard?.writeText(shareLink);
+    navigator.clipboard
+      ?.writeText(shareLink)
+      .then(() => setIsCopied(true))
+      .catch(() => setIsCopied(false));
   };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="cuts-share-modal-title"
+      aria-labelledby="share-modal-title"
       className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
     >
       <button
@@ -37,11 +48,11 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
         >
           <div className="flex items-center justify-between">
             <h2
-              id="cuts-share-modal-title"
+              id="share-modal-title"
               className={font.headline1.bold}
               style={{ color: lightTheme.label.neutral }}
             >
-              공유
+              {title}
             </h2>
             <button
               type="button"
@@ -50,7 +61,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
               className="flex h-[34px] w-[34px] items-center justify-center rounded-full border-0 p-0"
               style={{ backgroundColor: lightTheme.fill.normal }}
             >
-              <CutsCloseIcon />
+              <CloseIcon />
             </button>
           </div>
 
@@ -60,7 +71,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
 
           <div className="flex flex-col gap-2">
             <span className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-              공유 링크
+              {isCopied ? "링크를 복사했어요" : "공유 링크"}
             </span>
             <button
               type="button"
@@ -75,7 +86,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
               >
                 {shareLink}
               </span>
-              <CutsCopyIcon />
+              <CopyIcon />
             </button>
           </div>
         </div>

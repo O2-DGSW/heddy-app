@@ -40,7 +40,12 @@ const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     to: "/profile/share-permissions",
     isAvailable: true,
   },
-  { icon: bookmarkIcon, label: "저장한 후보 스타일", isAvailable: false },
+  {
+    icon: bookmarkIcon,
+    label: "저장한 후보 스타일",
+    to: "/profile/saved-styles",
+    isAvailable: true,
+  },
 ];
 
 interface ProfileMenuRowProps {

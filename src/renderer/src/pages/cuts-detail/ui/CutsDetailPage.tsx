@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { CutsDetailLayout } from "@/features/cuts/ui/CutsDetailLayout";
-import { CutsShareQrModal } from "@/features/cuts/ui/share/CutsShareQrModal";
+import { ShareQrModal } from "@/shared";
 import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
@@ -45,7 +45,7 @@ export const CutsDetailPage = () => {
         <Outlet />
 
         {isShareModalOpen && shareUrl && (
-          <CutsShareQrModal shareLink={shareUrl} onClose={handleCloseShareModal} />
+          <ShareQrModal shareLink={shareUrl} onClose={handleCloseShareModal} />
         )}
       </CutsDetailLayout>
     </cap-page>
