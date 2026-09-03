@@ -28,7 +28,7 @@ const BarItem = ({
     <button
       aria-current={isActive ? "page" : undefined}
       aria-label={title}
-      className="flex min-h-[55px] shrink-0 justify-center border-0 bg-transparent p-0"
+      className="flex min-h-[55px] w-[35px] shrink-0 justify-center border-0 bg-transparent p-0"
       onClick={onClick}
       type="button"
     >
@@ -44,7 +44,10 @@ const BarItem = ({
           />
         </span>
 
-        <span className={font.label.medium} style={{ color: textColor }}>
+        <span
+          className={cn("w-full whitespace-nowrap text-center", font.label.medium)}
+          style={{ color: textColor }}
+        >
           {title}
         </span>
       </span>
