@@ -1,5 +1,6 @@
 /** 서버가 정의한 시술 종류 */
 export type ServiceType = "CUT" | "PERM" | "COLOR" | "BLEACH" | "CLINIC" | "STYLING" | "OTHER";
+export type TreatmentRecordPhotoImageType = "BEFORE" | "AFTER" | "OTHER";
 
 export type TreatmentRecordSort = "performedAt,desc" | "performedAt,asc";
 
@@ -55,7 +56,7 @@ export type TreatmentRecordListApiResponse = {
 
 export type TreatmentRecordPhotoApiData = {
   photo_id: string;
-  image_type: "BEFORE" | "AFTER" | "OTHER";
+  image_type: TreatmentRecordPhotoImageType;
   sort_order: number;
   photo_url?: string | null;
 };
@@ -83,6 +84,22 @@ export type TreatmentRecordDetailApiData = {
 export type TreatmentRecordDetailApiResponse = {
   data: TreatmentRecordDetailApiData;
   request_id: string;
+};
+
+export type TreatmentRecordPhotoApiResponse = {
+  data: TreatmentRecordPhotoApiData;
+  request_id: string;
+};
+
+/**
+ * 시술기록 사진 추가 요청
+ * - 파일 업로드라 multipart/form-data로 보낸다.
+ * - 현재 폼에는 전/후/기타 선택이 없으므로 기본 image_type은 OTHER를 쓴다.
+ */
+export type AddTreatmentRecordPhotoRequest = {
+  file: File;
+  image_type?: TreatmentRecordPhotoImageType;
+  sort_order?: number;
 };
 
 /**

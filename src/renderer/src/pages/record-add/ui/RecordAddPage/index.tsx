@@ -1,9 +1,18 @@
+import { useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { arrowIcon, useCreateTreatmentRecord } from "@/entities/record";
-import { RecordAddForm, mapFormValuesToCreateRequest } from "@/features/record-add";
+import {
+  arrowIcon,
+  useAddTreatmentRecordPhotos,
+  useCreateTreatmentRecord,
+} from "@/entities/record";
+import {
+  RecordAddForm,
+  mapFormValuesToCreateRequest,
+  mapPhotoItemsToAddRequests,
+} from "@/features/record-add";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
@@ -12,16 +21,44 @@ const headingStyle = { color: lightTheme.label.neutral };
 const RecordAddPage = () => {
   const navigate = useNavigate();
   const createRecord = useCreateTreatmentRecord();
+  const addRecordPhotos = useAddTreatmentRecordPhotos();
+  const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
+
+  const submitErrorMessage = createRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
+  const isSubmitting = createRecord.isPending || addRecordPhotos.isPending;
 
   const handleClose = () => {
     setDirection("back");
     navigate(-1);
   };
 
-  const handleSubmit = ({ formValues, procedureType, rating }: RecordFormSubmitValues) => {
-    createRecord.mutate(mapFormValuesToCreateRequest(formValues, procedureType, rating), {
-      onSuccess: handleClose,
-    });
+  const handleSubmit = async ({
+    formValues,
+    photos,
+    procedureType,
+    rating,
+  }: RecordFormSubmitValues) => {
+    const photoRequests = mapPhotoItemsToAddRequests(photos);
+
+    try {
+      const recordId =
+        createdRecordId ??
+        (
+          await createRecord.mutateAsync(
+            mapFormValuesToCreateRequest(formValues, procedureType, rating)
+          )
+        ).record_id;
+
+      setCreatedRecordId(recordId);
+
+      if (photoRequests.length > 0) {
+        await addRecordPhotos.mutateAsync({ recordId, photos: photoRequests });
+      }
+
+      handleClose();
+    } catch {
+      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+    }
   };
 
   return (
@@ -50,17 +87,17 @@ const RecordAddPage = () => {
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {createRecord.isError && (
+          {submitErrorMessage && (
             <p
               className={`px-4 pt-4 text-center ${font.caption.regular}`}
               style={{ color: lightTheme.status.error }}
             >
-              {createRecord.error.message}
+              {submitErrorMessage}
             </p>
           )}
 
           <RecordAddForm
-            isSubmitting={createRecord.isPending}
+            isSubmitting={isSubmitting}
             onCancel={handleClose}
             onSubmitValues={handleSubmit}
           />

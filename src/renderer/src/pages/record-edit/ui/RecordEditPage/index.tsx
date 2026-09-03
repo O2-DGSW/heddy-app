@@ -3,13 +3,19 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { arrowIcon, useGetTreatmentRecord, useUpdateTreatmentRecord } from "@/entities/record";
+import {
+  arrowIcon,
+  useAddTreatmentRecordPhotos,
+  useGetTreatmentRecord,
+  useUpdateTreatmentRecord,
+} from "@/entities/record";
 import {
   RecordAddForm,
   mapDetailToFormValues,
   mapDetailToPhotoItems,
   mapDetailToProcedureType,
   mapFormValuesToUpdateRequest,
+  mapPhotoItemsToAddRequests,
 } from "@/features/record-add";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
@@ -22,6 +28,7 @@ const RecordEditPage = () => {
   const { id } = useParams();
   const { data: record, isPending, isError, error } = useGetTreatmentRecord(id);
   const updateRecord = useUpdateTreatmentRecord();
+  const addRecordPhotos = useAddTreatmentRecordPhotos();
 
   const initialValues = useMemo(
     () => (record ? mapDetailToFormValues(record) : undefined),
@@ -41,15 +48,35 @@ const RecordEditPage = () => {
     navigate(-1);
   };
 
-  const handleSubmit = ({ formValues, procedureType, rating }: RecordFormSubmitValues) => {
+  const submitErrorMessage = updateRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
+  const isSubmitting = updateRecord.isPending || addRecordPhotos.isPending;
+
+  const handleSubmit = async ({
+    formValues,
+    photos,
+    procedureType,
+    rating,
+  }: RecordFormSubmitValues) => {
     if (!id) {
       return;
     }
 
-    updateRecord.mutate(
-      { recordId: id, body: mapFormValuesToUpdateRequest(formValues, procedureType, rating) },
-      { onSuccess: handleClose }
-    );
+    const photoRequests = mapPhotoItemsToAddRequests(photos);
+
+    try {
+      await updateRecord.mutateAsync({
+        recordId: id,
+        body: mapFormValuesToUpdateRequest(formValues, procedureType, rating),
+      });
+
+      if (photoRequests.length > 0) {
+        await addRecordPhotos.mutateAsync({ recordId: id, photos: photoRequests });
+      }
+
+      handleClose();
+    } catch {
+      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+    }
   };
 
   return (
@@ -92,12 +119,12 @@ const RecordEditPage = () => {
           {/* 기존 값이 도착한 뒤에 폼을 그려야 초기값이 그대로 들어간다 */}
           {!isPending && !isError && (
             <>
-              {updateRecord.isError && (
+              {submitErrorMessage && (
                 <p
                   className={`px-4 pt-4 text-center ${font.caption.regular}`}
                   style={{ color: lightTheme.status.error }}
                 >
-                  {updateRecord.error.message}
+                  {submitErrorMessage}
                 </p>
               )}
 
@@ -107,7 +134,7 @@ const RecordEditPage = () => {
                 initialPhotos={initialPhotos}
                 initialRating={record?.satisfaction ?? undefined}
                 initialValues={initialValues}
-                isSubmitting={updateRecord.isPending}
+                isSubmitting={isSubmitting}
                 onCancel={handleClose}
                 onSubmitValues={handleSubmit}
               />

@@ -2,6 +2,7 @@ import { createDateValue, parseDateValue } from "@/entities/record/model/date";
 import type { ProcedureType } from "@/entities/record/model/constants";
 import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
 import type {
+  AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   ServiceType,
   TreatmentRecordDetailApiData,
@@ -49,12 +50,6 @@ const toPerformedAt = (formDate: string) => {
   return performedDate.toISOString();
 };
 
-const getTodayDateValue = () => {
-  const today = new Date();
-
-  return createDateValue(today.getFullYear(), today.getMonth() + 1, today.getDate());
-};
-
 /** 숫자만 남겨 가격으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
 const toPriceAmount = (price: string) => {
   const digitsOnly = price.replace(/[^0-9]/g, "");
@@ -66,6 +61,9 @@ const hasPhotoUrl = (
   photo: TreatmentRecordPhotoApiData
 ): photo is TreatmentRecordPhotoApiData & { photo_url: string } =>
   typeof photo.photo_url === "string" && photo.photo_url.length > 0;
+
+const hasUploadFile = (photo: PhotoItem): photo is PhotoItem & { file: File } =>
+  photo.file !== undefined;
 
 /** 서버 상세 응답을 수정 폼의 초기값으로 바꾼다 */
 export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): RecordFormValues => ({
@@ -93,6 +91,19 @@ export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): Pho
       src: photo.photo_url,
       isObjectUrl: false,
     }));
+
+export const mapPhotoItemsToAddRequests = (photos: PhotoItem[]): AddTreatmentRecordPhotoRequest[] =>
+  photos.flatMap((photo, index) =>
+    hasUploadFile(photo)
+      ? [
+          {
+            file: photo.file,
+            image_type: "OTHER",
+            sort_order: index,
+          },
+        ]
+      : []
+  );
 
 /**
  * 폼 값을 수정 요청 본문으로 바꾼다.
@@ -124,11 +135,10 @@ export const mapFormValuesToCreateRequest = (
   rating: number
 ): CreateTreatmentRecordRequest => {
   const priceAmount = toPriceAmount(formValues.price);
-  const performedAtDate = formValues.date || getTodayDateValue();
 
   return {
     service_types: [SERVICE_TYPE_BY_PROCEDURE_TYPE[procedureType]],
-    performed_at: toPerformedAt(performedAtDate),
+    performed_at: toPerformedAt(formValues.date),
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,
     satisfaction: rating >= 1 && rating <= 5 ? rating : null,

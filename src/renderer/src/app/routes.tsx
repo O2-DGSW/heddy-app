@@ -19,6 +19,7 @@ import { RecommendPage } from "@/pages/recommend";
 import { SavedStylesPage } from "@/pages/saved-styles";
 import { SharePermissionsPage } from "@/pages/share-permissions";
 import { ProfilePage } from "@/pages/profile";
+import { ProfileEditPage } from "@/pages/profile-edit";
 import { HomePage } from "@/pages/home";
 import { PublicSharePage } from "@/pages/public-share";
 
@@ -71,6 +72,7 @@ export const AppRoutes = () => {
             <Route path="/ar" element={<ArHairstylePage />} />
             <Route path="/recommend" element={<RecommendPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<ProfileEditPage />} />
             <Route path="/cuts" element={<CutsListPage />} />
             <Route path="/cuts/add" element={<RecordAddPage />} />
             <Route path="/cuts/:id" element={<CutsDetailPage />}>

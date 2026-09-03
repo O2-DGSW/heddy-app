@@ -8,8 +8,6 @@ export {
   starIcon,
 } from "./assets";
 export {
-  DEFAULT_DATE_VALUE,
-  DEFAULT_MONTH,
   INITIAL_FORM_VALUES,
   INITIAL_PHOTOS,
   MAX_PHOTO_COUNT,
@@ -21,9 +19,12 @@ export {
   createCalendarDays,
   createDateValue,
   formatDateDisplay,
+  getDaysInMonth,
+  getTodayDateValue,
   parseDateValue,
 } from "./model";
 export type {
+  AddTreatmentRecordPhotoRequest,
   AnalysisApiData,
   AnalysisApiResponse,
   AnalysisGrade,
@@ -46,12 +47,15 @@ export type {
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
   TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
+  TreatmentRecordPhotoImageType,
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
   UpdateTreatmentRecordRequest,
 } from "./model";
 export {
+  addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
   getLatestAnalysisApi,
   getTreatmentRecordApi,
@@ -60,6 +64,7 @@ export {
 } from "./api";
 export {
   recordQueryKeys,
+  useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,

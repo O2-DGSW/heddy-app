@@ -10,18 +10,10 @@ import type {
   RecordFormValues,
 } from "@/entities/record";
 
-type RecordFormErrorKeyType = RecordFieldNameType | "date" | "photos" | "procedureType" | "rating";
+type RecordFormErrorKeyType = "date" | "procedureType";
 type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
-const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 추가해 주세요.";
-const REQUIRED_FIELD_NAMES: RecordFieldNameType[] = [
-  "salon",
-  "price",
-  "duration",
-  "designer",
-  "procedureContent",
-];
 
 interface UseRecordAddFormOptions {
   /** 수정 화면처럼 기존 값에서 시작해야 할 때 넘긴다 */
@@ -60,10 +52,6 @@ export const useRecordAddForm = ({
   const validateForm = () => {
     const nextFormErrors: RecordFormErrorsType = {};
 
-    if (photos.length === 0) {
-      nextFormErrors.photos = PHOTO_REQUIRED_ERROR_MESSAGE;
-    }
-
     if (!formValues.date) {
       nextFormErrors.date = REQUIRED_FIELD_ERROR_MESSAGE;
     }
@@ -71,16 +59,6 @@ export const useRecordAddForm = ({
     if (!selectedProcedureType) {
       nextFormErrors.procedureType = REQUIRED_FIELD_ERROR_MESSAGE;
     }
-
-    if (rating < 1 || rating > 5) {
-      nextFormErrors.rating = REQUIRED_FIELD_ERROR_MESSAGE;
-    }
-
-    REQUIRED_FIELD_NAMES.forEach(fieldName => {
-      if (!formValues[fieldName].trim()) {
-        nextFormErrors[fieldName] = REQUIRED_FIELD_ERROR_MESSAGE;
-      }
-    });
 
     return nextFormErrors;
   };
@@ -99,6 +77,7 @@ export const useRecordAddForm = ({
       objectUrlsRef.current.add(src);
 
       return {
+        file,
         id,
         src,
         isObjectUrl: true,
@@ -106,7 +85,6 @@ export const useRecordAddForm = ({
     });
 
     setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
-    setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
     event.currentTarget.value = "";
   };
 
@@ -118,16 +96,7 @@ export const useRecordAddForm = ({
       objectUrlsRef.current.delete(removedPhoto.src);
     }
 
-    setPhotos(currentPhotos => {
-      const nextPhotos = currentPhotos.filter(photo => photo.id !== photoId);
-
-      setFormErrors(currentErrors => ({
-        ...currentErrors,
-        photos: nextPhotos.length === 0 ? currentErrors.photos : undefined,
-      }));
-
-      return nextPhotos;
-    });
+    setPhotos(currentPhotos => currentPhotos.filter(photo => photo.id !== photoId));
   };
 
   const handleDateChange = (date: string) => {
@@ -147,10 +116,6 @@ export const useRecordAddForm = ({
         ...currentValues,
         [fieldName]: value,
       }));
-      setFormErrors(currentErrors => ({
-        ...currentErrors,
-        [fieldName]: value.trim() ? undefined : currentErrors[fieldName],
-      }));
     };
 
   const handleDetailsChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -166,10 +131,6 @@ export const useRecordAddForm = ({
 
   const handleRatingChange = (nextRating: number) => {
     setRating(nextRating);
-    setFormErrors(currentErrors => ({
-      ...currentErrors,
-      rating: nextRating >= 1 && nextRating <= 5 ? undefined : currentErrors.rating,
-    }));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

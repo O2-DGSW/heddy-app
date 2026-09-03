@@ -4,6 +4,7 @@ export {
   mapDetailToProcedureType,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
+  mapPhotoItemsToAddRequests,
   useRecordAddForm,
 } from "./model";
 export { RecordAddForm } from "./ui";

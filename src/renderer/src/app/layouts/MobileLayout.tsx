@@ -2,7 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
-import { BottomBarVisibilityProvider, useBottomBarVisibility } from "@/shared";
+import { BottomBarVisibilityProvider, ToastProvider, useBottomBarVisibility } from "@/shared";
 import {
   PAGE_SCROLL_PATHS,
   PAGE_SCROLL_PREFIXES,
@@ -175,6 +175,7 @@ const MobileLayoutContent = () => {
                 <NavBar />
               </div>
             )}
+            <ToastProvider />
           </div>
         </div>
       </div>

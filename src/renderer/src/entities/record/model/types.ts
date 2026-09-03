@@ -21,6 +21,7 @@ export interface PhotoItem {
   id: string;
   src: string;
   isObjectUrl: boolean;
+  file?: File;
 }
 
 export interface CalendarDay {

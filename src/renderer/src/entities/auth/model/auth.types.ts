@@ -52,6 +52,24 @@ export type ResetPasswordRequest = {
 
 export type ResetPasswordApiResponse = AuthApiResponse<string>;
 
+export type ReauthenticationMethodType = "PASSWORD" | "SOCIAL_TOKEN";
+
+export type ReauthenticationProviderType = "APPLE" | "GOOGLE" | "KAKAO";
+
+export type ReauthenticateRequest = {
+  method: ReauthenticationMethodType;
+  password?: string;
+  provider?: ReauthenticationProviderType;
+  provider_token?: string;
+};
+
+export type ReauthenticateResponse = {
+  reauthentication_token: string;
+  expires_in: number;
+};
+
+export type ReauthenticateApiResponse = AuthApiResponse<ReauthenticateResponse>;
+
 export type SignupRequest = {
   email: string;
   password: string;

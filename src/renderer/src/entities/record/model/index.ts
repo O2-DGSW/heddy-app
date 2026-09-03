@@ -1,9 +1,4 @@
 export {
-  CALENDAR_DAY_TEMPLATES,
-  DEFAULT_DATE_VALUE,
-  DEFAULT_DAY,
-  DEFAULT_MONTH,
-  DEFAULT_YEAR,
   INITIAL_FORM_VALUES,
   INITIAL_PHOTOS,
   MAX_PHOTO_COUNT,
@@ -13,7 +8,14 @@ export {
   WEEK_DAYS,
   YEAR_OPTIONS,
 } from "./constants";
-export { createCalendarDays, createDateValue, formatDateDisplay, parseDateValue } from "./date";
+export {
+  createCalendarDays,
+  createDateValue,
+  formatDateDisplay,
+  getDaysInMonth,
+  getTodayDateValue,
+  parseDateValue,
+} from "./date";
 export type {
   CalendarDay,
   PhotoItem,
@@ -33,6 +35,7 @@ export type {
   AnalysisStatus,
 } from "./analysis.types";
 export type {
+  AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   PageApiData,
   ServiceType,
@@ -42,6 +45,8 @@ export type {
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
   TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
+  TreatmentRecordPhotoImageType,
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
