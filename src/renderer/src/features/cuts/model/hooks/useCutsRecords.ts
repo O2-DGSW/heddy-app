@@ -1,11 +1,9 @@
 import { useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { getTreatmentRecordsApi } from "@/entities";
-import type { ServiceType } from "@/entities";
+import { getTreatmentRecordsApi, recordQueryKeys } from "@/entities";
 import { mapTreatmentRecordToCutsRecord } from "@/features/cuts/model/mapTreatmentRecord";
-
-export const CUTS_RECORDS_QUERY_KEY = "cuts-records";
+import type { ServiceType, TreatmentRecordListParams } from "@/entities";
 
 const PAGE_SIZE = 20;
 const FIRST_PAGE = 0;
@@ -20,6 +18,14 @@ interface UseCutsRecordsOptions {
  * 화면을 아래로 내리면 다음 페이지를 이어 붙이는 방식이라 페이지 번호는 훅이 관리한다.
  */
 export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
+  const listParams = useMemo(
+    (): Omit<TreatmentRecordListParams, "page"> => ({
+      ...(serviceType ? { service_type: serviceType } : {}),
+      size: PAGE_SIZE,
+      sort: "performedAt,desc",
+    }),
+    [serviceType]
+  );
   const {
     data,
     isPending,
@@ -31,13 +37,11 @@ export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
     isFetchingNextPage,
   } = useInfiniteQuery({
     // 필터가 바뀌면 서버에 다시 물어야 하므로 키에 함께 넣는다.
-    queryKey: [CUTS_RECORDS_QUERY_KEY, serviceType ?? "ALL"],
+    queryKey: recordQueryKeys.list(listParams),
     queryFn: ({ pageParam }) =>
       getTreatmentRecordsApi({
-        ...(serviceType ? { service_type: serviceType } : {}),
+        ...listParams,
         page: pageParam,
-        size: PAGE_SIZE,
-        sort: "performedAt,desc",
       }),
     initialPageParam: FIRST_PAGE,
     getNextPageParam: lastPage => (lastPage.page?.has_next ? lastPage.page.number + 1 : undefined),

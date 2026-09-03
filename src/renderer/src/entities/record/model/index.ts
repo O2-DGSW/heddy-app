@@ -16,6 +16,7 @@ export {
   getTodayDateValue,
   parseDateValue,
 } from "./date";
+export { getTreatmentRecordPhotoDisplayUrl, getTreatmentRecordThumbnailUrl } from "./photo";
 export type {
   CalendarDay,
   PhotoItem,
@@ -36,8 +37,14 @@ export type {
 } from "./analysis.types";
 export type {
   AddTreatmentRecordPhotoRequest,
+  CompleteUploadApiData,
+  CompleteUploadApiResponse,
+  ConnectTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   PageApiData,
+  PresignUploadApiData,
+  PresignUploadApiResponse,
+  PresignUploadRequest,
   ServiceType,
   TreatmentRecordDetailApiData,
   TreatmentRecordDetailApiResponse,
@@ -50,5 +57,7 @@ export type {
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
+  UpdateTreatmentRecordPhotoRequest,
+  UploadPurpose,
   UpdateTreatmentRecordRequest,
 } from "./treatmentRecord.types";

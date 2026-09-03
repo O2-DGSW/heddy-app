@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { cn, useBottomBarVisibility } from "@/shared";
+import { cn } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -11,7 +10,6 @@ import StyleTagButton from "../StyleTagButton";
 import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
-  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     activeTab,
     actionErrorMessage,
@@ -33,14 +31,7 @@ const PreferredStyleRegistrationPage = () => {
     preferredTags,
     styleTags,
   } = usePreferredStyleRegistration();
-
-  useEffect(() => {
-    setIsBottomBarHidden(true);
-
-    return () => {
-      setIsBottomBarHidden(false);
-    };
-  }, [setIsBottomBarHidden]);
+  const isResultSummaryExpanded = isPreferredSummaryExpanded || isExcludedSummaryExpanded;
 
   return (
     <section
@@ -110,7 +101,12 @@ const PreferredStyleRegistrationPage = () => {
         className="flex min-h-0 flex-1 flex-col px-[clamp(16px,4.4vw,19px)] pb-[clamp(18px,3.6dvh,29px)] pt-[clamp(18px,3.6dvh,29px)]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
-        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain transition-colors duration-300 ease-out no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <div
+          className={cn(
+            "min-h-0 flex-1 touch-pan-y overscroll-contain transition-colors duration-300 ease-out no-scrollbar [-webkit-overflow-scrolling:touch]",
+            isResultSummaryExpanded ? "overflow-y-scroll" : "overflow-hidden"
+          )}
+        >
           <div className="flex min-h-full flex-col">
             <div className="flex shrink-0 flex-col gap-[clamp(24px,4.4dvh,40px)]">
               <section aria-labelledby="style-tag-list-title" className="flex flex-col gap-[10px]">

@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { cn, useBottomBarVisibility } from "@/shared";
+import { cn } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
 import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
@@ -111,7 +110,6 @@ const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSe
 };
 
 const SharePermissionsPage = () => {
-  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     actionErrorMessage,
     handleBack,
@@ -125,14 +123,6 @@ const SharePermissionsPage = () => {
     loadErrorMessage,
     sections,
   } = useSharePermissions();
-
-  useEffect(() => {
-    setIsBottomBarHidden(true);
-
-    return () => {
-      setIsBottomBarHidden(false);
-    };
-  }, [setIsBottomBarHidden]);
 
   return (
     <section

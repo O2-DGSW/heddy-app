@@ -45,14 +45,14 @@ const StyleTagResultRow = ({
             <button
               aria-expanded={isExpanded}
               aria-label={isExpanded ? `${label} 접기` : `${label} 더 보기`}
-              className="flex h-[32px] w-[32px] shrink-0 items-center justify-center border-0 bg-transparent p-0"
+              className="flex h-[38px] w-[38px] shrink-0 items-center justify-center border-0 bg-transparent p-0"
               onClick={onToggleExpand}
               type="button"
             >
               <svg
                 aria-hidden="true"
                 className={cn(
-                  "h-[24px] w-[24px] transition-transform duration-200",
+                  "h-[26px] w-[26px] transition-transform duration-200",
                   isExpanded && "rotate-180"
                 )}
                 fill="none"

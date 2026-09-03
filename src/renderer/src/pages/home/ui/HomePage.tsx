@@ -57,7 +57,7 @@ const HomePage = () => {
       >
         <HomeHeader onProfileClick={() => handleNavigate("/profile")} />
 
-        <div className="mx-auto mt-[24px] w-[calc(100%_-_52px)] max-w-[350px]">
+        <div className="mx-auto mt-[clamp(16px,2.9svh,24px)] w-[calc(100%_-_42px)] max-w-[360px]">
           <h1
             id="home-greeting"
             className={font.title2.bold}
@@ -70,7 +70,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        <div className="mx-auto mt-[32px] grid w-[calc(100%_-_42px)] max-w-[359px] grid-cols-[1.041fr_1fr] gap-3">
+        <div className="mx-auto mt-[clamp(18px,3.8svh,32px)] grid h-[clamp(188px,30svh,248px)] w-[calc(100%_-_42px)] max-w-[360px] grid-cols-[minmax(0,1.041fr)_minmax(0,1fr)] gap-[clamp(8px,2.8vw,12px)]">
           <RecentRecordCard
             record={recentRecord}
             isLoading={isRecentRecordPending}
@@ -78,7 +78,7 @@ const HomePage = () => {
             onClick={handleRecentRecordClick}
           />
 
-          <div className="grid h-[228px] grid-rows-2 gap-2">
+          <div className="grid min-h-0 grid-rows-2 gap-[clamp(6px,1.1svh,8px)]">
             {SHORTCUT_CARDS.map(card => (
               <ShortcutCard key={card.id} card={card} onClick={() => handleNavigate(card.to)} />
             ))}

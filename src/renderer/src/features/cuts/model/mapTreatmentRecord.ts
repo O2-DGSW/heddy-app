@@ -1,8 +1,5 @@
-import { createDateValue } from "@/entities/record/model/date";
-import type {
-  ServiceType,
-  TreatmentRecordSummaryApiData,
-} from "@/entities/record/model/treatmentRecord.types";
+import { createDateValue, getTreatmentRecordThumbnailUrl } from "@/entities";
+import type { ServiceType, TreatmentRecordSummaryApiData } from "@/entities";
 import type {
   CutsAnalysisStatus,
   CutsCategory,
@@ -90,7 +87,7 @@ export const mapTreatmentRecordToCutsRecord = (item: TreatmentRecordSummaryApiDa
     salonName: item.salon_name ?? "",
     designerName: item.designer_name ?? "",
     rating: item.satisfaction ?? 0,
-    thumbnailUrl: item.thumbnail_url ?? "",
+    thumbnailUrl: getTreatmentRecordThumbnailUrl(item),
     category: serviceTypes.map(type => CATEGORY_BY_SERVICE_TYPE[type]).find(Boolean) ?? null,
     analysisStatus: item.analysis_status
       ? (ANALYSIS_STATUS_BY_API_VALUE[item.analysis_status.toUpperCase()] ?? null)

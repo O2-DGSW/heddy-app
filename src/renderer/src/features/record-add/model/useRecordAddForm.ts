@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { INITIAL_FORM_VALUES, INITIAL_PHOTOS, MAX_PHOTO_COUNT } from "@/entities/record";
 
+import { compressPhotoFile } from "./compressPhotoFile";
+
 import type { ChangeEvent, FormEvent } from "react";
 import type {
   PhotoItem,
@@ -67,22 +69,30 @@ export const useRecordAddForm = ({
     photoInputRef.current?.click();
   };
 
-  const handlePhotoSelection = (event: ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelection = async (event: ChangeEvent<HTMLInputElement>) => {
     const availablePhotoCount = MAX_PHOTO_COUNT - photos.length;
     const selectedFiles = Array.from(event.currentTarget.files ?? []).slice(0, availablePhotoCount);
-    const addedPhotos = selectedFiles.map((file): PhotoItem => {
-      const src = URL.createObjectURL(file);
-      const id = `selected-photo-${photoIdSequenceRef.current}`;
-      photoIdSequenceRef.current += 1;
-      objectUrlsRef.current.add(src);
+    const addedPhotos = await Promise.all(
+      selectedFiles.map(async (file): Promise<PhotoItem> => {
+        const uploadFile = await compressPhotoFile(file);
+        const src = URL.createObjectURL(uploadFile);
+        const id = `selected-photo-${photoIdSequenceRef.current}`;
+        photoIdSequenceRef.current += 1;
+        objectUrlsRef.current.add(src);
 
-      return {
-        file,
-        id,
-        src,
-        isObjectUrl: true,
-      };
-    });
+        return {
+          file: uploadFile,
+          id,
+          src,
+          isObjectUrl: true,
+        };
+      })
+    );
+
+    if (addedPhotos.length === 0) {
+      event.currentTarget.value = "";
+      return;
+    }
 
     setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
     event.currentTarget.value = "";
