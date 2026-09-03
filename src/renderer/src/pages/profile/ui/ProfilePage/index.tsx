@@ -7,7 +7,8 @@ import heartIcon from "../../assets/heart.svg";
 import profileAvatar from "../../assets/profile-avatar.png";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
-import { useProfile } from "../../model/useProfile";
+
+import { useGetMyProfile } from "@/entities";
 
 interface ProfileStat {
   label: string;
@@ -77,7 +78,7 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading } = useGetMyProfile();
   const profileName = profile?.nickname ?? (isLoading ? "불러오는 중" : "사용자");
 
   const handleMenuClick = (to?: string) => {
