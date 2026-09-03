@@ -240,12 +240,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
             className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-40px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[24px] pb-[44px] pt-[22px]"
             style={datePickerPanelStyle}
           >
-            <div
-              className={cn(
-                "flex w-full max-w-[354px] flex-col items-center",
-                hasSixCalendarRows ? "gap-[20px]" : "gap-[44px]"
-              )}
-            >
+            <div className="flex h-full w-full max-w-[354px] flex-col items-center">
               <div className="flex w-full items-center justify-between">
                 <h2
                   className={font.headline1.bold}
@@ -265,7 +260,12 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
                 </button>
               </div>
 
-              <div className="flex w-full flex-col gap-[24px]">
+              <div
+                className={cn(
+                  "mt-[44px] flex w-full flex-col",
+                  hasSixCalendarRows ? "gap-[16px]" : "gap-[24px]"
+                )}
+              >
                 <div className="flex w-full items-center justify-between">
                   <button
                     aria-label="이전 달"
@@ -364,7 +364,12 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
                     ))}
                   </div>
 
-                  <div className="grid w-full grid-cols-7 justify-items-center gap-y-[8px]">
+                  <div
+                    className={cn(
+                      "grid w-full grid-cols-7 justify-items-center",
+                      hasSixCalendarRows ? "gap-y-[4px]" : "gap-y-[8px]"
+                    )}
+                  >
                     {calendarDays.map(day => {
                       const isSelected = draftDate === day.id;
 
@@ -392,7 +397,10 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
               </div>
 
               <button
-                className={cn(font.headline2.semiBold, "h-[48px] w-full rounded-[10px] border-0")}
+                className={cn(
+                  font.headline2.semiBold,
+                  "mt-auto h-[48px] w-full rounded-[10px] border-0"
+                )}
                 onClick={handleConfirmDate}
                 style={confirmButtonStyle}
                 type="button"
