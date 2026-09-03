@@ -1,4 +1,4 @@
-import { setDirection } from "@capgo/capacitor-transitions/react";
+import { setNavigation } from "@capgo/capacitor-transitions/react";
 import { lightTheme } from "@heddy/design-tokens";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -24,7 +24,7 @@ const BackButton = ({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    setDirection("back");
+    setNavigation("back", "back");
 
     if (location.key !== "default") {
       navigate(-1);
