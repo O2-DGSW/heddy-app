@@ -33,6 +33,7 @@ export type {
   AnalysisStatus,
 } from "./analysis.types";
 export type {
+  CreateTreatmentRecordRequest,
   PageApiData,
   ServiceType,
   TreatmentRecordDetailApiData,

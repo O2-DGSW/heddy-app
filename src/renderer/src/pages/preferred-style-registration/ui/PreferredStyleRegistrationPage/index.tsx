@@ -97,137 +97,147 @@ const PreferredStyleRegistrationPage = () => {
       </div>
 
       <div
-        className="flex flex-1 flex-col justify-between px-[19px] pb-[22px] pt-[29px]"
+        className="flex min-h-0 flex-1 flex-col px-[19px] pb-[29px] pt-[29px]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
-        <div className="flex flex-col gap-[40px] transition-colors duration-300 ease-out">
-          <section aria-labelledby="style-tag-list-title" className="flex flex-col gap-[10px]">
-            <h2
-              className={`px-[10px] ${font.headline2.semiBold}`}
-              id="style-tag-list-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              스타일 태그 목록
-            </h2>
-
-            <div className="flex flex-wrap gap-[4px]">
-              {isFetching && styleTags.length === 0 ? (
-                <p
-                  className={`px-[10px] py-[8px] ${font.label.regular}`}
-                  style={{ color: lightTheme.label.assistive }}
+        <div className="min-h-0 flex-1 overflow-y-auto transition-colors duration-300 ease-out no-scrollbar">
+          <div className="flex min-h-full flex-col">
+            <div className="flex flex-col gap-[40px]">
+              <section aria-labelledby="style-tag-list-title" className="flex flex-col gap-[10px]">
+                <h2
+                  className={`px-[10px] ${font.headline2.semiBold}`}
+                  id="style-tag-list-title"
+                  style={{ color: lightTheme.label.neutral }}
                 >
-                  스타일 태그를 불러오는 중입니다.
-                </p>
-              ) : (
-                styleTags.map(tag => (
-                  <StyleTagButton
-                    disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
-                    key={tag.id}
-                    label={tag.label}
-                    onClick={() => handleTagClick(tag.id)}
-                    status={tag.status}
-                  />
-                ))
-              )}
-            </div>
-          </section>
+                  스타일 태그 목록
+                </h2>
 
-          <section
-            aria-labelledby="selected-style-result-title"
-            className="flex flex-col gap-[10px]"
-          >
-            <h2
-              className={`px-[10px] ${font.headline2.semiBold}`}
-              id="selected-style-result-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              선택 결과
-            </h2>
+                <div className="flex flex-wrap gap-[4px]">
+                  {isFetching && styleTags.length === 0 ? (
+                    <p
+                      className={`px-[10px] py-[8px] ${font.label.regular}`}
+                      style={{ color: lightTheme.label.assistive }}
+                    >
+                      스타일 태그를 불러오는 중입니다.
+                    </p>
+                  ) : (
+                    styleTags.map(tag => (
+                      <StyleTagButton
+                        disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
+                        key={tag.id}
+                        label={tag.label}
+                        onClick={() => handleTagClick(tag.id)}
+                        status={tag.status}
+                      />
+                    ))
+                  )}
+                </div>
+              </section>
 
-            <div className="rounded-[15px]">
-              <div
-                className="border-b transition-all duration-200"
-                style={{ borderColor: lightTheme.label.disable }}
+              <section
+                aria-labelledby="selected-style-result-title"
+                className="flex flex-col gap-[10px]"
               >
-                <StyleTagResultRow
-                  isExpanded={isPreferredSummaryExpanded}
-                  label="선호 태그"
-                  onToggleExpand={handlePreferredSummaryToggle}
-                  status="preferred"
-                  tags={preferredTags}
-                />
-              </div>
+                <h2
+                  className={`px-[10px] ${font.headline2.semiBold}`}
+                  id="selected-style-result-title"
+                  style={{ color: lightTheme.label.neutral }}
+                >
+                  선택 결과
+                </h2>
 
-              <div className="transition-all duration-200">
-                <StyleTagResultRow
-                  isExpanded={isExcludedSummaryExpanded}
-                  label="제외 태그"
-                  onToggleExpand={handleExcludedSummaryToggle}
-                  status="excluded"
-                  tags={excludedTags}
-                />
-              </div>
+                <div className="rounded-[15px]">
+                  <div
+                    className="border-b transition-all duration-200"
+                    style={{ borderColor: lightTheme.label.disable }}
+                  >
+                    <StyleTagResultRow
+                      isExpanded={isPreferredSummaryExpanded}
+                      label="선호 태그"
+                      onToggleExpand={handlePreferredSummaryToggle}
+                      status="preferred"
+                      tags={preferredTags}
+                    />
+                  </div>
+
+                  <div className="transition-all duration-200">
+                    <StyleTagResultRow
+                      isExpanded={isExcludedSummaryExpanded}
+                      label="제외 태그"
+                      onToggleExpand={handleExcludedSummaryToggle}
+                      status="excluded"
+                      tags={excludedTags}
+                    />
+                  </div>
+                </div>
+              </section>
             </div>
 
-            <p
-              className={`mt-[31px] text-center ${font.label.regular}`}
-              style={{ color: lightTheme.label.neutral }}
-            >
-              ※제외한 스타일은 추천에 나오지 않아요.
-            </p>
-
-            {actionErrorMessage && (
-              <div className="mt-[12px] flex flex-col items-center gap-[8px]" role="alert">
-                <p
-                  className={`text-center ${font.caption.regular}`}
-                  style={{ color: lightTheme.status.error }}
-                >
-                  {actionErrorMessage}
-                </p>
-                {loadErrorMessage && (
-                  <button
-                    className={`h-[34px] rounded-[8px] border px-[14px] ${font.label.medium}`}
-                    onClick={handleRetry}
-                    style={{
-                      backgroundColor: lightTheme.background.normal,
-                      borderColor: lightTheme.fill.neutral,
-                      color: lightTheme.label.alternative,
-                    }}
-                    type="button"
+            <div className="flex min-h-[96px] flex-1 flex-col items-center justify-center gap-[8px] py-[18px]">
+              {actionErrorMessage && (
+                <div className="flex flex-col items-center gap-[8px]" role="alert">
+                  <p
+                    className={`text-center ${font.caption.regular}`}
+                    style={{ color: lightTheme.status.error }}
                   >
-                    다시 시도
-                  </button>
-                )}
-              </div>
-            )}
-          </section>
+                    {actionErrorMessage}
+                  </p>
+                  {loadErrorMessage && (
+                    <button
+                      className={`h-[34px] rounded-[8px] border px-[14px] ${font.label.medium}`}
+                      onClick={handleRetry}
+                      style={{
+                        backgroundColor: lightTheme.background.normal,
+                        borderColor: lightTheme.fill.neutral,
+                        color: lightTheme.label.alternative,
+                      }}
+                      type="button"
+                    >
+                      다시 시도
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <p
+                className={`text-center ${font.label.regular}`}
+                style={{ color: lightTheme.label.neutral }}
+              >
+                ※제외한 스타일은 추천에 나오지 않아요.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-[7px]">
-          <button
-            className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-            onClick={handleCancel}
-            style={{
-              backgroundColor: lightTheme.background.alternative,
-              borderColor: lightTheme.fill.neutral,
-              color: lightTheme.label.alternative,
-            }}
-            type="button"
-          >
-            취소
-          </button>
-          <button
-            className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
-            disabled={isSaveDisabled}
-            onClick={handleSave}
-            style={{
-              backgroundColor: isSaveDisabled ? lightTheme.fill.neutral : lightTheme.primary.normal,
-              color: lightTheme.label.buttonText,
-            }}
-            type="button"
-          >
-            {isSaving ? "저장 중" : "저장"}
-          </button>
+        <div className="shrink-0">
+          <div className="grid grid-cols-2 gap-[7px]">
+            <button
+              className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
+              onClick={handleCancel}
+              style={{
+                backgroundColor: lightTheme.background.alternative,
+                borderColor: lightTheme.fill.neutral,
+                color: lightTheme.label.alternative,
+              }}
+              type="button"
+            >
+              취소
+            </button>
+            <button
+              className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
+              disabled={isSaveDisabled}
+              onClick={handleSave}
+              style={{
+                backgroundColor: isSaveDisabled
+                  ? lightTheme.fill.neutral
+                  : lightTheme.primary.normal,
+                color: lightTheme.label.buttonText,
+              }}
+              type="button"
+            >
+              {isSaving ? "저장 중" : "저장"}
+            </button>
+          </div>
         </div>
       </div>
     </section>

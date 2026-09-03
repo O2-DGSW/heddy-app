@@ -86,6 +86,25 @@ export type TreatmentRecordDetailApiResponse = {
 };
 
 /**
+ * 시술기록 생성 요청
+ * - service_types와 performed_at은 새 기록을 만들 때 필요한 기본 정보다.
+ * - 선택 입력값은 비워 두면 null로 보내 서버에서 빈 값으로 저장한다.
+ * - price_amount와 price_currency는 함께 넣거나 함께 빼야 한다.
+ */
+export type CreateTreatmentRecordRequest = {
+  service_types: ServiceType[];
+  performed_at: string;
+  salon_name?: string | null;
+  designer_name?: string | null;
+  satisfaction?: number | null;
+  price_amount?: number | null;
+  price_currency?: string | null;
+  appointment_id?: string | null;
+  memo?: string | null;
+  next_visit_cautions?: string | null;
+};
+
+/**
  * 시술기록 부분 수정 요청
  * - 전달한 필드만 수정되고, nullable 필드에 null을 보내면 값이 지워진다.
  * - price_amount와 price_currency는 함께 넣거나 함께 빼야 한다.

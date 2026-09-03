@@ -25,12 +25,14 @@ type PlaceholderStyle = CSSProperties & {
 
 interface RecordDatePickerFieldProps {
   value: string;
+  errorMessage?: string;
   onChange: (date: string) => void;
 }
 
 const fieldStyle = {
   "--placeholder-color": lightTheme.line.normal,
   backgroundColor: lightTheme.background.neutral,
+  borderColor: "transparent",
   color: lightTheme.label.neutral,
 } satisfies PlaceholderStyle;
 
@@ -42,7 +44,7 @@ const confirmButtonStyle = {
 };
 
 const fieldClassName = cn(
-  "h-[53px] w-full rounded-[15px] border-0 px-[17px] outline-none",
+  "h-[53px] w-full rounded-[15px] border border-solid px-[17px] outline-none",
   font.body.regular
 );
 
@@ -63,12 +65,14 @@ const getCalendarDayStyle = (day: CalendarDay, isSelected: boolean): CSSProperti
   return { color: lightTheme.label.alternative };
 };
 
-const RecordDatePickerField = ({ value, onChange }: RecordDatePickerFieldProps) => {
+const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePickerFieldProps) => {
   const selectedYearRef = useRef<HTMLButtonElement>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
   const [draftDate, setDraftDate] = useState(DEFAULT_DATE_VALUE);
 
+  const hasError = Boolean(errorMessage);
+  const errorId = "record-date-error";
   const draftDateParts = parseDateValue(draftDate);
   const calendarDays = createCalendarDays(draftDateParts.year);
   const selectedDateLabel = value ? formatDateDisplay(value) : "입력";
@@ -139,16 +143,30 @@ const RecordDatePickerField = ({ value, onChange }: RecordDatePickerFieldProps) 
         날짜
       </h2>
       <button
+        aria-describedby={hasError ? errorId : undefined}
         aria-haspopup="dialog"
+        aria-invalid={hasError || undefined}
         aria-label="날짜 선택"
         className={cn(fieldClassName, "flex items-center justify-between pr-[17px] text-left")}
         onClick={handleOpenDatePicker}
-        style={fieldStyle}
+        style={{
+          ...fieldStyle,
+          borderColor: hasError ? lightTheme.status.error : fieldStyle.borderColor,
+        }}
         type="button"
       >
         <span style={{ color: selectedDateColor }}>{selectedDateLabel}</span>
         <img alt="" className="h-[24px] w-[24px]" src={dateIcon} />
       </button>
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
+      )}
 
       {isDatePickerOpen && (
         <div

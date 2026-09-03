@@ -1,5 +1,3 @@
-import recordPhoto from "../assets/result.png";
-
 import type { PhotoItem, RecordFieldConfig, RecordFormValues } from "./types";
 
 export const MAX_PHOTO_COUNT = 10;
@@ -42,11 +40,7 @@ export const INITIAL_FORM_VALUES: RecordFormValues = {
   details: "",
 };
 
-export const INITIAL_PHOTOS: PhotoItem[] = Array.from({ length: 5 }, (_, index) => ({
-  id: `initial-photo-${index + 1}`,
-  src: recordPhoto,
-  isObjectUrl: false,
-}));
+export const INITIAL_PHOTOS: PhotoItem[] = [];
 
 export const CALENDAR_DAY_TEMPLATES = [
   { month: 4, day: 27, label: "27", isCurrentMonth: false, tone: "mutedSunday" },

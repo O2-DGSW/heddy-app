@@ -6,18 +6,23 @@ import { starDisabledIcon, starIcon } from "../../assets";
 
 interface RecordRatingFieldProps {
   rating: number;
+  errorMessage?: string;
   onChange: (nextRating: number) => void;
 }
 
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 
-const RecordRatingField = ({ rating, onChange }: RecordRatingFieldProps) => {
+const RecordRatingField = ({ errorMessage, rating, onChange }: RecordRatingFieldProps) => {
+  const hasError = Boolean(errorMessage);
+  const errorId = "record-rating-error";
+
   return (
     <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         만족도
       </h2>
       <div
+        aria-describedby={hasError ? errorId : undefined}
         aria-label={`만족도 ${rating}점`}
         className="flex h-[59px] items-center justify-center"
         role="radiogroup"
@@ -43,6 +48,15 @@ const RecordRatingField = ({ rating, onChange }: RecordRatingFieldProps) => {
           </button>
         ))}
       </div>
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
+      )}
     </div>
   );
 };

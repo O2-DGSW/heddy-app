@@ -1,6 +1,8 @@
 export {
   mapDetailToFormValues,
+  mapDetailToPhotoItems,
   mapDetailToProcedureType,
+  mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   useRecordAddForm,
 } from "./model";

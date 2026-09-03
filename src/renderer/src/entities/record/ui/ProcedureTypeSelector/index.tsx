@@ -8,7 +8,8 @@ import type { CSSProperties } from "react";
 import type { ProcedureType } from "../../model";
 
 interface ProcedureTypeSelectorProps {
-  selectedProcedureType: ProcedureType;
+  selectedProcedureType: ProcedureType | null;
+  errorMessage?: string;
   onChange: (procedureType: ProcedureType) => void;
 }
 
@@ -18,13 +19,24 @@ const getProcedureButtonStyle = (isSelected: boolean): CSSProperties => ({
   color: isSelected ? lightTheme.primary.normal : lightTheme.label.alternative,
 });
 
-const ProcedureTypeSelector = ({ selectedProcedureType, onChange }: ProcedureTypeSelectorProps) => {
+const ProcedureTypeSelector = ({
+  errorMessage,
+  selectedProcedureType,
+  onChange,
+}: ProcedureTypeSelectorProps) => {
+  const hasError = Boolean(errorMessage);
+  const errorId = "record-procedure-type-error";
+
   return (
     <div className="flex w-full flex-col gap-[12px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         시술 종류
       </h2>
-      <div className="flex flex-wrap gap-[8px]">
+      <div
+        aria-describedby={hasError ? errorId : undefined}
+        aria-invalid={hasError || undefined}
+        className="flex flex-wrap gap-[8px]"
+      >
         {PROCEDURE_TYPES.map(procedureType => {
           const isSelected = selectedProcedureType === procedureType;
 
@@ -45,6 +57,15 @@ const ProcedureTypeSelector = ({ selectedProcedureType, onChange }: ProcedureTyp
           );
         })}
       </div>
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
+      )}
     </div>
   );
 };

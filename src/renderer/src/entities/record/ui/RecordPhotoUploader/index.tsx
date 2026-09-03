@@ -10,6 +10,7 @@ interface RecordPhotoUploaderProps {
   inputRef: RefObject<HTMLInputElement | null>;
   isPhotoLimitReached: boolean;
   photos: PhotoItem[];
+  errorMessage?: string;
   onOpenPhotoPicker: () => void;
   onPhotoSelection: (event: ChangeEvent<HTMLInputElement>) => void;
   onRemovePhoto: (photoId: string) => void;
@@ -23,6 +24,7 @@ const addPhotoButtonStyle = {
 const photoRemoveButtonStyle = { backgroundColor: lightTheme.background.normal };
 
 const RecordPhotoUploader = ({
+  errorMessage,
   inputRef,
   isPhotoLimitReached,
   photos,
@@ -30,6 +32,9 @@ const RecordPhotoUploader = ({
   onPhotoSelection,
   onRemovePhoto,
 }: RecordPhotoUploaderProps) => {
+  const hasError = Boolean(errorMessage);
+  const errorId = "record-photos-error";
+
   return (
     <div className="flex w-full flex-col gap-[6px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
@@ -48,11 +53,15 @@ const RecordPhotoUploader = ({
       <div className="w-[calc(100%+14px)] overflow-x-auto pb-[2px] scrollbar-hidden">
         <div className="flex w-max items-end gap-[11px]">
           <button
+            aria-describedby={hasError ? errorId : undefined}
             aria-label="사진 추가"
             className="flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-[10px] border border-solid p-0 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isPhotoLimitReached}
             onClick={onOpenPhotoPicker}
-            style={addPhotoButtonStyle}
+            style={{
+              ...addPhotoButtonStyle,
+              borderColor: hasError ? lightTheme.status.error : addPhotoButtonStyle.borderColor,
+            }}
             type="button"
           >
             <span className="flex w-[49px] flex-col items-center">
@@ -83,6 +92,16 @@ const RecordPhotoUploader = ({
           ))}
         </div>
       </div>
+
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
+      )}
     </div>
   );
 };

@@ -1,9 +1,11 @@
 import { createDateValue, parseDateValue } from "@/entities/record/model/date";
 import type { ProcedureType } from "@/entities/record/model/constants";
-import type { RecordFormValues } from "@/entities/record/model/types";
+import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
 import type {
+  CreateTreatmentRecordRequest,
   ServiceType,
   TreatmentRecordDetailApiData,
+  TreatmentRecordPhotoApiData,
   UpdateTreatmentRecordRequest,
 } from "@/entities/record/model/treatmentRecord.types";
 
@@ -47,12 +49,23 @@ const toPerformedAt = (formDate: string) => {
   return performedDate.toISOString();
 };
 
+const getTodayDateValue = () => {
+  const today = new Date();
+
+  return createDateValue(today.getFullYear(), today.getMonth() + 1, today.getDate());
+};
+
 /** 숫자만 남겨 가격으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
 const toPriceAmount = (price: string) => {
   const digitsOnly = price.replace(/[^0-9]/g, "");
 
   return digitsOnly ? Number(digitsOnly) : null;
 };
+
+const hasPhotoUrl = (
+  photo: TreatmentRecordPhotoApiData
+): photo is TreatmentRecordPhotoApiData & { photo_url: string } =>
+  typeof photo.photo_url === "string" && photo.photo_url.length > 0;
 
 /** 서버 상세 응답을 수정 폼의 초기값으로 바꾼다 */
 export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): RecordFormValues => ({
@@ -70,6 +83,16 @@ export const mapDetailToProcedureType = (
   detail: TreatmentRecordDetailApiData
 ): ProcedureType | undefined =>
   detail.service_types.map(type => PROCEDURE_TYPE_BY_SERVICE_TYPE[type]).find(Boolean);
+
+export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): PhotoItem[] =>
+  [...(detail.photos ?? [])]
+    .filter(hasPhotoUrl)
+    .sort((firstPhoto, secondPhoto) => firstPhoto.sort_order - secondPhoto.sort_order)
+    .map(photo => ({
+      id: photo.photo_id,
+      src: photo.photo_url,
+      isObjectUrl: false,
+    }));
 
 /**
  * 폼 값을 수정 요청 본문으로 바꾼다.
@@ -89,6 +112,26 @@ export const mapFormValuesToUpdateRequest = (
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),
     // 서버가 1~5만 받으므로 그 밖의 값은 보내지 않는다.
     ...(rating >= 1 && rating <= 5 ? { satisfaction: rating } : {}),
+    price_amount: priceAmount,
+    price_currency: priceAmount === null ? null : PRICE_CURRENCY,
+    memo: formValues.details.trim() || null,
+  };
+};
+
+export const mapFormValuesToCreateRequest = (
+  formValues: RecordFormValues,
+  procedureType: ProcedureType,
+  rating: number
+): CreateTreatmentRecordRequest => {
+  const priceAmount = toPriceAmount(formValues.price);
+  const performedAtDate = formValues.date || getTodayDateValue();
+
+  return {
+    service_types: [SERVICE_TYPE_BY_PROCEDURE_TYPE[procedureType]],
+    performed_at: toPerformedAt(performedAtDate),
+    salon_name: formValues.salon.trim() || null,
+    designer_name: formValues.designer.trim() || null,
+    satisfaction: rating >= 1 && rating <= 5 ? rating : null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,
     memo: formValues.details.trim() || null,

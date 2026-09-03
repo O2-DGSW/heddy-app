@@ -7,6 +7,7 @@ import { arrowIcon, useGetTreatmentRecord, useUpdateTreatmentRecord } from "@/en
 import {
   RecordAddForm,
   mapDetailToFormValues,
+  mapDetailToPhotoItems,
   mapDetailToProcedureType,
   mapFormValuesToUpdateRequest,
 } from "@/features/record-add";
@@ -28,6 +29,10 @@ const RecordEditPage = () => {
   );
   const initialProcedureType = useMemo(
     () => (record ? mapDetailToProcedureType(record) : undefined),
+    [record]
+  );
+  const initialPhotos = useMemo(
+    () => (record ? mapDetailToPhotoItems(record) : undefined),
     [record]
   );
 
@@ -99,6 +104,7 @@ const RecordEditPage = () => {
               <RecordAddForm
                 mode="edit"
                 initialProcedureType={initialProcedureType}
+                initialPhotos={initialPhotos}
                 initialRating={record?.satisfaction ?? undefined}
                 initialValues={initialValues}
                 isSubmitting={updateRecord.isPending}
