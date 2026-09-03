@@ -14,7 +14,7 @@ import type {
 
 const createPhotoFormData = ({
   file,
-  image_type = "OTHER",
+  image_type = "AFTER",
   sort_order,
 }: AddTreatmentRecordPhotoRequest) => {
   const formData = new FormData();

@@ -33,6 +33,7 @@ export type TreatmentRecordSummaryApiData = {
   service_types?: ServiceType[];
   satisfaction?: number | null;
   thumbnail_url?: string | null;
+  photos?: TreatmentRecordPhotoApiData[];
   analysis_status?: string | null;
 };
 
@@ -94,7 +95,7 @@ export type TreatmentRecordPhotoApiResponse = {
 /**
  * 시술기록 사진 추가 요청
  * - 파일 업로드라 multipart/form-data로 보낸다.
- * - 현재 폼에는 전/후/기타 선택이 없으므로 기본 image_type은 OTHER를 쓴다.
+ * - 현재 폼 사진은 시술 결과 사진으로 쓰이므로 기본 image_type은 AFTER를 쓴다.
  */
 export type AddTreatmentRecordPhotoRequest = {
   file: File;

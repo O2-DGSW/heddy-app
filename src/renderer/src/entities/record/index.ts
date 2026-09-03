@@ -20,6 +20,7 @@ export {
   createDateValue,
   formatDateDisplay,
   getDaysInMonth,
+  getTreatmentRecordThumbnailUrl,
   getTodayDateValue,
   parseDateValue,
 } from "./model";

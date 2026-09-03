@@ -98,7 +98,7 @@ export const mapPhotoItemsToAddRequests = (photos: PhotoItem[]): AddTreatmentRec
       ? [
           {
             file: photo.file,
-            image_type: "OTHER",
+            image_type: "AFTER",
             sort_order: index,
           },
         ]

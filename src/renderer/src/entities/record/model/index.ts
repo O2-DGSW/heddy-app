@@ -16,6 +16,7 @@ export {
   getTodayDateValue,
   parseDateValue,
 } from "./date";
+export { getTreatmentRecordThumbnailUrl } from "./photo";
 export type {
   CalendarDay,
   PhotoItem,
