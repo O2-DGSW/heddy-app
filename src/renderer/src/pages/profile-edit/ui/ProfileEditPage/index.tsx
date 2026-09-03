@@ -104,7 +104,7 @@ const ProfileEditPage = () => {
           <div className="mx-auto flex w-full max-w-[402px] flex-1 flex-col px-[clamp(20px,6.47vw,26px)] pb-[28px] pt-[35px]">
             <div className="flex flex-col items-center">
               <div
-                className="flex h-[86px] w-[86px] items-center justify-center rounded-full p-[8px]"
+                className="flex h-[86px] w-[86px] items-center justify-center rounded-full p-[14px]"
                 style={{ backgroundColor: lightTheme.background.neutral }}
               >
                 <img
