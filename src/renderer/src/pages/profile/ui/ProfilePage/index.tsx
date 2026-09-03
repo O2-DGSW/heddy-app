@@ -4,11 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetShares } from "@/entities/share";
+import { chevronRightIcon, profileAvatar } from "@/shared";
 
-import arrowRightIcon from "../../assets/arrow-right.svg";
 import bookmarkIcon from "../../assets/bookmark.svg";
 import heartIcon from "../../assets/heart.svg";
-import profileAvatar from "../../assets/profile-avatar.png";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
 import { useProfile } from "../../model/useProfile";
@@ -32,7 +31,7 @@ const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     to: "/profile/preferred-style",
     isAvailable: true,
   },
-  { icon: settingsIcon, label: "회원정보 수정", isAvailable: false },
+  { icon: settingsIcon, label: "회원정보 수정", to: "/profile/edit", isAvailable: true },
   {
     icon: sharePermissionsIcon,
     label: "공유 권한 관리",
@@ -62,7 +61,7 @@ const ProfileMenuRow = ({ item, onClick }: ProfileMenuRowProps) => {
       <img
         alt=""
         className="h-[14px] w-[14px] shrink-0"
-        src={arrowRightIcon}
+        src={chevronRightIcon}
         style={{ transform: "rotate(180deg)" }}
       />
     </>
