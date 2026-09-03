@@ -15,7 +15,7 @@ import { useProfile } from "../../model/useProfile";
 
 interface ProfileStat {
   label: string;
-  value: number | null;
+  value: number;
 }
 
 interface ProfileMenuItem {
@@ -105,8 +105,8 @@ const ProfilePage = () => {
   const profileName = getProfileName(profile?.nickname, isLoading);
   const profileStats: ProfileStat[] = [
     { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
-    { label: "AI 분석", value: null },
-    { label: "AR 후보", value: null },
+    { label: "AI 분석", value: 0 },
+    { label: "AR 후보", value: 0 },
     { label: "공유 중", value: getProfileStatCount(shares?.page?.total_elements) },
   ];
 
@@ -144,14 +144,8 @@ const ProfilePage = () => {
                 {profileStats.map(stat => (
                   <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
                     <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
-                      {stat.value === null ? (
-                        <span style={{ color: lightTheme.label.alternative }}>-</span>
-                      ) : (
-                        <>
-                          <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
-                          <span style={{ color: lightTheme.label.alternative }}>건</span>
-                        </>
-                      )}
+                      <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
+                      <span style={{ color: lightTheme.label.alternative }}>건</span>
                     </dd>
                     <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
                       {stat.label}
