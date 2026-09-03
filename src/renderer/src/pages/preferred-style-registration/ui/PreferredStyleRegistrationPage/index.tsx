@@ -31,6 +31,7 @@ const PreferredStyleRegistrationPage = () => {
     preferredTags,
     styleTags,
   } = usePreferredStyleRegistration();
+  const isResultSummaryExpanded = isPreferredSummaryExpanded || isExcludedSummaryExpanded;
 
   return (
     <section
@@ -100,7 +101,12 @@ const PreferredStyleRegistrationPage = () => {
         className="flex min-h-0 flex-1 flex-col px-[clamp(16px,4.4vw,19px)] pb-[clamp(18px,3.6dvh,29px)] pt-[clamp(18px,3.6dvh,29px)]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
-        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain transition-colors duration-300 ease-out no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <div
+          className={cn(
+            "min-h-0 flex-1 touch-pan-y overscroll-contain transition-colors duration-300 ease-out no-scrollbar [-webkit-overflow-scrolling:touch]",
+            isResultSummaryExpanded ? "overflow-y-scroll" : "overflow-hidden"
+          )}
+        >
           <div className="flex min-h-full flex-col">
             <div className="flex shrink-0 flex-col gap-[clamp(24px,4.4dvh,40px)]">
               <section aria-labelledby="style-tag-list-title" className="flex flex-col gap-[10px]">
