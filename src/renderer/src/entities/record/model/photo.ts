@@ -10,8 +10,11 @@ type TreatmentRecordThumbnailSource = Pick<
 
 const hasPhotoUrl = (
   photo: TreatmentRecordPhotoApiData
-): photo is TreatmentRecordPhotoApiData & { photo_url: string } =>
-  typeof photo.photo_url === "string" && photo.photo_url.length > 0;
+): photo is TreatmentRecordPhotoApiData & ({ display_url: string } | { photo_url: string }) =>
+  getTreatmentRecordPhotoDisplayUrl(photo).length > 0;
+
+export const getTreatmentRecordPhotoDisplayUrl = (photo: TreatmentRecordPhotoApiData) =>
+  photo.display_url || photo.photo_url || "";
 
 export const getTreatmentRecordThumbnailUrl = ({
   photos,
@@ -26,5 +29,9 @@ export const getTreatmentRecordThumbnailUrl = ({
     .sort((a, b) => a.sort_order - b.sort_order);
   const afterPhoto = usablePhotos.find(photo => photo.image_type === "AFTER");
 
-  return afterPhoto?.photo_url ?? usablePhotos[0]?.photo_url ?? "";
+  return afterPhoto
+    ? getTreatmentRecordPhotoDisplayUrl(afterPhoto)
+    : usablePhotos[0]
+      ? getTreatmentRecordPhotoDisplayUrl(usablePhotos[0])
+      : "";
 };

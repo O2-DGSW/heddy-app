@@ -59,6 +59,9 @@ export type TreatmentRecordPhotoApiData = {
   photo_id: string;
   image_type: TreatmentRecordPhotoImageType;
   sort_order: number;
+  /** 조회 시점에 발급되는 짧은 만료의 Presigned GET URL */
+  display_url?: string | null;
+  /** 이전 응답 호환용 */
   photo_url?: string | null;
 };
 
@@ -92,13 +95,52 @@ export type TreatmentRecordPhotoApiResponse = {
   request_id: string;
 };
 
+export type UploadPurpose = "TREATMENT_PHOTO" | "AR_CAPTURE";
+
+export type PresignUploadRequest = {
+  purpose: UploadPurpose;
+  content_type: string;
+  file_name: string;
+  file_size: number;
+  sha256: string;
+};
+
+export type PresignUploadApiData = {
+  upload_id: string;
+  file_id: string;
+  upload_url: string;
+  required_headers: Record<string, string>;
+  expires_at: string;
+};
+
+export type PresignUploadApiResponse = {
+  data: PresignUploadApiData;
+  request_id: string;
+};
+
+export type CompleteUploadApiData = {
+  file_id: string;
+  status: "READY" | string;
+};
+
+export type CompleteUploadApiResponse = {
+  data: CompleteUploadApiData;
+  request_id: string;
+};
+
 /**
  * 시술기록 사진 추가 요청
- * - 파일 업로드라 multipart/form-data로 보낸다.
+ * - 파일은 Presigned URL로 S3에 직접 업로드한 뒤, READY file_id를 기록에 연결한다.
  * - 현재 폼 사진은 시술 결과 사진으로 쓰이므로 기본 image_type은 AFTER를 쓴다.
  */
 export type AddTreatmentRecordPhotoRequest = {
   file: File;
+  image_type?: TreatmentRecordPhotoImageType;
+  sort_order?: number;
+};
+
+export type ConnectTreatmentRecordPhotoRequest = {
+  file_id: string;
   image_type?: TreatmentRecordPhotoImageType;
   sort_order?: number;
 };
