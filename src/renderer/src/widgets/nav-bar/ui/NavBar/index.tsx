@@ -20,7 +20,7 @@ const NavBar = () => {
     // 없는 기기(홈버튼 iPhone 등)에서 라벨 텍스트가 실기기에서 잘리지 않도록 하는 여유분이다.
     <nav
       aria-label="하단 메뉴"
-      className="flex w-full items-start justify-center gap-[clamp(34px,10.95vw,44px)] pb-[max(16px,var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] pt-[16px] shadow-[0_-2px_6px_rgba(0,0,0,0.05)]"
+      className="flex w-full items-start justify-center gap-[clamp(16px,calc((100vw_-_175px)_/_4),44px)] overflow-hidden rounded-t-[20px] pb-[max(16px,var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] pt-[16px] shadow-[0_-2px_6px_rgba(0,0,0,0.05)]"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       {NAV_ITEMS.map(({ Icon, iconClassName, title, to }) => {
