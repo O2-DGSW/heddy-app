@@ -16,6 +16,7 @@ import RecordDatePickerField from "../RecordDatePickerField";
 
 export interface RecordFormSubmitValues {
   formValues: RecordFormValues;
+  photos: PhotoItem[];
   procedureType: ProcedureType;
   rating: number;
 }
@@ -81,7 +82,7 @@ const RecordAddForm = ({
         return;
       }
 
-      onSubmitValues?.({ formValues, procedureType: selectedProcedureType, rating });
+      onSubmitValues?.({ formValues, photos, procedureType: selectedProcedureType, rating });
     },
   });
 

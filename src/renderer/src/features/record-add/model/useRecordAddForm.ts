@@ -77,6 +77,7 @@ export const useRecordAddForm = ({
       objectUrlsRef.current.add(src);
 
       return {
+        file,
         id,
         src,
         isObjectUrl: true,

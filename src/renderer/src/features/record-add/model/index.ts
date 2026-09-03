@@ -5,4 +5,5 @@ export {
   mapDetailToProcedureType,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
+  mapPhotoItemsToAddRequests,
 } from "./mapRecordForm";

@@ -24,6 +24,7 @@ export {
   parseDateValue,
 } from "./model";
 export type {
+  AddTreatmentRecordPhotoRequest,
   AnalysisApiData,
   AnalysisApiResponse,
   AnalysisGrade,
@@ -46,12 +47,15 @@ export type {
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
   TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
+  TreatmentRecordPhotoImageType,
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
   UpdateTreatmentRecordRequest,
 } from "./model";
 export {
+  addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
   getLatestAnalysisApi,
   getTreatmentRecordApi,
@@ -60,6 +64,7 @@ export {
 } from "./api";
 export {
   recordQueryKeys,
+  useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,

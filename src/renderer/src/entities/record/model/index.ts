@@ -35,6 +35,7 @@ export type {
   AnalysisStatus,
 } from "./analysis.types";
 export type {
+  AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
   PageApiData,
   ServiceType,
@@ -44,6 +45,8 @@ export type {
   TreatmentRecordListApiResponse,
   TreatmentRecordListParams,
   TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
+  TreatmentRecordPhotoImageType,
   TreatmentRecordPriceApiData,
   TreatmentRecordSort,
   TreatmentRecordSummaryApiData,
