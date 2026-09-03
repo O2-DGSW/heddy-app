@@ -26,13 +26,16 @@ const StyleTagResultRow = ({
   const displayTags = isExpanded ? tags : visibleTags;
 
   return (
-    <div className="flex flex-col gap-[14px] px-[14px] py-[14px]">
-      <div className="flex min-h-[26px] items-center justify-between gap-[12px]">
-        <span className={font.body.medium} style={{ color: lightTheme.label.inactive }}>
+    <div className="flex flex-col gap-[14px] px-[clamp(10px,3.2vw,14px)] py-[14px]">
+      <div className="flex min-h-[26px] flex-wrap items-start justify-between gap-x-[12px] gap-y-[8px]">
+        <span
+          className={cn(font.body.medium, "shrink-0 leading-[26px]")}
+          style={{ color: lightTheme.label.inactive }}
+        >
           {label}
         </span>
 
-        <div className="flex flex-wrap items-center justify-end gap-[4px]">
+        <div className="ml-auto flex min-w-0 max-w-full flex-1 flex-wrap items-center justify-end gap-[4px]">
           {!isExpanded &&
             displayTags.map(tag => (
               <StyleTagButton key={tag.id} label={tag.label} status={status} />
@@ -63,7 +66,7 @@ const StyleTagResultRow = ({
       </div>
 
       {isExpanded && (
-        <div className="flex flex-wrap gap-[4px] transition-opacity duration-200">
+        <div className="flex max-h-[min(156px,28dvh)] flex-wrap gap-[4px] overflow-y-auto overscroll-contain transition-opacity duration-200 no-scrollbar [-webkit-overflow-scrolling:touch]">
           {displayTags.map(tag => (
             <StyleTagButton key={tag.id} label={tag.label} status={status} />
           ))}
