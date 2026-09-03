@@ -25,7 +25,7 @@ const RecentRecordCard = ({
           최근 시술 기록
         </span>
 
-        <span className="block h-[clamp(58px,11svh,95px)] shrink-0 overflow-hidden rounded-[12px]">
+        <span className="block h-[clamp(72px,12svh,108px)] shrink-0 overflow-hidden rounded-[12px]">
           {hasRecord ? (
             <CroppedHairImage
               alt={`${record?.procedureName ?? "최근"} 시술 사진`}

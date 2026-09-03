@@ -70,7 +70,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        <div className="mx-auto mt-[clamp(18px,3.8svh,32px)] grid h-[clamp(168px,27svh,228px)] w-[calc(100%_-_42px)] max-w-[360px] grid-cols-[minmax(0,1.041fr)_minmax(0,1fr)] gap-[clamp(8px,2.8vw,12px)]">
+        <div className="mx-auto mt-[clamp(18px,3.8svh,32px)] grid h-[clamp(188px,30svh,248px)] w-[calc(100%_-_42px)] max-w-[360px] grid-cols-[minmax(0,1.041fr)_minmax(0,1fr)] gap-[clamp(8px,2.8vw,12px)]">
           <RecentRecordCard
             record={recentRecord}
             isLoading={isRecentRecordPending}
