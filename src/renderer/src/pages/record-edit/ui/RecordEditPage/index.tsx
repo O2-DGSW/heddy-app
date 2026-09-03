@@ -1,11 +1,12 @@
 import { useMemo } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
   arrowIcon,
-  useAddTreatmentRecordPhotos,
+  recordQueryKeys,
   useGetTreatmentRecord,
   useUpdateTreatmentRecord,
 } from "@/entities/record";
@@ -15,7 +16,7 @@ import {
   mapDetailToPhotoItems,
   mapDetailToProcedureType,
   mapFormValuesToUpdateRequest,
-  mapPhotoItemsToAddRequests,
+  syncRecordPhotos,
 } from "@/features/record-add";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
@@ -28,7 +29,16 @@ const RecordEditPage = () => {
   const { id } = useParams();
   const { data: record, isPending, isError, error } = useGetTreatmentRecord(id);
   const updateRecord = useUpdateTreatmentRecord();
-  const addRecordPhotos = useAddTreatmentRecordPhotos();
+  const queryClient = useQueryClient();
+
+  // 사진은 삭제·순서 변경·추가가 섞여 여러 번 호출되므로 한 묶음으로 처리하고, 끝나면 기록을 다시 읽는다.
+  const syncPhotos = useMutation({
+    mutationFn: syncRecordPhotos,
+    onSuccess: (_result, { recordId }) => {
+      void queryClient.invalidateQueries({ queryKey: recordQueryKeys.detail(recordId) });
+      void queryClient.invalidateQueries({ queryKey: recordQueryKeys.lists() });
+    },
+  });
 
   const initialValues = useMemo(
     () => (record ? mapDetailToFormValues(record) : undefined),
@@ -48,8 +58,8 @@ const RecordEditPage = () => {
     navigate(-1);
   };
 
-  const submitErrorMessage = updateRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
-  const isSubmitting = updateRecord.isPending || addRecordPhotos.isPending;
+  const submitErrorMessage = updateRecord.error?.message ?? syncPhotos.error?.message ?? null;
+  const isSubmitting = updateRecord.isPending || syncPhotos.isPending;
 
   const handleSubmit = async ({
     formValues,
@@ -61,17 +71,13 @@ const RecordEditPage = () => {
       return;
     }
 
-    const photoRequests = mapPhotoItemsToAddRequests(photos);
-
     try {
       await updateRecord.mutateAsync({
         recordId: id,
         body: mapFormValuesToUpdateRequest(formValues, procedureType, rating),
       });
 
-      if (photoRequests.length > 0) {
-        await addRecordPhotos.mutateAsync({ recordId: id, photos: photoRequests });
-      }
+      await syncPhotos.mutateAsync({ recordId: id, initialPhotos: initialPhotos ?? [], photos });
 
       handleClose();
     } catch {
