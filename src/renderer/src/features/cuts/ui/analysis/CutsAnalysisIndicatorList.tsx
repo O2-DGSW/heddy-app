@@ -21,6 +21,7 @@ export const CutsAnalysisIndicatorList = ({ indicators }: CutsAnalysisIndicatorL
             label={indicator.label}
             score={indicator.score}
             confidence={indicator.confidence}
+            higherIsBetter={indicator.higherIsBetter}
           />
         ))}
       </div>

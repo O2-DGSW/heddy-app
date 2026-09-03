@@ -1,20 +1,16 @@
-import { useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CutsShareItemToggle } from "@/features/cuts/ui/share/CutsShareItemToggle";
 import { CUTS_SHARE_ITEMS } from "@/features/cuts/constrants/shareItems";
+import type { ShareFieldType } from "@/entities/share";
 
-export const CutsShareItemList = () => {
-  const [enabledIds, setEnabledIds] = useState<string[]>(
-    CUTS_SHARE_ITEMS.filter(item => item.defaultEnabled).map(item => item.id)
-  );
+interface CutsShareItemListProps {
+  /** 선택한 노출 항목. 그대로 공유 생성 요청의 fields로 나간다 */
+  selectedFields: ShareFieldType[];
+  onToggle: (field: ShareFieldType) => void;
+}
 
-  const handleToggle = (itemId: string) => {
-    setEnabledIds(current =>
-      current.includes(itemId) ? current.filter(id => id !== itemId) : [...current, itemId]
-    );
-  };
-
+export const CutsShareItemList = ({ selectedFields, onToggle }: CutsShareItemListProps) => {
   return (
     <section className="flex flex-col gap-4 px-4 pt-6">
       <h2 className={font.headline2.bold} style={{ color: lightTheme.label.neutral }}>
@@ -33,8 +29,8 @@ export const CutsShareItemList = () => {
             </span>
             <CutsShareItemToggle
               label={item.label}
-              checked={enabledIds.includes(item.id)}
-              onToggle={() => handleToggle(item.id)}
+              checked={selectedFields.includes(item.id)}
+              onToggle={() => onToggle(item.id)}
             />
           </div>
         ))}

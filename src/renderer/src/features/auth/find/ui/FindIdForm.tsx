@@ -20,7 +20,6 @@ export const FindIdForm = () => {
         style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
       >
         {[
-          { label: "로그인", path: "/login", isActive: false },
           { label: "아이디 찾기", path: "/find-id", isActive: true },
           { label: "비밀번호 찾기", path: "/find-password", isActive: false },
         ].map(({ label, path, isActive }) => (
@@ -29,6 +28,7 @@ export const FindIdForm = () => {
             className={`flex-1 pt-3 flex flex-col items-center ${font.body.bold}`}
             style={{ color: isActive ? lightTheme.label.normal : lightTheme.label.assistive }}
             onClick={() => !isActive && navigate(path, { replace: true })}
+            type="button"
           >
             <span className="pb-3">{label}</span>
             <div
@@ -46,7 +46,7 @@ export const FindIdForm = () => {
           </p>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={{
                 backgroundColor: lightTheme.background.neutral,
                 color: lightTheme.label.normal,
@@ -64,12 +64,13 @@ export const FindIdForm = () => {
                 color: canRequestVerification ? lightTheme.fill.normal : lightTheme.line.normal,
               }}
               disabled={!canRequestVerification}
+              type="button"
             >
               인증번호
             </button>
           </div>
           <input
-            className={`w-full px-4 py-4 rounded-xl focus:outline-none mb-3 ${font.caption.regular}`}
+            className={`w-full px-4 py-4 rounded-xl focus:outline-none mb-3 ${font.body.regular}`}
             style={{
               backgroundColor: lightTheme.background.neutral,
               color: lightTheme.label.normal,
@@ -89,6 +90,7 @@ export const FindIdForm = () => {
             color: canSubmit ? lightTheme.fill.normal : lightTheme.line.normal,
           }}
           disabled={!canSubmit}
+          type="button"
         >
           아이디 찾기
         </button>

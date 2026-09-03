@@ -1,16 +1,19 @@
 import { useState } from "react";
 import type { BaseAccountForm } from "@/features/auth/signup/model/types.ts";
-import { isValidPhone, isPasswordMatch } from "./validation";
+import { isValidPhone, isPasswordMatch, isRequiredSignupAgreementsAccepted } from "./validation";
 
 export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
   const [submitted, setSubmitted] = useState(false);
+
+  const areRequiredAgreementsAccepted = isRequiredSignupAgreementsAccepted(form.agreements);
 
   const isValid =
     !!form.id &&
     !!form.name &&
     isPasswordMatch(form.password, form.passwordConfirm) &&
     isValidPhone(form.phone) &&
-    extraValid;
+    extraValid &&
+    areRequiredAgreementsAccepted;
 
   const canRequestVerification =
     !!form.id &&
@@ -24,12 +27,15 @@ export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
 
   const showNameError = submitted && !form.name;
 
+  const showAgreementError = submitted && !areRequiredAgreementsAccepted;
+
   return {
     isValid,
     canRequestVerification,
     showPasswordError,
     showPhoneError,
     showNameError,
+    showAgreementError,
     submitted,
     setSubmitted,
   };

@@ -13,8 +13,10 @@ import {
   isCutsCategory,
   type CutsCategoryFilterValue,
 } from "@/features/cuts/constrants/categories";
-import { dummyCutsRecords } from "@/features/cuts/constrants/dummyRecords";
-import { useHorizontalSwipe } from "@/shared";
+import { useCutsRecords } from "@/features/cuts/model/hooks/useCutsRecords";
+import { SERVICE_TYPE_BY_CATEGORY } from "@/features/cuts/model/mapTreatmentRecord";
+import { CutsRecordListStatus } from "@/features/cuts/ui/CutsRecordListStatus";
+import { CutsLoadMoreTrigger } from "@/features/cuts/ui/CutsLoadMoreTrigger";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
 const matchesStatusFilter = (record: CutsRecord, statusFilter: CutsStatusFilter) => {
@@ -34,15 +36,25 @@ export const CutsListPage = () => {
   const [statusFilter, setStatusFilter] = useState<CutsStatusFilter>(CUTS_TABS[0].label);
   const [categoryFilter, setCategoryFilter] = useState<CutsCategoryFilterValue>(CUTS_CATEGORIES[0]);
 
-  const filteredRecords = useMemo(
-    () =>
-      dummyCutsRecords.filter(record => {
-        const matchesCategory =
-          !isCutsCategory(categoryFilter) || record.category === categoryFilter;
+  // 카테고리는 서버가 걸러 주고, 분석 상태는 조회 조건이 없어 받아온 목록에서 거른다.
+  const {
+    records,
+    isPending,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCutsRecords({
+    serviceType: isCutsCategory(categoryFilter)
+      ? SERVICE_TYPE_BY_CATEGORY[categoryFilter]
+      : undefined,
+  });
 
-        return matchesCategory && matchesStatusFilter(record, statusFilter);
-      }),
-    [statusFilter, categoryFilter]
+  const filteredRecords = useMemo(
+    () => records.filter(record => matchesStatusFilter(record, statusFilter)),
+    [records, statusFilter]
   );
 
   const handleRecordClick = (record: CutsRecord) => {
@@ -50,26 +62,10 @@ export const CutsListPage = () => {
     navigate(`/cuts/${record.id}`);
   };
 
-  /** 좌우 스와이프로 상태 탭을 넘긴다 (양 끝에서는 더 넘어가지 않는다) */
-  const moveTab = (offset: number) => {
-    const nextIndex = CUTS_TABS.findIndex(({ label }) => label === statusFilter) + offset;
-
-    if (nextIndex < 0 || nextIndex >= CUTS_TABS.length) {
-      return;
-    }
-
-    setStatusFilter(CUTS_TABS[nextIndex].label);
-  };
-
-  const contentSwipeProps = useHorizontalSwipe({
-    onSwipeLeft: () => moveTab(1),
-    onSwipeRight: () => moveTab(-1),
-  });
-
   return (
     <cap-page>
       <CutsLayout
-        contentSwipeProps={contentSwipeProps}
+        floatingAction={<CutsAddButton />}
         header={
           <>
             <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
@@ -77,8 +73,18 @@ export const CutsListPage = () => {
           </>
         }
       >
-        <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
-        <CutsAddButton />
+        {isPending || isError ? (
+          <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
+        ) : (
+          <>
+            <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+            <CutsLoadMoreTrigger
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
+          </>
+        )}
       </CutsLayout>
     </cap-page>
   );

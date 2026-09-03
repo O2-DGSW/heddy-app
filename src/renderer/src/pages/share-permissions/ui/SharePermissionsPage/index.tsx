@@ -1,102 +1,45 @@
 import { font, lightTheme, palette } from "@heddy/design-tokens";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { arrowIcon } from "@/entities/record";
 import { cn } from "@/shared";
 
-interface SharePermissionItem {
-  id: string;
-  title: string;
-  description: string;
-  enabled: boolean;
-}
-
-interface SharePermissionSection {
-  id: string;
-  title: string;
-  items: SharePermissionItem[];
-}
+import { useSharePermissions } from "../../model/useSharePermissions";
+import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
 
 interface PermissionToggleProps {
   checked: boolean;
+  disabled?: boolean;
   label: string;
   onToggle: () => void;
 }
 
 interface PermissionRowProps {
+  disabled?: boolean;
   item: SharePermissionItem;
   onToggle: (itemId: string) => void;
 }
 
 interface PermissionSectionProps {
+  disabled?: boolean;
   section: SharePermissionSection;
   onToggle: (itemId: string) => void;
 }
 
-const INITIAL_SECTIONS: SharePermissionSection[] = [
-  {
-    id: "agreement",
-    title: "동의 항목",
-    items: [
-      {
-        id: "ai-training",
-        title: "AI 학습 활용 동의",
-        description: "내 사진 및 시술 기록을 모델 학습에 활용",
-        enabled: true,
-      },
-      {
-        id: "service-analysis",
-        title: "서비스 분석 동의",
-        description: "서비스 개선을 위한 통계 분석에 활용",
-        enabled: true,
-      },
-      {
-        id: "notification",
-        title: "알림 수신 동의",
-        description: "분석 완료 및 공유 만료 알림 수신",
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "default",
-    title: "기록 공유 기본 설정",
-    items: [
-      {
-        id: "auto-share",
-        title: "새 기록 자동 공유",
-        description: "끄면 매번 공유할 기록을 직접 선택합니다",
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "record-status",
-    title: "기록별 공유 상태",
-    items: [
-      {
-        id: "record-color-2026-07-18",
-        title: "2026-07-18 염색",
-        description: "준어헤어 강남점 · 만료 5일 남음",
-        enabled: true,
-      },
-      {
-        id: "record-perm-2026-05-02",
-        title: "2026-05-02 펌",
-        description: "공유 중 아님",
-        enabled: true,
-      },
-    ],
-  },
-];
-
-const PermissionToggle = ({ checked, label, onToggle }: PermissionToggleProps) => {
+const PermissionToggle = ({
+  checked,
+  disabled = false,
+  label,
+  onToggle,
+}: PermissionToggleProps) => {
   return (
     <button
       aria-label={`${label} ${checked ? "끄기" : "켜기"}`}
       aria-pressed={checked}
-      className="relative h-[27px] w-[45px] shrink-0 rounded-[14px] border-0 p-0 transition-colors duration-200"
+      className={cn(
+        "relative h-[27px] w-[45px] shrink-0 rounded-[14px] border-0 p-0 transition-colors duration-200",
+        disabled && "cursor-not-allowed"
+      )}
+      disabled={disabled}
       onClick={onToggle}
       style={{
         backgroundColor: checked ? lightTheme.primary.normal : lightTheme.line.neutral,
@@ -114,14 +57,15 @@ const PermissionToggle = ({ checked, label, onToggle }: PermissionToggleProps) =
   );
 };
 
-const PermissionRow = ({ item, onToggle }: PermissionRowProps) => {
+const PermissionRow = ({ disabled = false, item, onToggle }: PermissionRowProps) => {
   const handleToggle = () => {
     onToggle(item.id);
   };
+  const canToggle = item.canToggle ?? true;
 
   return (
-    <div className="flex w-full items-center justify-between gap-[16px]">
-      <div className="min-w-0 flex-1">
+    <div className="flex w-full items-start justify-between gap-[clamp(12px,3.2vw,16px)]">
+      <div className="min-w-0 flex-1 pt-[2px]">
         <p className={font.body.medium} style={{ color: lightTheme.label.alternative }}>
           {item.title}
         </p>
@@ -130,16 +74,23 @@ const PermissionRow = ({ item, onToggle }: PermissionRowProps) => {
         </p>
       </div>
 
-      <PermissionToggle checked={item.enabled} label={item.title} onToggle={handleToggle} />
+      {canToggle && (
+        <PermissionToggle
+          checked={item.enabled}
+          disabled={disabled || item.disabled}
+          label={item.title}
+          onToggle={handleToggle}
+        />
+      )}
     </div>
   );
 };
 
-const PermissionSection = ({ section, onToggle }: PermissionSectionProps) => {
+const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSectionProps) => {
   return (
     <section
       aria-labelledby={`${section.id}-title`}
-      className="flex flex-col gap-[36px] px-[25px] py-[46px]"
+      className="flex flex-col gap-[clamp(24px,4.5dvh,36px)] px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)]"
     >
       <h2
         className={font.headline1.semiBold}
@@ -149,9 +100,9 @@ const PermissionSection = ({ section, onToggle }: PermissionSectionProps) => {
         {section.title}
       </h2>
 
-      <div className="flex flex-col gap-[36px]">
+      <div className="flex flex-col gap-[clamp(24px,4.5dvh,36px)]">
         {section.items.map(item => (
-          <PermissionRow item={item} key={item.id} onToggle={onToggle} />
+          <PermissionRow disabled={disabled} item={item} key={item.id} onToggle={onToggle} />
         ))}
       </div>
     </section>
@@ -159,36 +110,25 @@ const PermissionSection = ({ section, onToggle }: PermissionSectionProps) => {
 };
 
 const SharePermissionsPage = () => {
-  const navigate = useNavigate();
-  const [sections, setSections] = useState<SharePermissionSection[]>(INITIAL_SECTIONS);
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleToggle = (itemId: string) => {
-    setSections(currentSections =>
-      currentSections.map(section => ({
-        ...section,
-        items: section.items.map(item =>
-          item.id === itemId ? { ...item, enabled: !item.enabled } : item
-        ),
-      }))
-    );
-  };
-
-  const handleClose = () => {
-    navigate(-1);
-  };
-
-  const handleSave = () => {
-    navigate(-1);
-  };
+  const {
+    actionErrorMessage,
+    handleBack,
+    handleClose,
+    handleRetry,
+    handleSave,
+    handleToggle,
+    isFetching,
+    isSaveDisabled,
+    isSaving,
+    loadErrorMessage,
+    sections,
+  } = useSharePermissions();
 
   return (
     <section
       aria-labelledby="share-permissions-title"
-      className="flex min-h-full flex-col overflow-x-clip"
+      aria-busy={isFetching || isSaving}
+      className="flex h-full min-h-0 flex-col overflow-x-clip"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <header className="relative flex h-[54px] shrink-0 items-center justify-center px-[20px]">
@@ -210,20 +150,64 @@ const SharePermissionsPage = () => {
         </h1>
       </header>
 
-      <div className="flex flex-1 flex-col" style={{ backgroundColor: lightTheme.fill.normal }}>
-        <div className="flex-1">
-          {sections.map((section, index) => (
-            <div
-              className={cn(index < sections.length - 1 && "border-b")}
-              key={section.id}
-              style={{ borderColor: lightTheme.line.alternative }}
+      <div
+        className="flex min-h-0 flex-1 flex-col"
+        style={{ backgroundColor: lightTheme.fill.normal }}
+      >
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
+          {isFetching && sections.length === 0 ? (
+            <p
+              className={`px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)] text-center ${font.body.medium}`}
+              style={{ color: lightTheme.label.assistive }}
             >
-              <PermissionSection section={section} onToggle={handleToggle} />
+              공유 권한 정보를 불러오는 중입니다.
+            </p>
+          ) : (
+            sections.map((section, index) => (
+              <div
+                className={cn(index < sections.length - 1 && "border-b")}
+                key={section.id}
+                style={{ borderColor: lightTheme.line.alternative }}
+              >
+                <PermissionSection
+                  disabled={isFetching || isSaving}
+                  section={section}
+                  onToggle={handleToggle}
+                />
+              </div>
+            ))
+          )}
+
+          {actionErrorMessage && (
+            <div
+              className="flex flex-col items-center gap-[8px] px-[clamp(18px,5.8vw,25px)] pb-[clamp(18px,3dvh,24px)]"
+              role="alert"
+            >
+              <p
+                className={`text-center ${font.caption.regular}`}
+                style={{ color: lightTheme.status.error }}
+              >
+                {actionErrorMessage}
+              </p>
+              {loadErrorMessage && (
+                <button
+                  className={`h-[34px] rounded-[8px] border px-[14px] ${font.label.medium}`}
+                  onClick={handleRetry}
+                  style={{
+                    backgroundColor: lightTheme.background.normal,
+                    borderColor: lightTheme.fill.neutral,
+                    color: lightTheme.label.alternative,
+                  }}
+                  type="button"
+                >
+                  다시 시도
+                </button>
+              )}
             </div>
-          ))}
+          )}
         </div>
 
-        <div className="grid grid-cols-2 gap-[7px] px-[18px] pb-[28px]">
+        <div className="grid shrink-0 grid-cols-2 gap-[7px] px-[18px] pb-[clamp(18px,3.4dvh,28px)] pt-[clamp(10px,2dvh,16px)]">
           <button
             className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
             onClick={handleClose}
@@ -237,15 +221,19 @@ const SharePermissionsPage = () => {
             닫기
           </button>
           <button
-            className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
+            className={cn(
+              `h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`,
+              isSaveDisabled && "cursor-not-allowed"
+            )}
+            disabled={isSaveDisabled}
             onClick={handleSave}
             style={{
-              backgroundColor: lightTheme.primary.normal,
-              color: lightTheme.label.buttonText,
+              backgroundColor: isSaveDisabled ? lightTheme.fill.neutral : lightTheme.primary.normal,
+              color: isSaveDisabled ? lightTheme.label.assistive : lightTheme.label.buttonText,
             }}
             type="button"
           >
-            저장
+            {isSaving ? "저장 중" : "저장"}
           </button>
         </div>
       </div>

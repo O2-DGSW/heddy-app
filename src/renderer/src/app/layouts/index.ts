@@ -1,2 +1,3 @@
 export { MobileLayout } from "./MobileLayout";
-export { CutsTransitionOutlet } from "./CutsTransitionOutlet";
+export { MainTransitionOutlet } from "./MainTransitionOutlet";
+export { AuthTransitionOutlet } from "./AuthTransitionOutlet";

@@ -1,9 +1,4 @@
 export {
-  CALENDAR_DAY_TEMPLATES,
-  DEFAULT_DATE_VALUE,
-  DEFAULT_DAY,
-  DEFAULT_MONTH,
-  DEFAULT_YEAR,
   INITIAL_FORM_VALUES,
   INITIAL_PHOTOS,
   MAX_PHOTO_COUNT,
@@ -13,7 +8,15 @@ export {
   WEEK_DAYS,
   YEAR_OPTIONS,
 } from "./constants";
-export { createCalendarDays, createDateValue, formatDateDisplay, parseDateValue } from "./date";
+export {
+  createCalendarDays,
+  createDateValue,
+  formatDateDisplay,
+  getDaysInMonth,
+  getTodayDateValue,
+  parseDateValue,
+} from "./date";
+export { getTreatmentRecordPhotoDisplayUrl, getTreatmentRecordThumbnailUrl } from "./photo";
 export type {
   CalendarDay,
   PhotoItem,
@@ -22,3 +25,39 @@ export type {
   RecordFormValues,
 } from "./types";
 export type { ProcedureType } from "./constants";
+export type {
+  AnalysisApiData,
+  AnalysisApiResponse,
+  AnalysisGrade,
+  AnalysisMetricApiData,
+  AnalysisMetricType,
+  AnalysisOverlayApiData,
+  AnalysisOverlayType,
+  AnalysisStatus,
+} from "./analysis.types";
+export type {
+  AddTreatmentRecordPhotoRequest,
+  CompleteUploadApiData,
+  CompleteUploadApiResponse,
+  ConnectTreatmentRecordPhotoRequest,
+  CreateTreatmentRecordRequest,
+  PageApiData,
+  PresignUploadApiData,
+  PresignUploadApiResponse,
+  PresignUploadRequest,
+  ServiceType,
+  TreatmentRecordDetailApiData,
+  TreatmentRecordDetailApiResponse,
+  TreatmentRecordListApiData,
+  TreatmentRecordListApiResponse,
+  TreatmentRecordListParams,
+  TreatmentRecordPhotoApiData,
+  TreatmentRecordPhotoApiResponse,
+  TreatmentRecordPhotoImageType,
+  TreatmentRecordPriceApiData,
+  TreatmentRecordSort,
+  TreatmentRecordSummaryApiData,
+  UpdateTreatmentRecordPhotoRequest,
+  UploadPurpose,
+  UpdateTreatmentRecordRequest,
+} from "./treatmentRecord.types";

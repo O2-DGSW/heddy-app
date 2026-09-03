@@ -29,7 +29,7 @@ export const useSmsVerification = (purpose: SmsPurpose, phoneNumber?: string) =>
     setIsSending(true);
     setSmsError(null);
     try {
-      await smsSendApi({ phoneNumber: phoneNumber.replace(/\D/g, ""), carrier, purpose });
+      await smsSendApi({ phone_number: phoneNumber.replace(/\D/g, ""), carrier, purpose });
       setIsSent(true);
       setIsVerified(false);
     } catch (err) {
@@ -43,7 +43,7 @@ export const useSmsVerification = (purpose: SmsPurpose, phoneNumber?: string) =>
     setIsVerifying(true);
     setSmsError(null);
     try {
-      await smsVerifyApi({ phoneNumber: phoneNumber.replace(/\D/g, ""), code, purpose });
+      await smsVerifyApi({ phone_number: phoneNumber.replace(/\D/g, ""), code, purpose });
       setIsVerified(true);
     } catch (err) {
       setSmsError(err instanceof Error ? err.message : "인증번호가 올바르지 않습니다.");

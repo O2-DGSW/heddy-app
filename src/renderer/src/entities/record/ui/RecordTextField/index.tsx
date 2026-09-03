@@ -13,6 +13,7 @@ interface RecordTextFieldProps {
   name: string;
   placeholder: string;
   value: string;
+  errorMessage?: string;
   inputMode?: "decimal" | "text";
   multiline?: boolean;
   maxLength?: number;
@@ -22,6 +23,7 @@ interface RecordTextFieldProps {
 const fieldStyle = {
   "--placeholder-color": lightTheme.line.normal,
   backgroundColor: lightTheme.background.neutral,
+  borderColor: "transparent",
   color: lightTheme.label.neutral,
 } satisfies PlaceholderStyle;
 
@@ -32,6 +34,7 @@ const fieldClassName = cn(
 );
 
 const RecordTextField = ({
+  errorMessage,
   inputMode = "text",
   label,
   maxLength,
@@ -41,6 +44,13 @@ const RecordTextField = ({
   placeholder,
   value,
 }: RecordTextFieldProps) => {
+  const hasError = Boolean(errorMessage);
+  const errorId = `${name}-error`;
+  const mergedFieldStyle = {
+    ...fieldStyle,
+    borderColor: hasError ? lightTheme.status.error : fieldStyle.borderColor,
+  };
+
   return (
     <label className="flex w-full flex-col gap-[10px]">
       <span className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
@@ -48,26 +58,39 @@ const RecordTextField = ({
       </span>
       {multiline ? (
         <textarea
-          className={cn(fieldClassName, "h-[113px] resize-none py-[15px]")}
+          aria-describedby={hasError ? errorId : undefined}
+          aria-invalid={hasError || undefined}
+          className={cn(fieldClassName, "h-[113px] resize-none border border-solid py-[15px]")}
           maxLength={maxLength}
           name={name}
           onChange={onChange}
           placeholder={placeholder}
-          style={fieldStyle}
+          style={mergedFieldStyle}
           value={value}
         />
       ) : (
         <input
+          aria-describedby={hasError ? errorId : undefined}
+          aria-invalid={hasError || undefined}
           autoComplete="off"
-          className={cn(fieldClassName, "h-[53px]")}
+          className={cn(fieldClassName, "h-[53px] border border-solid")}
           inputMode={inputMode}
           name={name}
           onChange={onChange}
           placeholder={placeholder}
-          style={fieldStyle}
+          style={mergedFieldStyle}
           type="text"
           value={value}
         />
+      )}
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
       )}
     </label>
   );

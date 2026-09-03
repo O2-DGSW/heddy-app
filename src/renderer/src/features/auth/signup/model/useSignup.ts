@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupApi } from "@/entities/auth";
+import { isRequiredSignupAgreementsAccepted } from "./validation";
 import type { CustomerAccountForm } from "./types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
@@ -11,6 +12,13 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   carrier: "SKT",
   phone: "",
   verificationCode: "",
+  agreements: {
+    terms_of_service: false,
+    privacy_policy: false,
+    ai_training: false,
+    service_analytics: false,
+    marketing_notification: false,
+  },
 };
 
 export const useSignup = () => {
@@ -24,18 +32,28 @@ export const useSignup = () => {
   const [error, setError] = useState<string | null>(null);
 
   const submitSignup = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isRequiredSignupAgreementsAccepted(customerForm.agreements)) {
+      setError("필수 약관에 동의해주세요.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
       await signupApi({
-        loginId: customerForm.id,
+        email: customerForm.id.trim(),
         password: customerForm.password,
-        name: customerForm.name,
-        phoneNumber: customerForm.phone.replace(/\D/g, ""),
+        nickname: customerForm.name.trim(),
+        phone_number: customerForm.phone.replace(/\D/g, ""),
+        agreements: customerForm.agreements,
       });
 
-      navigate("/login");
+      navigate("/login", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {

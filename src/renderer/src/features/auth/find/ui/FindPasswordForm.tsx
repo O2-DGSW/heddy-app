@@ -22,14 +22,30 @@ export const FindPasswordForm = () => {
     verificationField,
     canSubmit: canSubmitBase,
   } = useFindPassword();
-  const { passwordField, passwordConfirmField, canSubmit: canReset } = useResetPassword();
+  const {
+    passwordField,
+    passwordConfirmField,
+    canSubmit: canReset,
+    error: resetError,
+    isLoading: isResetting,
+    submitResetPassword,
+  } = useResetPassword();
   const sms = useSmsVerification("PASSWORD_RESET", phoneField.value);
 
   const canSubmit = canSubmitBase && sms.isVerified;
+  const canResetPassword = canReset && !isResetting;
 
   const inputStyle = {
     backgroundColor: lightTheme.background.neutral,
     color: lightTheme.label.normal,
+  };
+
+  const handleResetPassword = async () => {
+    const isSuccess = await submitResetPassword(phoneField.value);
+
+    if (isSuccess) {
+      navigate("/login", { replace: true });
+    }
   };
 
   const tabs = (
@@ -38,7 +54,6 @@ export const FindPasswordForm = () => {
       style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
     >
       {[
-        { label: "로그인", path: "/login", isActive: false },
         { label: "아이디 찾기", path: "/find-id", isActive: false },
         { label: "비밀번호 찾기", path: "/find-password", isActive: true },
       ].map(({ label, path, isActive }) => (
@@ -47,6 +62,7 @@ export const FindPasswordForm = () => {
           className={`flex-1 pt-3 flex flex-col items-center ${font.body.bold}`}
           style={{ color: isActive ? lightTheme.label.normal : lightTheme.label.assistive }}
           onClick={() => !isActive && navigate(path, { replace: true })}
+          type="button"
         >
           <span className="pb-3">{label}</span>
           <div
@@ -87,15 +103,27 @@ export const FindPasswordForm = () => {
           </div>
         </div>
         <div className="w-full pb-8">
+          {resetError && (
+            <p
+              className={`${font.caption.regular} mb-3 pl-2`}
+              style={{ color: lightTheme.status.error }}
+            >
+              {resetError}
+            </p>
+          )}
           <button
+            type="button"
             className={`w-full py-4 rounded-2xl ${font.headline2.semiBold}`}
             style={{
-              backgroundColor: canReset ? lightTheme.primary.normal : lightTheme.line.alternative,
-              color: canReset ? lightTheme.fill.normal : lightTheme.line.normal,
+              backgroundColor: canResetPassword
+                ? lightTheme.primary.normal
+                : lightTheme.line.alternative,
+              color: canResetPassword ? lightTheme.fill.normal : lightTheme.line.normal,
             }}
-            disabled={!canReset}
+            disabled={!canResetPassword}
+            onClick={handleResetPassword}
           >
-            비밀번호 찾기
+            {isResetting ? "변경 중" : "비밀번호 변경"}
           </button>
         </div>
       </div>
@@ -111,7 +139,7 @@ export const FindPasswordForm = () => {
             아이디
           </p>
           <input
-            className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+            className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
             style={inputStyle}
             placeholder="아이디"
             value={idField.value}
@@ -133,7 +161,7 @@ export const FindPasswordForm = () => {
               />
             ))}
             <select
-              className={`focus:outline-none bg-transparent ${font.caption.medium}`}
+              className={`focus:outline-none bg-transparent ${font.body.medium}`}
               style={{
                 color: isMvno(carrierField.value)
                   ? lightTheme.primary.normal
@@ -154,7 +182,7 @@ export const FindPasswordForm = () => {
           </div>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={inputStyle}
               placeholder="전화번호"
               value={phoneField.value}
@@ -174,6 +202,7 @@ export const FindPasswordForm = () => {
               }}
               disabled={!phoneField.canRequest || sms.isSending}
               onClick={() => sms.sendCode(phoneField.value, carrierField.value)}
+              type="button"
             >
               {sms.isSending ? "발송 중" : sms.isSent ? "재전송" : "인증번호"}
             </button>
@@ -181,7 +210,7 @@ export const FindPasswordForm = () => {
           {sms.isSent && !sms.isVerified && (
             <div className="flex gap-2 mb-1">
               <input
-                className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.caption.regular}`}
+                className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
                 style={inputStyle}
                 placeholder="인증번호"
                 value={verificationField.value}
@@ -201,6 +230,7 @@ export const FindPasswordForm = () => {
                 }}
                 disabled={verificationField.value.length === 0 || sms.isVerifying}
                 onClick={() => sms.verifyCode(phoneField.value, verificationField.value)}
+                type="button"
               >
                 {sms.isVerifying ? "확인 중" : "확인"}
               </button>
@@ -234,6 +264,7 @@ export const FindPasswordForm = () => {
           }}
           disabled={!canSubmit}
           onClick={() => setStep(2)}
+          type="button"
         >
           비밀번호 찾기
         </button>

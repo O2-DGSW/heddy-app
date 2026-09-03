@@ -35,7 +35,7 @@ export const CutsDetailLayout = ({ title, children }: CutsDetailLayoutProps) => 
         </div>
         <CutsDetailTabBar />
       </div>
-      {/* NavBar 여백은 <main>의 pb-[var(--nav-bar-height)]가 이미 확보한다 — 여기서 또 더하면 간격이 겹으로 벌어진다. */}
+      {/* NavBar는 MobileLayout에서 레이아웃 높이를 차지하므로, 상세 콘텐츠에는 화면 하단 여백만 둔다. */}
       <div className="relative flex flex-1 flex-col overflow-y-auto overscroll-none pb-[15px] no-scrollbar [-webkit-overflow-scrolling:touch]">
         {children}
       </div>

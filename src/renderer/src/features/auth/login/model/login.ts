@@ -5,7 +5,7 @@ import { loginApi, setAuthTokens } from "@/entities/auth";
 import { queryClient } from "@/app/queryClient";
 
 export const useLoginForm = () => {
-  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,20 +16,20 @@ export const useLoginForm = () => {
       return;
     }
 
-    const trimmedId = id.trim();
+    const trimmedEmail = email.trim();
 
-    if (!trimmedId || !password) {
-      setError("아이디와 비밀번호를 입력해주세요.");
+    if (!trimmedEmail || !password) {
+      setError("이메일과 비밀번호를 입력해주세요.");
       return;
     }
 
     setError(null);
     setIsLoading(true);
     try {
-      const { accessToken, refreshToken } = await loginApi({ loginId: trimmedId, password });
+      const { accessToken, refreshToken } = await loginApi({ email: trimmedEmail, password });
       await setAuthTokens({ accessToken, refreshToken });
       queryClient.clear();
-      navigate("/");
+      navigate("/home", { replace: true });
     } catch (err) {
       console.error("로그인 실패:", err);
       if (err instanceof Error) {
@@ -42,5 +42,5 @@ export const useLoginForm = () => {
     }
   };
 
-  return { id, setId, password, setPassword, error, isLoading, handleLogin };
+  return { email, setEmail, password, setPassword, error, isLoading, handleLogin };
 };
