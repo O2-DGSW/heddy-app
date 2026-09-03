@@ -133,7 +133,7 @@ const ProfilePage = () => {
                   <img alt="" className="h-full w-full object-contain" src={profileAvatar} />
                 </div>
                 <h1
-                  className={`${font.headline1.bold} min-w-0 truncate`}
+                  className={`${font.headline1.semiBold} min-w-0 truncate`}
                   id="profile-title"
                   style={{ color: lightTheme.label.neutral }}
                 >
