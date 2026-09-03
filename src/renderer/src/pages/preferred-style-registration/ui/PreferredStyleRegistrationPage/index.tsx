@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, useBottomBarVisibility } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -10,6 +11,7 @@ import StyleTagButton from "../StyleTagButton";
 import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
+  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     activeTab,
     actionErrorMessage,
@@ -32,11 +34,19 @@ const PreferredStyleRegistrationPage = () => {
     styleTags,
   } = usePreferredStyleRegistration();
 
+  useEffect(() => {
+    setIsBottomBarHidden(true);
+
+    return () => {
+      setIsBottomBarHidden(false);
+    };
+  }, [setIsBottomBarHidden]);
+
   return (
     <section
       aria-labelledby="preferred-style-registration-title"
       aria-busy={isFetching || isSaving}
-      className="flex min-h-full flex-col overflow-x-clip"
+      className="flex h-full min-h-0 flex-col overflow-x-clip"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <header className="relative flex h-[54px] shrink-0 items-center justify-center px-[20px]">
@@ -97,12 +107,12 @@ const PreferredStyleRegistrationPage = () => {
       </div>
 
       <div
-        className="flex min-h-0 flex-1 flex-col px-[19px] pb-[29px] pt-[29px]"
+        className="flex min-h-0 flex-1 flex-col px-[clamp(16px,4.4vw,19px)] pb-[clamp(18px,3.6dvh,29px)] pt-[clamp(18px,3.6dvh,29px)]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto transition-colors duration-300 ease-out no-scrollbar">
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain transition-colors duration-300 ease-out no-scrollbar [-webkit-overflow-scrolling:touch]">
           <div className="flex min-h-full flex-col">
-            <div className="flex flex-col gap-[40px]">
+            <div className="flex shrink-0 flex-col gap-[clamp(24px,4.4dvh,40px)]">
               <section aria-labelledby="style-tag-list-title" className="flex flex-col gap-[10px]">
                 <h2
                   className={`px-[10px] ${font.headline2.semiBold}`}
@@ -173,7 +183,7 @@ const PreferredStyleRegistrationPage = () => {
               </section>
             </div>
 
-            <div className="flex min-h-[96px] flex-1 flex-col items-center justify-center gap-[8px] py-[18px]">
+            <div className="flex min-h-[clamp(72px,13dvh,96px)] flex-1 flex-col items-center justify-center gap-[8px] py-[clamp(10px,2dvh,18px)]">
               {actionErrorMessage && (
                 <div className="flex flex-col items-center gap-[8px]" role="alert">
                   <p
@@ -209,7 +219,7 @@ const PreferredStyleRegistrationPage = () => {
           </div>
         </div>
 
-        <div className="shrink-0">
+        <div className="shrink-0 pt-[clamp(10px,2dvh,16px)]">
           <div className="grid grid-cols-2 gap-[7px]">
             <button
               className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
