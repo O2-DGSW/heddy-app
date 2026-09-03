@@ -126,7 +126,11 @@ const ProfilePage = () => {
           <div className="mx-auto flex w-full max-w-[402px] flex-col gap-[28px] px-[clamp(16px,6.47vw,26px)] pb-[25px] pt-[22px]">
             <header className="flex flex-col gap-[28px]">
               <div className="flex items-center gap-[20px]">
-                <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
+                <img
+                  alt=""
+                  className="h-[68px] w-[68px] shrink-0 object-contain"
+                  src={profileAvatar}
+                />
                 <h1
                   className={`${font.headline1.bold} min-w-0 truncate`}
                   id="profile-title"
