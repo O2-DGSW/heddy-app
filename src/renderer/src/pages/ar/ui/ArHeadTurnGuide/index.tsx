@@ -5,6 +5,7 @@ import type { ArLivebankProgress } from "../../model/useArServerConnection";
 import { cn } from "@/shared";
 
 const TARGET_YAW_TOLERANCE = 7;
+const COMPLETION_MESSAGE_DURATION_MS = 3000;
 
 const getHeadTurnInstruction = (targetYaw: number) => {
   if (targetYaw === 0) {
@@ -123,9 +124,7 @@ const ArHeadTurnGuide = ({
           ? isExpanded
             ? "top-[max(20px,env(safe-area-inset-top))]"
             : "top-3"
-          : isExpanded
-            ? "top-[16%]"
-            : "top-[20%]"
+          : "top-1/2 -translate-y-1/2"
       )}
     >
       {!isStyleGenerationCompleted && (
@@ -161,9 +160,26 @@ const ArHeadTurnGuide = ({
         </div>
       )}
 
-      <div
+      <motion.div
+        animate={
+          isStyleGenerationCompleted
+            ? {
+                opacity: [0, 1, 1, 0],
+                y: [-8, 0, 0, -16],
+              }
+            : { opacity: 1, y: 0 }
+        }
         className="mt-3 flex flex-col items-center rounded-[12px] px-3 py-2 text-center backdrop-blur-sm"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.48)" }}
+        transition={
+          isStyleGenerationCompleted
+            ? {
+                duration: COMPLETION_MESSAGE_DURATION_MS / 1000 + 0.56,
+                ease: "easeOut",
+                times: [0, 0.08, 0.92, 1],
+              }
+            : { duration: 0.2, ease: "easeOut" }
+        }
       >
         <strong className={font.label.medium} style={{ color: lightTheme.label.buttonText }}>
           {progressLabel}
@@ -203,7 +219,7 @@ const ArHeadTurnGuide = ({
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
     </section>
   );
 };
