@@ -262,7 +262,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
 
               <div
                 className={cn(
-                  "mt-[44px] flex w-full flex-col",
+                  "mt-[36px] flex w-full flex-col",
                   hasSixCalendarRows ? "gap-[16px]" : "gap-[24px]"
                 )}
               >
