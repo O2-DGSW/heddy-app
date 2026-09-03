@@ -237,10 +237,10 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
             type="button"
           />
           <div
-            className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-40px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[24px] pb-[44px] pt-[22px]"
+            className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-24px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
             style={datePickerPanelStyle}
           >
-            <div className="flex h-full w-full max-w-[354px] flex-col items-center">
+            <div className="flex h-full min-h-0 w-full max-w-[354px] flex-col items-center">
               <div className="flex w-full items-center justify-between">
                 <h2
                   className={font.headline1.bold}
@@ -262,8 +262,10 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
 
               <div
                 className={cn(
-                  "mt-[36px] flex w-full flex-col",
-                  hasSixCalendarRows ? "gap-[16px]" : "gap-[24px]"
+                  "mt-[clamp(22px,5dvh,36px)] flex w-full min-h-0 flex-col",
+                  hasSixCalendarRows
+                    ? "gap-[clamp(10px,2.6dvh,16px)]"
+                    : "gap-[clamp(14px,3dvh,24px)]"
                 )}
               >
                 <div className="flex w-full items-center justify-between">
@@ -351,7 +353,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
                       <span
                         className={cn(
                           font.body.medium,
-                          "flex h-[21px] w-[36px] items-center justify-center"
+                          "flex h-[21px] w-[clamp(32px,9vw,36px)] items-center justify-center"
                         )}
                         key={weekDay}
                         style={{
@@ -379,7 +381,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
                           aria-pressed={isSelected}
                           className={cn(
                             font.body.semiBold,
-                            "flex h-[36px] w-[36px] items-center justify-center rounded-full border-0 bg-transparent p-0",
+                            "flex h-[clamp(32px,8.8vw,36px)] w-[clamp(32px,8.8vw,36px)] items-center justify-center rounded-full border-0 bg-transparent p-0",
                             day.isCurrentMonth ? "cursor-pointer" : "cursor-default"
                           )}
                           disabled={!day.isCurrentMonth}
