@@ -45,7 +45,7 @@ export const CutsDetailPage = () => {
         <Outlet />
 
         {isShareModalOpen && shareUrl && (
-          <ShareQrModal shareLink={shareUrl} onClose={handleCloseShareModal} />
+          <ShareQrModal shareUrl={shareUrl} onClose={handleCloseShareModal} />
         )}
       </CutsDetailLayout>
     </cap-page>

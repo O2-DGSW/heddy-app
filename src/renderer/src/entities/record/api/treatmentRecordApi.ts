@@ -231,6 +231,20 @@ export const deleteTreatmentRecordPhotoApi = async (
 };
 
 /**
+ * 시술기록 삭제
+ * - 기록과 사진 연결을 함께 지운다. 되돌릴 수 없다.
+ */
+export const deleteTreatmentRecordApi = async (recordId: string): Promise<void> => {
+  try {
+    await api.delete(`/treatment-records/${recordId}`);
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, "시술기록을 삭제하지 못했습니다."), {
+      cause: error,
+    });
+  }
+};
+
+/**
  * 시술기록 목록 조회
  * - 로그인한 사용자 본인의 기록만 내려온다(Bearer 토큰 필요).
  * - 기록이 없으면 200과 빈 items를 반환한다.

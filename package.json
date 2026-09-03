@@ -25,6 +25,7 @@
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
     "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/share": "^8.0.1",
     "@capacitor/status-bar": "^8.0.3",
     "@capgo/capacitor-transitions": "^8.1.9",
     "@heddy/design-tokens": "workspace:*",

@@ -121,7 +121,7 @@ const SavedStylesPage = () => {
       {shareUrl && (
         <ShareQrModal
           onClose={handleCloseShareResult}
-          shareLink={shareUrl}
+          shareUrl={shareUrl}
           title="후보 스타일 공유"
         />
       )}

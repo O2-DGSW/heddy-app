@@ -6,7 +6,7 @@ import { useGetLatestAnalysis, useGetTreatmentRecord } from "@/entities/record";
 import { CutsAnalysisPhotoCard } from "@/features/cuts/ui/analysis/CutsAnalysisPhotoCard";
 import { CutsAnalysisConfidenceCard } from "@/features/cuts/ui/analysis/CutsAnalysisConfidenceCard";
 import { CutsAnalysisIndicatorList } from "@/features/cuts/ui/analysis/CutsAnalysisIndicatorList";
-import { CutsAnalysisActions } from "@/features/cuts/ui/analysis/CutsAnalysisActions";
+import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
 import { CutsAnalysisStaleNotice } from "@/features/cuts/ui/analysis/CutsAnalysisStaleNotice";
 import { mapAnalysisToResult, pickAnalysisPhotoUrl } from "@/features/cuts/model/mapAnalysis";
 
@@ -53,7 +53,7 @@ export const CutsDetailAnalysisPage = () => {
         description={result.confidenceDescription}
       />
       <CutsAnalysisIndicatorList indicators={result.indicators} />
-      <CutsAnalysisActions />
+      <CutsRecordActions className="px-4 pt-6" />
     </div>
   );
 };

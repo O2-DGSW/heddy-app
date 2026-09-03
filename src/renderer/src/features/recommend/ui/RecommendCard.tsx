@@ -52,13 +52,15 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
             {recommendation.styleName}
           </span>
           {/* 서버가 근거·참고기록을 안 줄 수도 있어, 값이 없으면 라벨만 남지 않도록 줄째로 숨긴다 */}
-          {recommendation.reasonDescription && (
-            <p
-              className={`${font.caption.regular} max-[360px]:text-[0.6875rem]`}
+          {recommendation.reasonDescriptions.length > 0 && (
+            <ul
+              className={`${font.caption.regular} flex flex-col gap-0.5 max-[360px]:text-[0.6875rem]`}
               style={{ color: lightTheme.label.alternative }}
             >
-              근거: {recommendation.reasonDescription}
-            </p>
+              {recommendation.reasonDescriptions.map(reason => (
+                <li key={reason}>· {reason}</li>
+              ))}
+            </ul>
           )}
           {recommendation.referenceRecordLabel && (
             <p

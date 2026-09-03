@@ -1,6 +1,7 @@
 export {
   addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
+  deleteTreatmentRecordApi,
   deleteTreatmentRecordPhotoApi,
   getTreatmentRecordApi,
   getTreatmentRecordsApi,
@@ -9,6 +10,7 @@ export {
 } from "./treatmentRecordApi";
 export { getLatestAnalysisApi } from "./analysisApi";
 export { useAddTreatmentRecordPhotos } from "./mutation/useAddTreatmentRecordPhotos.mutation";
+export { useDeleteTreatmentRecord } from "./mutation/useDeleteTreatmentRecord.mutation";
 export { useCreateTreatmentRecord } from "./mutation/useCreateTreatmentRecord.mutation";
 export { useUpdateTreatmentRecord } from "./mutation/useUpdateTreatmentRecord.mutation";
 export { recordQueryKeys } from "./query/recordQueryKeys";

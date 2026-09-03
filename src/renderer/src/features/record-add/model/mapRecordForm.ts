@@ -58,6 +58,13 @@ const toPriceAmount = (price: string) => {
   return digitsOnly ? Number(digitsOnly) : null;
 };
 
+/** 숫자만 남겨 소요 시간(분)으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
+const toDurationMinutes = (duration: string) => {
+  const digitsOnly = duration.replace(/[^0-9]/g, "");
+
+  return digitsOnly ? Number(digitsOnly) : null;
+};
+
 const hasPhotoUrl = (
   photo: TreatmentRecordPhotoApiData
 ): photo is TreatmentRecordPhotoApiData & ({ display_url: string } | { photo_url: string }) =>
@@ -71,10 +78,9 @@ export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): Rec
   date: toFormDate(detail.performed_at),
   salon: detail.salon_name ?? "",
   price: detail.price ? String(detail.price.amount) : "",
-  // 소요 시간과 시술 내용은 서버에 저장되는 필드가 없어 비워 둔다.
-  duration: "",
+  duration: detail.duration_minutes ? String(detail.duration_minutes) : "",
   designer: detail.designer_name ?? "",
-  procedureContent: "",
+  procedureContent: detail.treatment_content ?? "",
   details: detail.memo ?? "",
 });
 
@@ -124,6 +130,8 @@ export const mapFormValuesToUpdateRequest = (
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),
     // 서버가 1~5만 받으므로 그 밖의 값은 보내지 않는다.
     ...(rating >= 1 && rating <= 5 ? { satisfaction: rating } : {}),
+    duration_minutes: toDurationMinutes(formValues.duration),
+    treatment_content: formValues.procedureContent.trim() || null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,
     memo: formValues.details.trim() || null,
@@ -143,6 +151,8 @@ export const mapFormValuesToCreateRequest = (
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,
     satisfaction: rating >= 1 && rating <= 5 ? rating : null,
+    duration_minutes: toDurationMinutes(formValues.duration),
+    treatment_content: formValues.procedureContent.trim() || null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,
     memo: formValues.details.trim() || null,

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import ratingStar from "@/shared/assets/rating-star.svg";
@@ -7,6 +7,10 @@ import {
   useGetTreatmentRecord,
   type ServiceType,
 } from "@/entities/record";
+import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
+
+/** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
+const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
 
 const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
   CUT: "커트",
@@ -34,7 +38,6 @@ const formatPrice = (price: { amount: number; currency: string } | null | undefi
 };
 
 const CutsDetailInfoPage = () => {
-  const navigate = useNavigate();
   const { id } = useParams();
   const { data: record, isError, isLoading } = useGetTreatmentRecord(id);
 
@@ -68,19 +71,16 @@ const CutsDetailInfoPage = () => {
       label: "시술 종류",
       value: record.service_types.map(serviceType => SERVICE_TYPE_LABEL[serviceType]).join(" · "),
     },
+    { label: "시술 내용", value: record.treatment_content ?? "미입력" },
+    {
+      label: "소요 시간",
+      value: record.duration_minutes ? `${record.duration_minutes}분` : "미입력",
+    },
     { label: "금액", value: formatPrice(record.price) },
   ];
   const photoUrls = (record.photos ?? [])
     .map(getTreatmentRecordPhotoDisplayUrl)
     .filter((photoUrl): photoUrl is string => Boolean(photoUrl));
-
-  const handleShare = () => {
-    navigate("../share");
-  };
-
-  const handleEdit = () => {
-    navigate("../edit");
-  };
 
   return (
     <div className="flex flex-col gap-[52px] px-[19px] pb-[30px] pt-[29px]">
@@ -145,8 +145,19 @@ const CutsDetailInfoPage = () => {
                 aria-label={`만족도 ${record.satisfaction ?? 0}점`}
                 className="flex -space-x-[3px]"
               >
-                {Array.from({ length: record.satisfaction ?? 0 }, (_, index) => (
-                  <img alt="" className="h-[20px] w-[20px]" key={index} src={ratingStar} />
+                {SATISFACTION_SCORES.map(score => (
+                  <img
+                    alt=""
+                    className="h-[20px] w-[20px]"
+                    key={score}
+                    /* 빈 별도 같은 에셋을 회색으로 바꿔 쓴다. 다른 에셋은 뷰박스 비율이 달라 크기가 어긋난다 */
+                    style={
+                      score <= (record.satisfaction ?? 0)
+                        ? undefined
+                        : { filter: "grayscale(1)", opacity: 0.35 }
+                    }
+                    src={ratingStar}
+                  />
                 ))}
               </dd>
             </div>
@@ -173,39 +184,7 @@ const CutsDetailInfoPage = () => {
         </section>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_92px] gap-[7px]">
-        <button
-          className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-          style={{
-            backgroundColor: lightTheme.background.normal,
-            borderColor: lightTheme.fill.neutral,
-            color: lightTheme.label.alternative,
-          }}
-          onClick={handleEdit}
-          type="button"
-        >
-          수정
-        </button>
-        <button
-          className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-          onClick={handleShare}
-          style={{
-            backgroundColor: lightTheme.background.normal,
-            borderColor: lightTheme.fill.neutral,
-            color: lightTheme.label.alternative,
-          }}
-          type="button"
-        >
-          공유
-        </button>
-        <button
-          className={`h-[42px] rounded-[10px] border-0 ${font.headline2.semiBold}`}
-          style={{ backgroundColor: lightTheme.status.error, color: lightTheme.label.buttonText }}
-          type="button"
-        >
-          삭제
-        </button>
-      </div>
+      <CutsRecordActions />
     </div>
   );
 };

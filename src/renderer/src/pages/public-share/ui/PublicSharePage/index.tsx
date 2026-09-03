@@ -224,7 +224,9 @@ const PublicSharePage = () => {
   return (
     // 상세(정보 탭)와 같이 흰 배경 위에 올린다. 시술 정보 카드도 흰색이라 구분선만 남아 납작하게 보인다.
     <main
-      className="min-h-dvh w-full px-safe py-safe"
+      // 앱이 아니라 모바일 브라우저에서 열리는 화면이라 --safe-area-inset-*이 주입되지 않는다.
+      // env()도 0으로 잡히는 브라우저가 있어 최소 여백을 둬야 제목이 상단에 붙어 잘리지 않는다.
+      className="min-h-dvh w-full px-safe pb-[max(16px,var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] pt-[max(16px,var(--safe-area-inset-top,env(safe-area-inset-top,0px)))]"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       <div className="mx-auto w-full max-w-[430px]">

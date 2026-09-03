@@ -81,6 +81,10 @@ export type TreatmentRecordDetailApiData = {
   appointment_id?: string | null;
   memo?: string | null;
   next_visit_cautions?: string | null;
+  /** 소요 시간(분). 입력하지 않았으면 비어 있다 */
+  duration_minutes?: number | null;
+  /** 시술 내용. 메모와 별개로 무엇을 했는지 적는 한 줄 요약이며, 입력하지 않았으면 비어 있다 */
+  treatment_content?: string | null;
   created_at: string;
   photos?: TreatmentRecordPhotoApiData[];
 };
@@ -169,6 +173,8 @@ export type CreateTreatmentRecordRequest = {
   salon_name?: string | null;
   designer_name?: string | null;
   satisfaction?: number | null;
+  duration_minutes?: number | null;
+  treatment_content?: string | null;
   price_amount?: number | null;
   price_currency?: string | null;
   appointment_id?: string | null;
@@ -187,6 +193,8 @@ export type UpdateTreatmentRecordRequest = {
   designer_name?: string | null;
   performed_at?: string;
   satisfaction?: number | null;
+  duration_minutes?: number | null;
+  treatment_content?: string | null;
   price_amount?: number | null;
   price_currency?: string | null;
   appointment_id?: string | null;

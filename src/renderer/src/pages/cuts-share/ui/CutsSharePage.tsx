@@ -1,30 +1,20 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { useGetTreatmentRecords } from "@/entities/record";
 import { useCreateShare } from "@/entities/share";
 import type { ShareFieldType } from "@/entities/share";
-import { CutsShareRecordList } from "@/features/cuts/ui/share/CutsShareRecordList";
 import { CutsShareItemList } from "@/features/cuts/ui/share/CutsShareItemList";
 import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts/constrants/shareItems";
-import { mapTreatmentRecordToCutsRecord } from "@/features/cuts/model/mapTreatmentRecord";
 
 export const CutsSharePage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { data, isPending, isError, error } = useGetTreatmentRecords({ page: 0, size: 20 });
-  const records = useMemo(
-    () => (data?.items ?? []).map(mapTreatmentRecordToCutsRecord),
-    [data?.items]
-  );
-
-  // 상세에서 넘어왔으면 그 기록을, 아니면 목록 첫 기록을 기본 선택으로 둔다.
-  const [pickedId, setPickedId] = useState(id ?? "");
-  const selectedId = pickedId || records[0]?.id || "";
+  // 공유 버튼을 누른 그 기록만 공유한다. 어느 기록인지는 경로가 이미 알려주므로 따로 고르지 않는다.
+  const selectedId = id ?? "";
 
   const [selectedFields, setSelectedFields] = useState<ShareFieldType[]>(DEFAULT_CUTS_SHARE_FIELDS);
   const createShare = useCreateShare();
@@ -88,27 +78,7 @@ export const CutsSharePage = () => {
           className="flex flex-1 flex-col overflow-y-auto overscroll-none pb-[calc(28px+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] no-scrollbar [-webkit-overflow-scrolling:touch]"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
-          {(isPending || isError) && (
-            <p
-              className={`px-4 pt-6 text-center ${font.label.regular}`}
-              style={{ color: lightTheme.label.assistive }}
-            >
-              {isError
-                ? (error?.message ?? "시술기록을 불러오지 못했습니다.")
-                : "시술기록을 불러오는 중"}
-            </p>
-          )}
-
-          {!isPending && !isError && (
-            <>
-              <CutsShareRecordList
-                records={records}
-                selectedId={selectedId}
-                onSelect={setPickedId}
-              />
-              <CutsShareItemList selectedFields={selectedFields} onToggle={handleToggleField} />
-            </>
-          )}
+          <CutsShareItemList selectedFields={selectedFields} onToggle={handleToggleField} />
 
           {createShare.isError && (
             <p

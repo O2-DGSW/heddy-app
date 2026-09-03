@@ -12,7 +12,14 @@ export const CutsConfidenceRing = ({ percent }: CutsConfidenceRingProps) => {
 
   return (
     <svg viewBox="0 0 48 48" className="h-12 w-12 shrink-0 -rotate-90">
-      <circle cx="24" cy="24" r={RADIUS} fill="none" stroke={lightTheme.fill.neutral} strokeWidth="4" />
+      <circle
+        cx="24"
+        cy="24"
+        r={RADIUS}
+        fill="none"
+        stroke={lightTheme.fill.neutral}
+        strokeWidth="4"
+      />
       <circle
         cx="24"
         cy="24"
