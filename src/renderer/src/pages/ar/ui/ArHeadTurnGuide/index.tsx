@@ -177,14 +177,6 @@ const ArHeadTurnGuide = ({
             className="mt-2 w-full"
             aria-label={`${completedYawTargets}/${totalYawTargets} 방향 확보`}
           >
-            <div className="mb-1 flex items-center justify-between">
-              <span className={font.caption.medium} style={{ color: lightTheme.label.disable }}>
-                방향 확보
-              </span>
-              <span className={font.caption.medium} style={{ color: lightTheme.label.buttonText }}>
-                {completedYawTargets}/{totalYawTargets}
-              </span>
-            </div>
             <div
               aria-valuemax={totalYawTargets}
               aria-valuemin={0}
