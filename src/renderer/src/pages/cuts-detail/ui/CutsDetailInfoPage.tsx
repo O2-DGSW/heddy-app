@@ -71,6 +71,11 @@ const CutsDetailInfoPage = () => {
       label: "시술 종류",
       value: record.service_types.map(serviceType => SERVICE_TYPE_LABEL[serviceType]).join(" · "),
     },
+    { label: "시술 내용", value: record.treatment_content ?? "미입력" },
+    {
+      label: "소요 시간",
+      value: record.duration_minutes ? `${record.duration_minutes}분` : "미입력",
+    },
     { label: "금액", value: formatPrice(record.price) },
   ];
   const photoUrls = (record.photos ?? [])
