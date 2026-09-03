@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { arrowIcon } from "@/entities/record";
-import { cn, useBottomBarVisibility } from "@/shared";
+import { cn } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -11,7 +10,6 @@ import StyleTagButton from "../StyleTagButton";
 import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
-  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     activeTab,
     actionErrorMessage,
@@ -33,14 +31,6 @@ const PreferredStyleRegistrationPage = () => {
     preferredTags,
     styleTags,
   } = usePreferredStyleRegistration();
-
-  useEffect(() => {
-    setIsBottomBarHidden(true);
-
-    return () => {
-      setIsBottomBarHidden(false);
-    };
-  }, [setIsBottomBarHidden]);
 
   return (
     <section
