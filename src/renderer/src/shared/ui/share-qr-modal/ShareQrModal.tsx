@@ -1,15 +1,15 @@
 import { QRCodeSVG } from "qrcode.react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { CutsCloseIcon } from "@/features/cuts/ui/icons/CutsCloseIcon";
-import { CutsCopyIcon } from "@/features/cuts/ui/icons/CutsCopyIcon";
+import { CloseIcon } from "@/shared/ui/icons/CloseIcon";
+import { CopyIcon } from "@/shared/ui/icons/CopyIcon";
 
-interface CutsShareQrModalProps {
+interface ShareQrModalProps {
   shareLink: string;
   onClose: () => void;
 }
 
-export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) => {
+export const ShareQrModal = ({ shareLink, onClose }: ShareQrModalProps) => {
   /** 공유 링크를 클립보드에 복사한다 */
   const handleCopy = () => {
     void navigator.clipboard?.writeText(shareLink);
@@ -19,7 +19,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="cuts-share-modal-title"
+      aria-labelledby="share-modal-title"
       className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
     >
       <button
@@ -37,7 +37,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
         >
           <div className="flex items-center justify-between">
             <h2
-              id="cuts-share-modal-title"
+              id="share-modal-title"
               className={font.headline1.bold}
               style={{ color: lightTheme.label.neutral }}
             >
@@ -50,7 +50,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
               className="flex h-[34px] w-[34px] items-center justify-center rounded-full border-0 p-0"
               style={{ backgroundColor: lightTheme.fill.normal }}
             >
-              <CutsCloseIcon />
+              <CloseIcon />
             </button>
           </div>
 
@@ -75,7 +75,7 @@ export const CutsShareQrModal = ({ shareLink, onClose }: CutsShareQrModalProps) 
               >
                 {shareLink}
               </span>
-              <CutsCopyIcon />
+              <CopyIcon />
             </button>
           </div>
         </div>

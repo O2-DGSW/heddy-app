@@ -1,6 +1,6 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-export const CutsCloseIcon = () => (
+export const CloseIcon = () => (
   <svg
     aria-hidden="true"
     viewBox="0 0 24 24"

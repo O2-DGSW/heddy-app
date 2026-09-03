@@ -4,3 +4,4 @@ export { BottomBarVisibilityProvider } from "./ui/bottom-bar-visibility-provider
 export { BackButton } from "./ui/back-button";
 export { FloatingActionButton } from "./ui/floating-action-button";
 export { PageTitle } from "./ui/page-title/PageTitle";
+export { ShareQrModal } from "./ui/share-qr-modal/ShareQrModal";
