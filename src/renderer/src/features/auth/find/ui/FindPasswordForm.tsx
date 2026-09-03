@@ -54,7 +54,6 @@ export const FindPasswordForm = () => {
       style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
     >
       {[
-        { label: "로그인", path: "/login", isActive: false },
         { label: "아이디 찾기", path: "/find-id", isActive: false },
         { label: "비밀번호 찾기", path: "/find-password", isActive: true },
       ].map(({ label, path, isActive }) => (
@@ -63,6 +62,7 @@ export const FindPasswordForm = () => {
           className={`flex-1 pt-3 flex flex-col items-center ${font.body.bold}`}
           style={{ color: isActive ? lightTheme.label.normal : lightTheme.label.assistive }}
           onClick={() => !isActive && navigate(path, { replace: true })}
+          type="button"
         >
           <span className="pb-3">{label}</span>
           <div
@@ -202,6 +202,7 @@ export const FindPasswordForm = () => {
               }}
               disabled={!phoneField.canRequest || sms.isSending}
               onClick={() => sms.sendCode(phoneField.value, carrierField.value)}
+              type="button"
             >
               {sms.isSending ? "발송 중" : sms.isSent ? "재전송" : "인증번호"}
             </button>
@@ -229,6 +230,7 @@ export const FindPasswordForm = () => {
                 }}
                 disabled={verificationField.value.length === 0 || sms.isVerifying}
                 onClick={() => sms.verifyCode(phoneField.value, verificationField.value)}
+                type="button"
               >
                 {sms.isVerifying ? "확인 중" : "확인"}
               </button>
@@ -262,6 +264,7 @@ export const FindPasswordForm = () => {
           }}
           disabled={!canSubmit}
           onClick={() => setStep(2)}
+          type="button"
         >
           비밀번호 찾기
         </button>
