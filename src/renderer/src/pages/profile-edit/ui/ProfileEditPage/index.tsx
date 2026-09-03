@@ -114,7 +114,7 @@ const ProfileEditPage = () => {
                 />
               </div>
               <p
-                className={`mt-[12px] ${font.headline1.bold}`}
+                className={`mt-[12px] ${font.headline1.semiBold}`}
                 style={{ color: lightTheme.label.neutral }}
               >
                 {profileName}
