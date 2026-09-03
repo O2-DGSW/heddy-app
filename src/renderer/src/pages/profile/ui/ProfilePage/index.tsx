@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AccountDeletionModal } from "@/features/auth/delete-account";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
+import { useGetMyProfile } from "@/entities/profile";
 import { useGetShares } from "@/entities/share";
 import { chevronRightIcon, profileAvatar } from "@/shared";
 
@@ -12,7 +13,6 @@ import bookmarkIcon from "../../assets/bookmark.svg";
 import heartIcon from "../../assets/heart.svg";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
-import { useProfile } from "../../model/useProfile";
 
 interface ProfileStat {
   label: string;
@@ -96,7 +96,7 @@ const getProfileName = (nickname: unknown, isLoading: boolean) => {
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [isAccountDeletionModalOpen, setIsAccountDeletionModalOpen] = useState(false);
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading } = useGetMyProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
   const {

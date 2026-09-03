@@ -21,13 +21,9 @@ const getProfileApiErrorMessage = (error: unknown, fallbackMessage: string) => {
   return error instanceof Error ? error.message : fallbackMessage;
 };
 
-export const getMyProfileApi = async (
-  accessToken: string
-): Promise<GetMyProfileResponse | null> => {
+export const getMyProfileApi = async (): Promise<GetMyProfileResponse | null> => {
   try {
-    const response = await api.get<GetMyProfileApiResponse>("/me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const response = await api.get<GetMyProfileApiResponse>("/me");
 
     return response.data.data ?? null;
   } catch (error) {

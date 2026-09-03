@@ -1,9 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getAccessToken } from "@/entities/auth";
-import { getMyProfileApi, profileQueryKeys, usePatchMyProfile } from "@/entities/profile";
+import { useGetMyProfile, usePatchMyProfile } from "@/entities/profile";
 import { showErrorToast, showSuccessToast } from "@/shared";
 
 interface ProfileEditFormValues {
@@ -30,30 +28,10 @@ const getProfileName = (nickname: string | null | undefined, isLoading: boolean)
 
 export const useProfileEdit = () => {
   const navigate = useNavigate();
-  const [accessToken, setAccessToken] = useState<string | null | undefined>(undefined);
   const [formValues, setFormValues] = useState<ProfileEditFormValues>(INITIAL_FORM_VALUES);
   const hasInitializedForm = useRef(false);
   const { isPending: isSaving, mutate: patchMyProfile } = usePatchMyProfile();
-
-  useEffect(() => {
-    let isMounted = true;
-
-    void getAccessToken().then(token => {
-      if (isMounted) {
-        setAccessToken(token);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const { data: profile, isLoading } = useQuery({
-    queryKey: profileQueryKeys.mine(),
-    queryFn: () => getMyProfileApi(accessToken ?? ""),
-    enabled: Boolean(accessToken),
-  });
+  const { data: profile, isLoading } = useGetMyProfile();
 
   useEffect(() => {
     if (!profile || hasInitializedForm.current) {
