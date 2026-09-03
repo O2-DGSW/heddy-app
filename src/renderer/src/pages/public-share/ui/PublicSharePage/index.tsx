@@ -164,7 +164,11 @@ const SharedRecordSections = ({ record }: { record: PublicShareRecord }) => {
 };
 
 const SavedStyleSection = ({ savedStyles }: { savedStyles: PublicShareSavedStyle[] }) => (
-  <section className="flex flex-col gap-[10px] px-[19px] pb-[30px]" aria-label="후보 스타일">
+  // 시술기록 쪽(SharedRecordSections)과 같은 pt-[29px]를 둬서 헤더와 붙어 보이지 않게 한다.
+  <section
+    className="flex flex-col gap-[10px] px-[19px] pb-[30px] pt-[29px]"
+    aria-label="후보 스타일"
+  >
     <SectionTitle>후보 스타일</SectionTitle>
     <div className="flex flex-col gap-[10px]">
       {savedStyles.map((style, index) => (
@@ -209,6 +213,14 @@ const PublicSharePage = () => {
   const savedStyles = data?.saved_styles ?? [];
   const hasContent = records.length > 0 || savedStyles.length > 0;
 
+  /**
+   * 한 링크에 시술기록과 후보 스타일이 섞여 올 수 있다.
+   * 후보 스타일만 담긴 링크를 "시술기록"이라 부르면 받는 사람이 다른 걸 기대하게 되므로,
+   * 기록이 없을 때만 제목을 후보 스타일로 바꾼다.
+   */
+  const title =
+    records.length === 0 && savedStyles.length > 0 ? "공유된 후보 스타일" : "공유된 시술기록";
+
   return (
     // 상세(정보 탭)와 같이 흰 배경 위에 올린다. 시술 정보 카드도 흰색이라 구분선만 남아 납작하게 보인다.
     <main
@@ -224,7 +236,7 @@ const PublicSharePage = () => {
           }}
         >
           <h1 className={font.headline1.bold} style={{ color: lightTheme.label.neutral }}>
-            공유된 시술기록
+            {title}
           </h1>
           {data?.share.owner_display_name && (
             <p className={font.caption.regular} style={{ color: lightTheme.label.assistive }}>
