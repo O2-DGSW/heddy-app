@@ -124,12 +124,12 @@ const ProfilePage = () => {
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         <div style={{ backgroundColor: lightTheme.background.normal }}>
-          <div className="mx-[26px] flex flex-col gap-[28px] pb-[25px] pt-[22px]">
+          <div className="mx-auto flex w-full max-w-[402px] flex-col gap-[28px] px-[clamp(16px,6.47vw,26px)] pb-[25px] pt-[22px]">
             <header className="flex flex-col gap-[28px]">
               <div className="flex items-center gap-[20px]">
                 <img alt="" className="h-[68px] w-[68px] shrink-0" src={profileAvatar} />
                 <h1
-                  className={font.headline1.bold}
+                  className={`${font.headline1.bold} min-w-0 truncate`}
                   id="profile-title"
                   style={{ color: lightTheme.label.neutral }}
                 >
@@ -142,12 +142,15 @@ const ProfilePage = () => {
                 style={{ backgroundColor: "#F4FBF8" }}
               >
                 {profileStats.map(stat => (
-                  <div className="flex flex-col items-center gap-[4px]" key={stat.label}>
+                  <div className="flex min-w-0 flex-col items-center gap-[4px]" key={stat.label}>
                     <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
                       <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
                       <span style={{ color: lightTheme.label.alternative }}>건</span>
                     </dd>
-                    <dt className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+                    <dt
+                      className={`${font.label.medium} whitespace-nowrap text-center`}
+                      style={{ color: lightTheme.label.assistive }}
+                    >
                       {stat.label}
                     </dt>
                   </div>
@@ -158,12 +161,12 @@ const ProfilePage = () => {
         </div>
 
         <div
-          className="flex px-[22px] py-[37px]"
+          className="flex justify-center px-[clamp(16px,5.47vw,22px)] py-[clamp(24px,9.2vw,37px)]"
           style={{ backgroundColor: lightTheme.fill.normal }}
         >
           <section
             aria-labelledby="profile-settings-title"
-            className="flex h-[390px] w-full flex-col items-center justify-between rounded-[15px] px-[22px] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
+            className="flex min-h-[410px] w-full max-w-[349px] flex-col items-center justify-between rounded-[15px] px-[clamp(16px,5.47vw,22px)] pb-[19px] pt-[19px] shadow-[0_0_6px_rgba(0,0,0,0.02)]"
             style={{ backgroundColor: lightTheme.background.normal }}
           >
             <div className="flex w-full max-w-[300px] flex-col gap-[24px]">
