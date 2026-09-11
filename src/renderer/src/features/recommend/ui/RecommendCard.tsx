@@ -13,17 +13,17 @@ interface RecommendCardProps {
 
 export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
   return (
-    // AR 버튼까지 오른쪽 텍스트 열 안에 두고, 썸네일이 그 전체 높이에 맞춰 늘어나는 구조다.
+    // AR 버튼까지 오른쪽 텍스트 열 안에 두고, 썸네일은 그 옆에 정사각형으로 둔다.
     // 좁은 기기(400px 이하)에서는 썸네일 폭과 폰트를 함께 줄여 텍스트가 깨지지 않게 한다.
     <article
-      className="flex gap-3 rounded-2xl p-3 shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
+      className="flex gap-3 rounded-2xl p-2.5 shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
       style={{ backgroundColor: lightTheme.background.normal }}
     >
       {/* 폭을 카드 기준 비율로 잡고 aspect-square로 높이를 따라가게 해서, 화면 폭이 달라져도
-          정사각형이 유지되면서 카드 아래(AR 버튼)까지 꽉 찬다.
+          정사각형이 유지된다.
           self-stretch + aspect-square는 높이↔폭이 서로를 참조해 폭이 0으로 무너지니 쓰지 말 것. */}
       <div
-        className="aspect-square w-[42%] shrink-0 self-start overflow-hidden rounded-xl max-[360px]:w-[38%]"
+        className="aspect-square w-[30%] shrink-0 self-start overflow-hidden rounded-lg max-[360px]:w-[28%]"
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {recommendation.thumbnailUrl && (
@@ -35,7 +35,7 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
         )}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-1.5 max-[400px]:gap-1">
           <RecommendRankBadge rank={rank} />
           {recommendation.reasonType && (
@@ -51,16 +51,15 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
           >
             {recommendation.styleName}
           </span>
-          {/* 서버가 근거·참고기록을 안 줄 수도 있어, 값이 없으면 라벨만 남지 않도록 줄째로 숨긴다 */}
+          {/* 서버가 근거·참고기록을 안 줄 수도 있어, 값이 없으면 라벨만 남지 않도록 줄째로 숨긴다.
+              근거가 여러 개여도 카드 높이가 들쭉날쭉해지지 않게 한 줄로 잇고 두 줄에서 자른다. */}
           {recommendation.reasonDescriptions.length > 0 && (
-            <ul
-              className={`${font.caption.regular} flex flex-col gap-0.5 max-[360px]:text-[0.6875rem]`}
+            <p
+              className={`${font.caption.regular} line-clamp-2 max-[360px]:text-[0.6875rem]`}
               style={{ color: lightTheme.label.alternative }}
             >
-              {recommendation.reasonDescriptions.map(reason => (
-                <li key={reason}>· {reason}</li>
-              ))}
-            </ul>
+              근거: {recommendation.reasonDescriptions.join(" · ")}
+            </p>
           )}
           {recommendation.referenceRecordLabel && (
             <p
@@ -72,8 +71,8 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
           )}
         </div>
 
-        {/* 사진이 텍스트보다 높으면 버튼을 아래로 밀어 사진 하단과 나란히 맞춘다 */}
-        <div className="mt-auto">
+        {/* 시안처럼 참고기록 바로 아래에 붙인다 */}
+        <div className="mt-0.5">
           <RecommendArButton />
         </div>
       </div>

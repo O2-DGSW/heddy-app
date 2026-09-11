@@ -4,7 +4,7 @@ export const RecommendChevronRightIcon = () => (
   <svg
     aria-hidden="true"
     viewBox="0 0 24 24"
-    className="h-5 w-5 shrink-0 self-center"
+    className="h-4 w-4 shrink-0 self-center"
     fill="none"
     stroke={lightTheme.label.alternative}
     strokeWidth={2}
