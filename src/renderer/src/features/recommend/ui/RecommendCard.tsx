@@ -52,13 +52,13 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
             {recommendation.styleName}
           </span>
           {/* 서버가 근거·참고기록을 안 줄 수도 있어, 값이 없으면 라벨만 남지 않도록 줄째로 숨긴다.
-              근거가 여러 개여도 카드 높이가 들쭉날쭉해지지 않게 한 줄로 잇고 두 줄에서 자른다. */}
+              서버는 근거를 최대 네 개까지 주는데 시안은 한 줄이라, 가장 앞선 근거만 보여준다. */}
           {recommendation.reasonDescriptions.length > 0 && (
             <p
               className={`${font.caption.regular} line-clamp-2 max-[360px]:text-[0.6875rem]`}
               style={{ color: lightTheme.label.alternative }}
             >
-              근거: {recommendation.reasonDescriptions.join(" · ")}
+              근거: {recommendation.reasonDescriptions[0]}
             </p>
           )}
           {recommendation.referenceRecordLabel && (
