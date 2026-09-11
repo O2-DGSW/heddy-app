@@ -17,7 +17,11 @@ export const RecommendBasisSection = ({ rows }: RecommendBasisSectionProps) => {
       >
         추천 근거 데이터
       </h2>
-      <div className="flex flex-col px-1">
+      {/* 결과 카드와 같은 카드 위에 올려서 두 섹션이 한 화면에서 따로 놀지 않게 한다 */}
+      <div
+        className="flex flex-col rounded-2xl px-4 py-1 shadow-[0_1px_6px_rgba(0,0,0,0.06)]"
+        style={{ backgroundColor: lightTheme.background.normal }}
+      >
         {rows.map(row => (
           <RecommendBasisRow key={row.label} label={row.label} value={row.value} />
         ))}

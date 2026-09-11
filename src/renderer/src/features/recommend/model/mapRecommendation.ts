@@ -23,8 +23,13 @@ const RISK_LEVEL_BY_API_VALUE: Record<string, RecommendRiskLevel> = {
   HARD: "상",
 };
 
-/** 추천 방식(strategy) → 배지 문구. 위와 같은 이유로 아는 값만 매핑한다. */
+/**
+ * 추천 방식(strategy) → 배지 문구.
+ * 서버가 실제로 주는 값은 RULE_BASED_V1 하나이며, 시술 이력·저장 스타일·모발 프로필을 근거로
+ * 삼는 방식이라 "이력 기반"으로 표기한다. 모르는 값은 잘못된 배지를 띄우지 않도록 null로 둔다.
+ */
 const REASON_TYPE_BY_STRATEGY: Record<string, RecommendReasonType> = {
+  RULE_BASED_V1: "이력 기반",
   HISTORY: "이력 기반",
   HISTORY_BASED: "이력 기반",
   TREATMENT_HISTORY: "이력 기반",

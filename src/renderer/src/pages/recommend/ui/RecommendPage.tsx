@@ -1,13 +1,23 @@
 import { lightTheme } from "@heddy/design-tokens";
 
 import { RecommendHeader } from "@/features/recommend/ui/RecommendHeader";
+import { RecommendBasisSection } from "@/features/recommend/ui/RecommendBasisSection";
 import { RecommendResultSection } from "@/features/recommend/ui/RecommendResultSection";
 import { RecommendStatus } from "@/features/recommend/ui/RecommendStatus";
 import { useRecommendation } from "@/features/recommend/model/hooks/useRecommendation";
 
 export const RecommendPage = () => {
-  const { items, isEmpty, isPending, isError, error, generate, isGenerating, generateError } =
-    useRecommendation();
+  const {
+    items,
+    basisRows,
+    isEmpty,
+    isPending,
+    isError,
+    error,
+    generate,
+    isGenerating,
+    generateError,
+  } = useRecommendation();
 
   return (
     <cap-page>
@@ -45,6 +55,9 @@ export const RecommendPage = () => {
           )}
 
           {items.length > 0 && <RecommendResultSection recommendations={items} />}
+
+          {/* 근거 데이터는 추천 결과가 있을 때만 의미가 있어, 목록이 비면 함께 숨긴다 */}
+          {items.length > 0 && basisRows.length > 0 && <RecommendBasisSection rows={basisRows} />}
         </div>
       </section>
     </cap-page>

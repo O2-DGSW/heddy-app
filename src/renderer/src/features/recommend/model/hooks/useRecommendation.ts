@@ -7,6 +7,7 @@ import {
   useGetLatestRecommendation,
 } from "@/entities";
 import { mapRecommendationToItems } from "@/features/recommend/model/mapRecommendation";
+import { mapRecommendationToBasisRows } from "@/features/recommend/model/mapRecommendationBasis";
 
 /**
  * 화면에 보여줄 추천을 관리한다.
@@ -27,9 +28,15 @@ export const useRecommendation = () => {
   });
 
   const items = useMemo(() => mapRecommendationToItems(data ?? null), [data]);
+  const basisRows = useMemo(
+    () => mapRecommendationToBasisRows(data?.recommendation_basis),
+    [data?.recommendation_basis]
+  );
 
   return {
     items,
+    /** "추천 근거 데이터" 표에 쓸 행. 서버가 근거를 안 주면 빈 배열이다 */
+    basisRows,
     /** 추천을 한 번도 만든 적이 없는 상태 */
     isEmpty: !isPending && !isError && items.length === 0,
     generatedAt: data?.generated_at ?? null,
