@@ -3,11 +3,11 @@
  * 서버가 duration_minutes(분)를 주고받기 때문에, 화면 문구("1시간 30분")는 표시할 때만 만든다.
  */
 
-/** 휠에 올릴 시간 후보. 미용 시술이 하루를 넘기지 않아 0~11시간으로 끊는다 */
-export const DURATION_HOUR_OPTIONS = Array.from({ length: 12 }, (_, index) => index);
+/** 휠에 올릴 시간 후보. 아무리 긴 시술도 12시간을 넘지 않아 0~12시간으로 끊는다 */
+export const DURATION_HOUR_OPTIONS = Array.from({ length: 13 }, (_, index) => index);
 
-/** 휠에 올릴 분 후보. 5분 단위면 시술 시간을 적기에 충분하고 휠도 짧아진다 */
-export const DURATION_MINUTE_STEP = 5;
+/** 휠에 올릴 분 후보. 1분 단위 0~59분이며, 60분은 1시간이라 시간 휠 몫으로 둔다 */
+export const DURATION_MINUTE_STEP = 1;
 export const DURATION_MINUTE_OPTIONS = Array.from(
   { length: 60 / DURATION_MINUTE_STEP },
   (_, index) => index * DURATION_MINUTE_STEP
