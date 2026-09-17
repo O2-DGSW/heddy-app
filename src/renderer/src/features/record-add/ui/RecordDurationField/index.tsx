@@ -9,7 +9,7 @@ import {
   noIcon,
   parseDurationValue,
 } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, useHideBottomBarWhileOpen } from "@/shared";
 
 import DurationWheel from "./DurationWheel";
 import { WHEEL_ITEM_HEIGHT } from "./constants";
@@ -57,6 +57,8 @@ const RecordDurationField = ({ value, onChange }: RecordDurationFieldProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [draftHour, setDraftHour] = useState(0);
   const [draftMinute, setDraftMinute] = useState(0);
+
+  useHideBottomBarWhileOpen(isPickerOpen);
 
   const selectedLabel = formatDurationDisplay(value) || "입력";
   const selectedColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
