@@ -1,10 +1,16 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/shared";
 import { triggerSelectionHaptic } from "@/shared/lib";
 
-import { WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEM_COUNT } from "./constants";
+import {
+  WHEEL_EDGE_ITEM_COUNT,
+  WHEEL_ITEM_HEIGHT,
+  WHEEL_MIDDLE_BLOCK_INDEX,
+  WHEEL_REPEAT_COUNT,
+  WHEEL_VISIBLE_ITEM_COUNT,
+} from "./constants";
 
 interface DurationWheelProps {
   /** 스크린리더가 어느 휠인지 읽어 주는 이름 */
@@ -18,23 +24,37 @@ interface DurationWheelProps {
 /** 스크롤이 멈춘 걸 판단하는 시간(ms). iOS 사파리에 scrollend가 없어 이 값으로 대신한다 */
 const SCROLL_SETTLE_DELAY = 120;
 
-/** 위아래로 비워 둘 칸 수. 첫 항목과 마지막 항목도 가운데 선택줄에 올 수 있게 한다 */
-const EDGE_SPACER_COUNT = (WHEEL_VISIBLE_ITEM_COUNT - 1) / 2;
-
 /**
  * 세로로 굴려서 값을 고르는 휠.
- * CSS 스크롤 스냅으로 칸을 맞추고, 칸이 넘어갈 때마다 네이티브 햅틱을 울려 iOS 휠과 같은 손맛을 낸다.
+ *
+ * 아이폰 알람처럼 끝과 처음이 이어지고, 선택줄에 닿는 순간 바로 색이 바뀐다.
+ * - 순환: 같은 목록을 여러 벌 쌓아 두고, 멈출 때마다 가운데 벌로 스크롤 위치를 되돌린다.
+ *   내용이 같은 자리로 옮기는 거라 화면에는 아무 변화가 없다.
+ * - 색: 스크롤 도중에도 가운데 칸을 계산해 즉시 반영한다(값 확정은 멈춘 뒤).
  */
 const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelProps) => {
   const listRef = useRef<HTMLDivElement>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  // 스크롤 중 마지막으로 햅틱을 울린 칸. 같은 칸에서 여러 번 울리지 않게 기억해 둔다.
-  const hapticIndexRef = useRef(options.indexOf(value));
   // 사용자가 굴리는 중에는 밖에서 들어온 값으로 스크롤 위치를 되돌리지 않는다.
   const isUserScrollingRef = useRef(false);
+  // 선택줄에 놓인 칸을 "몇 번째 벌의 몇 번째"까지 그대로 기억한다.
+  // 색은 어느 벌이든 같은 숫자면 같이 바뀌어야 하고, aria-selected는 실제 그 칸 하나만 달아야 한다.
+  const [activeLoopedIndex, setActiveLoopedIndex] = useState(
+    () => WHEEL_MIDDLE_BLOCK_INDEX * options.length + Math.max(options.indexOf(value), 0)
+  );
 
-  const selectedIndex = Math.max(options.indexOf(value), 0);
-  const spacerHeight = EDGE_SPACER_COUNT * WHEEL_ITEM_HEIGHT;
+  const blockLength = options.length * WHEEL_ITEM_HEIGHT;
+  const activeIndex = ((activeLoopedIndex % options.length) + options.length) % options.length;
+
+  /** 같은 후보를 여러 벌 이어 붙인 실제 렌더 목록 */
+  const loopedOptions = useMemo(
+    () =>
+      Array.from(
+        { length: WHEEL_REPEAT_COUNT * options.length },
+        (_, loopedIndex) => options[loopedIndex % options.length] as number
+      ),
+    [options]
+  );
 
   const handleScroll = () => {
     const list = listRef.current;
@@ -45,12 +65,17 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
 
     isUserScrollingRef.current = true;
 
-    const scrolledIndex = Math.round(list.scrollTop / WHEEL_ITEM_HEIGHT);
-    const clampedIndex = Math.min(Math.max(scrolledIndex, 0), options.length - 1);
+    const centeredLoopedIndex =
+      Math.round(list.scrollTop / WHEEL_ITEM_HEIGHT) + WHEEL_EDGE_ITEM_COUNT;
+    const centeredIndex =
+      ((centeredLoopedIndex % options.length) + options.length) % options.length;
 
-    // 칸을 지나갈 때마다 울려야 휠을 굴리는 느낌이 나서, 멈춘 뒤가 아니라 스크롤 중에 울린다.
-    if (clampedIndex !== hapticIndexRef.current) {
-      hapticIndexRef.current = clampedIndex;
+    // 칸을 지나갈 때마다 색을 바꾸고 햅틱을 울려야 휠을 굴리는 느낌이 난다.
+    if (centeredLoopedIndex !== activeLoopedIndex) {
+      setActiveLoopedIndex(centeredLoopedIndex);
+    }
+
+    if (centeredIndex !== activeIndex) {
       triggerSelectionHaptic();
     }
 
@@ -61,7 +86,16 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
     settleTimerRef.current = setTimeout(() => {
       isUserScrollingRef.current = false;
 
-      const settledValue = options[clampedIndex];
+      // 끝에 다다르기 전에 가운데 벌로 되돌려 놔야 계속 굴릴 수 있다.
+      const offsetInBlock = ((list.scrollTop % blockLength) + blockLength) % blockLength;
+      const recenteredScrollTop = WHEEL_MIDDLE_BLOCK_INDEX * blockLength + offsetInBlock;
+
+      if (list.scrollTop !== recenteredScrollTop) {
+        list.scrollTop = recenteredScrollTop;
+        setActiveLoopedIndex(WHEEL_MIDDLE_BLOCK_INDEX * options.length + centeredIndex);
+      }
+
+      const settledValue = options[centeredIndex];
 
       if (settledValue !== undefined && settledValue !== value) {
         onChange(settledValue);
@@ -69,11 +103,14 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
     }, SCROLL_SETTLE_DELAY);
   };
 
-  const handleOptionClick = (optionIndex: number) => {
-    listRef.current?.scrollTo({ top: optionIndex * WHEEL_ITEM_HEIGHT, behavior: "smooth" });
+  const handleOptionClick = (loopedIndex: number) => {
+    listRef.current?.scrollTo({
+      top: (loopedIndex - WHEEL_EDGE_ITEM_COUNT) * WHEEL_ITEM_HEIGHT,
+      behavior: "smooth",
+    });
   };
 
-  // 열릴 때와 밖에서 값이 바뀔 때 선택된 칸을 가운데로 맞춘다.
+  // 열릴 때와 밖에서 값이 바뀔 때 고른 칸을 가운데 벌의 선택줄에 맞춘다.
   useEffect(() => {
     const list = listRef.current;
 
@@ -81,9 +118,13 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
       return;
     }
 
-    hapticIndexRef.current = selectedIndex;
-    list.scrollTop = selectedIndex * WHEEL_ITEM_HEIGHT;
-  }, [selectedIndex]);
+    const optionIndex = Math.max(options.indexOf(value), 0);
+
+    setActiveLoopedIndex(WHEEL_MIDDLE_BLOCK_INDEX * options.length + optionIndex);
+    list.scrollTop =
+      (WHEEL_MIDDLE_BLOCK_INDEX * options.length + optionIndex - WHEEL_EDGE_ITEM_COUNT) *
+      WHEEL_ITEM_HEIGHT;
+  }, [options, value]);
 
   useEffect(
     () => () => {
@@ -105,23 +146,22 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
       style={{ height: WHEEL_VISIBLE_ITEM_COUNT * WHEEL_ITEM_HEIGHT }}
       tabIndex={0}
     >
-      <div aria-hidden="true" style={{ height: spacerHeight }} />
-      {options.map((option, optionIndex) => {
-        const isSelected = optionIndex === selectedIndex;
+      {loopedOptions.map((option, loopedIndex) => {
+        const isActive = loopedIndex % options.length === activeIndex;
 
         return (
           <button
-            aria-selected={isSelected}
+            aria-selected={loopedIndex === activeLoopedIndex}
             className={cn(
               "flex w-full snap-center items-center justify-center border-0 bg-transparent p-0",
-              isSelected ? font.headline1.bold : font.headline2.semiBold
+              isActive ? font.headline1.bold : font.headline2.semiBold
             )}
-            key={option}
-            onClick={() => handleOptionClick(optionIndex)}
+            key={`${loopedIndex}-${option}`}
+            onClick={() => handleOptionClick(loopedIndex)}
             role="option"
             style={{
               height: WHEEL_ITEM_HEIGHT,
-              color: isSelected ? lightTheme.label.neutral : lightTheme.line.normal,
+              color: isActive ? lightTheme.label.neutral : lightTheme.line.normal,
             }}
             type="button"
           >
@@ -130,7 +170,6 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
           </button>
         );
       })}
-      <div aria-hidden="true" style={{ height: spacerHeight }} />
     </div>
   );
 };
