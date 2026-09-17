@@ -8,6 +8,9 @@ export {
   starIcon,
 } from "./assets";
 export {
+  DURATION_HOUR_OPTIONS,
+  DURATION_MINUTE_OPTIONS,
+  DURATION_MINUTE_STEP,
   INITIAL_FORM_VALUES,
   INITIAL_PHOTOS,
   MAX_PHOTO_COUNT,
@@ -18,12 +21,15 @@ export {
   YEAR_OPTIONS,
   createCalendarDays,
   createDateValue,
+  createDurationValue,
   formatDateDisplay,
+  formatDurationDisplay,
   getDaysInMonth,
   getTreatmentRecordPhotoDisplayUrl,
   getTreatmentRecordThumbnailUrl,
   getTodayDateValue,
   parseDateValue,
+  parseDurationValue,
 } from "./model";
 export type {
   AddTreatmentRecordPhotoRequest,
