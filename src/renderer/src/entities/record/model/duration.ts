@@ -6,8 +6,8 @@
 /** 휠에 올릴 시간 후보. 아무리 긴 시술도 12시간을 넘지 않아 0~12시간으로 끊는다 */
 export const DURATION_HOUR_OPTIONS = Array.from({ length: 13 }, (_, index) => index);
 
-/** 휠에 올릴 분 후보. 1분 단위 0~59분이며, 60분은 1시간이라 시간 휠 몫으로 둔다 */
-export const DURATION_MINUTE_STEP = 1;
+/** 휠에 올릴 분 후보. 10분 단위 0~50분이며, 60분은 1시간이라 시간 휠 몫으로 둔다 */
+export const DURATION_MINUTE_STEP = 10;
 export const DURATION_MINUTE_OPTIONS = Array.from(
   { length: 60 / DURATION_MINUTE_STEP },
   (_, index) => index * DURATION_MINUTE_STEP
