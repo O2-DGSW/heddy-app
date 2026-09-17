@@ -3,6 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import ratingStar from "@/shared/assets/rating-star.svg";
 import {
+  formatDurationDisplay,
   getTreatmentRecordPhotoDisplayUrl,
   useGetTreatmentRecord,
   type ServiceType,
@@ -74,7 +75,10 @@ const CutsDetailInfoPage = () => {
     { label: "시술 내용", value: record.treatment_content ?? "미입력" },
     {
       label: "소요 시간",
-      value: record.duration_minutes ? `${record.duration_minutes}분` : "미입력",
+      // 입력이 시·분 휠로 바뀌어서, 보여줄 때도 "155분"이 아니라 "2시간 35분"으로 맞춘다
+      value: record.duration_minutes
+        ? formatDurationDisplay(String(record.duration_minutes))
+        : "미입력",
     },
     { label: "금액", value: formatPrice(record.price) },
   ];
