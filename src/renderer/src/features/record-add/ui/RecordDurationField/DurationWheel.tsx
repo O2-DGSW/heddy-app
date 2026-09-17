@@ -2,7 +2,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect, useRef } from "react";
 
 import { cn } from "@/shared";
-import { endSelectionHaptic, startSelectionHaptic, triggerSelectionHaptic } from "@/shared/lib";
+import { triggerSelectionHaptic } from "@/shared/lib";
 
 import { WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEM_COUNT } from "./constants";
 
@@ -43,10 +43,7 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
       return;
     }
 
-    if (!isUserScrollingRef.current) {
-      isUserScrollingRef.current = true;
-      startSelectionHaptic();
-    }
+    isUserScrollingRef.current = true;
 
     const scrolledIndex = Math.round(list.scrollTop / WHEEL_ITEM_HEIGHT);
     const clampedIndex = Math.min(Math.max(scrolledIndex, 0), options.length - 1);
@@ -63,7 +60,6 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
 
     settleTimerRef.current = setTimeout(() => {
       isUserScrollingRef.current = false;
-      endSelectionHaptic();
 
       const settledValue = options[clampedIndex];
 
