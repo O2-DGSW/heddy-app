@@ -117,6 +117,10 @@ export const useRecordAddForm = ({
     }));
   };
 
+  const handleDurationChange = (duration: string) => {
+    setFormValues(currentValues => ({ ...currentValues, duration }));
+  };
+
   const handleFieldChange =
     (fieldName: RecordFieldNameType) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -174,6 +178,7 @@ export const useRecordAddForm = ({
     rating,
     selectedProcedureType,
     handleDateChange,
+    handleDurationChange,
     handleDetailsChange,
     handleFieldChange,
     handleOpenPhotoPicker,
