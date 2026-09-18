@@ -14,6 +14,7 @@ import {
   RecordAddForm,
   mapDetailToFormValues,
   mapDetailToPhotoItems,
+  getUnsupportedServiceTypes,
   mapDetailToProcedureTypes,
   mapFormValuesToUpdateRequest,
   syncRecordPhotos,
@@ -42,6 +43,11 @@ const RecordEditPage = () => {
 
   const initialValues = useMemo(
     () => (record ? mapDetailToFormValues(record) : undefined),
+    [record]
+  );
+  // 화면에 칸이 없는 종류(탈색 등)는 고치지 않고 그대로 되돌려 보내야 저장할 때 안 지워진다
+  const preservedServiceTypes = useMemo(
+    () => (record ? getUnsupportedServiceTypes(record) : []),
     [record]
   );
   const initialProcedureTypes = useMemo(
@@ -74,7 +80,12 @@ const RecordEditPage = () => {
     try {
       await updateRecord.mutateAsync({
         recordId: id,
-        body: mapFormValuesToUpdateRequest(formValues, procedureTypes, rating),
+        body: mapFormValuesToUpdateRequest(
+          formValues,
+          procedureTypes,
+          rating,
+          preservedServiceTypes
+        ),
       });
 
       await syncPhotos.mutateAsync({ recordId: id, initialPhotos: initialPhotos ?? [], photos });

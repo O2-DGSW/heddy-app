@@ -1,6 +1,7 @@
 export {
   mapDetailToFormValues,
   mapDetailToPhotoItems,
+  getUnsupportedServiceTypes,
   mapDetailToProcedureTypes,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,

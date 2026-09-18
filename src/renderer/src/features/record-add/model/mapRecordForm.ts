@@ -84,11 +84,18 @@ export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): Rec
   details: detail.memo ?? "",
 });
 
-/** 폼에 없는 시술 종류(탈색·스타일링·기타)는 고를 칸이 없어 버린다 */
+/** 폼에 고를 칸이 있는 시술 종류만 추린다 */
 export const mapDetailToProcedureTypes = (detail: TreatmentRecordDetailApiData): ProcedureType[] =>
   detail.service_types
     .map(type => PROCEDURE_TYPE_BY_SERVICE_TYPE[type])
     .filter((procedureType): procedureType is ProcedureType => Boolean(procedureType));
+
+/**
+ * 폼에 칸이 없는 시술 종류(탈색·스타일링·기타)를 골라낸다.
+ * 화면에서 손댈 방법이 없는 값이라, 수정 저장 때 그대로 되돌려 보내지 않으면 조용히 지워진다.
+ */
+export const getUnsupportedServiceTypes = (detail: TreatmentRecordDetailApiData): ServiceType[] =>
+  detail.service_types.filter(serviceType => !PROCEDURE_TYPE_BY_SERVICE_TYPE[serviceType]);
 
 export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): PhotoItem[] =>
   [...(detail.photos ?? [])]
@@ -120,12 +127,17 @@ export const mapPhotoItemsToAddRequests = (photos: PhotoItem[]): AddTreatmentRec
 export const mapFormValuesToUpdateRequest = (
   formValues: RecordFormValues,
   procedureTypes: ProcedureType[],
-  rating: number
+  rating: number,
+  /** 화면에서 고를 수 없어 손대지 않은 종류. 함께 보내지 않으면 저장할 때 지워진다 */
+  preservedServiceTypes: ServiceType[] = []
 ): UpdateTreatmentRecordRequest => {
   const priceAmount = toPriceAmount(formValues.price);
 
   return {
-    service_types: procedureTypes.map(type => SERVICE_TYPE_BY_PROCEDURE_TYPE[type]),
+    service_types: [
+      ...procedureTypes.map(type => SERVICE_TYPE_BY_PROCEDURE_TYPE[type]),
+      ...preservedServiceTypes,
+    ],
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),

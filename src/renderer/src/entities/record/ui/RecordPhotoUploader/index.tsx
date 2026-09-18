@@ -11,6 +11,7 @@ import type { PhotoItem } from "../../model";
 interface RecordPhotoUploaderProps {
   inputRef: RefObject<HTMLInputElement | null>;
   isPhotoLimitReached: boolean;
+  isRequired?: boolean;
   photos: PhotoItem[];
   errorMessage?: string;
   onOpenPhotoPicker: () => void;
@@ -29,6 +30,7 @@ const RecordPhotoUploader = ({
   errorMessage,
   inputRef,
   isPhotoLimitReached,
+  isRequired = false,
   photos,
   onOpenPhotoPicker,
   onPhotoSelection,
@@ -41,7 +43,7 @@ const RecordPhotoUploader = ({
     <div className="flex w-full flex-col gap-[6px] [--record-photo-size:clamp(82px,26vw,100px)]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         사진
-        <RecordRequiredMark />
+        {isRequired && <RecordRequiredMark />}
       </h2>
 
       <input

@@ -74,6 +74,7 @@ const RecordAddForm = ({
     handleRemovePhoto,
     handleSubmit,
   } = useRecordAddForm({
+    isEditMode,
     initialValues,
     initialPhotos,
     initialProcedureTypes,
@@ -91,6 +92,7 @@ const RecordAddForm = ({
       {/* 필수 항목(사진·날짜·시술 종류·소요 시간)을 위로 모아, 아래로 내리지 않아도 저장에 필요한 게 다 보이게 한다 */}
       <RecordPhotoUploader
         errorMessage={formErrors.photos}
+        isRequired={!isEditMode}
         inputRef={photoInputRef}
         isPhotoLimitReached={isPhotoLimitReached}
         onOpenPhotoPicker={handleOpenPhotoPicker}
@@ -114,7 +116,7 @@ const RecordAddForm = ({
       <RecordTextField
         errorMessage={formErrors.duration}
         inputMode={RECORD_DURATION_FIELD.inputMode}
-        isRequired
+        isRequired={!isEditMode}
         label={RECORD_DURATION_FIELD.label}
         name={RECORD_DURATION_FIELD.id}
         onChange={handleFieldChange(RECORD_DURATION_FIELD.id)}

@@ -24,6 +24,11 @@ const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
 const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 한 장 이상 올려주세요.";
 
 interface UseRecordAddFormOptions {
+  /**
+   * 수정 화면이면 사진·소요 시간을 필수로 걸지 않는다.
+   * 이 규칙이 생기기 전에 만든 기록에는 둘 다 없을 수 있어, 필수로 막으면 메모 한 줄도 고칠 수 없다.
+   */
+  isEditMode?: boolean;
   /** 수정 화면처럼 기존 값에서 시작해야 할 때 넘긴다 */
   initialValues?: RecordFormValues;
   initialPhotos?: PhotoItem[];
@@ -33,6 +38,7 @@ interface UseRecordAddFormOptions {
 }
 
 export const useRecordAddForm = ({
+  isEditMode = false,
   initialValues,
   initialPhotos,
   initialProcedureTypes,
@@ -71,11 +77,12 @@ export const useRecordAddForm = ({
       nextFormErrors.procedureType = REQUIRED_FIELD_ERROR_MESSAGE;
     }
 
-    if (!formValues.duration.trim()) {
+    // 날짜·시술 종류는 서버도 요구하는 값이라 수정 화면에서도 그대로 막는다.
+    if (!isEditMode && !formValues.duration.trim()) {
       nextFormErrors.duration = REQUIRED_FIELD_ERROR_MESSAGE;
     }
 
-    if (photos.length === 0) {
+    if (!isEditMode && photos.length === 0) {
       nextFormErrors.photos = PHOTO_REQUIRED_ERROR_MESSAGE;
     }
 
