@@ -10,7 +10,7 @@ interface PageTitleProps {
 export const PageTitle = ({ children, id }: PageTitleProps) => {
   return (
     <h1
-      className={`shrink-0 py-2 pt-3 pb-3 text-center ${font.headline1.bold}`}
+      className={`shrink-0 py-3 text-center ${font.headline1.bold}`}
       id={id}
       style={{ color: lightTheme.label.neutral, backgroundColor: lightTheme.background.normal }}
     >
