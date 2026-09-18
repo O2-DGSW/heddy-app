@@ -1,13 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import { CutsLayout } from "@/features/cuts/ui/CutsLayout.tsx";
-import { CutsTabBar } from "@/features/cuts/ui/CutsTabBar";
 import { CutsCategoryFilter } from "@/features/cuts/ui/CutsCategoryFilter";
 import { CutsRecordList } from "@/features/cuts/ui/CutsRecordList";
 import { CutsAddButton } from "@/features/cuts/ui/CutsAddButton";
-import { CUTS_TABS, type CutsStatusFilter } from "@/features/cuts/constrants/tabs";
 import {
   CUTS_CATEGORIES,
   isCutsCategory,
@@ -19,24 +17,11 @@ import { CutsRecordListStatus } from "@/features/cuts/ui/CutsRecordListStatus";
 import { CutsLoadMoreTrigger } from "@/features/cuts/ui/CutsLoadMoreTrigger";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 
-const matchesStatusFilter = (record: CutsRecord, statusFilter: CutsStatusFilter) => {
-  if (statusFilter === "전체") {
-    return true;
-  }
-
-  if (statusFilter === "분석됨") {
-    return record.analysisStatus === "분석 완료";
-  }
-
-  return record.analysisStatus === "분석 중" || record.analysisStatus === "재촬영";
-};
-
 export const CutsListPage = () => {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState<CutsStatusFilter>(CUTS_TABS[0].label);
   const [categoryFilter, setCategoryFilter] = useState<CutsCategoryFilterValue>(CUTS_CATEGORIES[0]);
 
-  // 카테고리는 서버가 걸러 주고, 분석 상태는 조회 조건이 없어 받아온 목록에서 거른다.
+  // 분석 상태 탭을 없애면서 걸러낼 조건이 카테고리 하나만 남았고, 그건 서버가 걸러 준다.
   const {
     records,
     isPending,
@@ -52,11 +37,6 @@ export const CutsListPage = () => {
       : undefined,
   });
 
-  const filteredRecords = useMemo(
-    () => records.filter(record => matchesStatusFilter(record, statusFilter)),
-    [records, statusFilter]
-  );
-
   const handleRecordClick = (record: CutsRecord) => {
     setDirection("forward");
     navigate(`/cuts/${record.id}`);
@@ -66,18 +46,13 @@ export const CutsListPage = () => {
     <cap-page>
       <CutsLayout
         floatingAction={<CutsAddButton />}
-        header={
-          <>
-            <CutsTabBar selected={statusFilter} onSelect={setStatusFilter} />
-            <CutsCategoryFilter selected={categoryFilter} onSelect={setCategoryFilter} />
-          </>
-        }
+        header={<CutsCategoryFilter selected={categoryFilter} onSelect={setCategoryFilter} />}
       >
         {isPending || isError ? (
           <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
         ) : (
           <>
-            <CutsRecordList records={filteredRecords} onRecordClick={handleRecordClick} />
+            <CutsRecordList records={records} onRecordClick={handleRecordClick} />
             <CutsLoadMoreTrigger
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
