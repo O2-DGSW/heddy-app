@@ -4,7 +4,6 @@ export {
   MAX_PHOTO_COUNT,
   PROCEDURE_TYPES,
   RECORD_DETAIL_FIELDS,
-  RECORD_DURATION_FIELD,
   RECORD_FIELDS,
   WEEK_DAYS,
   YEAR_OPTIONS,
@@ -17,6 +16,14 @@ export {
   getTodayDateValue,
   parseDateValue,
 } from "./date";
+export {
+  DURATION_HOUR_OPTIONS,
+  DURATION_MINUTE_OPTIONS,
+  DURATION_MINUTE_STEP,
+  createDurationValue,
+  formatDurationDisplay,
+  parseDurationValue,
+} from "./duration";
 export { getTreatmentRecordPhotoDisplayUrl, getTreatmentRecordThumbnailUrl } from "./photo";
 export type {
   CalendarDay,

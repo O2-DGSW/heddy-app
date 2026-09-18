@@ -13,9 +13,9 @@ import {
   getTodayDateValue,
   noIcon,
   parseDateValue,
+  RecordRequiredMark,
 } from "@/entities/record";
-import { RecordRequiredMark } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, useHideBottomBarWhileOpen } from "@/shared";
 
 import type { CSSProperties } from "react";
 import type { CalendarDay } from "@/entities/record";
@@ -98,6 +98,8 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
   const [draftDate, setDraftDate] = useState(() => getTodayDateValue());
+
+  useHideBottomBarWhileOpen(isDatePickerOpen);
 
   const hasError = Boolean(errorMessage);
   const errorId = "record-date-error";

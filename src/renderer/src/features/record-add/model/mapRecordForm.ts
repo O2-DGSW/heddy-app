@@ -59,11 +59,8 @@ const toPriceAmount = (price: string) => {
 };
 
 /** 숫자만 남겨 소요 시간(분)으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
-/**
- * 입력된 소요 시간에서 숫자만 남겨 분으로 바꾼다. 숫자가 하나도 없으면 null이라 서버에서 지워진다.
- * 필수 검증도 같은 함수를 써야 "한시간"처럼 숫자가 없는 값이 통과하지 않는다.
- */
-export const parseDurationMinutes = (duration: string) => {
+/** 소요 시간(분 문자열)을 서버가 받는 숫자로 바꾼다. 값이 없으면 null이라 서버에서 지워진다. */
+const parseDurationMinutes = (duration: string) => {
   const digitsOnly = duration.replace(/[^0-9]/g, "");
 
   return digitsOnly ? Number(digitsOnly) : null;

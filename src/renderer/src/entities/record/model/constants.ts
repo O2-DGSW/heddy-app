@@ -13,14 +13,6 @@ export const RECORD_FIELDS = [
   { id: "price", label: "가격", placeholder: "가격", inputMode: "decimal" },
 ] as const satisfies readonly RecordFieldConfig[];
 
-/** 필수 항목이라 위쪽에 따로 렌더한다 */
-export const RECORD_DURATION_FIELD = {
-  id: "duration",
-  label: "소요 시간",
-  placeholder: "소요 시간(분)",
-  inputMode: "decimal",
-} as const satisfies RecordFieldConfig;
-
 export const RECORD_DETAIL_FIELDS = [
   {
     id: "designer",

@@ -3,7 +3,6 @@ import { lightTheme, font } from "@heddy/design-tokens";
 import {
   ProcedureTypeSelector,
   RECORD_DETAIL_FIELDS,
-  RECORD_DURATION_FIELD,
   RECORD_FIELDS,
   RecordPhotoUploader,
   RecordRatingField,
@@ -14,6 +13,7 @@ import { cn } from "@/shared";
 
 import { useRecordAddForm } from "../../model";
 import RecordDatePickerField from "../RecordDatePickerField";
+import RecordDurationField from "../RecordDurationField";
 
 export interface RecordFormSubmitValues {
   formValues: RecordFormValues;
@@ -66,6 +66,7 @@ const RecordAddForm = ({
     selectedProcedureTypes,
     handleDateChange,
     handleDetailsChange,
+    handleDurationChange,
     handleFieldChange,
     handleOpenPhotoPicker,
     handlePhotoSelection,
@@ -113,15 +114,11 @@ const RecordAddForm = ({
         selectedProcedureTypes={selectedProcedureTypes}
       />
 
-      <RecordTextField
+      <RecordDurationField
         errorMessage={formErrors.duration}
-        inputMode={RECORD_DURATION_FIELD.inputMode}
         isRequired={!isEditMode}
-        label={RECORD_DURATION_FIELD.label}
-        name={RECORD_DURATION_FIELD.id}
-        onChange={handleFieldChange(RECORD_DURATION_FIELD.id)}
-        placeholder={RECORD_DURATION_FIELD.placeholder}
-        value={formValues[RECORD_DURATION_FIELD.id]}
+        onChange={handleDurationChange}
+        value={formValues.duration}
       />
 
       {/* 여기부터는 선택 입력 */}
