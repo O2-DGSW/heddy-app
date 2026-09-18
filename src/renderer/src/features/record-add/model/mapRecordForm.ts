@@ -59,7 +59,11 @@ const toPriceAmount = (price: string) => {
 };
 
 /** 숫자만 남겨 소요 시간(분)으로 쓴다. 값이 없거나 숫자가 아니면 null로 보내 서버에서 지운다. */
-const toDurationMinutes = (duration: string) => {
+/**
+ * 입력된 소요 시간에서 숫자만 남겨 분으로 바꾼다. 숫자가 하나도 없으면 null이라 서버에서 지워진다.
+ * 필수 검증도 같은 함수를 써야 "한시간"처럼 숫자가 없는 값이 통과하지 않는다.
+ */
+export const parseDurationMinutes = (duration: string) => {
   const digitsOnly = duration.replace(/[^0-9]/g, "");
 
   return digitsOnly ? Number(digitsOnly) : null;
@@ -143,7 +147,7 @@ export const mapFormValuesToUpdateRequest = (
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),
     // 1~5 밖의 값(아직 안 고른 0 등)은 보내지 않는다. 0.5 단위는 그대로 보낸다.
     ...(rating >= 1 && rating <= 5 ? { satisfaction: rating } : {}),
-    duration_minutes: toDurationMinutes(formValues.duration),
+    duration_minutes: parseDurationMinutes(formValues.duration),
     treatment_content: formValues.procedureContent.trim() || null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,
@@ -164,7 +168,7 @@ export const mapFormValuesToCreateRequest = (
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,
     satisfaction: rating >= 1 && rating <= 5 ? rating : null,
-    duration_minutes: toDurationMinutes(formValues.duration),
+    duration_minutes: parseDurationMinutes(formValues.duration),
     treatment_content: formValues.procedureContent.trim() || null,
     price_amount: priceAmount,
     price_currency: priceAmount === null ? null : PRICE_CURRENCY,

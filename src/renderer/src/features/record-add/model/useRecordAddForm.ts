@@ -8,6 +8,7 @@ import {
 } from "@/entities/record";
 
 import { compressPhotoFile } from "./compressPhotoFile";
+import { parseDurationMinutes } from "./mapRecordForm";
 
 import type { ChangeEvent, FormEvent } from "react";
 import type {
@@ -22,6 +23,7 @@ type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
 const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 한 장 이상 올려주세요.";
+const DURATION_NUMBER_ERROR_MESSAGE = "숫자로 입력해 주세요.";
 
 interface UseRecordAddFormOptions {
   /**
@@ -80,6 +82,9 @@ export const useRecordAddForm = ({
     // 날짜·시술 종류는 서버도 요구하는 값이라 수정 화면에서도 그대로 막는다.
     if (!isEditMode && !formValues.duration.trim()) {
       nextFormErrors.duration = REQUIRED_FIELD_ERROR_MESSAGE;
+    } else if (formValues.duration.trim() && parseDurationMinutes(formValues.duration) === null) {
+      // 숫자가 하나도 없으면 전송 단계에서 null이 되어 "필수"인데 빈 값으로 저장된다.
+      nextFormErrors.duration = DURATION_NUMBER_ERROR_MESSAGE;
     }
 
     if (!isEditMode && photos.length === 0) {
@@ -155,7 +160,7 @@ export const useRecordAddForm = ({
       if (fieldName === "duration") {
         setFormErrors(currentErrors => ({
           ...currentErrors,
-          duration: value.trim() ? undefined : currentErrors.duration,
+          duration: parseDurationMinutes(value) === null ? currentErrors.duration : undefined,
         }));
       }
     };

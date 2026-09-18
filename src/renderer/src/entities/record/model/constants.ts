@@ -17,8 +17,8 @@ export const RECORD_FIELDS = [
 export const RECORD_DURATION_FIELD = {
   id: "duration",
   label: "소요 시간",
-  placeholder: "소요 시간",
-  inputMode: "text",
+  placeholder: "소요 시간(분)",
+  inputMode: "decimal",
 } as const satisfies RecordFieldConfig;
 
 export const RECORD_DETAIL_FIELDS = [
