@@ -4,15 +4,23 @@ export const WHEEL_ITEM_HEIGHT = 44;
 /** 한 번에 보이는 칸 수. 가운데 선택줄 위아래로 두 칸씩 보이도록 홀수로 둔다 */
 export const WHEEL_VISIBLE_ITEM_COUNT = 5;
 
-/**
- * 같은 후보 목록을 몇 번 이어 붙일지. 아이폰 알람처럼 끝에서 처음으로 이어지게 하려고
- * 목록을 여러 벌 쌓아 두고, 가운데 벌에서 시작해 끝에 가까워지면 한 벌만큼 스크롤을 옮긴다.
- * 내용이 똑같아서 옮기는 순간이 눈에 보이지 않는다. 홀수여야 가운데 벌이 생긴다.
- */
-export const WHEEL_REPEAT_COUNT = 7;
-
-/** 처음 자리잡을 벌의 번호(0부터). 위아래로 같은 길이의 여유를 두려고 한가운데를 쓴다 */
-export const WHEEL_MIDDLE_BLOCK_INDEX = (WHEEL_REPEAT_COUNT - 1) / 2;
-
 /** 선택줄 위에 놓이는 칸까지의 거리(칸 수) */
 export const WHEEL_EDGE_ITEM_COUNT = (WHEEL_VISIBLE_ITEM_COUNT - 1) / 2;
+
+/**
+ * 한 휠에 깔아 둘 대략의 칸 수.
+ * 세게 튕겼을 때 관성이 끝에 닿지 않을 만큼은 깔려 있어야 한다 —
+ * 400칸이면 가운데에서 양쪽으로 8,000px 넘게 남아 한 번의 플릭으로는 끝에 닿지 않는다.
+ */
+const WHEEL_TARGET_ITEM_COUNT = 400;
+
+/**
+ * 같은 후보 목록을 몇 벌 이어 붙일지.
+ * 후보가 적을수록(예: 10분 단위라 6개) 더 많이 깔아야 굴릴 거리가 확보된다.
+ * 가운데 벌이 생기도록 홀수로 맞춘다.
+ */
+export const getWheelRepeatCount = (optionCount: number) => {
+  const repeatCount = Math.max(3, Math.ceil(WHEEL_TARGET_ITEM_COUNT / optionCount));
+
+  return repeatCount % 2 === 0 ? repeatCount + 1 : repeatCount;
+};

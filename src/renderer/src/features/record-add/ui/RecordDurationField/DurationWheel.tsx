@@ -7,9 +7,8 @@ import { triggerSelectionHaptic } from "@/shared/lib";
 import {
   WHEEL_EDGE_ITEM_COUNT,
   WHEEL_ITEM_HEIGHT,
-  WHEEL_MIDDLE_BLOCK_INDEX,
-  WHEEL_REPEAT_COUNT,
   WHEEL_VISIBLE_ITEM_COUNT,
+  getWheelRepeatCount,
 } from "./constants";
 
 interface DurationWheelProps {
@@ -28,8 +27,8 @@ const SCROLL_SETTLE_DELAY = 120;
  * 세로로 굴려서 값을 고르는 휠.
  *
  * 아이폰 알람처럼 끝과 처음이 이어지고, 선택줄에 닿는 순간 바로 색이 바뀐다.
- * - 순환: 같은 목록을 여러 벌 쌓아 두고, 멈출 때마다 가운데 벌로 스크롤 위치를 되돌린다.
- *   내용이 같은 자리로 옮기는 거라 화면에는 아무 변화가 없다.
+ * - 순환: 같은 목록을 여러 벌 깔아 두고 가운데 벌에서 시작한다. 끝 쪽 한 벌 안으로 들어오면
+ *   스크롤 도중이라도 가운데 벌로 되돌린다. 내용이 같은 자리라 화면에는 변화가 없다.
  * - 색: 스크롤 도중에도 가운데 칸을 계산해 즉시 반영한다(값 확정은 멈춘 뒤).
  */
 const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelProps) => {
@@ -38,11 +37,15 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
   // 사용자가 굴리는 중에는 밖에서 들어온 값으로 스크롤 위치를 되돌리지 않는다.
   const isUserScrollingRef = useRef(false);
   // 선택줄에 놓인 칸을 "몇 번째 벌의 몇 번째"까지 그대로 기억한다.
-  // 색은 어느 벌이든 같은 숫자면 같이 바뀌어야 하고, aria-selected는 실제 그 칸 하나만 달아야 한다.
+  // 색은 어느 벌이든 같은 숫자면 같이 바뀌고, aria-selected는 실제 그 칸 하나에만 단다.
   const [activeLoopedIndex, setActiveLoopedIndex] = useState(
-    () => WHEEL_MIDDLE_BLOCK_INDEX * options.length + Math.max(options.indexOf(value), 0)
+    () =>
+      ((getWheelRepeatCount(options.length) - 1) / 2) * options.length +
+      Math.max(options.indexOf(value), 0)
   );
 
+  const repeatCount = useMemo(() => getWheelRepeatCount(options.length), [options.length]);
+  const middleBlockIndex = (repeatCount - 1) / 2;
   const blockLength = options.length * WHEEL_ITEM_HEIGHT;
   const activeIndex = ((activeLoopedIndex % options.length) + options.length) % options.length;
 
@@ -50,11 +53,18 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
   const loopedOptions = useMemo(
     () =>
       Array.from(
-        { length: WHEEL_REPEAT_COUNT * options.length },
+        { length: repeatCount * options.length },
         (_, loopedIndex) => options[loopedIndex % options.length] as number
       ),
-    [options]
+    [options, repeatCount]
   );
+
+  /** 지금 보고 있는 칸을 그대로 둔 채 스크롤 위치만 가운데 벌로 옮긴다 */
+  const recenterToMiddleBlock = (list: HTMLDivElement) => {
+    const offsetInBlock = ((list.scrollTop % blockLength) + blockLength) % blockLength;
+
+    list.scrollTop = middleBlockIndex * blockLength + offsetInBlock;
+  };
 
   const handleScroll = () => {
     const list = listRef.current;
@@ -79,6 +89,13 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
       triggerSelectionHaptic();
     }
 
+    // 끝 쪽 한 벌 안으로 들어오면 관성이 끝에 박히기 전에 되돌린다.
+    // 여기서 멈추면 더 굴러가지 않고 끊겨서, 멈춘 뒤가 아니라 지금 옮겨야 한다.
+    if (list.scrollTop < blockLength || list.scrollTop > (repeatCount - 2) * blockLength) {
+      recenterToMiddleBlock(list);
+      setActiveLoopedIndex(middleBlockIndex * options.length + centeredIndex);
+    }
+
     if (settleTimerRef.current) {
       clearTimeout(settleTimerRef.current);
     }
@@ -86,14 +103,9 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
     settleTimerRef.current = setTimeout(() => {
       isUserScrollingRef.current = false;
 
-      // 끝에 다다르기 전에 가운데 벌로 되돌려 놔야 계속 굴릴 수 있다.
-      const offsetInBlock = ((list.scrollTop % blockLength) + blockLength) % blockLength;
-      const recenteredScrollTop = WHEEL_MIDDLE_BLOCK_INDEX * blockLength + offsetInBlock;
-
-      if (list.scrollTop !== recenteredScrollTop) {
-        list.scrollTop = recenteredScrollTop;
-        setActiveLoopedIndex(WHEEL_MIDDLE_BLOCK_INDEX * options.length + centeredIndex);
-      }
+      // 멈춘 김에 가운데 벌로 돌려놔 다음 제스처도 양쪽 거리를 넉넉히 쓰게 한다.
+      recenterToMiddleBlock(list);
+      setActiveLoopedIndex(middleBlockIndex * options.length + centeredIndex);
 
       const settledValue = options[centeredIndex];
 
@@ -120,11 +132,10 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
 
     const optionIndex = Math.max(options.indexOf(value), 0);
 
-    setActiveLoopedIndex(WHEEL_MIDDLE_BLOCK_INDEX * options.length + optionIndex);
+    setActiveLoopedIndex(middleBlockIndex * options.length + optionIndex);
     list.scrollTop =
-      (WHEEL_MIDDLE_BLOCK_INDEX * options.length + optionIndex - WHEEL_EDGE_ITEM_COUNT) *
-      WHEEL_ITEM_HEIGHT;
-  }, [options, value]);
+      (middleBlockIndex * options.length + optionIndex - WHEEL_EDGE_ITEM_COUNT) * WHEEL_ITEM_HEIGHT;
+  }, [middleBlockIndex, options, value]);
 
   useEffect(
     () => () => {
