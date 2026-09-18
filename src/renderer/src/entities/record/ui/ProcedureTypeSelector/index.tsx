@@ -2,15 +2,18 @@ import { font, lightTheme, palette } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
+import RecordRequiredMark from "../RecordRequiredMark";
+
 import { PROCEDURE_TYPES } from "../../model";
 
 import type { CSSProperties } from "react";
 import type { ProcedureType } from "../../model";
 
 interface ProcedureTypeSelectorProps {
-  selectedProcedureType: ProcedureType | null;
+  /** 한 시술에 커트·염색처럼 여러 종류가 섞일 수 있어 여러 개를 고를 수 있다 */
+  selectedProcedureTypes: ProcedureType[];
   errorMessage?: string;
-  onChange: (procedureType: ProcedureType) => void;
+  onToggle: (procedureType: ProcedureType) => void;
 }
 
 const getProcedureButtonStyle = (isSelected: boolean): CSSProperties => ({
@@ -21,8 +24,8 @@ const getProcedureButtonStyle = (isSelected: boolean): CSSProperties => ({
 
 const ProcedureTypeSelector = ({
   errorMessage,
-  selectedProcedureType,
-  onChange,
+  selectedProcedureTypes,
+  onToggle,
 }: ProcedureTypeSelectorProps) => {
   const hasError = Boolean(errorMessage);
   const errorId = "record-procedure-type-error";
@@ -31,6 +34,7 @@ const ProcedureTypeSelector = ({
     <div className="flex w-full flex-col gap-[12px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         시술 종류
+        <RecordRequiredMark />
       </h2>
       <div
         aria-describedby={hasError ? errorId : undefined}
@@ -38,7 +42,7 @@ const ProcedureTypeSelector = ({
         className="flex flex-wrap gap-[8px]"
       >
         {PROCEDURE_TYPES.map(procedureType => {
-          const isSelected = selectedProcedureType === procedureType;
+          const isSelected = selectedProcedureTypes.includes(procedureType);
 
           return (
             <button
@@ -48,7 +52,7 @@ const ProcedureTypeSelector = ({
                 "h-[27px] rounded-[15px] border border-solid px-[13px] py-[3px]"
               )}
               key={procedureType}
-              onClick={() => onChange(procedureType)}
+              onClick={() => onToggle(procedureType)}
               style={getProcedureButtonStyle(isSelected)}
               type="button"
             >

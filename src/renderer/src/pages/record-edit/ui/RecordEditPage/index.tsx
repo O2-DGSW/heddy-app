@@ -14,7 +14,7 @@ import {
   RecordAddForm,
   mapDetailToFormValues,
   mapDetailToPhotoItems,
-  mapDetailToProcedureType,
+  mapDetailToProcedureTypes,
   mapFormValuesToUpdateRequest,
   syncRecordPhotos,
 } from "@/features/record-add";
@@ -44,8 +44,8 @@ const RecordEditPage = () => {
     () => (record ? mapDetailToFormValues(record) : undefined),
     [record]
   );
-  const initialProcedureType = useMemo(
-    () => (record ? mapDetailToProcedureType(record) : undefined),
+  const initialProcedureTypes = useMemo(
+    () => (record ? mapDetailToProcedureTypes(record) : undefined),
     [record]
   );
   const initialPhotos = useMemo(
@@ -64,7 +64,7 @@ const RecordEditPage = () => {
   const handleSubmit = async ({
     formValues,
     photos,
-    procedureType,
+    procedureTypes,
     rating,
   }: RecordFormSubmitValues) => {
     if (!id) {
@@ -74,7 +74,7 @@ const RecordEditPage = () => {
     try {
       await updateRecord.mutateAsync({
         recordId: id,
-        body: mapFormValuesToUpdateRequest(formValues, procedureType, rating),
+        body: mapFormValuesToUpdateRequest(formValues, procedureTypes, rating),
       });
 
       await syncPhotos.mutateAsync({ recordId: id, initialPhotos: initialPhotos ?? [], photos });
@@ -136,7 +136,7 @@ const RecordEditPage = () => {
 
               <RecordAddForm
                 mode="edit"
-                initialProcedureType={initialProcedureType}
+                initialProcedureTypes={initialProcedureTypes}
                 initialPhotos={initialPhotos}
                 initialRating={record?.satisfaction ?? undefined}
                 initialValues={initialValues}

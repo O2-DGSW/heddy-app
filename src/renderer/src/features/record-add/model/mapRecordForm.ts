@@ -84,10 +84,11 @@ export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): Rec
   details: detail.memo ?? "",
 });
 
-export const mapDetailToProcedureType = (
-  detail: TreatmentRecordDetailApiData
-): ProcedureType | undefined =>
-  detail.service_types.map(type => PROCEDURE_TYPE_BY_SERVICE_TYPE[type]).find(Boolean);
+/** 폼에 없는 시술 종류(탈색·스타일링·기타)는 고를 칸이 없어 버린다 */
+export const mapDetailToProcedureTypes = (detail: TreatmentRecordDetailApiData): ProcedureType[] =>
+  detail.service_types
+    .map(type => PROCEDURE_TYPE_BY_SERVICE_TYPE[type])
+    .filter((procedureType): procedureType is ProcedureType => Boolean(procedureType));
 
 export const mapDetailToPhotoItems = (detail: TreatmentRecordDetailApiData): PhotoItem[] =>
   [...(detail.photos ?? [])]
@@ -118,17 +119,17 @@ export const mapPhotoItemsToAddRequests = (photos: PhotoItem[]): AddTreatmentRec
  */
 export const mapFormValuesToUpdateRequest = (
   formValues: RecordFormValues,
-  procedureType: ProcedureType,
+  procedureTypes: ProcedureType[],
   rating: number
 ): UpdateTreatmentRecordRequest => {
   const priceAmount = toPriceAmount(formValues.price);
 
   return {
-    service_types: [SERVICE_TYPE_BY_PROCEDURE_TYPE[procedureType]],
+    service_types: procedureTypes.map(type => SERVICE_TYPE_BY_PROCEDURE_TYPE[type]),
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,
     ...(formValues.date ? { performed_at: toPerformedAt(formValues.date) } : {}),
-    // 서버가 1~5만 받으므로 그 밖의 값은 보내지 않는다.
+    // 1~5 밖의 값(아직 안 고른 0 등)은 보내지 않는다. 0.5 단위는 그대로 보낸다.
     ...(rating >= 1 && rating <= 5 ? { satisfaction: rating } : {}),
     duration_minutes: toDurationMinutes(formValues.duration),
     treatment_content: formValues.procedureContent.trim() || null,
@@ -140,13 +141,13 @@ export const mapFormValuesToUpdateRequest = (
 
 export const mapFormValuesToCreateRequest = (
   formValues: RecordFormValues,
-  procedureType: ProcedureType,
+  procedureTypes: ProcedureType[],
   rating: number
 ): CreateTreatmentRecordRequest => {
   const priceAmount = toPriceAmount(formValues.price);
 
   return {
-    service_types: [SERVICE_TYPE_BY_PROCEDURE_TYPE[procedureType]],
+    service_types: procedureTypes.map(type => SERVICE_TYPE_BY_PROCEDURE_TYPE[type]),
     performed_at: toPerformedAt(formValues.date),
     salon_name: formValues.salon.trim() || null,
     designer_name: formValues.designer.trim() || null,

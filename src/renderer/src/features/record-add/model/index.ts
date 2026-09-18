@@ -2,7 +2,7 @@ export { useRecordAddForm } from "./useRecordAddForm";
 export {
   mapDetailToFormValues,
   mapDetailToPhotoItems,
-  mapDetailToProcedureType,
+  mapDetailToProcedureTypes,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   mapPhotoItemsToAddRequests,
