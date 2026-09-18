@@ -13,7 +13,7 @@ interface CutsCategoryFilterProps {
 export const CutsCategoryFilter = ({ selected, onSelect }: CutsCategoryFilterProps) => {
   return (
     <div
-      className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hidden"
+      className="flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 py-3 scrollbar-hidden"
       style={{ backgroundColor: lightTheme.fill.normal }}
     >
       {CUTS_CATEGORIES.map(category => {

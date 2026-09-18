@@ -4,19 +4,74 @@ import { CutsStatusBadge } from "@/features/cuts/ui/CutsStatusBadge";
 import { CutsStarIcon } from "@/features/cuts/ui/icons/CutsStarIcon";
 import { CutsChevronRightIcon } from "@/features/cuts/ui/icons/CutsChevronRightIcon";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
+import type { CutsViewMode } from "@/features/cuts/model/types/CutsViewMode.types";
 
 interface CutsRecordCardProps {
   record: CutsRecord;
   onClick: () => void;
+  /** 그리드에서는 사진을 위에 크게 올리고 화살표를 뺀 세로형으로 바뀐다 */
+  viewMode?: CutsViewMode;
 }
 
-export const CutsRecordCard = ({ record, onClick }: CutsRecordCardProps) => {
+const cardStyle = { backgroundColor: lightTheme.background.normal };
+
+export const CutsRecordCard = ({ record, onClick, viewMode = "list" }: CutsRecordCardProps) => {
+  if (viewMode === "grid") {
+    return (
+      <button
+        className="flex h-full w-full flex-col gap-2 rounded-2xl p-2.5 text-left shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-1.5 max-[400px]:p-2"
+        onClick={onClick}
+        style={cardStyle}
+        type="button"
+      >
+        {/* 칸 너비가 화면 폭에 따라 달라져서, 고정 크기 대신 aspect-square로 정사각형을 유지한다 */}
+        <div
+          className="aspect-square w-full shrink-0 overflow-hidden rounded-xl"
+          style={{ backgroundColor: lightTheme.fill.normal }}
+        >
+          {record.thumbnailUrl && (
+            <img
+              alt={`${record.procedureName} 시술 사진`}
+              className="h-full w-full object-cover"
+              src={record.thumbnailUrl}
+            />
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className={font.caption.medium} style={{ color: lightTheme.label.assistive }}>
+            {record.date}
+          </span>
+          <span
+            className={`truncate ${font.headline2.bold} max-[400px]:text-[0.9375rem]`}
+            style={{ color: lightTheme.label.normal }}
+          >
+            {record.procedureName}
+          </span>
+          <span
+            className={`truncate ${font.caption.regular}`}
+            style={{ color: lightTheme.label.alternative }}
+          >
+            {record.salonName} · {record.designerName}
+          </span>
+        </div>
+
+        {/* 칸이 좁아 별점과 배지가 한 줄에 다 들어가지 않으므로 줄바꿈을 허용한다 */}
+        <div className="mt-auto flex flex-wrap items-center gap-1 pt-0.5">
+          <CutsRatingStars rating={record.rating} />
+          {record.isSharing && <CutsStatusBadge variant="sharing" />}
+          {record.analysisStatus && <CutsStatusBadge variant={record.analysisStatus} />}
+        </div>
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex w-full items-center gap-3 rounded-2xl p-3 text-left shadow-[0_1px_6px_rgba(0,0,0,0.06)] max-[400px]:gap-2 max-[400px]:p-2"
-      style={{ backgroundColor: lightTheme.background.normal }}
+      style={cardStyle}
     >
       {/* 정사각형을 항상 유지해야 하므로 가로/세로를 각각 고정한다.
           (self-stretch로 세로를 옆 텍스트 블록 높이에 맞추면 좁은 화면에서 폭만 줄어 비율이 깨진다.) */}
