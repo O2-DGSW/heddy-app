@@ -1,6 +1,6 @@
 export { cn, shareLink } from "./lib";
 export { chevronRightIcon, profileAvatar } from "./assets";
-export { useBottomBarVisibility } from "./model/bottom-bar-visibility";
+export { useBottomBarVisibility, useHideBottomBarWhileOpen } from "./model/bottom-bar-visibility";
 export { BottomBarVisibilityProvider } from "./ui/bottom-bar-visibility-provider";
 export { FloatingActionButton } from "./ui/floating-action-button";
 export { PageTitle } from "./ui/page-title/PageTitle";

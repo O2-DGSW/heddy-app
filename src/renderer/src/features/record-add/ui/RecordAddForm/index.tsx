@@ -13,6 +13,7 @@ import { cn } from "@/shared";
 
 import { useRecordAddForm } from "../../model";
 import RecordDatePickerField from "../RecordDatePickerField";
+import RecordDurationField from "../RecordDurationField";
 
 export interface RecordFormSubmitValues {
   formValues: RecordFormValues;
@@ -65,6 +66,7 @@ const RecordAddForm = ({
     selectedProcedureType,
     handleDateChange,
     handleDetailsChange,
+    handleDurationChange,
     handleFieldChange,
     handleOpenPhotoPicker,
     handlePhotoSelection,
@@ -117,6 +119,8 @@ const RecordAddForm = ({
           value={formValues[field.id]}
         />
       ))}
+
+      <RecordDurationField onChange={handleDurationChange} value={formValues.duration} />
 
       <ProcedureTypeSelector
         errorMessage={formErrors.procedureType}
