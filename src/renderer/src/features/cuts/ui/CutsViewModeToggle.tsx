@@ -26,10 +26,8 @@ const VIEW_MODE_LABEL = {
   list: "리스트로 보기",
 } as const satisfies Record<CutsViewMode, string>;
 
-const buttonStyle = {
-  backgroundColor: lightTheme.fill.neutral,
-  color: lightTheme.primary.normal,
-};
+/** 배경 없이 아이콘만 둔다. 눌린 느낌은 투명도로만 준다 */
+const buttonStyle = { color: lightTheme.label.assistive };
 
 /**
  * 시술기록 목록의 배치를 그리드↔리스트로 바꾸는 버튼.
@@ -43,7 +41,7 @@ export const CutsViewModeToggle = ({ selected, onSelect }: CutsViewModeTogglePro
   return (
     <button
       aria-label={VIEW_MODE_LABEL[nextViewMode]}
-      className="mr-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-0 p-2 transition-colors duration-200 max-[400px]:h-8 max-[400px]:w-8 max-[400px]:p-1.5"
+      className="mr-4 flex h-9 w-9 shrink-0 items-center justify-center border-0 bg-transparent p-2 transition-opacity duration-200 active:opacity-50 max-[400px]:h-8 max-[400px]:w-8 max-[400px]:p-1.5"
       onClick={() => onSelect(nextViewMode)}
       style={buttonStyle}
       type="button"
