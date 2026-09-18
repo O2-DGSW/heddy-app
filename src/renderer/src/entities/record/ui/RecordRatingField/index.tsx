@@ -1,8 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-
-import { cn } from "@/shared";
-
-import { starDisabledIcon, starIcon } from "../../assets";
+import { Rating } from "react-simple-star-rating";
 
 interface RecordRatingFieldProps {
   rating: number;
@@ -10,7 +7,8 @@ interface RecordRatingFieldProps {
   onChange: (nextRating: number) => void;
 }
 
-const RATING_VALUES = [1, 2, 3, 4, 5] as const;
+/** 별 하나 크기(px). 손가락으로 반 칸을 집어야 해서 넉넉하게 잡는다 */
+const STAR_SIZE = 38;
 
 const RecordRatingField = ({ errorMessage, rating, onChange }: RecordRatingFieldProps) => {
   const hasError = Boolean(errorMessage);
@@ -25,28 +23,19 @@ const RecordRatingField = ({ errorMessage, rating, onChange }: RecordRatingField
         aria-describedby={hasError ? errorId : undefined}
         aria-label={`만족도 ${rating}점`}
         className="flex h-[59px] items-center justify-center"
-        role="radiogroup"
       >
-        {RATING_VALUES.map(ratingValue => (
-          <button
-            aria-checked={rating === ratingValue}
-            aria-label={`${ratingValue}점`}
-            className={cn(
-              "flex h-[35px] w-[35px] items-center justify-center border-0 bg-transparent p-0",
-              ratingValue < 5 && "-mr-[3px]"
-            )}
-            key={ratingValue}
-            onClick={() => onChange(ratingValue)}
-            role="radio"
-            type="button"
-          >
-            <img
-              alt=""
-              className={cn(ratingValue <= rating ? "h-[35px] w-[35px]" : "h-[24px] w-[25px]")}
-              src={ratingValue <= rating ? starIcon : starDisabledIcon}
-            />
-          </button>
-        ))}
+        {/* 반 칸 선택(allowFraction)과 터치 드래그는 직접 만들면 손이 많이 가서 라이브러리에 맡긴다.
+            별 모양·색만 디자인 토큰으로 맞춘다. */}
+        <Rating
+          allowFraction
+          fillColor={lightTheme.status.warning}
+          emptyColor={lightTheme.line.neutral}
+          initialValue={rating}
+          onClick={onChange}
+          size={STAR_SIZE}
+          SVGstyle={{ display: "inline-block" }}
+          transition
+        />
       </div>
       {errorMessage && (
         <span
