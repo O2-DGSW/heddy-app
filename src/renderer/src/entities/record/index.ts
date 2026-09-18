@@ -13,6 +13,7 @@ export {
   MAX_PHOTO_COUNT,
   PROCEDURE_TYPES,
   RECORD_DETAIL_FIELDS,
+  RECORD_DURATION_FIELD,
   RECORD_FIELDS,
   WEEK_DAYS,
   YEAR_OPTIONS,
@@ -89,5 +90,6 @@ export {
   ProcedureTypeSelector,
   RecordPhotoUploader,
   RecordRatingField,
+  RecordRequiredMark,
   RecordTextField,
 } from "./ui";

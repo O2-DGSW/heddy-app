@@ -11,8 +11,15 @@ export const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"] as co
 export const RECORD_FIELDS = [
   { id: "salon", label: "미용실", placeholder: "미용실", inputMode: "text" },
   { id: "price", label: "가격", placeholder: "가격", inputMode: "decimal" },
-  { id: "duration", label: "소요 시간", placeholder: "소요 시간", inputMode: "text" },
 ] as const satisfies readonly RecordFieldConfig[];
+
+/** 필수 항목이라 위쪽에 따로 렌더한다 */
+export const RECORD_DURATION_FIELD = {
+  id: "duration",
+  label: "소요 시간",
+  placeholder: "소요 시간",
+  inputMode: "text",
+} as const satisfies RecordFieldConfig;
 
 export const RECORD_DETAIL_FIELDS = [
   {

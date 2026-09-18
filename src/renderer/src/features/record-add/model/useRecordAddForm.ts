@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-import { INITIAL_FORM_VALUES, INITIAL_PHOTOS, MAX_PHOTO_COUNT } from "@/entities/record";
+import {
+  INITIAL_FORM_VALUES,
+  INITIAL_PHOTOS,
+  MAX_PHOTO_COUNT,
+  getTodayDateValue,
+} from "@/entities/record";
 
 import { compressPhotoFile } from "./compressPhotoFile";
 
@@ -12,16 +17,17 @@ import type {
   RecordFormValues,
 } from "@/entities/record";
 
-type RecordFormErrorKeyType = "date" | "procedureType";
+type RecordFormErrorKeyType = "date" | "procedureType" | "duration" | "photos";
 type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
+const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 한 장 이상 올려주세요.";
 
 interface UseRecordAddFormOptions {
   /** 수정 화면처럼 기존 값에서 시작해야 할 때 넘긴다 */
   initialValues?: RecordFormValues;
   initialPhotos?: PhotoItem[];
-  initialProcedureType?: ProcedureType;
+  initialProcedureTypes?: ProcedureType[];
   initialRating?: number;
   onSubmit?: () => void;
 }
@@ -29,19 +35,22 @@ interface UseRecordAddFormOptions {
 export const useRecordAddForm = ({
   initialValues,
   initialPhotos,
-  initialProcedureType,
+  initialProcedureTypes,
   initialRating,
   onSubmit,
 }: UseRecordAddFormOptions = {}) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photoIdSequenceRef = useRef(1);
   const objectUrlsRef = useRef(new Set<string>());
+  // 추가 화면은 오늘 시술을 적는 경우가 대부분이라 날짜를 오늘로 채워 두고 시작한다.
+  // (수정 화면은 initialValues가 들어와 기존 날짜가 그대로 유지된다.)
   const [formValues, setFormValues] = useState<RecordFormValues>(
-    initialValues ?? INITIAL_FORM_VALUES
+    () => initialValues ?? { ...INITIAL_FORM_VALUES, date: getTodayDateValue() }
   );
   const [photos, setPhotos] = useState<PhotoItem[]>(initialPhotos ?? INITIAL_PHOTOS);
-  const [selectedProcedureType, setSelectedProcedureType] = useState<ProcedureType | null>(
-    initialProcedureType ?? null
+  // 한 번 방문에 커트+염색처럼 여러 시술을 받는 경우가 있어 여러 개를 고를 수 있다.
+  const [selectedProcedureTypes, setSelectedProcedureTypes] = useState<ProcedureType[]>(
+    initialProcedureTypes ?? []
   );
   const [rating, setRating] = useState(initialRating ?? 0);
   const [formErrors, setFormErrors] = useState<RecordFormErrorsType>({});
@@ -58,8 +67,16 @@ export const useRecordAddForm = ({
       nextFormErrors.date = REQUIRED_FIELD_ERROR_MESSAGE;
     }
 
-    if (!selectedProcedureType) {
+    if (selectedProcedureTypes.length === 0) {
       nextFormErrors.procedureType = REQUIRED_FIELD_ERROR_MESSAGE;
+    }
+
+    if (!formValues.duration.trim()) {
+      nextFormErrors.duration = REQUIRED_FIELD_ERROR_MESSAGE;
+    }
+
+    if (photos.length === 0) {
+      nextFormErrors.photos = PHOTO_REQUIRED_ERROR_MESSAGE;
     }
 
     return nextFormErrors;
@@ -95,6 +112,7 @@ export const useRecordAddForm = ({
     }
 
     setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
+    setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
     event.currentTarget.value = "";
   };
 
@@ -126,6 +144,13 @@ export const useRecordAddForm = ({
         ...currentValues,
         [fieldName]: value,
       }));
+
+      if (fieldName === "duration") {
+        setFormErrors(currentErrors => ({
+          ...currentErrors,
+          duration: value.trim() ? undefined : currentErrors.duration,
+        }));
+      }
     };
 
   const handleDetailsChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -134,8 +159,13 @@ export const useRecordAddForm = ({
     setFormValues(currentValues => ({ ...currentValues, details: value }));
   };
 
-  const handleProcedureTypeChange = (procedureType: ProcedureType) => {
-    setSelectedProcedureType(procedureType);
+  /** 이미 고른 종류를 다시 누르면 선택을 푼다 */
+  const handleProcedureTypeToggle = (procedureType: ProcedureType) => {
+    setSelectedProcedureTypes(currentTypes =>
+      currentTypes.includes(procedureType)
+        ? currentTypes.filter(type => type !== procedureType)
+        : [...currentTypes, procedureType]
+    );
     setFormErrors(currentErrors => ({ ...currentErrors, procedureType: undefined }));
   };
 
@@ -172,13 +202,13 @@ export const useRecordAddForm = ({
     photoInputRef,
     photos,
     rating,
-    selectedProcedureType,
+    selectedProcedureTypes,
     handleDateChange,
     handleDetailsChange,
     handleFieldChange,
     handleOpenPhotoPicker,
     handlePhotoSelection,
-    handleProcedureTypeChange,
+    handleProcedureTypeToggle,
     handleRatingChange,
     handleRemovePhoto,
     handleSubmit,

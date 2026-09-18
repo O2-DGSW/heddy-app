@@ -14,6 +14,7 @@ import {
   noIcon,
   parseDateValue,
 } from "@/entities/record";
+import { RecordRequiredMark } from "@/entities/record";
 import { cn } from "@/shared";
 
 import type { CSSProperties } from "react";
@@ -195,6 +196,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
     <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         날짜
+        <RecordRequiredMark />
       </h2>
       <button
         aria-describedby={hasError ? errorId : undefined}

@@ -1,5 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
+import RecordRequiredMark from "../RecordRequiredMark";
+
 import { noIcon, pictureIcon } from "../../assets";
 import { MAX_PHOTO_COUNT } from "../../model";
 
@@ -39,6 +41,7 @@ const RecordPhotoUploader = ({
     <div className="flex w-full flex-col gap-[6px] [--record-photo-size:clamp(82px,26vw,100px)]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         사진
+        <RecordRequiredMark />
       </h2>
 
       <input
