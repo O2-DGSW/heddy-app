@@ -95,5 +95,6 @@ export {
   ProcedureTypeSelector,
   RecordPhotoUploader,
   RecordRatingField,
+  RecordRequiredMark,
   RecordTextField,
 } from "./ui";

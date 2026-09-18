@@ -18,7 +18,7 @@ import RecordDurationField from "../RecordDurationField";
 export interface RecordFormSubmitValues {
   formValues: RecordFormValues;
   photos: PhotoItem[];
-  procedureType: ProcedureType;
+  procedureTypes: ProcedureType[];
   rating: number;
 }
 
@@ -28,7 +28,7 @@ interface RecordAddFormProps {
   mode?: "create" | "edit";
   initialValues?: RecordFormValues;
   initialPhotos?: PhotoItem[];
-  initialProcedureType?: ProcedureType;
+  initialProcedureTypes?: ProcedureType[];
   initialRating?: number;
   isSubmitting?: boolean;
   onSubmitValues?: (values: RecordFormSubmitValues) => void;
@@ -49,7 +49,7 @@ const RecordAddForm = ({
   mode = "create",
   initialValues,
   initialPhotos,
-  initialProcedureType,
+  initialProcedureTypes,
   initialRating,
   isSubmitting,
   onSubmitValues,
@@ -63,28 +63,25 @@ const RecordAddForm = ({
     photoInputRef,
     photos,
     rating,
-    selectedProcedureType,
+    selectedProcedureTypes,
     handleDateChange,
     handleDetailsChange,
     handleDurationChange,
     handleFieldChange,
     handleOpenPhotoPicker,
     handlePhotoSelection,
-    handleProcedureTypeChange,
+    handleProcedureTypeToggle,
     handleRatingChange,
     handleRemovePhoto,
     handleSubmit,
   } = useRecordAddForm({
+    isEditMode,
     initialValues,
     initialPhotos,
-    initialProcedureType,
+    initialProcedureTypes,
     initialRating,
     onSubmit: () => {
-      if (!selectedProcedureType) {
-        return;
-      }
-
-      onSubmitValues?.({ formValues, photos, procedureType: selectedProcedureType, rating });
+      onSubmitValues?.({ formValues, photos, procedureTypes: selectedProcedureTypes, rating });
     },
   });
 
@@ -93,7 +90,10 @@ const RecordAddForm = ({
       className="mx-auto flex w-full max-w-[391px] flex-col items-center gap-[clamp(22px,3.4dvh,28px)] px-[clamp(14px,4.2vw,20px)] pb-[clamp(20px,3.4dvh,30px)] pt-[clamp(8px,1.5dvh,12px)]"
       onSubmit={handleSubmit}
     >
+      {/* 필수 항목(사진·날짜·시술 종류·소요 시간)을 위로 모아, 아래로 내리지 않아도 저장에 필요한 게 다 보이게 한다 */}
       <RecordPhotoUploader
+        errorMessage={formErrors.photos}
+        isRequired={!isEditMode}
         inputRef={photoInputRef}
         isPhotoLimitReached={isPhotoLimitReached}
         onOpenPhotoPicker={handleOpenPhotoPicker}
@@ -108,6 +108,20 @@ const RecordAddForm = ({
         value={formValues.date}
       />
 
+      <ProcedureTypeSelector
+        errorMessage={formErrors.procedureType}
+        onToggle={handleProcedureTypeToggle}
+        selectedProcedureTypes={selectedProcedureTypes}
+      />
+
+      <RecordDurationField
+        errorMessage={formErrors.duration}
+        isRequired={!isEditMode}
+        onChange={handleDurationChange}
+        value={formValues.duration}
+      />
+
+      {/* 여기부터는 선택 입력 */}
       {RECORD_FIELDS.map(field => (
         <RecordTextField
           inputMode={field.inputMode}
@@ -119,14 +133,6 @@ const RecordAddForm = ({
           value={formValues[field.id]}
         />
       ))}
-
-      <RecordDurationField onChange={handleDurationChange} value={formValues.duration} />
-
-      <ProcedureTypeSelector
-        errorMessage={formErrors.procedureType}
-        onChange={handleProcedureTypeChange}
-        selectedProcedureType={selectedProcedureType}
-      />
 
       <RecordRatingField onChange={handleRatingChange} rating={rating} />
 

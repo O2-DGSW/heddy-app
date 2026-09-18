@@ -8,6 +8,7 @@ import {
   formatDurationDisplay,
   noIcon,
   parseDurationValue,
+  RecordRequiredMark,
 } from "@/entities/record";
 import { cn, useHideBottomBarWhileOpen } from "@/shared";
 
@@ -19,6 +20,8 @@ import type { CSSProperties } from "react";
 interface RecordDurationFieldProps {
   /** 분 단위 숫자 문자열. 빈 문자열이면 아직 고르지 않은 상태다 */
   value: string;
+  errorMessage?: string;
+  isRequired?: boolean;
   onChange: (durationValue: string) => void;
 }
 
@@ -53,7 +56,15 @@ const selectionBandStyle = {
  * 소요 시간을 시·분 휠로 고르는 입력.
  * 날짜와 같은 바텀시트 구조를 써서 두 입력이 같은 방식으로 열리고 닫히게 맞췄다.
  */
-const RecordDurationField = ({ value, onChange }: RecordDurationFieldProps) => {
+const RecordDurationField = ({
+  errorMessage,
+  isRequired = false,
+  value,
+  onChange,
+}: RecordDurationFieldProps) => {
+  const hasError = Boolean(errorMessage);
+  const errorId = "record-duration-error";
+
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [draftHour, setDraftHour] = useState(0);
   const [draftMinute, setDraftMinute] = useState(0);
@@ -102,17 +113,32 @@ const RecordDurationField = ({ value, onChange }: RecordDurationFieldProps) => {
     <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         소요 시간
+        {isRequired && <RecordRequiredMark />}
       </h2>
       <button
+        aria-describedby={hasError ? errorId : undefined}
         aria-haspopup="dialog"
+        aria-invalid={hasError || undefined}
         aria-label="소요 시간 선택"
         className={cn(fieldClassName, "flex items-center justify-between text-left")}
         onClick={handleOpenPicker}
-        style={fieldStyle}
+        style={{
+          ...fieldStyle,
+          borderColor: hasError ? lightTheme.status.error : fieldStyle.borderColor,
+        }}
         type="button"
       >
         <span style={{ color: selectedColor }}>{selectedLabel}</span>
       </button>
+      {errorMessage && (
+        <span
+          className={font.caption.regular}
+          id={errorId}
+          style={{ color: lightTheme.status.error }}
+        >
+          {errorMessage}
+        </span>
+      )}
 
       {isPickerOpen && (
         <div

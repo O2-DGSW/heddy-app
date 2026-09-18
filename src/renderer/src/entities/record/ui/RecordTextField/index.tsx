@@ -2,6 +2,8 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
+import RecordRequiredMark from "../RecordRequiredMark";
+
 import type { ChangeEvent, CSSProperties } from "react";
 
 type PlaceholderStyle = CSSProperties & {
@@ -14,6 +16,7 @@ interface RecordTextFieldProps {
   placeholder: string;
   value: string;
   errorMessage?: string;
+  isRequired?: boolean;
   inputMode?: "decimal" | "text";
   multiline?: boolean;
   maxLength?: number;
@@ -35,6 +38,7 @@ const fieldClassName = cn(
 
 const RecordTextField = ({
   errorMessage,
+  isRequired = false,
   inputMode = "text",
   label,
   maxLength,
@@ -55,6 +59,7 @@ const RecordTextField = ({
     <label className="flex w-full flex-col gap-[10px]">
       <span className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         {label}
+        {isRequired && <RecordRequiredMark />}
       </span>
       {multiline ? (
         <textarea

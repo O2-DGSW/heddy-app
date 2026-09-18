@@ -35,7 +35,7 @@ const RecordAddPage = () => {
   const handleSubmit = async ({
     formValues,
     photos,
-    procedureType,
+    procedureTypes,
     rating,
   }: RecordFormSubmitValues) => {
     const photoRequests = mapPhotoItemsToAddRequests(photos);
@@ -45,7 +45,7 @@ const RecordAddPage = () => {
         createdRecordId ??
         (
           await createRecord.mutateAsync(
-            mapFormValuesToCreateRequest(formValues, procedureType, rating)
+            mapFormValuesToCreateRequest(formValues, procedureTypes, rating)
           )
         ).record_id;
 

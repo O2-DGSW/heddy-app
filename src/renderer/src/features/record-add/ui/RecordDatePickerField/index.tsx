@@ -13,6 +13,7 @@ import {
   getTodayDateValue,
   noIcon,
   parseDateValue,
+  RecordRequiredMark,
 } from "@/entities/record";
 import { cn, useHideBottomBarWhileOpen } from "@/shared";
 
@@ -197,6 +198,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
     <div className="flex w-full flex-col gap-[10px]">
       <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
         날짜
+        <RecordRequiredMark />
       </h2>
       <button
         aria-describedby={hasError ? errorId : undefined}
