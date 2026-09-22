@@ -28,7 +28,8 @@ android {
     signingConfigs {
         release {
             if (hasKeystore) {
-                storeFile file(keystoreProperties['storeFile'])
+                // 경로는 android/ 기준으로 푼다 — file() 은 모듈(app/) 기준이라 어긋난다
+                storeFile rootProject.file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
