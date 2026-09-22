@@ -53,9 +53,11 @@ captures/
 .idea/navEditor.xml
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+# 서명 키와 비밀번호는 저장소에 올리지 않는다. 키를 잃으면 원스토어 앱 업데이트가 영구히 불가능하니
+# 팀 비밀번호 관리소에 따로 백업할 것.
+*.jks
+*.keystore
+keystore.properties
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild

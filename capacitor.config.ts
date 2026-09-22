@@ -8,7 +8,7 @@ const liveHost = process.env.CAPACITOR_LIVE_HOST ?? "localhost";
 const livePort = process.env.CAPACITOR_LIVE_PORT ?? "5173";
 
 const config: CapacitorConfig = {
-  appId: "com.heddy.app",
+  appId: "site.heddy.app",
   appName: "heddy-app",
   webDir: "src/renderer/src/dist",
   server: isLive
