@@ -1,4 +1,4 @@
-package com.heddy.app;
+package site.heddy.app;
 
 import com.getcapacitor.BridgeActivity;
 
