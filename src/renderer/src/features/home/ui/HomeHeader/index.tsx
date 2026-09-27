@@ -11,7 +11,7 @@ interface HomeHeaderProps {
 const HomeHeader = ({ onProfileClick }: HomeHeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   return (
-    <header className="relative flex min-h-11 items-center justify-between">
+    <header className="relative flex h-9 items-center justify-between">
       <HeddyLogo />
       <div className="flex items-center gap-1">
         <button

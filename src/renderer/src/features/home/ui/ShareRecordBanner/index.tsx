@@ -7,10 +7,10 @@ interface ShareRecordBannerProps {
 const ShareRecordBanner = ({ onClick }: ShareRecordBannerProps) => (
   <section
     aria-label="기록 공유"
-    className="flex min-h-[67px] items-center gap-4 rounded-[10px] bg-[var(--home-banner)] px-[15px] py-3"
+    className="flex min-h-[67px] flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] bg-[var(--home-banner)] px-[15px] py-3"
   >
     <img src={mascot} alt="" className="h-[37px] w-[39px] shrink-0 object-cover" />
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <div className="flex min-w-[140px] flex-1 flex-col gap-1">
       <h2 className={cn(font.label.semiBold, "text-[var(--home-secondary)]")}>
         기록을 선택하고 공유해보세요
       </h2>
@@ -19,7 +19,7 @@ const ShareRecordBanner = ({ onClick }: ShareRecordBannerProps) => (
     <button
       type="button"
       onClick={onClick}
-      className="h-6 shrink-0 rounded bg-[var(--home-share)] px-4 text-[10px] font-semibold text-[var(--home-share-text)]"
+      className="min-h-8 shrink-0 max-[374px]:ml-auto rounded bg-[var(--home-share)] px-4 text-[10px] font-semibold text-[var(--home-share-text)]"
     >
       기록 공유하기
     </button>

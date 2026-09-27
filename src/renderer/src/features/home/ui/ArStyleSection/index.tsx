@@ -26,7 +26,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
   return (
     <section
       aria-labelledby="home-ar-title"
-      className="min-w-0 overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-5 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
+      className="min-w-0 overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-3 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
     >
       <div className="flex items-center justify-between gap-1 px-3">
         <h2 id="home-ar-title" className={cn(font.label.semiBold, "whitespace-nowrap")}>
@@ -36,7 +36,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
           type="button"
           onClick={onMoreClick}
           aria-label="AR 스타일 전체보기"
-          className="flex items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
+          className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
         >
           전체보기
           <img src={arrow} alt="" className="rotate-180" />
@@ -48,7 +48,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
             {...swipe}
             aria-roledescription="캐러셀"
             aria-label="AR 스타일 선택"
-            className="relative mt-6 flex h-[113px] items-center justify-center"
+            className="relative mt-5 flex h-[113px] items-center justify-center"
           >
             {styles.length > 1 && (
               <button
@@ -127,7 +127,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
           <button
             type="button"
             onClick={() => onTryClick(activeStyle)}
-            className="mx-auto mt-1 block h-6 w-[130px] rounded bg-[var(--home-soft)] text-[10px] font-semibold text-[var(--home-primary)]"
+            className="mx-auto mt-1 block min-h-8 w-[min(130px,calc(100%-24px))] rounded bg-[var(--home-soft)] text-[10px] font-semibold text-[var(--home-primary)]"
           >
             AR 체험하기
           </button>

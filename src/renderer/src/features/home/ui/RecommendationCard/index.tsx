@@ -7,7 +7,7 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
     type="button"
     onClick={onClick}
     aria-label={`${card.rank}위 ${card.title}, 일치도 ${card.matchRate ?? 0}%, 추천 보기`}
-    className="flex min-h-[58px] w-full items-center gap-[7px] border-b border-[var(--home-line)] py-[7px] text-left last:border-0"
+    className="flex min-h-[58px] w-full items-center gap-[7px] border-b border-[var(--home-line)] py-[5px] text-left last:border-0 [&_span]:leading-[1.3]"
   >
     <span className="relative block size-11 shrink-0 overflow-hidden rounded-md">
       <img
@@ -23,7 +23,7 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
         </span>
         <span className="text-[10px] font-semibold">{card.title}</span>
       </span>
-      <span className="inline-flex items-center gap-0.5 rounded-full border border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
+      <span className="inline-flex items-center gap-0.5 rounded-full border-[0.5px] border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
         <img src={colorDot} alt="" />
         {card.colorName}
       </span>

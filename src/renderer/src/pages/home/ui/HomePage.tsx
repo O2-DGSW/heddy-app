@@ -20,9 +20,9 @@ const HomePage = () => {
       <section
         aria-labelledby="home-greeting"
         style={homeTheme}
-        className="h-full overflow-y-auto bg-[var(--home-background)] text-[var(--home-text)]"
+        className="h-full overflow-y-auto overscroll-contain no-scrollbar bg-[var(--home-background)] text-[var(--home-text)]"
       >
-        <div className="mx-auto w-[350px] pt-1 pb-6">
+        <div className="mx-auto w-full max-w-[532px] px-[clamp(16px,6.47vw,26px)] pt-1 pb-6">
           <HomeHeader onProfileClick={() => navigate("/profile")} />
           <div className="mt-5 mb-6 flex flex-col gap-1">
             <h1 id="home-greeting" className={font.headline1.bold}>
@@ -33,7 +33,7 @@ const HomePage = () => {
             </p>
           </div>
           <RecentRecordCard record={HOME_RECENT_RECORD} onClick={() => navigate("/cuts")} />
-          <div className="mt-6 grid grid-cols-[178px_158px] gap-[14px]">
+          <div className="mt-6 grid grid-cols-[minmax(0,1.126fr)_minmax(0,1fr)] gap-[14px] max-[374px]:grid-cols-1">
             <ArStyleSection
               styles={HOME_AR_STYLES}
               onMoreClick={() => navigate("/ar")}

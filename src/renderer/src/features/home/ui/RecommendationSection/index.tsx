@@ -20,7 +20,7 @@ const RecommendationSection = ({
         type="button"
         onClick={onMoreClick}
         aria-label="스타일 추천 더보기"
-        className="flex items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
+        className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
       >
         더보기
         <img src={arrow} alt="" className="rotate-180" />
@@ -31,7 +31,7 @@ const RecommendationSection = ({
         <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
       ))}
     </div>
-    <p className="mt-2 text-[8px] text-[var(--home-muted)]">
+    <p className="mt-2 text-[8px] leading-[1.3] text-[var(--home-muted)]">
       ※ 자세한 내용은 ‘추천’에서 확인해 보세요.
     </p>
   </section>
