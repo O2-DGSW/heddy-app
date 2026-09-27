@@ -1,5 +1,5 @@
 import { cn } from "@/shared";
-import starIcon from "../../assets/star.svg";
+import starIcon from "../assets/star.svg";
 interface RatingStarsProps {
   rating: number;
 }

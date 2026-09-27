@@ -1,12 +1,12 @@
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
-import type { RecentRecordCardProps } from "../../model/types";
-import arrow from "../../assets/arrow-white.svg";
-import colorDot from "../../assets/color-dot.svg";
-import edit from "../../assets/edit.svg";
-import HomeImage from "../HomeImage";
-import SectionFeedback from "../SectionFeedback";
-import RatingStars from "../RatingStars";
+import type { RecentRecordCardProps } from "../model/types";
+import arrow from "../assets/arrow-white.svg";
+import colorDot from "../assets/color-dot.svg";
+import edit from "../assets/edit.svg";
+import HomeImage from "./HomeImage";
+import SectionFeedback from "./SectionFeedback";
+import RatingStars from "./RatingStars";
 
 const RecentRecordCard = ({
   record,

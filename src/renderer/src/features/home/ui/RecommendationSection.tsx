@@ -1,8 +1,8 @@
 import { font } from "@heddy/design-tokens";
-import type { RecommendationSectionProps } from "../../model/types";
-import arrow from "../../assets/arrow-green.svg";
-import SectionFeedback from "../SectionFeedback";
-import RecommendationCard from "../RecommendationCard";
+import type { RecommendationSectionProps } from "../model/types";
+import arrow from "../assets/arrow-green.svg";
+import SectionFeedback from "./SectionFeedback";
+import RecommendationCard from "./RecommendationCard";
 
 const RecommendationSection = ({
   recommendations,

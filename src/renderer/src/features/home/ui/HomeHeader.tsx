@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
-import profileIcon from "../../assets/profile-head.svg";
-import alarmIcon from "../../assets/alarm.svg";
-import HeddyLogo from "../HeddyLogo";
+import profileIcon from "../assets/profile-head.svg";
+import alarmIcon from "../assets/alarm.svg";
+import HeddyLogo from "./HeddyLogo";
 
 interface HomeHeaderProps {
   onProfileClick: () => void;

@@ -1,6 +1,6 @@
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
-import mascot from "../../assets/share-mascot.png";
+import mascot from "../assets/share-mascot.png";
 interface ShareRecordBannerProps {
   hasRecord?: boolean;
   onClick: () => void;

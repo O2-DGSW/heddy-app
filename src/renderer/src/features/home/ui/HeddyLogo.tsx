@@ -1,8 +1,8 @@
-import h from "../../assets/logo-h.svg";
-import e from "../../assets/logo-e.svg";
-import d1 from "../../assets/logo-d1.svg";
-import d2 from "../../assets/logo-d2.svg";
-import y from "../../assets/logo-y.svg";
+import h from "../assets/logo-h.svg";
+import e from "../assets/logo-e.svg";
+import d1 from "../assets/logo-d1.svg";
+import d2 from "../assets/logo-d2.svg";
+import y from "../assets/logo-y.svg";
 
 const HeddyLogo = () => (
   <span aria-label="heddy" role="img" className="relative block h-7 w-[84px] shrink-0">

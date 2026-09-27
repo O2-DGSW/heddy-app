@@ -1,7 +1,7 @@
-import type { RecommendationCardProps } from "../../model/types";
-import HomeImage from "../HomeImage";
-import arrow from "../../assets/arrow.svg";
-import colorDot from "../../assets/recommend-color-dot.svg";
+import type { RecommendationCardProps } from "../model/types";
+import HomeImage from "./HomeImage";
+import arrow from "../assets/arrow.svg";
+import colorDot from "../assets/recommend-color-dot.svg";
 
 const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
   <button

@@ -2,11 +2,11 @@ import { useState } from "react";
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
-import type { ArStyleType } from "../../model/types";
-import HomeImage from "../HomeImage";
-import SectionFeedback from "../SectionFeedback";
-import arrow from "../../assets/arrow-green.svg";
-import dots from "../../assets/carousel-dots.svg";
+import type { ArStyleType } from "../model/types";
+import HomeImage from "./HomeImage";
+import SectionFeedback from "./SectionFeedback";
+import arrow from "../assets/arrow-green.svg";
+import dots from "../assets/carousel-dots.svg";
 
 interface ArStyleSectionProps {
   isLoading?: boolean;
