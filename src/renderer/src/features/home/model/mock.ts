@@ -22,3 +22,18 @@ export const HOME_AR_STYLES: ArStyleType[] = [
   { id: "demo-ar-2", name: "애즈펌 2", imageUrl: arStyleImage },
   { id: "demo-ar-3", name: "애즈펌 3", imageUrl: arStyleImage },
 ];
+
+import recommendedHair from "../assets/recommended-hair.png";
+import type { RecommendationCardType } from "./types";
+export const HOME_RECOMMENDATIONS: RecommendationCardType[] = Array.from(
+  { length: 3 },
+  (_, index) => ({
+    id: `demo-recommendation-${index + 1}`,
+    rank: index + 1,
+    title: "다운펌",
+    imageUrl: recommendedHair,
+    colorName: "내추럴 블랙",
+    matchRate: 92,
+    tags: [],
+  })
+);

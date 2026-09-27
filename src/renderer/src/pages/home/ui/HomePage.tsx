@@ -4,6 +4,8 @@ import { cn } from "@/shared";
 import {
   ArStyleSection,
   HOME_AR_STYLES,
+  HOME_RECOMMENDATIONS,
+  ShareRecordBanner,
   HomeHeader,
   RecentRecordCard,
   RecommendationSection,
@@ -37,12 +39,15 @@ const HomePage = () => {
               onMoreClick={() => navigate("/ar")}
               onTryClick={() => navigate("/ar")}
             />
+            <RecommendationSection
+              recommendations={HOME_RECOMMENDATIONS}
+              onMoreClick={() => navigate("/recommend")}
+              onRecommendationClick={() => navigate("/recommend")}
+            />
           </div>
-          <RecommendationSection
-            recommendations={[]}
-            onMoreClick={() => navigate("/recommend")}
-            onRecommendationClick={() => navigate("/recommend")}
-          />
+          <div className="mt-6">
+            <ShareRecordBanner onClick={() => navigate("/cuts")} />
+          </div>
         </div>
       </section>
     </cap-page>

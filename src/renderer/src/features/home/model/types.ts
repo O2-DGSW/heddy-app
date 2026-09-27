@@ -1,13 +1,3 @@
-export interface ShortcutCardType {
-  id: string;
-  eyebrow: string;
-  title: string;
-  imageSrc: string;
-  imageAlt: string;
-  imageClassName: string;
-  to: string;
-}
-
 export interface RecommendationCardType {
   id: string;
   rank: number;
@@ -15,6 +5,7 @@ export interface RecommendationCardType {
   imageUrl: string;
   colorName: string;
   tags: string[];
+  matchRate?: number;
 }
 
 export interface RecentRecordType {
@@ -30,24 +21,10 @@ export interface RecentRecordType {
   memo?: string;
 }
 
-export interface LogoPartType {
-  src: string;
-  className: string;
-}
-
-export interface HomeHeaderProps {
-  onProfileClick: () => void;
-}
-
 export interface RecentRecordCardProps {
   record?: RecentRecordType;
   isLoading?: boolean;
   isError?: boolean;
-  onClick: () => void;
-}
-
-export interface ShortcutCardProps {
-  card: ShortcutCardType;
   onClick: () => void;
 }
 
@@ -62,15 +39,6 @@ export interface RecommendationSectionProps {
 export interface RecommendationCardProps {
   card: RecommendationCardType;
   onClick: () => void;
-}
-
-export interface CroppedHairImageProps {
-  alt: string;
-  src?: string;
-}
-
-export interface RatingStarsProps {
-  rating: number;
 }
 
 export interface ArStyleType {

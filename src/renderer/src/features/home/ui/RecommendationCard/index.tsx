@@ -1,80 +1,37 @@
-import { font, lightTheme } from "@heddy/design-tokens";
+import type { RecommendationCardProps } from "../../model/types";
+import arrow from "../../assets/arrow.svg";
+import colorDot from "../../assets/recommend-color-dot.svg";
 
-import bookmarkIcon from "../../assets/bookmark.svg";
-import colorDotIcon from "../../assets/color-dot.svg";
-import type { RecommendationCardProps } from "../../model/types.ts";
-
-import CroppedHairImage from "../CroppedHairImage";
-
-const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
-  return (
-    <button
-      type="button"
-      className="h-full min-h-0 overflow-hidden rounded-[12px] p-[clamp(6px,1svh,8px)] text-left shadow-[0_0_6px_rgba(0,0,0,0.02)] active:scale-[0.99]"
-      style={{ backgroundColor: lightTheme.background.normal }}
-      onClick={onClick}
-    >
-      <span className="flex h-full min-h-0 flex-col gap-[clamp(8px,1.7svh,16px)]">
-        <span className="relative block h-[clamp(56px,10svh,95px)] shrink-0 overflow-hidden rounded-[12px]">
-          <CroppedHairImage alt={`${card.title} 추천 사진`} src={card.imageUrl || undefined} />
-          <span
-            aria-hidden="true"
-            className="absolute bottom-[5px] right-[5px] flex size-[23px] items-center justify-center rounded-full"
-            style={{ backgroundColor: "rgba(60,62,63,0.7)" }}
-          >
-            <img src={bookmarkIcon} alt="" className="size-[15px]" />
-          </span>
+const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={`${card.rank}위 ${card.title}, 일치도 ${card.matchRate ?? 0}%, 추천 보기`}
+    className="flex min-h-[58px] w-full items-center gap-[7px] border-b border-[var(--home-line)] py-[7px] text-left last:border-0"
+  >
+    <span className="relative block size-11 shrink-0 overflow-hidden rounded-md">
+      <img
+        src={card.imageUrl}
+        alt={`${card.title} 추천 사진`}
+        className="absolute left-[-2px] top-[-8px] h-[83px] w-12 max-w-none"
+      />
+    </span>
+    <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
+      <span className="flex items-center gap-1">
+        <span className="flex size-[10px] shrink-0 items-center justify-center rounded-full bg-[var(--home-primary)] text-[8px] font-semibold text-[var(--home-note)]">
+          {card.rank}
         </span>
-
-        <span className="flex min-h-0 flex-1 flex-col gap-[clamp(5px,1.2svh,12px)] overflow-hidden">
-          <span className="flex min-w-0 items-center gap-2">
-            <span
-              className={`${font.caption.semiBold} flex size-[18px] items-center justify-center rounded-full`}
-              style={{
-                backgroundColor: lightTheme.primary.normal,
-                color: lightTheme.label.buttonText,
-              }}
-            >
-              {card.rank}
-            </span>
-            <span
-              className={`${font.body.bold} truncate`}
-              style={{ color: lightTheme.label.neutral }}
-            >
-              {card.title}
-            </span>
-          </span>
-
-          <span
-            className="inline-flex h-5 w-fit items-center gap-[6px] rounded-[15px] border px-2"
-            style={{
-              backgroundColor: lightTheme.background.normal,
-              borderColor: lightTheme.fill.neutral,
-              color: lightTheme.label.alternative,
-            }}
-          >
-            <img src={colorDotIcon} alt="" className="h-3 w-[11px]" />
-            <span className={font.caption.regular}>{card.colorName}</span>
-          </span>
-
-          <span className="flex flex-wrap gap-[5px]">
-            {card.tags.map(tag => (
-              <span
-                key={tag}
-                className={`${font.caption.medium} rounded-[5px] px-[6px] py-[2px]`}
-                style={{
-                  backgroundColor: lightTheme.fill.neutral,
-                  color: lightTheme.label.alternative,
-                }}
-              >
-                # {tag}
-              </span>
-            ))}
-          </span>
-        </span>
+        <span className="text-[10px] font-semibold">{card.title}</span>
       </span>
-    </button>
-  );
-};
-
+      <span className="inline-flex items-center gap-0.5 rounded-full border border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
+        <img src={colorDot} alt="" />
+        {card.colorName}
+      </span>
+      <span className="rounded-full bg-[var(--home-soft)] px-[3px] py-px text-[7px] font-medium text-[var(--home-primary)]">
+        일치도 {card.matchRate}%
+      </span>
+    </span>
+    <img src={arrow} alt="" className="shrink-0 rotate-180" />
+  </button>
+);
 export default RecommendationCard;
