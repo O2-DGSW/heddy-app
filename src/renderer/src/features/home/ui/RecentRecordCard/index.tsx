@@ -4,9 +4,17 @@ import type { RecentRecordCardProps } from "../../model/types";
 import arrow from "../../assets/arrow-white.svg";
 import colorDot from "../../assets/color-dot.svg";
 import edit from "../../assets/edit.svg";
+import HomeImage from "../HomeImage";
+import SectionFeedback from "../SectionFeedback";
 import RatingStars from "../RatingStars";
 
-const RecentRecordCard = ({ record, onClick }: RecentRecordCardProps) => (
+const RecentRecordCard = ({
+  record,
+  onClick,
+  onAddClick,
+  isLoading = false,
+  isError = false,
+}: RecentRecordCardProps) => (
   <section
     aria-labelledby="home-recent-title"
     className="overflow-hidden rounded-[15px] bg-[var(--home-surface)] shadow-[0_0_4px_rgb(0_0_0/0.08)]"
@@ -25,18 +33,20 @@ const RecentRecordCard = ({ record, onClick }: RecentRecordCardProps) => (
         <img src={arrow} alt="" className="rotate-180" />
       </button>
     </div>
-    {record && (
+    {record && !isLoading && !isError ? (
       <div className="flex flex-col gap-[15px] p-[15px]">
         <div className="flex items-center gap-[14px]">
           <div className="relative h-24 w-[100px] shrink-0 overflow-hidden rounded-[10px]">
-            <img
+            <HomeImage
               src={record.thumbnailUrl}
               alt={`${record.procedureName} 시술 사진`}
               className="absolute left-1/2 top-1/2 size-28 max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
             />
-            <span className="absolute bottom-1 right-1 rounded px-2 py-0.5 text-[10px] text-[var(--home-note)] bg-[color-mix(in_srgb,var(--home-text)_70%,transparent)]">
-              {record.daysAgo}
-            </span>
+            {record.daysAgo && (
+              <span className="absolute bottom-1 right-1 rounded px-2 py-0.5 text-[10px] text-[var(--home-note)] bg-[color-mix(in_srgb,var(--home-text)_70%,transparent)]">
+                {record.daysAgo}
+              </span>
+            )}
           </div>
           <div className="flex min-w-0 flex-col gap-[3px] text-[var(--home-secondary)]">
             <time className={font.caption.medium} dateTime={record.date}>
@@ -47,8 +57,8 @@ const RecentRecordCard = ({ record, onClick }: RecentRecordCardProps) => (
                 {record.procedureName}
               </p>
               <span className="inline-flex items-center gap-1 rounded-full border border-[var(--home-line)] px-2 py-px text-[10px]">
-                <img src={colorDot} alt="" />
-                {record.colorName}
+                {record.colorName && <img src={colorDot} alt="" />}
+                {record.colorName || "컬러 정보 없음"}
               </span>
             </div>
             <p className={font.caption.medium}>
@@ -68,10 +78,18 @@ const RecentRecordCard = ({ record, onClick }: RecentRecordCardProps) => (
             메모
           </span>
           <p className="text-[11px] leading-[1.3] tracking-[-0.02em] text-[var(--home-secondary)]">
-            {record.memo}
+            {record.memo?.trim() || "등록된 메모가 없습니다."}
           </p>
         </div>
       </div>
+    ) : (
+      <SectionFeedback
+        isLoading={isLoading}
+        isError={isError}
+        emptyMessage="현재 시술 기록이 없습니다."
+        actionLabel={isError ? "기록 보기" : "첫 기록 추가하기"}
+        onAction={isError ? onClick : onAddClick}
+      />
     )}
   </section>
 );

@@ -1,5 +1,10 @@
 import recentHair from "../assets/recent-hair.png";
 import type { RecentRecordType } from "./types";
+import arStyleImage from "../assets/ar-style.png";
+import type { ArStyleType } from "./types";
+import recommendedHair from "../assets/recommended-hair.png";
+import type { RecommendationCardType } from "./types";
+import type { HomeDataType } from "./types";
 
 // Temporary home response. Replace with mapped API data when integration resumes.
 export const HOME_RECENT_RECORD: RecentRecordType = {
@@ -15,16 +20,12 @@ export const HOME_RECENT_RECORD: RecentRecordType = {
   memo: "앞머리 뜸 있음. 옆머리는 자연스럽게 눌러주세요.",
 };
 
-import arStyleImage from "../assets/ar-style.png";
-import type { ArStyleType } from "./types";
 export const HOME_AR_STYLES: ArStyleType[] = [
   { id: "demo-ar-1", name: "애즈펌", imageUrl: arStyleImage },
   { id: "demo-ar-2", name: "애즈펌 2", imageUrl: arStyleImage },
   { id: "demo-ar-3", name: "애즈펌 3", imageUrl: arStyleImage },
 ];
 
-import recommendedHair from "../assets/recommended-hair.png";
-import type { RecommendationCardType } from "./types";
 export const HOME_RECOMMENDATIONS: RecommendationCardType[] = Array.from(
   { length: 3 },
   (_, index) => ({
@@ -37,3 +38,10 @@ export const HOME_RECOMMENDATIONS: RecommendationCardType[] = Array.from(
     tags: [],
   })
 );
+
+export const HOME_MOCK_DATA: HomeDataType = {
+  profileName: "오용준",
+  recentRecord: HOME_RECENT_RECORD,
+  arStyles: HOME_AR_STYLES,
+  recommendations: HOME_RECOMMENDATIONS,
+};

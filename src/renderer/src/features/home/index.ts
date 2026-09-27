@@ -8,3 +8,5 @@ export { default as ArStyleSection } from "./ui/ArStyleSection";
 export { HOME_AR_STYLES } from "./model/mock";
 export { HOME_RECOMMENDATIONS } from "./model/mock";
 export { default as ShareRecordBanner } from "./ui/ShareRecordBanner";
+export { HOME_MOCK_DATA } from "./model/mock";
+export type { HomeDataType } from "./model/types";

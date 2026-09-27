@@ -1,28 +1,39 @@
 import { useState } from "react";
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
-import { useHorizontalSwipe } from "@/shared/lib/useHorizontalSwipe";
+import { useHorizontalSwipe } from "@/shared/lib";
 import type { ArStyleType } from "../../model/types";
+import HomeImage from "../HomeImage";
+import SectionFeedback from "../SectionFeedback";
 import arrow from "../../assets/arrow-green.svg";
 import dots from "../../assets/carousel-dots.svg";
 
 interface ArStyleSectionProps {
+  isLoading?: boolean;
+  isError?: boolean;
   styles: ArStyleType[];
   onMoreClick: () => void;
   onTryClick: (style: ArStyleType) => void;
 }
-const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps) => {
+const ArStyleSection = ({
+  styles,
+  onMoreClick,
+  onTryClick,
+  isLoading = false,
+  isError = false,
+}: ArStyleSectionProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const swipe = useHorizontalSwipe({
+    onSwipeLeft: () => setSelectedIndex(index => (index + 1) % Math.max(styles.length, 1)),
+    onSwipeRight: () =>
+      setSelectedIndex(index => (index + styles.length - 1) % Math.max(styles.length, 1)),
+    minDistance: 30,
+  });
   const activeIndex = styles.length ? selectedIndex % styles.length : 0;
   const activeStyle = styles[activeIndex];
   const handlePrevious = () =>
     setSelectedIndex(index => (index + styles.length - 1) % Math.max(styles.length, 1));
   const handleNext = () => setSelectedIndex(index => (index + 1) % Math.max(styles.length, 1));
-  const swipe = useHorizontalSwipe({
-    onSwipeLeft: handleNext,
-    onSwipeRight: handlePrevious,
-    minDistance: 30,
-  });
   return (
     <section
       aria-labelledby="home-ar-title"
@@ -42,7 +53,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
           <img src={arrow} alt="" className="rotate-180" />
         </button>
       </div>
-      {activeStyle && (
+      {activeStyle && !isLoading && !isError ? (
         <>
           <div
             {...swipe}
@@ -57,7 +68,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
                 aria-label="이전 AR 스타일"
                 className="absolute right-[calc(50%+60px)] h-[92px] w-[71px] overflow-hidden rounded-[13px] blur-[1.25px]"
               >
-                <img
+                <HomeImage
                   src={styles[(activeIndex + styles.length - 1) % styles.length]?.imageUrl}
                   alt=""
                   className="absolute left-1/2 top-[-13px] h-[137px] w-[102px] max-w-none -translate-x-1/2 object-cover brightness-60"
@@ -70,10 +81,9 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
               aria-label={`${activeStyle.name} AR 체험하기`}
               className="relative h-[113px] w-[98px] shrink-0 overflow-hidden rounded-[13px] shadow-[0_2.5px_3.3px_rgb(0_0_0/0.25)]"
             >
-              <img
+              <HomeImage
                 src={activeStyle.imageUrl}
                 alt={`${activeStyle.name} 미리보기`}
-                draggable={false}
                 className="absolute left-1/2 top-[-24px] h-[159px] w-[119px] max-w-none -translate-x-1/2 -rotate-2 object-cover"
               />
               <span
@@ -90,7 +100,7 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
                 aria-label="다음 AR 스타일"
                 className="absolute left-[calc(50%+60px)] h-[92px] w-[71px] overflow-hidden rounded-[13px] blur-[1.25px]"
               >
-                <img
+                <HomeImage
                   src={styles[(activeIndex + 1) % styles.length]?.imageUrl}
                   alt=""
                   className="absolute left-1/2 top-[-13px] h-[137px] w-[102px] max-w-none -translate-x-1/2 object-cover brightness-60"
@@ -132,6 +142,14 @@ const ArStyleSection = ({ styles, onMoreClick, onTryClick }: ArStyleSectionProps
             AR 체험하기
           </button>
         </>
+      ) : (
+        <SectionFeedback
+          isLoading={isLoading}
+          isError={isError}
+          emptyMessage="현재 체험할 스타일이 없습니다."
+          actionLabel="AR 스타일 찾아보기"
+          onAction={onMoreClick}
+        />
       )}
     </section>
   );

@@ -22,7 +22,8 @@ export interface RecentRecordType {
 }
 
 export interface RecentRecordCardProps {
-  record?: RecentRecordType;
+  onAddClick: () => void;
+  record?: RecentRecordType | null;
   isLoading?: boolean;
   isError?: boolean;
   onClick: () => void;
@@ -45,4 +46,11 @@ export interface ArStyleType {
   id: string;
   name: string;
   imageUrl: string;
+}
+
+export interface HomeDataType {
+  profileName?: string;
+  recentRecord: RecentRecordType | null;
+  arStyles: ArStyleType[];
+  recommendations: RecommendationCardType[];
 }

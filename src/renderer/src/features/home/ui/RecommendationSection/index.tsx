@@ -1,10 +1,13 @@
 import { font } from "@heddy/design-tokens";
 import type { RecommendationSectionProps } from "../../model/types";
 import arrow from "../../assets/arrow-green.svg";
+import SectionFeedback from "../SectionFeedback";
 import RecommendationCard from "../RecommendationCard";
 
 const RecommendationSection = ({
   recommendations,
+  isLoading = false,
+  isError = false,
   onMoreClick,
   onRecommendationClick,
 }: RecommendationSectionProps) => (
@@ -26,14 +29,26 @@ const RecommendationSection = ({
         <img src={arrow} alt="" className="rotate-180" />
       </button>
     </div>
-    <div className="mt-[6px]">
-      {recommendations.slice(0, 3).map(card => (
-        <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
-      ))}
-    </div>
-    <p className="mt-2 text-[8px] leading-[1.3] text-[var(--home-muted)]">
-      ※ 자세한 내용은 ‘추천’에서 확인해 보세요.
-    </p>
+    {recommendations.length > 0 && !isLoading && !isError ? (
+      <>
+        <div className="mt-[6px]">
+          {recommendations.slice(0, 3).map(card => (
+            <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
+          ))}
+        </div>
+        <p className="mt-2 text-[8px] leading-[1.3] text-[var(--home-muted)]">
+          ※ 자세한 내용은 ‘추천’에서 확인해 보세요.
+        </p>
+      </>
+    ) : (
+      <SectionFeedback
+        isLoading={isLoading}
+        isError={isError}
+        emptyMessage="현재 추천 정보가 없습니다."
+        actionLabel="스타일 추천받기"
+        onAction={onMoreClick}
+      />
+    )}
   </section>
 );
 export default RecommendationSection;

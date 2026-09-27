@@ -1,4 +1,5 @@
 import type { RecommendationCardProps } from "../../model/types";
+import HomeImage from "../HomeImage";
 import arrow from "../../assets/arrow.svg";
 import colorDot from "../../assets/recommend-color-dot.svg";
 
@@ -6,11 +7,11 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
   <button
     type="button"
     onClick={onClick}
-    aria-label={`${card.rank}위 ${card.title}, 일치도 ${card.matchRate ?? 0}%, 추천 보기`}
+    aria-label={`${card.rank}위 ${card.title}, ${typeof card.matchRate === "number" && Number.isFinite(card.matchRate) ? `일치도 ${card.matchRate}%` : "일치도 정보 없음"}, 추천 보기`}
     className="flex min-h-[58px] w-full items-center gap-[7px] border-b border-[var(--home-line)] py-[5px] text-left last:border-0 [&_span]:leading-[1.3]"
   >
     <span className="relative block size-11 shrink-0 overflow-hidden rounded-md">
-      <img
+      <HomeImage
         src={card.imageUrl}
         alt={`${card.title} 추천 사진`}
         className="absolute left-[-2px] top-[-8px] h-[83px] w-12 max-w-none"
@@ -24,11 +25,13 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
         <span className="text-[10px] font-semibold">{card.title}</span>
       </span>
       <span className="inline-flex items-center gap-0.5 rounded-full border-[0.5px] border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
-        <img src={colorDot} alt="" />
-        {card.colorName}
+        {card.colorName && <img src={colorDot} alt="" />}
+        {card.colorName || "컬러 정보 없음"}
       </span>
       <span className="rounded-full bg-[var(--home-soft)] px-[3px] py-px text-[7px] font-medium text-[var(--home-primary)]">
-        일치도 {card.matchRate}%
+        {typeof card.matchRate === "number" && Number.isFinite(card.matchRate)
+          ? `일치도 ${card.matchRate}%`
+          : "일치도 정보 없음"}
       </span>
     </span>
     <img src={arrow} alt="" className="shrink-0 rotate-180" />

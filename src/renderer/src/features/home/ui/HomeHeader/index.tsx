@@ -10,6 +10,7 @@ interface HomeHeaderProps {
 }
 const HomeHeader = ({ onProfileClick }: HomeHeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const handleToggleNotifications = () => setNotificationsOpen(open => !open);
   return (
     <header className="relative flex h-9 items-center justify-between">
       <HeddyLogo />
@@ -20,7 +21,7 @@ const HomeHeader = ({ onProfileClick }: HomeHeaderProps) => {
           aria-expanded={notificationsOpen}
           aria-controls="home-notifications"
           className="flex size-11 items-center justify-center rounded-full"
-          onClick={() => setNotificationsOpen(open => !open)}
+          onClick={handleToggleNotifications}
         >
           <img src={alarmIcon} alt="" />
         </button>
