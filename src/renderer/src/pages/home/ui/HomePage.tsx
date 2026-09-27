@@ -2,6 +2,8 @@ import { font } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/shared";
 import {
+  ArStyleSection,
+  HOME_AR_STYLES,
   HomeHeader,
   RecentRecordCard,
   RecommendationSection,
@@ -29,6 +31,13 @@ const HomePage = () => {
             </p>
           </div>
           <RecentRecordCard record={HOME_RECENT_RECORD} onClick={() => navigate("/cuts")} />
+          <div className="mt-6 grid grid-cols-[178px_158px] gap-[14px]">
+            <ArStyleSection
+              styles={HOME_AR_STYLES}
+              onMoreClick={() => navigate("/ar")}
+              onTryClick={() => navigate("/ar")}
+            />
+          </div>
           <RecommendationSection
             recommendations={[]}
             onMoreClick={() => navigate("/recommend")}

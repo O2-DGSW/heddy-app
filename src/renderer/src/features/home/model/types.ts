@@ -72,3 +72,9 @@ export interface CroppedHairImageProps {
 export interface RatingStarsProps {
   rating: number;
 }
+
+export interface ArStyleType {
+  id: string;
+  name: string;
+  imageUrl: string;
+}

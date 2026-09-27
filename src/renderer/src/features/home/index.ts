@@ -6,3 +6,5 @@ export { SHORTCUT_CARDS } from "./model/constants";
 export type { RecentRecordType, RecommendationCardType } from "./model/types";
 export { HOME_RECENT_RECORD } from "./model/mock";
 export { homeTheme } from "./model/theme";
+export { default as ArStyleSection } from "./ui/ArStyleSection";
+export { HOME_AR_STYLES } from "./model/mock";

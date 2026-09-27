@@ -14,3 +14,11 @@ export const HOME_RECENT_RECORD: RecentRecordType = {
   daysAgo: "7일 전",
   memo: "앞머리 뜸 있음. 옆머리는 자연스럽게 눌러주세요.",
 };
+
+import arStyleImage from "../assets/ar-style.png";
+import type { ArStyleType } from "./types";
+export const HOME_AR_STYLES: ArStyleType[] = [
+  { id: "demo-ar-1", name: "애즈펌", imageUrl: arStyleImage },
+  { id: "demo-ar-2", name: "애즈펌 2", imageUrl: arStyleImage },
+  { id: "demo-ar-3", name: "애즈펌 3", imageUrl: arStyleImage },
+];
