@@ -1,6 +1,6 @@
 import type { RecommendationApiData, RecommendationItemApiData } from "@/entities";
 
-import type { RecommendationCardType } from "./types";
+import type { RecommendationCardType } from "@/features/home";
 
 const MAX_HOME_RECOMMENDATION_COUNT = 2;
 

@@ -25,6 +25,9 @@ export interface RecentRecordType {
   designerName: string;
   rating: number;
   thumbnailUrl: string;
+  colorName?: string;
+  daysAgo?: string;
+  memo?: string;
 }
 
 export interface LogoPartType {

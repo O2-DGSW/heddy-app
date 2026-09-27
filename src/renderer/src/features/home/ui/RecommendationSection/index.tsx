@@ -1,9 +1,9 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import arrowIcon from "@/pages/home/assets/arrow.svg";
-import type { RecommendationSectionProps } from "@/pages/home/model/types.ts";
+import arrowIcon from "../../assets/arrow.svg";
+import type { RecommendationSectionProps } from "../../model/types.ts";
 
-import RecommendationCard from "./RecommendationCard.tsx";
+import RecommendationCard from "../RecommendationCard";
 
 const RecommendationSection = ({
   recommendations,

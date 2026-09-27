@@ -1,10 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import bookmarkIcon from "@/pages/home/assets/bookmark.svg";
-import colorDotIcon from "@/pages/home/assets/color-dot.svg";
-import type { RecommendationCardProps } from "@/pages/home/model/types.ts";
+import bookmarkIcon from "../../assets/bookmark.svg";
+import colorDotIcon from "../../assets/color-dot.svg";
+import type { RecommendationCardProps } from "../../model/types.ts";
 
-import CroppedHairImage from "./CroppedHairImage.tsx";
+import CroppedHairImage from "../CroppedHairImage";
 
 const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
   return (
