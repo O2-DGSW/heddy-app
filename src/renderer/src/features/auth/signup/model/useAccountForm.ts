@@ -29,6 +29,9 @@ export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
 
   const showAgreementError = submitted && !areRequiredAgreementsAccepted;
 
+  // 휴대폰 번호 형식은 맞지만 SMS 본인인증을 아직 완료하지 않아 제출이 막힌 경우에만 노출
+  const showVerificationError = submitted && isValidPhone(form.phone) && !extraValid;
+
   return {
     isValid,
     canRequestVerification,
@@ -36,6 +39,7 @@ export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
     showPhoneError,
     showNameError,
     showAgreementError,
+    showVerificationError,
     submitted,
     setSubmitted,
   };

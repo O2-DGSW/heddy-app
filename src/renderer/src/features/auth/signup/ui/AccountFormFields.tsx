@@ -8,6 +8,7 @@ export const AccountFormFields = ({
   showPasswordError,
   showPhoneError,
   showNameError,
+  showVerificationError,
   canRequestVerification,
   nameLabel = "닉네임",
   smsVerification,
@@ -76,6 +77,7 @@ export const AccountFormFields = ({
         verificationCode={form.verificationCode}
         canRequestVerification={canRequestVerification}
         showPhoneError={showPhoneError}
+        showVerificationError={showVerificationError}
         smsVerification={smsVerification}
         onCarrierChange={e => onChange({ ...form, carrier: e })}
         onPhoneChange={e => onChange({ ...form, phone: e })}

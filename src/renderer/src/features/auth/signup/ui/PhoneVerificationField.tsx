@@ -14,6 +14,7 @@ export const PhoneVerificationField = ({
   verificationCode,
   canRequestVerification,
   showPhoneError = false,
+  showVerificationError = false,
   smsVerification,
   onCarrierChange,
   onPhoneChange,
@@ -120,6 +121,11 @@ export const PhoneVerificationField = ({
       {isVerified && (
         <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.success }}>
           인증이 완료되었습니다.
+        </p>
+      )}
+      {showVerificationError && !isVerified && (
+        <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.error }}>
+          휴대폰 본인인증을 완료해주세요.
         </p>
       )}
       {smsError && (

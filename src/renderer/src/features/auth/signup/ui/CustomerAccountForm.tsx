@@ -31,6 +31,7 @@ export const CustomerAccountForm = ({
     showPhoneError,
     showNameError,
     showAgreementError,
+    showVerificationError,
     setSubmitted,
   } = useAccountForm(form, sms.isVerified);
 
@@ -50,6 +51,7 @@ export const CustomerAccountForm = ({
         showPasswordError={showPasswordError}
         showPhoneError={showPhoneError}
         showNameError={showNameError}
+        showVerificationError={showVerificationError}
         canRequestVerification={canRequestVerification}
         smsVerification={{
           ...sms,
@@ -71,6 +73,13 @@ export const CustomerAccountForm = ({
         </p>
       )}
 
+      {/*
+        isValid가 false여도 버튼 자체를 disabled로 막지 않는다.
+        disabled 버튼은 클릭해도 submit 이벤트가 발생하지 않아 setSubmitted(true)가 호출되지 않고,
+        결과적으로 위 필드들의 에러 메시지(휴대폰 인증 미완료 등)가 하나도 노출되지 않은 채
+        버튼만 계속 회색으로 남는 문제가 있었다. 색상으로만 활성/비활성 상태를 표현하고,
+        실제 제출 가능 여부는 handleSubmit 내부의 isValid 체크로 막는다.
+      */}
       <button
         type="submit"
         className={`mt-4 w-full rounded-2xl py-4 ${font.headline2.semiBold}`}
@@ -78,7 +87,7 @@ export const CustomerAccountForm = ({
           backgroundColor: isValid ? lightTheme.primary.normal : lightTheme.line.alternative,
           color: isValid ? lightTheme.fill.normal : lightTheme.line.normal,
         }}
-        disabled={!isValid || isLoading}
+        disabled={isLoading}
       >
         {isLoading ? "가입 중..." : "회원가입"}
       </button>
