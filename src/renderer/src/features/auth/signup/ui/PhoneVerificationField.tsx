@@ -14,6 +14,7 @@ export const PhoneVerificationField = ({
   verificationCode,
   canRequestVerification,
   showPhoneError = false,
+  showVerificationError = false,
   smsVerification,
   onCarrierChange,
   onPhoneChange,
@@ -64,7 +65,7 @@ export const PhoneVerificationField = ({
       </div>
       <div className="flex gap-2">
         <input
-          className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+          className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder="휴대폰 번호"
           value={phone}
@@ -91,7 +92,7 @@ export const PhoneVerificationField = ({
       {isSent && !isVerified && (
         <div className="flex gap-2">
           <input
-            className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+            className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
             style={inputStyle}
             placeholder="인증번호"
             value={verificationCode}
@@ -120,6 +121,11 @@ export const PhoneVerificationField = ({
       {isVerified && (
         <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.success }}>
           인증이 완료되었습니다.
+        </p>
+      )}
+      {showVerificationError && !isVerified && (
+        <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.error }}>
+          휴대폰 본인인증을 완료해주세요.
         </p>
       )}
       {smsError && (

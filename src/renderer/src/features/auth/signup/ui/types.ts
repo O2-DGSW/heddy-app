@@ -19,6 +19,7 @@ export interface AccountFormFieldsProps {
   showPasswordError: boolean;
   showPhoneError: boolean;
   showNameError?: boolean;
+  showVerificationError?: boolean;
   canRequestVerification: boolean;
   nameLabel?: string;
   smsVerification: SmsVerificationState;
@@ -39,6 +40,7 @@ export interface PhoneVerificationFieldProps {
   verificationCode: string;
   canRequestVerification: boolean;
   showPhoneError?: boolean;
+  showVerificationError?: boolean;
   smsVerification: SmsVerificationState;
   onCarrierChange: (carrier: Carrier) => void;
   onPhoneChange: (value: string) => void;

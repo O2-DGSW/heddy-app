@@ -182,7 +182,7 @@ export const FindPasswordForm = () => {
           </div>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+              className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={inputStyle}
               placeholder="전화번호"
               value={phoneField.value}
@@ -210,7 +210,7 @@ export const FindPasswordForm = () => {
           {sms.isSent && !sms.isVerified && (
             <div className="flex gap-2 mb-1">
               <input
-                className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+                className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
                 style={inputStyle}
                 placeholder="인증번호"
                 value={verificationField.value}
