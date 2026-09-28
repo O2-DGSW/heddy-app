@@ -1,20 +1,21 @@
-import starIcon from "@/pages/home/assets/star.svg";
-
-import type { RatingStarsProps } from "@/pages/home/model/types.ts";
-
+import { cn } from "@/shared";
+import starIcon from "../assets/star.svg";
+interface RatingStarsProps {
+  rating: number;
+}
 const RatingStars = ({ rating }: RatingStarsProps) => {
+  const safeRating = Number.isFinite(rating) ? Math.min(5, Math.max(0, rating)) : 0;
   return (
-    <span aria-label={`평점 ${rating}점`} className="mt-px flex -space-x-[3px]">
+    <span role="img" aria-label={`5점 만점에 ${safeRating}점`} className="flex -space-x-[2px]">
       {Array.from({ length: 5 }, (_, index) => (
         <img
           key={index}
           src={starIcon}
           alt=""
-          className={`size-[15px] ${index < rating ? "" : "opacity-25 grayscale"}`}
+          className={cn(index >= safeRating && "opacity-25 grayscale")}
         />
       ))}
     </span>
   );
 };
-
 export default RatingStars;

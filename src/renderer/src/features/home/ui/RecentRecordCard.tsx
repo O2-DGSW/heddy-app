@@ -1,70 +1,96 @@
-import { font, lightTheme } from "@heddy/design-tokens";
-
-import type { RecentRecordCardProps } from "@/pages/home/model/types.ts";
-
-import CroppedHairImage from "./CroppedHairImage.tsx";
-import RatingStars from "./RatingStars.tsx";
+import { font } from "@heddy/design-tokens";
+import { cn } from "@/shared";
+import type { RecentRecordCardProps } from "../model/types";
+import arrow from "../assets/arrow-white.svg";
+import colorDot from "../assets/color-dot.svg";
+import edit from "../assets/edit.svg";
+import HomeImage from "./HomeImage";
+import SectionFeedback from "./SectionFeedback";
+import RatingStars from "./RatingStars";
 
 const RecentRecordCard = ({
   record,
+  onClick,
+  onAddClick,
   isLoading = false,
   isError = false,
-  onClick,
-}: RecentRecordCardProps) => {
-  const hasRecord = Boolean(record);
-
-  return (
-    <button
-      type="button"
-      className="h-full min-h-0 overflow-hidden rounded-[10px] p-[clamp(10px,1.65svh,14px)] text-left shadow-[0_0_4px_rgba(0,0,0,0.13)] active:scale-[0.99]"
-      style={{ backgroundColor: lightTheme.background.normal }}
-      onClick={onClick}
-    >
-      <span className="flex h-full min-h-0 flex-col gap-[clamp(6px,1.2svh,10px)]">
-        <span className={font.label.medium} style={{ color: lightTheme.primary.normal }}>
-          최근 시술 기록
-        </span>
-
-        <span className="block h-[clamp(72px,12svh,108px)] shrink-0 overflow-hidden rounded-[12px]">
-          {hasRecord ? (
-            <CroppedHairImage
-              alt={`${record?.procedureName ?? "최근"} 시술 사진`}
-              src={record?.thumbnailUrl || undefined}
+}: RecentRecordCardProps) => (
+  <section
+    aria-labelledby="home-recent-title"
+    className="overflow-hidden rounded-[15px] bg-[var(--home-surface)] shadow-[0_0_4px_rgb(0_0_0/0.08)]"
+  >
+    <div className="flex min-h-[35px] items-center justify-between bg-[var(--home-primary)] px-5 text-[var(--home-surface)]">
+      <h2 id="home-recent-title" className={font.body.semiBold}>
+        최근 시술 기록
+      </h2>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn("flex min-h-[35px] items-center gap-1", font.caption.medium)}
+        aria-label="시술 기록 전체보기"
+      >
+        전체보기
+        <img src={arrow} alt="" className="rotate-180" />
+      </button>
+    </div>
+    {record && !isLoading && !isError ? (
+      <div className="flex flex-col gap-[15px] p-[15px]">
+        <div className="flex items-center gap-[14px]">
+          <div className="relative h-24 w-[100px] shrink-0 overflow-hidden rounded-[10px]">
+            <HomeImage
+              src={record.thumbnailUrl}
+              alt={`${record.procedureName} 시술 사진`}
+              className="absolute left-1/2 top-1/2 size-28 max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
             />
-          ) : (
-            <span
-              className={`flex size-full items-center justify-center rounded-[12px] text-center ${font.caption.medium}`}
-              style={{
-                backgroundColor: lightTheme.background.neutral,
-                color: lightTheme.label.assistive,
-              }}
-            >
-              {isLoading ? "불러오는 중" : isError ? "다시 시도" : "기록 없음"}
-            </span>
-          )}
-        </span>
-
-        <span className="flex min-w-0 flex-1 flex-col gap-px overflow-hidden">
-          <span className={font.caption.medium} style={{ color: lightTheme.label.alternative }}>
-            {record?.date || "최근 기록을 확인해보세요"}
-          </span>
+            {record.daysAgo && (
+              <span className="absolute bottom-1 right-1 rounded px-2 py-0.5 text-[10px] text-[var(--home-note)] bg-[color-mix(in_srgb,var(--home-text)_70%,transparent)]">
+                {record.daysAgo}
+              </span>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-[3px] text-[var(--home-secondary)]">
+            <time className={font.caption.medium} dateTime={record.date}>
+              {record.date}
+            </time>
+            <div className="flex flex-wrap items-center gap-1">
+              <p className={cn(font.body.semiBold, "text-[var(--home-text)]")}>
+                {record.procedureName}
+              </p>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--home-line)] px-2 py-px text-[10px]">
+                {record.colorName && <img src={colorDot} alt="" />}
+                {record.colorName || "컬러 정보 없음"}
+              </span>
+            </div>
+            <p className={font.caption.medium}>
+              {record.salonName} · {record.designerName}
+            </p>
+            <RatingStars rating={record.rating} />
+          </div>
+        </div>
+        <div className="flex min-h-8 items-center gap-3 rounded-[5px] bg-[var(--home-note)] px-2 py-1.5">
           <span
-            className={`${font.headline2.semiBold} block truncate`}
-            style={{ color: lightTheme.label.neutral }}
+            className={cn(
+              "flex shrink-0 items-center gap-1 text-[var(--home-primary)]",
+              font.label.medium
+            )}
           >
-            {record?.procedureName || (isLoading ? "시술 기록 로딩 중" : "아직 기록이 없어요")}
+            <img src={edit} alt="" />
+            메모
           </span>
-          <span
-            className={`${font.caption.medium} block truncate`}
-            style={{ color: lightTheme.label.alternative }}
-          >
-            {record ? `${record.salonName} · ${record.designerName}` : "첫 기록을 추가해보세요"}
-          </span>
-          <RatingStars rating={record?.rating ?? 0} />
-        </span>
-      </span>
-    </button>
-  );
-};
-
+          <p className="text-[11px] leading-[1.3] tracking-[-0.02em] text-[var(--home-secondary)]">
+            {record.memo?.trim() || "등록된 메모가 없습니다."}
+          </p>
+        </div>
+      </div>
+    ) : (
+      <SectionFeedback
+        isLoading={isLoading}
+        isError={isError}
+        emptyMessage="현재 시술 기록이 없습니다."
+        actionLabel={isError ? "기록 보기" : "첫 기록 추가하기"}
+        onAction={isError ? onClick : onAddClick}
+      />
+    )}
+  </section>
+);
 export default RecentRecordCard;

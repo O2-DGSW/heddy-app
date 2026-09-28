@@ -2,7 +2,7 @@ import { createDateValue, getTreatmentRecordThumbnailUrl } from "@/entities";
 import type { TreatmentRecordSummaryApiData } from "@/entities";
 
 import { SERVICE_TYPE_LABEL } from "./constants";
-import type { RecentRecordType } from "./types";
+import type { RecentRecordType } from "@/features/home";
 
 const formatPerformedAt = (performedAt: string) => {
   const performedDate = new Date(performedAt);
