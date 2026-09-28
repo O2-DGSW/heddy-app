@@ -46,7 +46,7 @@ export const FindIdForm = () => {
           </p>
           <div className="flex gap-2 mb-1">
             <input
-              className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+              className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
               style={{
                 backgroundColor: lightTheme.background.neutral,
                 color: lightTheme.label.normal,

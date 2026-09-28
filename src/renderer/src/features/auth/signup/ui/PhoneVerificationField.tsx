@@ -65,7 +65,7 @@ export const PhoneVerificationField = ({
       </div>
       <div className="flex gap-2">
         <input
-          className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+          className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder="휴대폰 번호"
           value={phone}
@@ -92,7 +92,7 @@ export const PhoneVerificationField = ({
       {isSent && !isVerified && (
         <div className="flex gap-2">
           <input
-            className={`flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
+            className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
             style={inputStyle}
             placeholder="인증번호"
             value={verificationCode}
