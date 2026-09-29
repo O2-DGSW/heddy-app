@@ -52,15 +52,11 @@ export type ResetPasswordRequest = {
 
 export type ResetPasswordApiResponse = AuthApiResponse<string>;
 
-export type ReauthenticationMethodType = "PASSWORD" | "SOCIAL_TOKEN";
-
-export type ReauthenticationProviderType = "APPLE" | "GOOGLE" | "KAKAO";
+export type ReauthenticationMethodType = "PASSWORD";
 
 export type ReauthenticateRequest = {
   method: ReauthenticationMethodType;
   password?: string;
-  provider?: ReauthenticationProviderType;
-  provider_token?: string;
 };
 
 export type ReauthenticateResponse = {
@@ -82,31 +78,12 @@ export type SignupResponse = SocialSignupResponse;
 
 export type SignupApiResponse = AuthApiResponse<SignupResponse>;
 
-export type SocialSignupProviderType = "EMAIL" | "KAKAO" | "NAVER" | "GOOGLE";
-
 export type SocialSignupAgreements = {
   terms_of_service: boolean;
   privacy_policy: boolean;
   ai_training: boolean;
   service_analytics: boolean;
   marketing_notification: boolean;
-};
-
-export type SocialLoginRequest = {
-  provider: SocialSignupProviderType;
-  provider_token: string;
-};
-
-export type SocialLoginResponse = SocialSignupResponse;
-
-export type SocialLoginApiResponse = AuthApiResponse<SocialLoginResponse>;
-
-export type SocialSignupRequest = {
-  provider: SocialSignupProviderType;
-  provider_token: string;
-  nickname: string;
-  phone_number: string;
-  agreements: SocialSignupAgreements;
 };
 
 export type SocialSignupResponse = {
@@ -122,11 +99,6 @@ export type SocialSignupResponse = {
     token_type: string;
     expires_in: number;
   };
-};
-
-export type SocialSignupApiResponse = {
-  data: SocialSignupResponse;
-  request_id: string;
 };
 
 export type SmsPurpose = "SIGNUP" | "OWNER_SIGNUP" | "PASSWORD_RESET" | "PHONE_CHANGE";

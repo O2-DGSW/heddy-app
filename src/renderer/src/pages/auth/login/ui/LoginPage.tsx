@@ -1,6 +1,6 @@
 import { lightTheme, font } from "@heddy/design-tokens";
 import { AuthBackButton } from "@/features/auth/back-button";
-import { LoginForm, SocialLogin } from "@/features/auth/login";
+import { LoginForm } from "@/features/auth/login";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -30,10 +30,6 @@ const LoginPage = () => {
             </div>
 
             <LoginForm />
-
-            <div className="mt-10 w-full">
-              <SocialLogin />
-            </div>
           </div>
         </div>
       </section>
