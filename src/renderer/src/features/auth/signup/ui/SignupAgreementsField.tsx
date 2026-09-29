@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { SIGNUP_AGREEMENT_ITEMS } from "@/features/auth/signup/constants/signup";
+import { LEGAL_TERMS_CONTENT } from "@/features/auth/signup/constants/legalTermsContent";
 import type { SignupAgreementKey } from "@/features/auth/signup/model/types";
 import type { SignupAgreementsFieldProps as Props } from "@/features/auth/signup/ui/types";
+import { TermsDetailModal } from "@/features/auth/signup/ui/TermsDetailModal";
 
 interface AgreementCheckboxProps {
   id: string;
@@ -39,6 +42,8 @@ const AgreementCheckbox = ({ id, checked, className = "", onChange }: AgreementC
 };
 
 export const SignupAgreementsField = ({ agreements, showError = false, onChange }: Props) => {
+  const [openTermsKey, setOpenTermsKey] = useState<SignupAgreementKey | null>(null);
+
   const allAgreementsAccepted = SIGNUP_AGREEMENT_ITEMS.every(item => agreements[item.key]);
 
   const handleToggleAll = (checked: boolean) => {
@@ -58,6 +63,14 @@ export const SignupAgreementsField = ({ agreements, showError = false, onChange 
       ...agreements,
       [key]: checked,
     });
+  };
+
+  const handleOpenTerms = (key: SignupAgreementKey) => {
+    setOpenTermsKey(key);
+  };
+
+  const handleCloseTerms = () => {
+    setOpenTermsKey(null);
   };
 
   return (
@@ -84,25 +97,39 @@ export const SignupAgreementsField = ({ agreements, showError = false, onChange 
       <ul className="flex flex-col gap-3 px-2">
         {SIGNUP_AGREEMENT_ITEMS.map(item => (
           <li key={item.key}>
-            <label htmlFor={`signup-agreement-${item.key}`} className="flex items-start gap-3">
-              <AgreementCheckbox
-                id={`signup-agreement-${item.key}`}
-                checked={agreements[item.key]}
-                className="mt-0.5"
-                onChange={checked => handleToggleAgreement(item.key, checked)}
-              />
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className={font.label.medium} style={{ color: lightTheme.label.neutral }}>
-                  {item.required ? "[필수]" : "[선택]"} {item.label}
+            <div className="flex items-start gap-3">
+              <label
+                htmlFor={`signup-agreement-${item.key}`}
+                className="flex min-w-0 flex-1 items-start gap-3"
+              >
+                <AgreementCheckbox
+                  id={`signup-agreement-${item.key}`}
+                  checked={agreements[item.key]}
+                  className="mt-0.5"
+                  onChange={checked => handleToggleAgreement(item.key, checked)}
+                />
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className={font.label.medium} style={{ color: lightTheme.label.neutral }}>
+                    {item.required ? "[필수]" : "[선택]"} {item.label}
+                  </span>
+                  <span
+                    className={font.caption.regular}
+                    style={{ color: lightTheme.label.assistive }}
+                  >
+                    {item.description}
+                  </span>
                 </span>
-                <span
-                  className={font.caption.regular}
-                  style={{ color: lightTheme.label.assistive }}
-                >
-                  {item.description}
-                </span>
-              </span>
-            </label>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => handleOpenTerms(item.key)}
+                className={`shrink-0 underline ${font.caption.regular}`}
+                style={{ color: lightTheme.label.assistive }}
+              >
+                보기
+              </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -111,6 +138,10 @@ export const SignupAgreementsField = ({ agreements, showError = false, onChange 
         <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.error }}>
           필수 약관에 동의해주세요.
         </p>
+      )}
+
+      {openTermsKey && (
+        <TermsDetailModal content={LEGAL_TERMS_CONTENT[openTermsKey]} onClose={handleCloseTerms} />
       )}
     </fieldset>
   );
