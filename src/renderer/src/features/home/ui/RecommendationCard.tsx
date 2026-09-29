@@ -1,6 +1,5 @@
 import type { RecommendationCardProps } from "../model/types";
 import HomeImage from "./HomeImage";
-import arrow from "../assets/arrow.svg";
 import colorDot from "../assets/recommend-color-dot.svg";
 
 const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
@@ -18,11 +17,13 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
       />
     </span>
     <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
-      <span className="flex items-center gap-1">
+      <span className="flex w-full min-w-0 items-start gap-1">
         <span className="flex size-[10px] shrink-0 items-center justify-center rounded-full bg-[var(--home-primary)] text-[8px] font-semibold text-[var(--home-note)]">
           {card.rank}
         </span>
-        <span className="text-[10px] font-semibold">{card.title}</span>
+        <span className="line-clamp-2 min-w-0 text-ellipsis text-[10px] font-semibold">
+          {card.title}
+        </span>
       </span>
       <span className="inline-flex items-center gap-0.5 rounded-full border-[0.5px] border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
         {card.colorName && <img src={colorDot} alt="" />}
@@ -34,7 +35,6 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
           : "일치도 정보 없음"}
       </span>
     </span>
-    <img src={arrow} alt="" className="shrink-0 rotate-180" />
   </button>
 );
 export default RecommendationCard;
