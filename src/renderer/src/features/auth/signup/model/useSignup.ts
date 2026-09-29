@@ -12,6 +12,13 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   carrier: "SKT",
   phone: "",
   verificationCode: "",
+  hairProfile: {
+    hairLength: "SHORT",
+    hairCondition: "HEALTHY",
+    hairType: "STRAIGHT",
+    hairThickness: "THIN",
+    availableCareTimeMinutes: "",
+  },
   agreements: {
     terms_of_service: false,
     privacy_policy: false,

@@ -7,6 +7,19 @@ export type Carrier = MainCarrier | MvnoCarrier;
 export type SignupAgreements = SocialSignupAgreements;
 export type SignupAgreementKey = keyof SignupAgreements;
 
+export type HairLengthType = "SHORT" | "BELOW_CHIN" | "BELOW_SHOULDER" | "BELOW_CHEST";
+export type HairConditionType = "HEALTHY" | "NORMAL" | "DAMAGED" | "SEVERELY_DAMAGED";
+export type HairType = "STRAIGHT" | "WAVY" | "CURLY";
+export type HairThicknessType = "THIN" | "NORMAL" | "THICK";
+
+export interface HairProfileForm {
+  hairLength: HairLengthType;
+  hairCondition: HairConditionType;
+  hairType: HairType;
+  hairThickness: HairThicknessType;
+  availableCareTimeMinutes: string;
+}
+
 export type SignupAgreementItem = {
   key: SignupAgreementKey;
   label: string;
@@ -33,5 +46,6 @@ export type CustomerAccountForm = {
   carrier: Carrier;
   phone: string;
   verificationCode: string;
+  hairProfile: HairProfileForm;
   agreements: SignupAgreements;
 };
