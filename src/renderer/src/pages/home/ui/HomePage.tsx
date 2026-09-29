@@ -3,15 +3,15 @@ import { font } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 
 import { HOME_RECENT_RECORD_PARAMS } from "../model/constants";
+import { mapRecommendationToHomeCards } from "../model/mapRecommendationToHomeCards";
 import { mapTreatmentRecordToRecentRecord } from "../model/mapTreatmentRecordToRecentRecord";
 
-import { useGetTreatmentRecords } from "@/entities";
+import { useGetLatestRecommendation, useGetTreatmentRecords } from "@/entities";
 import { cn } from "@/shared";
 import {
   ArStyleSection,
   HOME_AR_STYLES,
   HOME_PROFILE_NAME,
-  HOME_RECOMMENDATIONS,
   HomeHeader,
   RecentRecordCard,
   RecommendationSection,
@@ -27,12 +27,25 @@ const HomePage = () => {
     isError: isRecentRecordError,
     refetch: refetchRecentRecord,
   } = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
+  const {
+    data: latestRecommendation,
+    isPending: isRecommendationPending,
+    isFetching: isRecommendationFetching,
+    isError: isRecommendationError,
+    refetch: refetchRecommendation,
+  } = useGetLatestRecommendation();
   const recentRecord = useMemo(() => {
     const latestRecord = treatmentRecordList?.items[0];
 
     return latestRecord ? mapTreatmentRecordToRecentRecord(latestRecord) : null;
   }, [treatmentRecordList]);
+  const recommendations = useMemo(
+    () => mapRecommendationToHomeCards(latestRecommendation ?? null),
+    [latestRecommendation]
+  );
   const hasRecentRecord = isRecentRecordPending || Boolean(recentRecord);
+  const isRecommendationLoading =
+    isRecommendationPending || (isRecommendationError && isRecommendationFetching);
 
   const handleRecentRecordListClick = () => {
     if (isRecentRecordError) {
@@ -41,6 +54,15 @@ const HomePage = () => {
     }
 
     navigate("/cuts");
+  };
+
+  const handleRecommendationClick = () => {
+    if (isRecommendationError) {
+      void refetchRecommendation();
+      return;
+    }
+
+    navigate("/recommend");
   };
 
   return (
@@ -74,9 +96,11 @@ const HomePage = () => {
               onTryClick={() => navigate("/ar")}
             />
             <RecommendationSection
-              recommendations={HOME_RECOMMENDATIONS}
-              onMoreClick={() => navigate("/recommend")}
-              onRecommendationClick={() => navigate("/recommend")}
+              recommendations={recommendations}
+              isLoading={isRecommendationLoading}
+              isError={isRecommendationError}
+              onMoreClick={handleRecommendationClick}
+              onRecommendationClick={handleRecommendationClick}
             />
           </div>
           <div className="mt-6">

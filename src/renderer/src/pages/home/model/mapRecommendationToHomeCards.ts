@@ -2,7 +2,17 @@ import type { RecommendationApiData, RecommendationItemApiData } from "@/entitie
 
 import type { RecommendationCardType } from "@/features/home";
 
-const MAX_HOME_RECOMMENDATION_COUNT = 2;
+const MAX_HOME_RECOMMENDATION_COUNT = 3;
+
+const normalizeMatchRate = (score: number | null | undefined) => {
+  if (typeof score !== "number" || !Number.isFinite(score)) {
+    return undefined;
+  }
+
+  const percentage = score >= 0 && score <= 1 ? score * 100 : score;
+
+  return Math.round(Math.min(100, Math.max(0, percentage)));
+};
 
 const formatDifficulty = (difficulty: string) => {
   const normalizedDifficulty = difficulty.toUpperCase();
@@ -48,14 +58,15 @@ export const mapRecommendationToHomeCards = (
   }
 
   return [...recommendation.items]
-    .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+    .sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER))
     .slice(0, MAX_HOME_RECOMMENDATION_COUNT)
     .map((item, index) => ({
       id: item.hairstyle?.hairstyle_id ?? `recommend-${index}`,
-      rank: index + 1,
+      rank: item.rank ?? index + 1,
       title: item.hairstyle?.style_name || "추천 스타일",
       imageUrl: item.hairstyle?.thumbnail_url ?? "",
-      colorName: item.recommended_color ? "추천 컬러" : "컬러 정보 없음",
+      colorName: item.recommended_color || "컬러 정보 없음",
       tags: buildRecommendationTags(item),
+      matchRate: normalizeMatchRate(item.score),
     }));
 };
