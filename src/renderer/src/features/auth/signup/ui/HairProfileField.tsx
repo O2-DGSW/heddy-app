@@ -84,13 +84,16 @@ const ImageOptionField = <TValue extends string>({
           const isSelected = selectedValue === option.value;
 
           return (
-            <label key={option.value} className="relative min-w-0 cursor-pointer text-center">
+            <label
+              key={option.value}
+              className="relative min-w-0 touch-pan-y cursor-pointer text-center"
+            >
               <input
                 type="radio"
                 name={name}
                 value={option.value}
                 checked={isSelected}
-                className="peer absolute inset-0 z-10 size-full cursor-pointer opacity-0"
+                className="peer sr-only"
                 onChange={() => onChange(option.value)}
               />
               <span
@@ -158,14 +161,14 @@ const HairProfileField = ({ value, onChange }: HairProfileFieldProps) => {
             return (
               <label
                 key={option.value}
-                className="relative flex cursor-pointer flex-col items-center"
+                className="relative flex touch-pan-y cursor-pointer flex-col items-center"
               >
                 <input
                   type="radio"
                   name="hair-condition"
                   value={option.value}
                   checked={isSelected}
-                  className="peer absolute inset-0 z-20 size-full cursor-pointer opacity-0"
+                  className="peer sr-only"
                   onChange={() => onChange({ ...value, hairCondition: option.value })}
                 />
                 <span
