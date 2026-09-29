@@ -21,20 +21,20 @@ export type TreatmentRecordListParams = {
 
 /**
  * 목록 응답 한 건
- * - 미용실·디자이너·만족도는 등록 시 선택 입력이라 값이 비어 올 수 있다.
- * - thumbnail_url은 사진이 없으면 null이고, 있으면 만료가 짧은 Presigned URL이다.
- * - analysis_status는 분석 기능 연결 전까지 null이다.
+ * - thumbnail_url은 만료가 짧은 Presigned URL이다.
+ * - analysis_status는 서버의 분석 작업 상태 문자열이다.
  */
 export type TreatmentRecordSummaryApiData = {
   record_id: string;
   performed_at: string;
-  salon_name?: string | null;
-  designer_name?: string | null;
-  service_types?: ServiceType[];
-  satisfaction?: number | null;
-  thumbnail_url?: string | null;
+  salon_name: string;
+  designer_name: string;
+  service_types: ServiceType[];
+  satisfaction: number;
+  thumbnail_url: string;
   photos?: TreatmentRecordPhotoApiData[];
-  analysis_status?: string | null;
+  analysis_status: string;
+  is_shared: boolean;
 };
 
 export type PageApiData = {

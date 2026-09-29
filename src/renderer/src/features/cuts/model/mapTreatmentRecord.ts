@@ -74,7 +74,7 @@ const formatPerformedAt = (performedAt: string) => {
 
 /**
  * 목록 API 응답 한 건을 카드에서 쓰는 형태로 변환한다.
- * 서버에 없는 값(시술명·공유 여부)은 아래 주석대로 대체한다.
+ * 서버에 시술명 필드가 없어 시술 종류를 이어 붙여 제목으로 사용한다.
  */
 export const mapTreatmentRecordToCutsRecord = (item: TreatmentRecordSummaryApiData): CutsRecord => {
   const serviceTypes = item.service_types ?? [];
@@ -92,7 +92,6 @@ export const mapTreatmentRecordToCutsRecord = (item: TreatmentRecordSummaryApiDa
     analysisStatus: item.analysis_status
       ? (ANALYSIS_STATUS_BY_API_VALUE[item.analysis_status.toUpperCase()] ?? null)
       : null,
-    // 목록 API에 공유 여부가 없어 항상 false다. 공유 API가 붙으면 함께 채운다.
-    isSharing: false,
+    isSharing: item.is_shared,
   };
 };

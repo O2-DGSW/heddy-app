@@ -18,6 +18,29 @@ const formatPerformedAt = (performedAt: string) => {
   );
 };
 
+const formatElapsedDays = (performedAt: string) => {
+  const performedDate = new Date(performedAt);
+
+  if (Number.isNaN(performedDate.getTime())) {
+    return undefined;
+  }
+
+  const today = new Date();
+  const todayStart = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const performedDateStart = Date.UTC(
+    performedDate.getFullYear(),
+    performedDate.getMonth(),
+    performedDate.getDate()
+  );
+  const elapsedDays = Math.floor((todayStart - performedDateStart) / (24 * 60 * 60 * 1000));
+
+  if (elapsedDays < 0) {
+    return undefined;
+  }
+
+  return elapsedDays === 0 ? "오늘" : `${elapsedDays}일 전`;
+};
+
 export const mapTreatmentRecordToRecentRecord = (
   item: TreatmentRecordSummaryApiData
 ): RecentRecordType => {
@@ -32,5 +55,6 @@ export const mapTreatmentRecordToRecentRecord = (
     designerName: item.designer_name || "디자이너 정보 없음",
     rating: item.satisfaction ?? 0,
     thumbnailUrl: getTreatmentRecordThumbnailUrl(item),
+    daysAgo: formatElapsedDays(item.performed_at),
   };
 };
