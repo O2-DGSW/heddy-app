@@ -13,7 +13,7 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
       <HomeImage
         src={card.imageUrl}
         alt={`${card.title} 추천 사진`}
-        className="absolute left-[-2px] top-[-8px] h-[83px] w-12 max-w-none"
+        className="absolute inset-0 size-full object-cover"
       />
     </span>
     <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
