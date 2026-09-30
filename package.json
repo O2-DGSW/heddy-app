@@ -7,6 +7,8 @@
     "ios": "npx cap add ios",
     "android": "npx cap add android",
     "dev": "vite",
+    "cert:dev": "mkdir -p .cert && mkcert -cert-file .cert/localhost.pem -key-file .cert/localhost-key.pem localhost 127.0.0.1 ::1",
+    "dev:https": "vite --mode https --host localhost --port 5174 --strictPort",
     "dev:ios": "CAPACITOR_LIVE=true CAPACITOR_LIVE_HOST=localhost npx cap sync ios && npx cap open ios",
     "dev:android": "CAPACITOR_LIVE=true CAPACITOR_LIVE_HOST=10.0.2.2 npx cap sync android && npx cap open android",
     "build": "tsc -b && vite build",
