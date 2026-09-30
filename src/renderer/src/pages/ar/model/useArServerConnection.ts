@@ -153,13 +153,18 @@ export const useArServerConnection = (
       channel.send(JSON.stringify(command));
       lastSentFitRef.current = desired;
       if (command.groom !== undefined) {
+        clearTimeout(foreheadTimerRef.current);
+        foreheadTimerRef.current = undefined;
+        setForeheadState({ status: "idle" });
+        // 서버는 groom 해제에 완료 알림을 보내지 않으므로 다음 스타일 요청을 막지 않는다.
+        if (command.groom === "") {
+          setGroomState({ groom: "", status: "idle" });
+          return;
+        }
         // 서버가 요청 ID를 제공하지 않으므로 스타일 요청은 하나씩 보내고 최신 선택을 대기시킨다.
         pendingGroomRef.current = desired.groom;
         setGroomState({ groom: desired.groom, status: "loading" });
         clearTimeout(groomTimerRef.current);
-        clearTimeout(foreheadTimerRef.current);
-        foreheadTimerRef.current = undefined;
-        setForeheadState({ status: "idle" });
         groomTimerRef.current = setTimeout(() => {
           pendingGroomRef.current = null;
           lastSentFitRef.current = null;
