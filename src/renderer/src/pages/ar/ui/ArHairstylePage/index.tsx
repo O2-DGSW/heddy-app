@@ -112,7 +112,7 @@ const ArHairstylePage = () => {
           <video
             aria-hidden="true"
             autoPlay
-            className="absolute inset-0 h-full w-full bg-black object-cover [transform:scaleX(-1)]"
+            className="absolute inset-0 h-full w-full bg-black object-cover"
             muted
             playsInline
             ref={cameraPreviewRef}
