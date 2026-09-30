@@ -35,6 +35,9 @@ importers:
       '@capgo/capacitor-transitions':
         specifier: ^8.1.9
         version: 8.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@heddy/api':
+        specifier: workspace:*
+        version: link:packages/api
       '@heddy/design-tokens':
         specifier: workspace:*
         version: link:packages/design-tokens
@@ -135,6 +138,12 @@ importers:
       vite-plugin-svgr:
         specifier: ^5.2.0
         version: 5.2.0(typescript@6.0.3)(vite@8.2.1(@types/node@24.13.3)(jiti@2.7.0))
+
+  packages/api:
+    dependencies:
+      '@capacitor/core':
+        specifier: ^8.5.0
+        version: 8.5.0
 
   packages/design-tokens:
     dependencies:

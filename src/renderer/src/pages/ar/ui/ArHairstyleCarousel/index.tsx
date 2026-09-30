@@ -16,6 +16,7 @@ interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
   hairstyleOptions: ArHairstyleOption[];
   loadingMessage: string | null;
+  disabled: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
 }
 
@@ -26,6 +27,7 @@ const ArHairstyleCarousel = ({
   activeHairstylePosition,
   hairstyleOptions,
   loadingMessage,
+  disabled,
   onSelect,
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
@@ -33,6 +35,7 @@ const ArHairstyleCarousel = ({
   const lastWheelAtRef = useRef(0);
 
   const handleMove = (offset: -1 | 1) => {
+    if (disabled) return;
     onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
   };
 
@@ -80,6 +83,7 @@ const ArHairstyleCarousel = ({
   };
 
   const handleSelect = (hairstyleId: HairstyleOptionId) => {
+    if (disabled) return;
     if (didSwipeRef.current) {
       didSwipeRef.current = false;
       return;
@@ -124,8 +128,9 @@ const ArHairstyleCarousel = ({
             <button
               aria-label={isNoStyle ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
               aria-pressed={isSelected}
+              disabled={disabled}
               className={cn(
-                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)]",
+                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] disabled:opacity-45",
                 size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
                 isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
               )}
