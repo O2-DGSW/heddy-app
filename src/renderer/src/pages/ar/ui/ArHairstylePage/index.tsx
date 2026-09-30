@@ -13,7 +13,6 @@ import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
 import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
-import ArGroomControls from "../ArGroomControls";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 
 const ArHairstylePage = () => {
@@ -45,16 +44,8 @@ const ArHairstylePage = () => {
   const selectedGroom =
     selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? "" : selectedHairstyle.id;
   const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
-  const {
-    connectionStatus,
-    errorMessage,
-    controlReady,
-    groomState,
-    foreheadState,
-    stats,
-    handleGroomRetry,
-    handleForeheadRefresh,
-  } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
+  const { connectionStatus, errorMessage, controlReady, groomState, foreheadState, stats } =
+    useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
   const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw;
   const isFaceTracked = typeof faceYaw === "number";
   const isForeheadLoading = foreheadState.status === "loading";
@@ -139,17 +130,6 @@ const ArHairstylePage = () => {
             errorMessage={errorMessage}
             isFaceTracked={isFaceTracked}
             isExpanded={isExpanded}
-          />
-          <ArGroomControls
-            isExpanded={isExpanded}
-            enabled={controlReady}
-            hasGroom={selectedGroom !== ""}
-            groomState={groomState}
-            foreheadState={foreheadState}
-            settings={fitSettings}
-            onChange={handleFitSettingsChange}
-            onForeheadRefresh={handleForeheadRefresh}
-            onRetry={handleGroomRetry}
           />
           <ArColorPicker
             isExpanded={isExpanded}
