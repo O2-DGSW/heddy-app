@@ -26,6 +26,18 @@ pnpm dev:https
 사용합니다. 로컬 HTTPS 설정으로 원격 AR 서버의 인증서 신뢰 오류가 해결되지는 않습니다.
 `VITE_AR_SERVER_URL`에는 유효한 인증서가 적용된 HTTPS 서버 주소가 필요합니다.
 
+AR 서버가 자체 서명 인증서를 사용하는 개발 환경에서는 서버 담당자 또는 사용자가
+확인한 공개 인증서를 `.cert/ar-server.pem`에 저장하고 `.env.https.local`에 지정할 수 있습니다.
+
+```dotenv
+AR_SERVER_CERT_FILE=.cert/ar-server.pem
+```
+
+이 설정은 `pnpm dev:https`의 AR 프록시에만 적용합니다. 인증서 체인·호스트 이름 검증을
+유지하며, 서버 인증서의 SHA-256 지문이 지정한 인증서와 같아야 연결됩니다. 서버 인증서가
+교체되면 새 인증서를 확인한 후 파일을 갱신하고 개발 서버를 재시작하세요. 시스템 신뢰
+저장소나 일반 HTTP 개발, preview, 네이티브 앱의 인증서 설정에는 적용하지 않습니다.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
