@@ -1,4 +1,14 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { loadEnv } from "vite";
+
+import { getArServerTrust } from "./config/arServerTrust.ts";
+
+const env = loadEnv("production", process.cwd(), "");
+const arServerTrust = getArServerTrust({
+  serverUrl: process.env.VITE_AR_SERVER_URL ?? env.VITE_AR_SERVER_URL,
+  certificateFile: process.env.AR_SERVER_CERT_FILE ?? env.AR_SERVER_CERT_FILE,
+});
+const nativeHttpConfig = { enabled: false, arServerTrust };
 
 // CAPACITOR_LIVE=true points the native app at the local Vite dev server
 // instead of the bundled web assets, so `pnpm dev` changes show up live
@@ -18,6 +28,7 @@ const config: CapacitorConfig = {
       }
     : undefined,
   plugins: {
+    CapacitorHttp: nativeHttpConfig,
     StatusBar: {
       overlaysWebView: true,
       // 'LIGHT' = dark icons/text, for our light app background.

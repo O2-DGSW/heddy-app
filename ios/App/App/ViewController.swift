@@ -3,6 +3,10 @@ import Capacitor
 import AVFoundation
 
 class ViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        bridge?.registerPluginInstance(ArServerHttpPlugin())
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 

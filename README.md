@@ -38,6 +38,24 @@ AR_SERVER_CERT_FILE=.cert/ar-server.pem
 교체되면 새 인증서를 확인한 후 파일을 갱신하고 개발 서버를 재시작하세요. 시스템 신뢰
 저장소나 일반 HTTP 개발, preview, 네이티브 앱의 인증서 설정에는 적용하지 않습니다.
 
+## 네이티브 AR 서버 인증서
+
+자체 서명된 AR 서버 인증서를 네이티브 앱에서 사용하려면 담당자가 확인한 공개 인증서를
+`.cert/ar-server.pem`에 저장하고 `.env.local`에 다음 값을 설정합니다.
+
+```dotenv
+AR_SERVER_CERT_FILE=.cert/ar-server.pem
+```
+
+`VITE_AR_SERVER_URL`은 기존 환경 설정의 HTTPS 서버 주소를 사용합니다. 이 설정 후
+`pnpm build`와 `pnpm sync:android` 또는 `pnpm sync:ios`를 실행하고 네이티브 앱을 다시 빌드합니다.
+인증서는 개발용 프록시와 달리 앱의 `CapacitorHttp.request`에도 적용됩니다. 서버의 origin과
+공개 인증서를 빌드 설정에 고정하며, 다른 서버는 기존 HTTP 처리와 시스템 인증서 검증을 사용합니다.
+인증서의 호스트 이름·유효기간을 검증하고, 승인된 인증서와 다른 인증서를 거부하며 리다이렉트를
+따르지 않습니다.
+개인키는 앱에 포함하지 않습니다. 인증서가 교체되면 승인된 공개 인증서로 갱신하고 앱을 다시
+빌드해야 합니다. 공인 인증서를 사용하는 서버는 이 옵션을 생략해 기본 검증을 사용할 수 있습니다.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
