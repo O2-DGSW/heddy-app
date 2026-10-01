@@ -17,7 +17,7 @@
     "sync:ios": "npx cap sync ios",
     "sync:android": "npx cap sync android",
     "lint": "eslint .",
-    "test:ar": "node --test tests/ar-protocol.test.ts packages/api/request.test.ts",
+    "test:ar": "node --test tests/ar-protocol.test.ts tests/native-ar-trust.test.ts packages/api/request.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview"
