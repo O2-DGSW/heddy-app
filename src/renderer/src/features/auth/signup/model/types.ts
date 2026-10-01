@@ -1,4 +1,10 @@
-import type { SocialSignupAgreements } from "@/entities/auth";
+import type {
+  SignupHairConditionType,
+  SignupHairLengthType,
+  SignupHairThicknessType,
+  SignupHairType,
+  SocialSignupAgreements,
+} from "@/entities/auth";
 
 export type MainCarrier = "SKT" | "KT" | "LG U+";
 export type MvnoCarrier = "SKT 알뜰폰" | "KT 알뜰폰" | "LGU+ 알뜰폰";
@@ -7,10 +13,10 @@ export type Carrier = MainCarrier | MvnoCarrier;
 export type SignupAgreements = SocialSignupAgreements;
 export type SignupAgreementKey = keyof SignupAgreements;
 
-export type HairLengthType = "SHORT" | "BELOW_CHIN" | "BELOW_SHOULDER" | "BELOW_CHEST";
-export type HairConditionType = "HEALTHY" | "NORMAL" | "DAMAGED" | "SEVERELY_DAMAGED";
-export type HairType = "STRAIGHT" | "WAVY" | "CURLY";
-export type HairThicknessType = "THIN" | "NORMAL" | "THICK";
+export type HairLengthType = SignupHairLengthType;
+export type HairConditionType = SignupHairConditionType;
+export type HairType = SignupHairType;
+export type HairThicknessType = SignupHairThicknessType;
 
 export interface HairProfileForm {
   hairLength: HairLengthType;
