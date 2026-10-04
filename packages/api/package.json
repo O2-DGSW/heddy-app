@@ -1,0 +1,12 @@
+{
+  "name": "@heddy/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^8.5.0"
+  }
+}

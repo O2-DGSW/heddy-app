@@ -66,12 +66,28 @@ export type ReauthenticateResponse = {
 
 export type ReauthenticateApiResponse = AuthApiResponse<ReauthenticateResponse>;
 
+export type SignupHairType = "STRAIGHT" | "WAVY" | "CURLY";
+
+export type SignupHairConditionType = "HEALTHY" | "NORMAL" | "DAMAGED" | "SEVERELY_DAMAGED";
+
+export type SignupHairLengthType = "SHORT" | "BELOW_CHIN" | "BELOW_SHOULDER" | "BELOW_CHEST";
+
+export type SignupHairThicknessType = "THIN" | "NORMAL" | "THICK";
+
+export type SignupHairProfileRequest = {
+  hair_type: SignupHairType;
+  hair_condition: SignupHairConditionType;
+  hair_length: SignupHairLengthType;
+  hair_thickness: SignupHairThicknessType;
+  available_care_time_minutes: number;
+};
+
 export type SignupRequest = {
   email: string;
   password: string;
   nickname: string;
-  phone_number: string;
   agreements: SocialSignupAgreements;
+  hair_profile: SignupHairProfileRequest;
 };
 
 export type SignupResponse = SocialSignupResponse;

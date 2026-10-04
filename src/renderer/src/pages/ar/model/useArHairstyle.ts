@@ -1,11 +1,16 @@
 import { useState } from "react";
 
-import { HAIR_COLOR_OPTIONS } from "./constants";
-import type { ArHairstyleOption, ArModalType, HairstyleOptionId } from "./types";
+import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "./arGroomFit";
+import type {
+  ArGroomFitSettings,
+  ArHairstyleOption,
+  ArModalType,
+  HairstyleOptionId,
+} from "./types";
 
 export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
-  const [selectedColorId, setSelectedColorId] = useState<string>(HAIR_COLOR_OPTIONS[0].id);
+  const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(DEFAULT_GROOM_FIT_SETTINGS);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
   const [candidateMemo, setCandidateMemo] = useState("");
@@ -42,7 +47,14 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
 
   const handleStyleReset = () => {
     setActiveHairstylePosition(0);
-    setSelectedColorId(HAIR_COLOR_OPTIONS[0].id);
+    setFitSettings(DEFAULT_GROOM_FIT_SETTINGS);
+  };
+
+  const handleFitSettingsChange = (patch: Partial<ArGroomFitSettings>) => {
+    setFitSettings(current => {
+      const next = { ...current, ...patch };
+      return isValidGroomFitSettings(next) ? next : current;
+    });
   };
 
   const handleExpandedToggle = () => {
@@ -59,8 +71,8 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     handleModalOpen,
     handleStyleReset,
     isExpanded,
-    selectedColorId,
+    fitSettings,
+    handleFitSettingsChange,
     setCandidateMemo,
-    setSelectedColorId,
   };
 };

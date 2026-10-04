@@ -1,139 +1,77 @@
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
+import { Capacitor } from "@capacitor/core";
+import { ApiHttpError, get, post } from "@heddy/api";
 
 import type { ArHairstyleOption } from "./types";
-
-interface ArServerAnswer {
-  sdp: string;
-  type: "answer";
-}
-
-interface ArServerReferencesResponse {
-  references?: unknown[];
-  styles?: unknown[];
-}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-const isArServerAnswer = (value: unknown): value is ArServerAnswer =>
-  isRecord(value) && typeof value.sdp === "string" && value.type === "answer";
-
-const isArServerReferencesResponse = (value: unknown): value is ArServerReferencesResponse =>
-  isRecord(value) && (Array.isArray(value.references) || Array.isArray(value.styles));
-
-const parseHairstyleOption = (value: unknown): ArHairstyleOption | null => {
-  if (typeof value === "string" && value.trim()) {
-    return { id: value, label: value };
-  }
-
-  if (!isRecord(value) || typeof value.id !== "string" || !value.id.trim()) {
-    return null;
-  }
-
-  const label =
-    typeof value.display_name === "string"
-      ? value.display_name
-      : typeof value.name === "string"
-        ? value.name
-        : value.id;
-  const imageUrl =
-    typeof value.image_url === "string"
-      ? value.image_url
-      : typeof value.thumbnail_url === "string"
-        ? value.thumbnail_url
-        : typeof value.image === "string"
-          ? value.image
-          : undefined;
-
-  return { id: value.id, imageUrl, label };
-};
-
 export const getArServerBaseUrl = (): string => {
   const configuredUrl = import.meta.env.VITE_AR_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
-
-  return configuredUrl ? (Capacitor.isNativePlatform() ? configuredUrl : "/ar-server") : "";
+  if (!configuredUrl) return "";
+  let url: URL;
+  try {
+    url = new URL(configuredUrl);
+  } catch {
+    throw new Error("AR 서버 주소가 올바르지 않습니다.");
+  }
+  const isLocalhost = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (
+    url.username ||
+    url.password ||
+    (url.protocol !== "https:" && !(isLocalhost && url.protocol === "http:"))
+  ) {
+    throw new Error(
+      "AR 서버는 HTTPS 주소를 사용해야 합니다. 로컬 개발에서는 localhost HTTP를 사용할 수 있습니다."
+    );
+  }
+  return Capacitor.isNativePlatform() ? configuredUrl : "/ar-server";
 };
 
-export const getArHairstyleReferences = async (): Promise<ArHairstyleOption[]> => {
-  const serverBaseUrl = getArServerBaseUrl();
-
-  if (!serverBaseUrl) {
-    throw new Error("AR 서버 주소가 설정되지 않았습니다.");
+export const getArGrooms = async (signal?: AbortSignal): Promise<ArHairstyleOption[]> => {
+  const baseUrl = getArServerBaseUrl();
+  if (!baseUrl) throw new Error("AR 서버 주소가 설정되지 않았습니다.");
+  let response: unknown;
+  try {
+    response = await get(`${baseUrl}/grooms`, { signal });
+  } catch (error: unknown) {
+    signal?.throwIfAborted();
+    throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.", { cause: error });
   }
+  return parseArGrooms(response);
+};
 
-  const url = `${serverBaseUrl}/references`;
-  let responseData: unknown;
-
-  if (Capacitor.isNativePlatform()) {
-    const response = await CapacitorHttp.get({
-      connectTimeout: 10000,
-      readTimeout: 10000,
-      url,
-    });
-
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
-    }
-
-    responseData = response.data;
-  } else {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("AR 헤어스타일 목록을 불러오지 못했습니다.");
-    }
-
-    responseData = (await response.json()) as unknown;
-  }
-
-  if (!isArServerReferencesResponse(responseData)) {
+export const parseArGrooms = (response: unknown): ArHairstyleOption[] => {
+  if (!isRecord(response) || !Array.isArray(response.grooms)) {
     throw new Error("AR 서버의 헤어스타일 목록 형식이 올바르지 않습니다.");
   }
-
-  return (responseData.styles ?? responseData.references ?? []).flatMap(reference => {
-    const hairstyleOption = parseHairstyleOption(reference);
-
-    return hairstyleOption ? [hairstyleOption] : [];
+  return response.grooms.map((groom: unknown) => {
+    if (!isRecord(groom) || typeof groom.name !== "string" || !groom.name.trim()) {
+      throw new Error("AR 서버의 헤어스타일 이름이 올바르지 않습니다.");
+    }
+    // GLB 파일은 서버에서 렌더링하므로 목록 이름만 사용한다.
+    return { id: groom.name, label: groom.name };
   });
 };
 
 export const requestArServerOffer = async (
   serverBaseUrl: string,
-  offer: RTCSessionDescriptionInit
+  offer: RTCSessionDescriptionInit,
+  signal?: AbortSignal
 ): Promise<RTCSessionDescriptionInit> => {
-  const url = `${serverBaseUrl}/offer`;
   let answer: unknown;
-
-  if (Capacitor.isNativePlatform()) {
-    const response = await CapacitorHttp.post({
-      connectTimeout: 10000,
-      data: offer,
-      headers: { "Content-Type": "application/json" },
-      readTimeout: 10000,
-      url,
-    });
-
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
-    }
-
-    answer = response.data;
-  } else {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(offer),
-    });
-    answer = (await response.json()) as unknown;
-
-    if (!response.ok) {
-      throw new Error("AR 서버가 offer 요청을 처리하지 못했습니다.");
-    }
+  try {
+    answer = await post(`${serverBaseUrl}/offer`, offer, { signal });
+  } catch (error: unknown) {
+    signal?.throwIfAborted();
+    const message =
+      error instanceof ApiHttpError && error.status === 503
+        ? "AR 서버가 사용 중입니다. 잠시 후 다시 시도해 주세요."
+        : "AR 서버가 연결 요청을 처리하지 못했습니다.";
+    throw new Error(message, { cause: error });
   }
-
-  if (!isArServerAnswer(answer)) {
+  if (!isRecord(answer) || typeof answer.sdp !== "string" || answer.type !== "answer") {
     throw new Error("AR 서버가 유효한 WebRTC 응답을 반환하지 않았습니다.");
   }
-
-  return answer;
+  return { sdp: answer.sdp, type: answer.type };
 };

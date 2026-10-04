@@ -36,6 +36,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Environment files
+.cert/
 .env
 .env.*
 *.local

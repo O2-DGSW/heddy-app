@@ -12,6 +12,13 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   carrier: "SKT",
   phone: "",
   verificationCode: "",
+  hairProfile: {
+    hairLength: "SHORT",
+    hairCondition: "HEALTHY",
+    hairType: "STRAIGHT",
+    hairThickness: "THIN",
+    availableCareTimeMinutes: "",
+  },
   agreements: {
     terms_of_service: false,
     privacy_policy: false,
@@ -49,8 +56,16 @@ export const useSignup = () => {
         email: customerForm.id.trim(),
         password: customerForm.password,
         nickname: customerForm.name.trim(),
-        phone_number: customerForm.phone.replace(/\D/g, ""),
         agreements: customerForm.agreements,
+        hair_profile: {
+          hair_type: customerForm.hairProfile.hairType,
+          hair_condition: customerForm.hairProfile.hairCondition,
+          hair_length: customerForm.hairProfile.hairLength,
+          hair_thickness: customerForm.hairProfile.hairThickness,
+          available_care_time_minutes: Number(
+            customerForm.hairProfile.availableCareTimeMinutes || 0
+          ),
+        },
       });
 
       navigate("/login", { replace: true });
