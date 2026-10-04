@@ -3,14 +3,14 @@ import type { TouchEvent, WheelEvent } from "react";
 
 import { cn } from "@/shared";
 
-import noStyleIcon from "../../assets/no-style.svg";
+import noStyleIcon from "../assets/no-style.svg";
 import {
   getCircularHairstyleOption,
   getHairstyleItemLeft,
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
-} from "../../model/constants";
-import type { ArHairstyleOption, HairstyleOptionId } from "../../model/types";
+} from "../model/constants";
+import type { ArHairstyleOption, HairstyleOptionId } from "../model/types";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
@@ -18,6 +18,7 @@ interface ArHairstyleCarouselProps {
   loadingMessage: string | null;
   disabled: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
+  compact?: boolean;
 }
 
 const SWIPE_THRESHOLD = 24;
@@ -29,6 +30,7 @@ const ArHairstyleCarousel = ({
   loadingMessage,
   disabled,
   onSelect,
+  compact = false,
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
@@ -91,6 +93,41 @@ const ArHairstyleCarousel = ({
 
     onSelect(hairstyleId);
   };
+
+  if (compact) {
+    return (
+      <div
+        aria-label="헤어스타일 선택"
+        className="flex w-full items-center justify-center gap-2 overflow-x-auto px-3"
+      >
+        {hairstyleOptions.map(option => (
+          <button
+            key={option.id}
+            type="button"
+            aria-label={option.id === "none" ? "헤어스타일 적용 안 함" : option.label + " 선택"}
+            aria-pressed={
+              getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions).id === option.id
+            }
+            disabled={disabled}
+            onClick={() => handleSelect(option.id)}
+            className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/80 bg-white/20 p-1 disabled:opacity-45"
+          >
+            {option.id === "none" ? (
+              <img src={noStyleIcon} alt="" className="size-full p-1" />
+            ) : option.imageUrl ? (
+              <img
+                src={option.imageUrl}
+                alt={option.label}
+                className="size-full rounded-full object-cover"
+              />
+            ) : (
+              option.label
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (loadingMessage || hairstyleOptions.length === 0) {
     return (

@@ -10,9 +10,8 @@ import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../mod
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArColorPicker from "../ArColorPicker";
-import ArControlBar from "../ArControlBar";
+import { ArCameraViewport, ArControlBar, ArHairstyleCarousel } from "@/features/ar-preview";
 import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
-import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 
 const ArHairstylePage = () => {
@@ -109,66 +108,60 @@ const ArHairstylePage = () => {
               AR 헤어스타일
             </h1>
           )}
-          <video
-            aria-hidden="true"
-            autoPlay
-            className="absolute inset-0 h-full w-full bg-black object-cover"
-            muted
-            playsInline
-            ref={cameraPreviewRef}
-          />
-          <video
-            aria-hidden="true"
-            autoPlay
-            className="pointer-events-none absolute h-px w-px opacity-0"
-            muted
-            playsInline
-            ref={faceTrackingVideoRef}
-          />
-          <ArRecognitionBadge
-            connectionStatus={connectionStatus}
-            errorMessage={errorMessage}
-            isFaceTracked={isFaceTracked}
-            isExpanded={isExpanded}
-          />
-          <ArColorPicker
-            isExpanded={isExpanded}
-            disabled={!canAdjust}
-            selectedColor={fitSettings.groom_color}
-            onSelect={handleColorSelect}
-          />
-          <div
-            className={cn(
-              "absolute inset-x-0 bottom-0 flex flex-col items-center gap-4",
-              isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
-            )}
-          >
-            <ArControlBar
-              handleExpandedToggle={handleExpandedToggle}
-              handleModalOpen={() => handleModalOpen("candidate-save")}
-              handleStyleReset={handleReset}
+          <ArCameraViewport videoRef={cameraPreviewRef}>
+            <video
+              aria-hidden="true"
+              autoPlay
+              className="pointer-events-none absolute h-px w-px opacity-0"
+              muted
+              playsInline
+              ref={faceTrackingVideoRef}
+            />
+            <ArRecognitionBadge
+              connectionStatus={connectionStatus}
+              errorMessage={errorMessage}
+              isFaceTracked={isFaceTracked}
               isExpanded={isExpanded}
-              selectedHairstyleLabel={selectedHairstyle.label}
             />
-            <ArHairstyleCarousel
-              activeHairstylePosition={activeHairstylePosition}
-              hairstyleOptions={hairstyleOptions}
-              loadingMessage={listMessage}
-              disabled={!controlReady || isForeheadLoading}
-              onSelect={handleHairstyleSelect}
+            <ArColorPicker
+              isExpanded={isExpanded}
+              disabled={!canAdjust}
+              selectedColor={fitSettings.groom_color}
+              onSelect={handleColorSelect}
             />
-            {groomsError && (
-              <button
-                className={font.caption.medium}
-                onClick={() => void refetchGrooms()}
-                style={{ color: lightTheme.label.buttonText }}
-                type="button"
-              >
-                스타일 목록 다시 불러오기
-              </button>
-            )}
-            {isExpanded && <ArExpandedBottomMenu />}
-          </div>
+            <div
+              className={cn(
+                "absolute inset-x-0 bottom-0 flex flex-col items-center gap-4",
+                isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
+              )}
+            >
+              <ArControlBar
+                handleExpandedToggle={handleExpandedToggle}
+                handleModalOpen={() => handleModalOpen("candidate-save")}
+                handleStyleReset={handleReset}
+                isExpanded={isExpanded}
+                selectedHairstyleLabel={selectedHairstyle.label}
+              />
+              <ArHairstyleCarousel
+                activeHairstylePosition={activeHairstylePosition}
+                hairstyleOptions={hairstyleOptions}
+                loadingMessage={listMessage}
+                disabled={!controlReady || isForeheadLoading}
+                onSelect={handleHairstyleSelect}
+              />
+              {groomsError && (
+                <button
+                  className={font.caption.medium}
+                  onClick={() => void refetchGrooms()}
+                  style={{ color: lightTheme.label.buttonText }}
+                  type="button"
+                >
+                  스타일 목록 다시 불러오기
+                </button>
+              )}
+              {isExpanded && <ArExpandedBottomMenu />}
+            </div>
+          </ArCameraViewport>
         </main>
 
         {activeModal === "candidate-save" && (

@@ -1,10 +1,5 @@
-export interface ArHairstyleOption {
-  id: string;
-  imageUrl?: string;
-  label: string;
-}
+export type { ArHairstyleOption, HairstyleOptionId } from "@/features/ar-preview";
 
-export type HairstyleOptionId = string;
 export type ArModalType = "candidate-save";
 
 export interface ArGroomFitSettings {

@@ -8,9 +8,10 @@ import { mapTreatmentRecordToRecentRecord } from "../model/mapTreatmentRecordToR
 
 import { useGetLatestRecommendation, useGetTreatmentRecords } from "@/entities";
 import { cn } from "@/shared";
+import { ArCameraTrial } from "@/features/ar-preview";
+
 import {
   ArStyleSection,
-  HOME_AR_STYLES,
   HOME_PROFILE_NAME,
   HomeHeader,
   RecentRecordCard,
@@ -90,11 +91,9 @@ const HomePage = () => {
             onClick={handleRecentRecordListClick}
           />
           <div className="mt-6 grid grid-cols-[minmax(0,1.126fr)_minmax(0,1fr)] gap-[14px] max-[374px]:grid-cols-1">
-            <ArStyleSection
-              styles={HOME_AR_STYLES}
-              onMoreClick={() => navigate("/ar")}
-              onTryClick={() => navigate("/ar")}
-            />
+            <ArStyleSection onMoreClick={() => navigate("/ar")}>
+              <ArCameraTrial onExpand={() => navigate("/ar")} />
+            </ArStyleSection>
             <RecommendationSection
               recommendations={recommendations}
               isLoading={isRecommendationLoading}
