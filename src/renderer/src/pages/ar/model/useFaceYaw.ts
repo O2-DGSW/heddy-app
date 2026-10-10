@@ -1,5 +1,6 @@
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { publicUrl } from "@/shared/lib";
 
 interface UseFaceYawResult {
   yaw: number | null;
@@ -79,9 +80,9 @@ export const useFaceYaw = (
 
     const initializeFaceLandmarker = async () => {
       try {
-        const vision = await FilesetResolver.forVisionTasks("/mediapipe");
+        const vision = await FilesetResolver.forVisionTasks(publicUrl("mediapipe"));
         const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-          baseOptions: { modelAssetPath: "/models/face_landmarker.task" },
+          baseOptions: { modelAssetPath: publicUrl("models/face_landmarker.task") },
           minFaceDetectionConfidence: 0.6,
           minFacePresenceConfidence: 0.6,
           minTrackingConfidence: 0.6,

@@ -1,6 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { AuthBackButton } from "@/features/auth/back-button";
 import { useSignup, CustomerAccountForm } from "@/features/auth/signup";
+import { publicUrl } from "@/shared/lib";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -21,7 +22,11 @@ const SignupPage = () => {
         <div className="min-w-0 w-full pb-8">
           <div className="mx-auto flex min-w-0 w-full max-w-[330px] flex-col items-center pt-6">
             <div className="mb-8 flex flex-col items-center gap-3">
-              <img src="/heddyIcon.svg" alt="heddy" className="h-[69px] w-[204px] shrink-0" />
+              <img
+                src={publicUrl("heddyIcon.svg")}
+                alt="heddy"
+                className="h-[69px] w-[204px] shrink-0"
+              />
 
               <h1
                 className={font.body.medium}

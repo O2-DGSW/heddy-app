@@ -2,6 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import { ApiHttpError, get, post } from "@heddy/api";
 
 import type { ArHairstyleOption } from "./types";
+import { publicUrl } from "@/shared/lib";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -25,7 +26,7 @@ export const getArServerBaseUrl = (): string => {
       "AR 서버는 HTTPS 주소를 사용해야 합니다. 로컬 개발에서는 localhost HTTP를 사용할 수 있습니다."
     );
   }
-  return Capacitor.isNativePlatform() ? configuredUrl : "/ar-server";
+  return Capacitor.isNativePlatform() ? configuredUrl : publicUrl("ar-server");
 };
 
 export const getArGrooms = async (signal?: AbortSignal): Promise<ArHairstyleOption[]> => {

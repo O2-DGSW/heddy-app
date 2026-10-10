@@ -1,6 +1,7 @@
 import { setNavigation } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
+import { publicUrl } from "@/shared/lib";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -26,7 +27,7 @@ const WelcomePage = () => {
       >
         <div className="flex min-h-full flex-col items-center justify-between px-6 py-24">
           <div className="flex flex-col items-center gap-2.5">
-            <img src="/heddyIcon.svg" alt="heddy" className="mb-3 w-64" />
+            <img src={publicUrl("heddyIcon.svg")} alt="heddy" className="mb-3 w-64" />
             <h1
               className={font.headline1.semiBold}
               id="welcome-title"
@@ -44,7 +45,7 @@ const WelcomePage = () => {
             </div>
           </div>
 
-          <img src="/agua.svg" alt="아거!" className="w-35" />
+          <img src={publicUrl("agua.svg")} alt="아거!" className="w-35" />
 
           <div className="flex w-full flex-col items-center gap-6">
             <button

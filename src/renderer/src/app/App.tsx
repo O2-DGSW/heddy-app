@@ -6,6 +6,9 @@ import { setupApiAuth } from "./setupApiAuth";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
 
 setupApiAuth();
+
+/** 웹 배포는 `heddy.site/mobile` 하위 경로라 라우트 앞에 base를 붙인다(네이티브는 `/` → 없음) */
+const ROUTER_BASENAME = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
 // const shouldRestoreAuthSession = () => {
 //     if (typeof window === "undefined") {
 //         return false;
@@ -27,7 +30,7 @@ const App = () => {
   // }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <AppRoutes />
     </BrowserRouter>
   );
