@@ -57,7 +57,12 @@ export default defineConfig(({ command, mode, isPreview }) => {
       }
     : undefined;
 
+  // 웹 배포는 heddy.site/mobile 하위 경로에서 서비스된다(heddy-landing이 프록시). Vercel에만
+  // VITE_BASE_PATH=/mobile/ 을 넣고, 네이티브(Capacitor)·로컬 개발은 기본값 "/"를 쓴다.
+  const base = env.VITE_BASE_PATH?.trim() || "/";
+
   return {
+    base,
     root: new URL("src/renderer/src", import.meta.url).pathname,
     envDir: new URL(".", import.meta.url).pathname,
     publicDir: new URL("public", import.meta.url).pathname,
