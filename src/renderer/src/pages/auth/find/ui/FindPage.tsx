@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { AuthBackButton } from "@/features/auth/back-button";
 import { FindIdForm, FindPasswordForm } from "@/features/auth/find";
+import { publicUrl } from "@/shared/lib";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
@@ -24,7 +25,7 @@ const FindPage = () => {
 
         <div className="flex min-h-0 w-full flex-1 flex-col items-center touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
           <div className="mb-10 flex flex-col items-center gap-2 pt-[36px]">
-            <img src="/heddyIcon.svg" alt="heddy" className="w-50" />
+            <img src={publicUrl("heddyIcon.svg")} alt="heddy" className="w-50" />
 
             <h1
               className={font.body.medium}
