@@ -5,51 +5,30 @@ import { cn } from "@/shared";
 import { useLocalCamera } from "../model/useLocalCamera";
 import { ORIGINAL_HAIRSTYLE_OPTION } from "../model/constants";
 import ArCameraViewport from "./ArCameraViewport";
-import ArControlBar from "./ArControlBar";
 import ArHairstyleCarousel from "./ArHairstyleCarousel";
-
-interface ArCameraTrialProps {
-  onExpand: () => void;
-}
 
 const ORIGINAL_OPTIONS = [ORIGINAL_HAIRSTYLE_OPTION];
 
-const ArCameraTrial = ({ onExpand }: ArCameraTrialProps) => {
+const ArCameraTrial = () => {
   const { pathname } = useLocation();
   const { videoRef, containerRef, status, errorMessage, startCamera, stopCamera } =
     useLocalCamera();
   const isActive = status === "active";
   const isStarting = status === "starting";
-  const statusLabel = isActive ? "카메라 켜짐" : isStarting ? "카메라 연결 중" : "카메라 미리보기";
 
   const handleStart = () => void startCamera();
-  const handleRestart = () => {
-    stopCamera();
-    void startCamera();
-  };
-  const handleExpand = () => {
-    stopCamera();
-    onExpand();
-  };
 
   useEffect(() => stopCamera, [pathname, stopCamera]);
 
   return (
-    <div ref={containerRef} className="px-2">
-      <ArCameraViewport videoRef={videoRef} mirrored className="h-[260px] rounded-lg">
-        <div
-          role="status"
-          className={cn(
-            "absolute inset-x-2 top-2 w-fit max-w-[calc(100%-16px)] rounded px-2 py-1",
-            font.caption.medium
-          )}
-          style={{ backgroundColor: lightTheme.primary.normal, color: lightTheme.label.buttonText }}
-        >
-          {statusLabel}
-        </div>
+    <div
+      ref={containerRef}
+      className="h-[190px] px-2 min-[375px]:h-auto min-[375px]:min-h-0 min-[375px]:flex-1"
+    >
+      <ArCameraViewport videoRef={videoRef} mirrored className="h-full rounded-lg">
         {!isActive && (
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-3 pt-7 pb-16 text-center"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 overflow-y-auto px-3 pt-3 pb-14 text-center"
             style={{ color: lightTheme.label.buttonText }}
           >
             <p role={errorMessage ? "alert" : undefined} className={font.caption.medium}>
@@ -82,16 +61,6 @@ const ArCameraTrial = ({ onExpand }: ArCameraTrialProps) => {
           </div>
         )}
         <div className="absolute inset-x-0 bottom-3 flex flex-col items-center gap-2">
-          {isActive && (
-            <ArControlBar
-              compact
-              isExpanded={false}
-              selectedHairstyleLabel="원본 스타일"
-              handleExpandedToggle={handleExpand}
-              handleStyleReset={handleRestart}
-              resetLabel="카메라 다시 시작"
-            />
-          )}
           <ArHairstyleCarousel
             compact
             activeHairstylePosition={0}
@@ -102,22 +71,6 @@ const ArCameraTrial = ({ onExpand }: ArCameraTrialProps) => {
           />
         </div>
       </ArCameraViewport>
-      {isActive && (
-        <button
-          type="button"
-          onClick={stopCamera}
-          className={cn("mt-1 min-h-8 w-full underline", font.caption.medium)}
-          style={{ color: lightTheme.label.alternative }}
-        >
-          카메라 끄기
-        </button>
-      )}
-      <p
-        className={cn("mt-2 text-center", font.caption.regular)}
-        style={{ color: lightTheme.label.alternative }}
-      >
-        헤어 합성 준비 중
-      </p>
     </div>
   );
 };

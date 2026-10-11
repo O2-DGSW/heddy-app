@@ -11,9 +11,9 @@ interface ArStyleSectionProps {
 const ArStyleSection = ({ children, onMoreClick }: ArStyleSectionProps) => (
   <section
     aria-labelledby="home-ar-title"
-    className="min-w-0 overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-3 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
+    className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-3 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
   >
-    <div className="mb-3 flex items-center justify-between gap-1 px-3">
+    <div className="mb-3 flex shrink-0 items-center justify-between gap-1 px-3">
       <h2 id="home-ar-title" className={cn(font.label.semiBold, "whitespace-nowrap")}>
         AR 스타일 체험
       </h2>

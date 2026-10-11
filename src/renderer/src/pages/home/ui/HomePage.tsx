@@ -92,7 +92,7 @@ const HomePage = () => {
           />
           <div className="mt-6 grid grid-cols-[minmax(0,1.126fr)_minmax(0,1fr)] gap-[14px] max-[374px]:grid-cols-1">
             <ArStyleSection onMoreClick={() => navigate("/ar")}>
-              <ArCameraTrial onExpand={() => navigate("/ar")} />
+              <ArCameraTrial />
             </ArStyleSection>
             <RecommendationSection
               recommendations={recommendations}
