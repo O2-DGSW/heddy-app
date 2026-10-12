@@ -23,7 +23,6 @@ export interface HairProfileForm {
   hairCondition: HairConditionType;
   hairType: HairType;
   hairThickness: HairThicknessType;
-  availableCareTimeMinutes: string;
 }
 
 export type SignupAgreementItem = {

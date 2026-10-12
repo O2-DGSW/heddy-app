@@ -17,7 +17,6 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
     hairCondition: "HEALTHY",
     hairType: "STRAIGHT",
     hairThickness: "THIN",
-    availableCareTimeMinutes: "",
   },
   agreements: {
     terms_of_service: false,
@@ -62,9 +61,7 @@ export const useSignup = () => {
           hair_condition: customerForm.hairProfile.hairCondition,
           hair_length: customerForm.hairProfile.hairLength,
           hair_thickness: customerForm.hairProfile.hairThickness,
-          available_care_time_minutes: Number(
-            customerForm.hairProfile.availableCareTimeMinutes || 0
-          ),
+          available_care_time_minutes: 0,
         },
       });
 
