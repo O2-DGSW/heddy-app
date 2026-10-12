@@ -127,11 +127,6 @@ const ImageOptionField = <TValue extends string>({
 };
 
 const HairProfileField = ({ value, onChange }: HairProfileFieldProps) => {
-  const handleCareTimeChange = (careTime: string) => {
-    const numericValue = careTime.replace(/\D/g, "").slice(0, 3);
-    onChange({ ...value, availableCareTimeMinutes: numericValue });
-  };
-
   return (
     <section aria-label="모발 정보" className="flex flex-col gap-9 py-3">
       <ImageOptionField
@@ -218,42 +213,6 @@ const HairProfileField = ({ value, onChange }: HairProfileFieldProps) => {
         selectedValue={value.hairThickness}
         onChange={hairThickness => onChange({ ...value, hairThickness })}
       />
-
-      <div className="flex flex-col gap-3">
-        <label
-          htmlFor="available-care-time"
-          className={font.body.semiBold}
-          style={{ color: lightTheme.label.normal }}
-        >
-          관리 가능 시간
-        </label>
-        <div className="relative">
-          <input
-            id="available-care-time"
-            name="availableCareTimeMinutes"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            className={`h-[42px] w-full rounded-xl px-4 pr-12 focus:outline-none focus-visible:outline focus-visible:outline-2 ${font.label.regular}`}
-            style={{
-              backgroundColor: lightTheme.background.neutral,
-              color: lightTheme.label.normal,
-              outlineColor: lightTheme.primary.normal,
-            }}
-            placeholder="관리 가능 시간"
-            value={value.availableCareTimeMinutes}
-            onChange={event => handleCareTimeChange(event.target.value)}
-          />
-          {value.availableCareTimeMinutes && (
-            <span
-              className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 ${font.label.regular}`}
-              style={{ color: lightTheme.label.assistive }}
-            >
-              분
-            </span>
-          )}
-        </div>
-      </div>
     </section>
   );
 };
