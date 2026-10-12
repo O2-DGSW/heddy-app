@@ -1,5 +1,6 @@
 import { api, getApiErrorMessage } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/lib/api";
+import { toWebShareUrl } from "@/shared/lib/share";
 
 import type {
   CreateShareRequest,
@@ -41,7 +42,9 @@ export const deleteShareApi = async (shareId: string): Promise<void> => {
 export const createShareApi = async (body: CreateShareRequest): Promise<ShareResponse> => {
   try {
     const res = await api.post<ApiResponse<ShareResponse>>("/shares", body);
-    return res.data.data;
+    const share = res.data.data;
+
+    return { ...share, share_url: toWebShareUrl(share.share_url) };
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유 링크를 만들지 못했습니다."), {
       cause: error,
