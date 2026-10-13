@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { env } from "@/shared/config";
 
 import { getArGrooms } from "./arServerApi";
 
@@ -9,7 +10,7 @@ const arGroomQueryKeys = {
 
 export const useGetArGrooms = () =>
   useQuery({
-    queryKey: arGroomQueryKeys.list(import.meta.env.VITE_AR_SERVER_URL ?? ""),
+    queryKey: arGroomQueryKeys.list(env.arServerUrl),
     queryFn: ({ signal }) => getArGrooms(signal),
     retry: false,
     refetchOnWindowFocus: false,

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
 import { BottomBarVisibilityProvider, ToastProvider, useBottomBarVisibility } from "@/shared";
+import { env } from "@/shared/config";
 import {
   PAGE_SCROLL_PATHS,
   PAGE_SCROLL_PREFIXES,
@@ -24,7 +25,7 @@ const useBrowserDevicePreview = () => {
   const [viewport, setViewport] = useState(getBrowserViewport);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || Capacitor.isNativePlatform()) {
+    if (!env.isDev || Capacitor.isNativePlatform()) {
       return;
     }
 
@@ -36,7 +37,7 @@ const useBrowserDevicePreview = () => {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const isBrowserDevelopment = import.meta.env.DEV && !Capacitor.isNativePlatform();
+  const isBrowserDevelopment = env.isDev && !Capacitor.isNativePlatform();
   // 좁은 브라우저 폭에서는 기기 프레임만 숨기고 실제 웹 화면은 그대로 렌더링한다.
   const isBrowserDevicePreview = isBrowserDevelopment && viewport.width >= 640;
   const devicePreviewScale = isBrowserDevicePreview

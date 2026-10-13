@@ -2,13 +2,14 @@ import { Capacitor } from "@capacitor/core";
 import { ApiHttpError, get, post } from "@heddy/api";
 
 import type { ArHairstyleOption } from "./types";
+import { env } from "@/shared/config";
 import { publicUrl } from "@/shared/lib";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 export const getArServerBaseUrl = (): string => {
-  const configuredUrl = import.meta.env.VITE_AR_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
+  const configuredUrl = env.arServerUrl;
   if (!configuredUrl) return "";
   let url: URL;
   try {
