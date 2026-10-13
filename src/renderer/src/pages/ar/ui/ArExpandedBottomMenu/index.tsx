@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
@@ -12,6 +12,7 @@ const ArExpandedBottomMenu = () => {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const navigateTimerRef = useRef<number | null>(null);
 
   const handleNavigate = (to: string) => {
     if (isNavigating) {
@@ -21,11 +22,22 @@ const ArExpandedBottomMenu = () => {
     setSelectedPath(to);
     setIsNavigating(true);
 
-    window.setTimeout(() => {
+    navigateTimerRef.current = window.setTimeout(() => {
+      navigateTimerRef.current = null;
       setDirection("forward");
       navigate(to);
     }, ROUTE_TRANSITION_DURATION);
   };
+
+  // 메뉴가 사라진 뒤에 늦게 이동하지 않도록 남은 타이머를 정리한다
+  useEffect(
+    () => () => {
+      if (navigateTimerRef.current !== null) {
+        window.clearTimeout(navigateTimerRef.current);
+      }
+    },
+    []
+  );
 
   return (
     <nav
