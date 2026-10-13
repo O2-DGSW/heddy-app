@@ -20,7 +20,7 @@ import type {
   SignupResponse,
   SmsSendRequest,
   SmsVerifyRequest,
-} from "@/entities";
+} from "../model/auth.types";
 
 const mapAuthTokens = (tokens: AuthTokensApiData): LoginResponse => ({
   accessToken: tokens.access_token,

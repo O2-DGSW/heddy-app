@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getTreatmentRecordsApi } from "@/entities";
-import { recordQueryKeys } from "@/entities";
+import { getTreatmentRecordsApi } from "../treatmentRecordApi";
+import { recordQueryKeys } from "./recordQueryKeys";
 import type { TreatmentRecordListParams } from "@/entities/record/model/treatmentRecord.types";
 
 export const useGetTreatmentRecords = (params: TreatmentRecordListParams = {}) =>
