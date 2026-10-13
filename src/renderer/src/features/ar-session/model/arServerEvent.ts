@@ -5,7 +5,7 @@ export interface ArStats {
   errors?: number;
 }
 
-type ArServerEvent =
+export type ArServerEvent =
   | { type: "stats"; data: ArStats }
   | { type: "groom"; status: "ok" | "error"; groom?: string; message?: string }
   | { type: "forehead"; status: "loading" | "ok" | "error"; message?: string }

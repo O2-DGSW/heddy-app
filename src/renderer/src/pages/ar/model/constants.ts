@@ -1,6 +1,6 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-import type { ArHairstyleOption } from "./types";
+import type { ArHairstyleOption } from "@/entities/ar-groom";
 
 export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
   id: "none",

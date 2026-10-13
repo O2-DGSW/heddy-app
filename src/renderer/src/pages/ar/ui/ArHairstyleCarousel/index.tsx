@@ -10,7 +10,7 @@ import {
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
 } from "../../model/constants";
-import type { ArHairstyleOption, HairstyleOptionId } from "../../model/types";
+import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;

@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { ApiHttpError, get, post } from "@heddy/api";
 
-import type { ArHairstyleOption } from "./types";
+import type { ArHairstyleOption } from "../model/types";
 import { env } from "@/shared/config";
 import { publicUrl } from "@/shared/lib";
 
