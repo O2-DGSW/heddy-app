@@ -54,6 +54,10 @@ export const useRecordAddForm = ({
     () => initialValues ?? { ...INITIAL_FORM_VALUES, date: getTodayDateValue() }
   );
   const [photos, setPhotos] = useState<PhotoItem[]>(initialPhotos ?? INITIAL_PHOTOS);
+  // 압축을 기다리는 동안 다시 사진을 고르면 화면의 photos가 아직 갱신되지 않아 10장 제한이 깨진다.
+  // 확정된 장수와 처리 중인 장수를 ref로 세서 고르는 즉시 남은 자리를 계산한다.
+  const photoCountRef = useRef((initialPhotos ?? INITIAL_PHOTOS).length);
+  const pendingPhotoCountRef = useRef(0);
   // 한 번 방문에 커트+염색처럼 여러 시술을 받는 경우가 있어 여러 개를 고를 수 있다.
   const [selectedProcedureTypes, setSelectedProcedureTypes] = useState<ProcedureType[]>(
     initialProcedureTypes ?? []
@@ -95,33 +99,46 @@ export const useRecordAddForm = ({
   };
 
   const handlePhotoSelection = async (event: ChangeEvent<HTMLInputElement>) => {
-    const availablePhotoCount = MAX_PHOTO_COUNT - photos.length;
-    const selectedFiles = Array.from(event.currentTarget.files ?? []).slice(0, availablePhotoCount);
-    const addedPhotos = await Promise.all(
-      selectedFiles.map(async (file): Promise<PhotoItem> => {
-        const uploadFile = await compressPhotoFile(file);
-        const src = URL.createObjectURL(uploadFile);
-        const id = `selected-photo-${photoIdSequenceRef.current}`;
-        photoIdSequenceRef.current += 1;
-        objectUrlsRef.current.add(src);
+    // React는 이벤트 처리가 끝나면 currentTarget을 비운다. await 전에 파일을 꺼내고 입력값을 비워
+    // 같은 사진을 다시 고를 수 있게 한다.
+    const input = event.currentTarget;
+    const files = Array.from(input.files ?? []);
+    input.value = "";
 
-        return {
-          file: uploadFile,
-          id,
-          src,
-          isObjectUrl: true,
-        };
-      })
-    );
+    const availablePhotoCount =
+      MAX_PHOTO_COUNT - photoCountRef.current - pendingPhotoCountRef.current;
+    const selectedFiles = files.slice(0, Math.max(availablePhotoCount, 0));
 
-    if (addedPhotos.length === 0) {
-      event.currentTarget.value = "";
+    if (selectedFiles.length === 0) {
       return;
     }
 
-    setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
-    setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
-    event.currentTarget.value = "";
+    pendingPhotoCountRef.current += selectedFiles.length;
+
+    try {
+      const addedPhotos = await Promise.all(
+        selectedFiles.map(async (file): Promise<PhotoItem> => {
+          const uploadFile = await compressPhotoFile(file);
+          const src = URL.createObjectURL(uploadFile);
+          const id = `selected-photo-${photoIdSequenceRef.current}`;
+          photoIdSequenceRef.current += 1;
+          objectUrlsRef.current.add(src);
+
+          return {
+            file: uploadFile,
+            id,
+            src,
+            isObjectUrl: true,
+          };
+        })
+      );
+
+      photoCountRef.current += addedPhotos.length;
+      setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
+      setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
+    } finally {
+      pendingPhotoCountRef.current -= selectedFiles.length;
+    }
   };
 
   const handleRemovePhoto = (photoId: string) => {
@@ -130,6 +147,10 @@ export const useRecordAddForm = ({
     if (removedPhoto?.isObjectUrl) {
       URL.revokeObjectURL(removedPhoto.src);
       objectUrlsRef.current.delete(removedPhoto.src);
+    }
+
+    if (removedPhoto) {
+      photoCountRef.current -= 1;
     }
 
     setPhotos(currentPhotos => currentPhotos.filter(photo => photo.id !== photoId));
