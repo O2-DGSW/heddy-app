@@ -14,6 +14,8 @@ export const RecommendPage = () => {
     isPending,
     isError,
     error,
+    refetch,
+    isRefetching,
     generate,
     isGenerating,
     generateError,
@@ -35,8 +37,8 @@ export const RecommendPage = () => {
               hasIllustration
               message={error?.message ?? "추천을 불러오지 못했습니다."}
               actionLabel="다시 시도"
-              isActionPending={isGenerating}
-              onAction={generate}
+              isActionPending={isRefetching}
+              onAction={() => void refetch()}
             />
           )}
 
