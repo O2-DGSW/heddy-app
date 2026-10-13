@@ -7,6 +7,23 @@ interface CutsLoadMoreTriggerProps {
   onLoadMore: () => void;
 }
 
+/** 가장 가까운 스크롤 컨테이너. 페이지가 자기 영역 안에서 스크롤하므로 viewport가 아니라 이것을 기준으로 감지한다 */
+const getScrollParent = (element: HTMLElement): HTMLElement | null => {
+  let parent = element.parentElement;
+
+  while (parent) {
+    const { overflowY } = window.getComputedStyle(parent);
+
+    if (overflowY === "auto" || overflowY === "scroll") {
+      return parent;
+    }
+
+    parent = parent.parentElement;
+  }
+
+  return null;
+};
+
 /** 목록 아래 끝을 감지해 다음 페이지를 이어서 불러온다 */
 export const CutsLoadMoreTrigger = ({
   hasNextPage,
@@ -18,7 +35,8 @@ export const CutsLoadMoreTrigger = ({
   useEffect(() => {
     const triggerElement = triggerRef.current;
 
-    if (!triggerElement || !hasNextPage) {
+    // 불러오는 중에는 감지하지 않는다. 끝나면 다시 붙어서, 아직 끝이 보이면 바로 다음 페이지를 부른다.
+    if (!triggerElement || !hasNextPage || isFetchingNextPage) {
       return;
     }
 
@@ -26,16 +44,17 @@ export const CutsLoadMoreTrigger = ({
     const observer = new IntersectionObserver(
       entries => {
         if (entries.some(entry => entry.isIntersecting)) {
+          observer.disconnect();
           onLoadMore();
         }
       },
-      { rootMargin: "200px" }
+      { root: getScrollParent(triggerElement), rootMargin: "200px" }
     );
 
     observer.observe(triggerElement);
 
     return () => observer.disconnect();
-  }, [hasNextPage, onLoadMore]);
+  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
   if (!hasNextPage) {
     return null;

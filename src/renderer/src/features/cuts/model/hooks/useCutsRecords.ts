@@ -37,7 +37,7 @@ export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
     isFetchingNextPage,
   } = useInfiniteQuery({
     // 필터가 바뀌면 서버에 다시 물어야 하므로 키에 함께 넣는다.
-    queryKey: recordQueryKeys.list(listParams),
+    queryKey: recordQueryKeys.infiniteList(listParams),
     queryFn: ({ pageParam }) =>
       getTreatmentRecordsApi({
         ...listParams,
