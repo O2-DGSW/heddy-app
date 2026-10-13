@@ -1,8 +1,5 @@
-import { createDateValue } from "@/entities/record/model/date";
-import type {
-  RecommendationApiData,
-  RecommendationItemApiData,
-} from "@/entities/recommendation/model/recommendation.types";
+import { createDateValue } from "@/entities/record";
+import type { RecommendationApiData, RecommendationItemApiData } from "@/entities/recommendation";
 import type {
   RecommendationItem,
   RecommendReasonType,

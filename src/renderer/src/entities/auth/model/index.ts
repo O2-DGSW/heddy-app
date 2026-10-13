@@ -40,4 +40,7 @@ export {
   setAuthTokens,
   setRefreshToken,
 } from "./token";
+export { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "./carrier";
+export type { Carrier, MainCarrier, MvnoCarrier } from "./carrier";
+export { useSmsVerification } from "./useSmsVerification";
 export { isRefreshTokenRejectedError, refreshAuthTokens, restoreAuthSession } from "./session";

@@ -9,6 +9,10 @@ export {
   smsVerifyApi,
 } from "./api";
 export {
+  MAIN_CARRIERS,
+  MVNO_CARRIERS,
+  isMvnoCarrier,
+  useSmsVerification,
   clearAccessToken,
   clearAuthTokens,
   clearRefreshToken,
@@ -22,6 +26,9 @@ export {
   setRefreshToken,
 } from "./model";
 export type {
+  Carrier,
+  MainCarrier,
+  MvnoCarrier,
   AuthApiResponse,
   AuthTokensApiData,
   AuthTokensResponse,

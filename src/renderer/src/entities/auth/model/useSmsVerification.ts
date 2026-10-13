@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { smsSendApi, smsVerifyApi } from "@/entities/auth";
-import type { SmsPurpose } from "@/entities/auth";
+import { smsSendApi, smsVerifyApi } from "../api";
+import type { SmsPurpose } from "./auth.types";
 
 export const useSmsVerification = (purpose: SmsPurpose, phoneNumber?: string) => {
   const [isSent, setIsSent] = useState(false);

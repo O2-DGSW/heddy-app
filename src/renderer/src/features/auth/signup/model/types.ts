@@ -1,4 +1,5 @@
 import type {
+  Carrier,
   SignupHairConditionType,
   SignupHairLengthType,
   SignupHairThicknessType,
@@ -6,10 +7,6 @@ import type {
   SocialSignupAgreements,
 } from "@/entities/auth";
 
-export type MainCarrier = "SKT" | "KT" | "LG U+";
-export type MvnoCarrier = "SKT 알뜰폰" | "KT 알뜰폰" | "LGU+ 알뜰폰";
-
-export type Carrier = MainCarrier | MvnoCarrier;
 export type SignupAgreements = SocialSignupAgreements;
 export type SignupAgreementKey = keyof SignupAgreements;
 

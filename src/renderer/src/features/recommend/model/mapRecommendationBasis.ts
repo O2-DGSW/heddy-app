@@ -1,4 +1,4 @@
-import type { RecommendationBasisApiData } from "@/entities/recommendation/model/recommendation.types";
+import type { RecommendationBasisApiData } from "@/entities/recommendation";
 import type { RecommendationBasisRow } from "@/features/recommend/model/types/Recommend.types";
 
 /** 모발 길이 → 화면 문구. 값은 모발 프로필(HairProfile)과 같은 enum이다 */
