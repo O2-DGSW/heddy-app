@@ -1,12 +1,9 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import type { Carrier, MvnoCarrier } from "@/features/auth/signup/model/types";
-import { MAIN_CARRIERS, MVNO_CARRIERS } from "@/features/auth/signup/constants/signup";
+import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "@/entities/auth";
+import type { Carrier } from "@/entities/auth";
 import { RadioButton } from "@/shared/ui/radio/RadioButton";
 import { formatPhone } from "@/shared/utils/formatPhone";
 import type { PhoneVerificationFieldProps as Props } from "@/features/auth/signup/ui/types";
-
-const MVNO_SET = new Set<string>(MVNO_CARRIERS);
-const isMvno = (c: Carrier): c is MvnoCarrier => MVNO_SET.has(c);
 
 export const PhoneVerificationField = ({
   carrier,
@@ -28,7 +25,7 @@ export const PhoneVerificationField = ({
     color: lightTheme.label.normal,
   };
 
-  const isAlddulSelected = isMvno(carrier);
+  const isAlddulSelected = isMvnoCarrier(carrier);
   const canSend = canRequestVerification && !isSending;
 
   return (

@@ -1,7 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
-import type { ArConnectionStatusType } from "../../model/useArServerConnection";
+import type { ArConnectionStatusType } from "@/features/ar-session";
 
 interface ArRecognitionBadgeProps {
   connectionStatus: ArConnectionStatusType;

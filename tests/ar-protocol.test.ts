@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { parseArGrooms } from "../src/renderer/src/pages/ar/model/arServerApi.ts";
+import { parseArGrooms } from "../src/renderer/src/entities/ar-groom/api/arServerApi.ts";
 import {
   parseArServerEvent,
   parseDataChannelPayload,
-} from "../src/renderer/src/pages/ar/model/arServerEvent.ts";
+} from "../src/renderer/src/features/ar-session/model/arServerEvent.ts";
 import {
   buildGroomFitCommand,
   DEFAULT_GROOM_FIT_SETTINGS,
   isValidGroomFitSettings,
-} from "../src/renderer/src/pages/ar/model/arGroomFit.ts";
+} from "../src/renderer/src/entities/ar-groom/model/arGroomFit.ts";
 
 const defaults = DEFAULT_GROOM_FIT_SETTINGS;
 

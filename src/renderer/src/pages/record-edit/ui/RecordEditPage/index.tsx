@@ -1,12 +1,10 @@
 import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
   arrowIcon,
-  recordQueryKeys,
   useGetTreatmentRecord,
   useUpdateTreatmentRecord,
 } from "@/entities/record";
@@ -17,7 +15,7 @@ import {
   getUnsupportedServiceTypes,
   mapDetailToProcedureTypes,
   mapFormValuesToUpdateRequest,
-  syncRecordPhotos,
+  usePutTreatmentRecordPhotos,
 } from "@/features/record-add";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
@@ -30,16 +28,7 @@ const RecordEditPage = () => {
   const { id } = useParams();
   const { data: record, isPending, isError, error } = useGetTreatmentRecord(id);
   const updateRecord = useUpdateTreatmentRecord();
-  const queryClient = useQueryClient();
-
-  // 사진은 삭제·순서 변경·추가가 섞여 여러 번 호출되므로 한 묶음으로 처리하고, 끝나면 기록을 다시 읽는다.
-  const syncPhotos = useMutation({
-    mutationFn: syncRecordPhotos,
-    onSuccess: (_result, { recordId }) => {
-      void queryClient.invalidateQueries({ queryKey: recordQueryKeys.detail(recordId) });
-      void queryClient.invalidateQueries({ queryKey: recordQueryKeys.lists() });
-    },
-  });
+  const syncPhotos = usePutTreatmentRecordPhotos();
 
   const initialValues = useMemo(
     () => (record ? mapDetailToFormValues(record) : undefined),

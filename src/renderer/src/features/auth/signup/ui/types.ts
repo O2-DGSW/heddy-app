@@ -1,8 +1,5 @@
-import type {
-  Carrier,
-  CustomerAccountForm,
-  SignupAgreements,
-} from "@/features/auth/signup/model/types";
+import type { Carrier } from "@/entities/auth";
+import type { CustomerAccountForm, SignupAgreements } from "@/features/auth/signup/model/types";
 
 export interface SmsVerificationState {
   isSent: boolean;

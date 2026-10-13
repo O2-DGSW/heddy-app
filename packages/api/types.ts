@@ -3,6 +3,7 @@ export type ApiError = {
   message?: string;
 } | null;
 
+/** 앱 서버 공통 응답 형태 */
 export interface ApiResponse<TData = unknown> {
   success?: boolean;
   message?: string;

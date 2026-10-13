@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getLatestRecommendationApi } from "@/entities";
-import { recommendationQueryKeys } from "@/entities";
+import { getLatestRecommendationApi } from "../recommendationApi";
+import { recommendationQueryKeys } from "./recommendationQueryKeys";
 
 export const useGetLatestRecommendation = () =>
   useQuery({

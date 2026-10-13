@@ -6,8 +6,8 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { arrowIcon } from "@/entities/record";
 import { useCreateShare } from "@/entities/share";
 import type { ShareFieldType } from "@/entities/share";
-import { CutsShareItemList } from "@/features/cuts/ui/share/CutsShareItemList";
-import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts/constrants/shareItems";
+import { CutsShareItemList } from "@/features/cuts";
+import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts";
 
 export const CutsSharePage = () => {
   const navigate = useNavigate();

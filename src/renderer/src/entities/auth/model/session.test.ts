@@ -1,4 +1,4 @@
-import { AxiosError, AxiosHeaders } from "axios";
+import { ApiHttpError } from "@heddy/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const { refreshTokenApi, token } = vi.hoisted(() => ({
@@ -16,18 +16,9 @@ vi.mock("./token", () => token);
 
 import { isRefreshTokenRejectedError, refreshAuthTokens, restoreAuthSession } from "./session";
 
-/** api 함수처럼 사용자용 메시지로 감싼 axios 에러를 만든다 */
-const wrappedHttpError = (status: number) => {
-  const axiosError = new AxiosError("request failed", "ERR_BAD_REQUEST", undefined, undefined, {
-    status,
-    statusText: "",
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-    data: null,
-  });
-
-  return new Error("토큰 재발급에 실패했습니다.", { cause: axiosError });
-};
+/** api 함수처럼 사용자용 메시지로 감싼 HTTP 에러를 만든다 */
+const wrappedHttpError = (status: number) =>
+  new Error("토큰 재발급에 실패했습니다.", { cause: new ApiHttpError(status, null) });
 
 const NEW_TOKENS = { accessToken: "new-access", refreshToken: "new-refresh" };
 

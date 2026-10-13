@@ -1,11 +1,10 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect, useRef } from "react";
 
-import { useArServerConnection } from "../../model/useArServerConnection";
-import { useGetArGrooms } from "../../model/useGetArGrooms.query";
-import type { HairstyleOptionId } from "../../model/types";
+import { useGetArGrooms } from "@/entities/ar-groom";
+import type { HairstyleOptionId } from "@/entities/ar-groom";
+import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
-import { useFaceYaw } from "../../model/useFaceYaw";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";

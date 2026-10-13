@@ -1,15 +1,19 @@
-import { createDateValue, parseDateValue } from "@/entities/record/model/date";
-import { getTreatmentRecordPhotoDisplayUrl } from "@/entities/record/model/photo";
-import type { ProcedureType } from "@/entities/record/model/constants";
-import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
+import {
+  createDateValue,
+  getTreatmentRecordPhotoDisplayUrl,
+  parseDateValue,
+} from "@/entities/record";
 import type {
   AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
+  PhotoItem,
+  ProcedureType,
+  RecordFormValues,
   ServiceType,
   TreatmentRecordDetailApiData,
   TreatmentRecordPhotoApiData,
   UpdateTreatmentRecordRequest,
-} from "@/entities/record/model/treatmentRecord.types";
+} from "@/entities/record";
 
 const PRICE_CURRENCY = "KRW";
 

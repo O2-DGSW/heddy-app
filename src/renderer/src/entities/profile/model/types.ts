@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/shared/lib/api";
+import type { ApiResponse } from "@heddy/api";
 
 export interface GetMyProfileResponse {
   user_id?: string | null;

@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useFindPassword } from "@/features/auth/find/model/useFindPassword";
 import { useResetPassword } from "@/features/auth/find/model/useResetPassword";
-import { useSmsVerification } from "@/features/auth/signup/model/useSmsVerification";
-import type { Carrier, MvnoCarrier } from "@/features/auth/signup/model/types";
-import { MAIN_CARRIERS, MVNO_CARRIERS } from "@/features/auth/signup/constants/signup";
+import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier, useSmsVerification } from "@/entities/auth";
+import type { MvnoCarrier } from "@/entities/auth";
 import { RadioButton } from "@/shared/ui/radio/RadioButton";
 import { PasswordInput } from "@/shared/ui/password-input/PasswordInput";
-
-const MVNO_SET = new Set<string>(MVNO_CARRIERS);
-const isMvno = (c: Carrier): c is MvnoCarrier => MVNO_SET.has(c);
 
 export const FindPasswordForm = () => {
   const navigate = useNavigate();
@@ -163,11 +159,11 @@ export const FindPasswordForm = () => {
             <select
               className={`focus:outline-none bg-transparent ${font.body.medium}`}
               style={{
-                color: isMvno(carrierField.value)
+                color: isMvnoCarrier(carrierField.value)
                   ? lightTheme.primary.normal
                   : lightTheme.label.assistive,
               }}
-              value={isMvno(carrierField.value) ? carrierField.value : ""}
+              value={isMvnoCarrier(carrierField.value) ? carrierField.value : ""}
               onChange={e => carrierField.onChange(e.target.value as MvnoCarrier)}
             >
               <option value="" disabled>

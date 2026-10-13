@@ -1,4 +1,4 @@
-import { api, getApiErrorMessage } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage } from "@heddy/api";
 import type {
   AddTreatmentRecordPhotoRequest,
   CompleteUploadApiResponse,
@@ -50,7 +50,7 @@ const createPresignUploadRequest = async (file: File): Promise<PresignUploadRequ
 
 const presignUploadApi = async (file: File) => {
   const body = await createPresignUploadRequest(file);
-  const res = await api.post<PresignUploadApiResponse>("/uploads/presign", body);
+  const res = await apiClient.post<PresignUploadApiResponse>("/uploads/presign", body);
 
   return res.data.data;
 };
@@ -98,7 +98,7 @@ const putFileToPresignedUrl = async (
 };
 
 const completeUploadApi = async (uploadId: string) => {
-  const res = await api.post<CompleteUploadApiResponse>(`/uploads/${uploadId}/complete`);
+  const res = await apiClient.post<CompleteUploadApiResponse>(`/uploads/${uploadId}/complete`);
 
   return res.data.data;
 };
@@ -123,7 +123,7 @@ const connectTreatmentRecordPhotoApi = async (
   recordId: string,
   body: ConnectTreatmentRecordPhotoRequest
 ) => {
-  const res = await api.post<TreatmentRecordPhotoApiResponse>(
+  const res = await apiClient.post<TreatmentRecordPhotoApiResponse>(
     `/treatment-records/${recordId}/photos`,
     body
   );
@@ -139,7 +139,7 @@ export const createTreatmentRecordApi = async (
   body: CreateTreatmentRecordRequest
 ): Promise<TreatmentRecordDetailApiData> => {
   try {
-    const res = await api.post<TreatmentRecordDetailApiResponse>("/treatment-records", body);
+    const res = await apiClient.post<TreatmentRecordDetailApiResponse>("/treatment-records", body);
 
     return res.data.data;
   } catch (error) {
@@ -153,7 +153,9 @@ export const getTreatmentRecordApi = async (
   recordId: string
 ): Promise<TreatmentRecordDetailApiData> => {
   try {
-    const res = await api.get<TreatmentRecordDetailApiResponse>(`/treatment-records/${recordId}`);
+    const res = await apiClient.get<TreatmentRecordDetailApiResponse>(
+      `/treatment-records/${recordId}`
+    );
 
     return res.data.data;
   } catch (error) {
@@ -199,7 +201,7 @@ export const updateTreatmentRecordPhotoApi = async (
   try {
     const fileId = body.file ? await uploadTreatmentPhotoFile(body.file) : undefined;
 
-    const res = await api.patch<TreatmentRecordPhotoApiResponse>(
+    const res = await apiClient.patch<TreatmentRecordPhotoApiResponse>(
       `/treatment-records/${recordId}/photos/${photoId}`,
       {
         ...(fileId ? { file_id: fileId } : {}),
@@ -222,7 +224,7 @@ export const deleteTreatmentRecordPhotoApi = async (
   photoId: string
 ): Promise<void> => {
   try {
-    await api.delete(`/treatment-records/${recordId}/photos/${photoId}`);
+    await apiClient.delete(`/treatment-records/${recordId}/photos/${photoId}`);
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록 사진을 삭제하지 못했습니다."), {
       cause: error,
@@ -236,7 +238,7 @@ export const deleteTreatmentRecordPhotoApi = async (
  */
 export const deleteTreatmentRecordApi = async (recordId: string): Promise<void> => {
   try {
-    await api.delete(`/treatment-records/${recordId}`);
+    await apiClient.delete(`/treatment-records/${recordId}`);
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "시술기록을 삭제하지 못했습니다."), {
       cause: error,
@@ -253,7 +255,9 @@ export const getTreatmentRecordsApi = async (
   params: TreatmentRecordListParams = {}
 ): Promise<TreatmentRecordListApiData> => {
   try {
-    const res = await api.get<TreatmentRecordListApiResponse>("/treatment-records", { params });
+    const res = await apiClient.get<TreatmentRecordListApiResponse>("/treatment-records", {
+      params,
+    });
 
     return res.data.data;
   } catch (error) {
@@ -272,7 +276,7 @@ export const updateTreatmentRecordApi = async (
   body: UpdateTreatmentRecordRequest
 ): Promise<TreatmentRecordDetailApiData> => {
   try {
-    const res = await api.patch<TreatmentRecordDetailApiResponse>(
+    const res = await apiClient.patch<TreatmentRecordDetailApiResponse>(
       `/treatment-records/${recordId}`,
       body
     );

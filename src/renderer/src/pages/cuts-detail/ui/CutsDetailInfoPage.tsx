@@ -8,7 +8,7 @@ import {
   useGetTreatmentRecord,
   type ServiceType,
 } from "@/entities/record";
-import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
+import { CutsRecordActions } from "@/features/cuts";
 
 /** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
 const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
