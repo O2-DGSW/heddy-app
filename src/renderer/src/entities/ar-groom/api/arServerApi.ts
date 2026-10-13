@@ -3,10 +3,7 @@ import { ApiHttpError, get, post } from "@heddy/api";
 
 import type { ArHairstyleOption } from "../model/types";
 import { env } from "@/shared/config";
-import { publicUrl } from "@/shared/lib";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+import { isRecord, publicUrl } from "@/shared/lib";
 
 export const getArServerBaseUrl = (): string => {
   const configuredUrl = env.arServerUrl;
