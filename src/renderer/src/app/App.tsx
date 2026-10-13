@@ -1,6 +1,7 @@
 // import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
+import SessionExpiryListener from "./SessionExpiryListener";
 import { setupApiAuth } from "./setupApiAuth";
 // import { restoreAuthSession } from "@/entities/auth/model/session";
 // import { setupInterceptor } from "@/private/shared/api/interceptor";
@@ -31,6 +32,7 @@ const App = () => {
 
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
+      <SessionExpiryListener />
       <AppRoutes />
     </BrowserRouter>
   );
