@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
-import { CutsDetailLayout } from "@/features/cuts/ui/CutsDetailLayout";
+import { CutsDetailLayout } from "@/features/cuts";
 import { ShareQrModal } from "@/shared";
 import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
 

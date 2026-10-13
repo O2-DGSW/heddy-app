@@ -3,12 +3,12 @@ import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { useGetLatestAnalysis, useGetTreatmentRecord } from "@/entities/record";
-import { CutsAnalysisPhotoCard } from "@/features/cuts/ui/analysis/CutsAnalysisPhotoCard";
-import { CutsAnalysisConfidenceCard } from "@/features/cuts/ui/analysis/CutsAnalysisConfidenceCard";
-import { CutsAnalysisIndicatorList } from "@/features/cuts/ui/analysis/CutsAnalysisIndicatorList";
-import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
-import { CutsAnalysisStaleNotice } from "@/features/cuts/ui/analysis/CutsAnalysisStaleNotice";
-import { mapAnalysisToResult, pickAnalysisPhotoUrl } from "@/features/cuts/model/mapAnalysis";
+import { CutsAnalysisPhotoCard } from "@/features/cuts";
+import { CutsAnalysisConfidenceCard } from "@/features/cuts";
+import { CutsAnalysisIndicatorList } from "@/features/cuts";
+import { CutsRecordActions } from "@/features/cuts";
+import { CutsAnalysisStaleNotice } from "@/features/cuts";
+import { mapAnalysisToResult, pickAnalysisPhotoUrl } from "@/features/cuts";
 
 const CenteredMessage = ({ children }: { children: string }) => (
   <p

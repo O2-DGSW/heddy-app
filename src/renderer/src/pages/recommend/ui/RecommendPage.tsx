@@ -1,10 +1,10 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-import { RecommendHeader } from "@/features/recommend/ui/RecommendHeader";
-import { RecommendBasisSection } from "@/features/recommend/ui/RecommendBasisSection";
-import { RecommendResultSection } from "@/features/recommend/ui/RecommendResultSection";
-import { RecommendStatus } from "@/features/recommend/ui/RecommendStatus";
-import { useRecommendation } from "@/features/recommend/model/hooks/useRecommendation";
+import { RecommendHeader } from "@/features/recommend";
+import { RecommendBasisSection } from "@/features/recommend";
+import { RecommendResultSection } from "@/features/recommend";
+import { RecommendStatus } from "@/features/recommend";
+import { useRecommendation } from "@/features/recommend";
 
 export const RecommendPage = () => {
   const {

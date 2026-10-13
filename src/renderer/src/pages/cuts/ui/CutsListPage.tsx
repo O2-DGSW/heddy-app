@@ -3,22 +3,18 @@ import { lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { CutsLayout } from "@/features/cuts/ui/CutsLayout.tsx";
-import { CutsCategoryFilter } from "@/features/cuts/ui/CutsCategoryFilter";
-import { CutsViewModeToggle } from "@/features/cuts/ui/CutsViewModeToggle";
-import { CutsRecordList } from "@/features/cuts/ui/CutsRecordList";
-import { CutsAddButton } from "@/features/cuts/ui/CutsAddButton";
-import {
-  CUTS_CATEGORIES,
-  isCutsCategory,
-  type CutsCategoryFilterValue,
-} from "@/features/cuts/constrants/categories";
-import { useCutsRecords } from "@/features/cuts/model/hooks/useCutsRecords";
-import { SERVICE_TYPE_BY_CATEGORY } from "@/features/cuts/model/mapTreatmentRecord";
-import { CutsRecordListStatus } from "@/features/cuts/ui/CutsRecordListStatus";
-import { CutsLoadMoreTrigger } from "@/features/cuts/ui/CutsLoadMoreTrigger";
-import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
-import type { CutsViewMode } from "@/features/cuts/model/types/CutsViewMode.types";
+import { CutsLayout } from "@/features/cuts";
+import { CutsCategoryFilter } from "@/features/cuts";
+import { CutsViewModeToggle } from "@/features/cuts";
+import { CutsRecordList } from "@/features/cuts";
+import { CutsAddButton } from "@/features/cuts";
+import { CUTS_CATEGORIES, isCutsCategory, type CutsCategoryFilterValue } from "@/features/cuts";
+import { useCutsRecords } from "@/features/cuts";
+import { SERVICE_TYPE_BY_CATEGORY } from "@/features/cuts";
+import { CutsRecordListStatus } from "@/features/cuts";
+import { CutsLoadMoreTrigger } from "@/features/cuts";
+import type { CutsRecord } from "@/features/cuts";
+import type { CutsViewMode } from "@/features/cuts";
 
 export const CutsListPage = () => {
   const navigate = useNavigate();
