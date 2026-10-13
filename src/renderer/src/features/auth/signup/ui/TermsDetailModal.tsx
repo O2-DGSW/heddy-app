@@ -1,6 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import type { LegalTermsContent } from "@/features/auth/signup/constants/legalTermsContent";
+import { ModalShell } from "@/shared";
 import { CloseIcon } from "@/shared/ui/icons/CloseIcon";
 
 interface TermsDetailModalProps {
@@ -10,22 +11,14 @@ interface TermsDetailModalProps {
 
 export const TermsDetailModal = ({ content, onClose }: TermsDetailModalProps) => {
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="terms-detail-title"
-      className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
+    <ModalShell
+      labelledBy="terms-detail-title"
+      placement="bottom"
+      onBackdropClick={onClose}
+      backdropLabel="약관 상세 닫기"
     >
-      <button
-        type="button"
-        aria-label="약관 상세 닫기"
-        onClick={onClose}
-        className="absolute inset-0 h-full w-full border-0 p-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      />
-
       <div
-        className="absolute inset-x-0 bottom-0 flex max-h-[80vh] flex-col overflow-hidden rounded-t-2xl px-6 pt-6 pb-8"
+        className="flex max-h-[80vh] flex-col overflow-hidden rounded-t-2xl px-6 pt-6 pb-8"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
         <div className="flex shrink-0 items-center justify-between pb-4">
@@ -75,6 +68,6 @@ export const TermsDetailModal = ({ content, onClose }: TermsDetailModalProps) =>
           </div>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 };

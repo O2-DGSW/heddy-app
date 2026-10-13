@@ -10,7 +10,7 @@ import {
   parseDurationValue,
   RecordRequiredMark,
 } from "@/entities/record";
-import { cn, useHideBottomBarWhileOpen } from "@/shared";
+import { cn, ModalShell, useHideBottomBarWhileOpen } from "@/shared";
 
 import DurationWheel from "./DurationWheel";
 import { WHEEL_ITEM_HEIGHT } from "./constants";
@@ -31,7 +31,6 @@ const fieldStyle = {
   color: lightTheme.label.neutral,
 } satisfies CSSProperties;
 
-const pickerOverlayStyle = { backgroundColor: "rgba(0,0,0,0.5)" };
 const pickerPanelStyle = { backgroundColor: lightTheme.background.normal };
 const confirmButtonStyle = {
   backgroundColor: lightTheme.primary.normal,
@@ -141,21 +140,14 @@ const RecordDurationField = ({
       )}
 
       {isPickerOpen && (
-        <div
-          aria-labelledby="duration-picker-title"
-          aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
-          role="dialog"
+        <ModalShell
+          labelledBy="duration-picker-title"
+          placement="bottom"
+          onBackdropClick={handleClosePicker}
+          backdropLabel="소요 시간 선택 닫기"
         >
-          <button
-            aria-label="소요 시간 선택 닫기"
-            className="absolute inset-0 h-full w-full border-0 p-0"
-            onClick={handleClosePicker}
-            style={pickerOverlayStyle}
-            type="button"
-          />
           <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
+            className="flex flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
             style={pickerPanelStyle}
           >
             <div className="flex w-full max-w-[354px] flex-col items-center">
@@ -225,7 +217,7 @@ const RecordDurationField = ({
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );

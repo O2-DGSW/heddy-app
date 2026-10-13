@@ -15,7 +15,7 @@ import {
   parseDateValue,
   RecordRequiredMark,
 } from "@/entities/record";
-import { cn, useHideBottomBarWhileOpen } from "@/shared";
+import { cn, ModalShell, useHideBottomBarWhileOpen } from "@/shared";
 
 import type { CSSProperties } from "react";
 import type { CalendarDay } from "@/entities/record";
@@ -37,7 +37,6 @@ const fieldStyle = {
   color: lightTheme.label.neutral,
 } satisfies PlaceholderStyle;
 
-const datePickerOverlayStyle = { backgroundColor: "rgba(0,0,0,0.5)" };
 const datePickerPanelStyle = { backgroundColor: lightTheme.background.normal };
 const confirmButtonStyle = {
   backgroundColor: lightTheme.primary.normal,
@@ -227,21 +226,14 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
       )}
 
       {isDatePickerOpen && (
-        <div
-          aria-labelledby="date-picker-title"
-          aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
-          role="dialog"
+        <ModalShell
+          labelledBy="date-picker-title"
+          placement="bottom"
+          onBackdropClick={handleCloseDatePicker}
+          backdropLabel="날짜 선택 닫기"
         >
-          <button
-            aria-label="날짜 선택 닫기"
-            className="absolute inset-0 h-full w-full border-0 p-0"
-            onClick={handleCloseDatePicker}
-            style={datePickerOverlayStyle}
-            type="button"
-          />
           <div
-            className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-24px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
+            className="flex h-[526px] max-h-[calc(100dvh-24px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
             style={datePickerPanelStyle}
           >
             <div className="flex h-full min-h-0 w-full max-w-[354px] flex-col items-center">
@@ -415,7 +407,7 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );
