@@ -1,6 +1,4 @@
-import { isAxiosError } from "axios";
-
-import { api, getApiErrorMessage } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage, getHttpStatus } from "@heddy/api";
 import type {
   GenerateRecommendationRequest,
   RecommendationApiData,
@@ -13,11 +11,11 @@ import type {
  */
 export const getLatestRecommendationApi = async (): Promise<RecommendationApiData | null> => {
   try {
-    const res = await api.get<RecommendationApiResponse>("/recommendations/latest");
+    const res = await apiClient.get<RecommendationApiResponse>("/recommendations/latest");
 
     return res.data.data ?? null;
   } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 404) {
+    if (getHttpStatus(error) === 404) {
       return null;
     }
 
@@ -33,7 +31,7 @@ export const generateRecommendationApi = async (
   body: GenerateRecommendationRequest = {}
 ): Promise<RecommendationApiData> => {
   try {
-    const res = await api.post<RecommendationApiResponse>("/recommendations/generate", body);
+    const res = await apiClient.post<RecommendationApiResponse>("/recommendations/generate", body);
 
     return res.data.data;
   } catch (error) {

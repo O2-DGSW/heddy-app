@@ -1,6 +1,4 @@
-import { isAxiosError } from "axios";
-
-import { api, getApiErrorMessage } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage, getHttpStatus } from "@heddy/api";
 import type { AnalysisApiData, AnalysisApiResponse } from "@/entities/record/model/analysis.types";
 
 /**
@@ -10,13 +8,13 @@ import type { AnalysisApiData, AnalysisApiResponse } from "@/entities/record/mod
  */
 export const getLatestAnalysisApi = async (recordId: string): Promise<AnalysisApiData | null> => {
   try {
-    const res = await api.get<AnalysisApiResponse>(
+    const res = await apiClient.get<AnalysisApiResponse>(
       `/treatment-records/${recordId}/analyses/latest`
     );
 
     return res.data.data;
   } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 404) {
+    if (getHttpStatus(error) === 404) {
       return null;
     }
 

@@ -1,5 +1,5 @@
-import { api, getApiErrorMessage } from "@/shared/lib/api";
-import type { ApiResponse } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage } from "@heddy/api";
+import type { ApiResponse } from "@heddy/api";
 import type {
   SaveStyleRequest,
   SavedStyleResponse,
@@ -13,7 +13,7 @@ import type {
  */
 export const getSavedStylesApi = async (): Promise<SavedStylesResponse> => {
   try {
-    const res = await api.get<ApiResponse<SavedStylesResponse>>("/me/saved-styles");
+    const res = await apiClient.get<ApiResponse<SavedStylesResponse>>("/me/saved-styles");
 
     return res.data.data;
   } catch (error) {
@@ -26,7 +26,7 @@ export const getSavedStylesApi = async (): Promise<SavedStylesResponse> => {
 /** 후보 스타일 저장. 카탈로그에 있는 스타일과 색상만 저장할 수 있다 */
 export const saveStyleApi = async (body: SaveStyleRequest): Promise<SavedStyleResponse> => {
   try {
-    const res = await api.post<ApiResponse<SavedStyleResponse>>("/me/saved-styles", body);
+    const res = await apiClient.post<ApiResponse<SavedStyleResponse>>("/me/saved-styles", body);
 
     return res.data.data;
   } catch (error) {
@@ -42,7 +42,7 @@ export const saveStyleApi = async (body: SaveStyleRequest): Promise<SavedStyleRe
  */
 export const deleteSavedStyleApi = async (savedStyleId: string): Promise<void> => {
   try {
-    await api.delete(`/me/saved-styles/${savedStyleId}`);
+    await apiClient.delete(`/me/saved-styles/${savedStyleId}`);
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "후보 스타일을 삭제하지 못했습니다."), {
       cause: error,

@@ -159,6 +159,9 @@ importers:
       '@capacitor/core':
         specifier: ^8.5.0
         version: 8.5.0
+      axios:
+        specifier: ^1.16.0
+        version: 1.19.0(debug@4.4.3)
 
   packages/design-tokens:
     dependencies:
