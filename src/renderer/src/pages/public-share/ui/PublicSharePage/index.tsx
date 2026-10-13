@@ -1,38 +1,11 @@
 import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
+import { formatLongDate, formatServiceTypes } from "@/entities/record";
 import { useGetPublicShare } from "@/entities/share";
 import type { PublicShareRecord, PublicShareSavedStyle } from "@/entities/share";
 import agerSad from "@/shared/assets/agerSad.svg";
 import ratingStar from "@/shared/assets/rating-star.svg";
-
-const SERVICE_TYPE_LABEL: Record<string, string> = {
-  CUT: "커트",
-  PERM: "펌",
-  COLOR: "염색",
-  BLEACH: "탈색",
-  CLINIC: "클리닉",
-  STYLING: "스타일링",
-  OTHER: "기타",
-};
-
-const formatDate = (value?: string | null) => {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-};
 
 const SectionTitle = ({ children }: { children: string }) => (
   <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
@@ -46,14 +19,12 @@ const SectionTitle = ({ children }: { children: string }) => (
  */
 const SharedRecordSections = ({ record }: { record: PublicShareRecord }) => {
   const recordInformation = [
-    { label: "시술 날짜", value: formatDate(record.performed_at) },
+    { label: "시술 날짜", value: formatLongDate(record.performed_at) },
     { label: "미용실", value: record.salon_name ?? "" },
     { label: "담당 디자이너", value: record.designer_name ?? "" },
     {
       label: "시술 종류",
-      value: (record.service_types ?? [])
-        .map(serviceType => SERVICE_TYPE_LABEL[serviceType] ?? serviceType)
-        .join(" · "),
+      value: formatServiceTypes(record.service_types ?? []),
     },
   ].filter(({ value }) => Boolean(value));
 
@@ -281,7 +252,7 @@ const PublicSharePage = () => {
                 className={`px-[19px] pb-[30px] text-center ${font.caption.regular}`}
                 style={{ color: lightTheme.label.assistive }}
               >
-                {formatDate(data.share.expires_at)}까지 볼 수 있어요
+                {formatLongDate(data.share.expires_at)}까지 볼 수 있어요
               </p>
             )}
           </>

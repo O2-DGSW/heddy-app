@@ -11,6 +11,34 @@ export const getTodayDateValue = () => {
   return createDateValue(today.getFullYear(), today.getMonth() + 1, today.getDate());
 };
 
+/** ISO 8601 일시를 YYYY-MM-DD로 바꾼다(기기 시간대 기준). 날짜가 아니면 빈 문자열이다 */
+export const toDateValue = (dateTime: string) => {
+  const date = new Date(dateTime);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return createDateValue(date.getFullYear(), date.getMonth() + 1, date.getDate());
+};
+
+const LONG_DATE_FORMAT = new Intl.DateTimeFormat("ko-KR", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+/** ISO 8601 일시를 "2026년 3월 5일"로 바꾼다. 값이 없거나 날짜가 아니면 빈 문자열이다 */
+export const formatLongDate = (dateTime?: string | null) => {
+  if (!dateTime) {
+    return "";
+  }
+
+  const date = new Date(dateTime);
+
+  return Number.isNaN(date.getTime()) ? "" : LONG_DATE_FORMAT.format(date);
+};
+
 export const formatDateDisplay = (dateValue: string) => {
   const [year, month, day] = dateValue.split("-");
 

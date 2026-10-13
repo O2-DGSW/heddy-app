@@ -6,27 +6,13 @@ import {
   formatDurationDisplay,
   getTreatmentRecordPhotoDisplayUrl,
   useGetTreatmentRecord,
-  type ServiceType,
+  formatLongDate,
+  formatServiceTypes,
 } from "@/entities/record";
 import { CutsRecordActions } from "@/features/cuts";
 
 /** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
 const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
-
-const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
-  CUT: "커트",
-  PERM: "펌",
-  COLOR: "염색",
-  BLEACH: "탈색",
-  CLINIC: "클리닉",
-  STYLING: "스타일링",
-  OTHER: "기타",
-};
-
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "long", day: "numeric" }).format(
-    new Date(value)
-  );
 
 const formatPrice = (price: { amount: number; currency: string } | null | undefined) => {
   if (!price) {
@@ -65,12 +51,12 @@ const CutsDetailInfoPage = () => {
   }
 
   const recordInformation = [
-    { label: "시술 날짜", value: formatDate(record.performed_at) },
+    { label: "시술 날짜", value: formatLongDate(record.performed_at) },
     { label: "미용실", value: record.salon_name ?? "미입력" },
     { label: "담당 디자이너", value: record.designer_name ?? "미입력" },
     {
       label: "시술 종류",
-      value: record.service_types.map(serviceType => SERVICE_TYPE_LABEL[serviceType]).join(" · "),
+      value: formatServiceTypes(record.service_types),
     },
     { label: "시술 내용", value: record.treatment_content ?? "미입력" },
     {

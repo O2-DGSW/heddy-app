@@ -12,10 +12,13 @@ export {
   createCalendarDays,
   createDateValue,
   formatDateDisplay,
+  formatLongDate,
   getDaysInMonth,
   getTodayDateValue,
   parseDateValue,
+  toDateValue,
 } from "./date";
+export { SERVICE_TYPE_LABEL, formatServiceTypes, getServiceTypeLabel } from "./serviceType";
 export {
   DURATION_HOUR_OPTIONS,
   DURATION_MINUTE_OPTIONS,

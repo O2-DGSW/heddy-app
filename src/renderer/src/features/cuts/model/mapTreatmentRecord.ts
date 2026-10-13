@@ -1,21 +1,10 @@
-import { createDateValue, getTreatmentRecordThumbnailUrl } from "@/entities";
-import type { ServiceType, TreatmentRecordSummaryApiData } from "@/entities";
+import { formatServiceTypes, getTreatmentRecordThumbnailUrl, toDateValue } from "@/entities/record";
+import type { ServiceType, TreatmentRecordSummaryApiData } from "@/entities/record";
 import type {
   CutsAnalysisStatus,
   CutsCategory,
   CutsRecord,
 } from "@/features/cuts/model/types/CutsRecord.types";
-
-/** 카드 제목에 쓸 시술 종류 한글 이름 */
-const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
-  CUT: "커트",
-  PERM: "펌",
-  COLOR: "염색",
-  BLEACH: "탈색",
-  CLINIC: "클리닉",
-  STYLING: "스타일링",
-  OTHER: "기타",
-};
 
 /**
  * 카테고리 칩을 목록 조회 파라미터(service_type)로 바꾼다.
@@ -57,21 +46,6 @@ const ANALYSIS_STATUS_BY_API_VALUE: Record<string, CutsAnalysisStatus> = {
   FAILED: "재촬영",
 };
 
-/** ISO 8601 시술일시를 카드에 표시할 YYYY-MM-DD로 바꾼다(기기 시간대 기준) */
-const formatPerformedAt = (performedAt: string) => {
-  const performedDate = new Date(performedAt);
-
-  if (Number.isNaN(performedDate.getTime())) {
-    return "";
-  }
-
-  return createDateValue(
-    performedDate.getFullYear(),
-    performedDate.getMonth() + 1,
-    performedDate.getDate()
-  );
-};
-
 /**
  * 목록 API 응답 한 건을 카드에서 쓰는 형태로 변환한다.
  * 서버에 없는 값(시술명·공유 여부)은 아래 주석대로 대체한다.
@@ -81,9 +55,9 @@ export const mapTreatmentRecordToCutsRecord = (item: TreatmentRecordSummaryApiDa
 
   return {
     id: item.record_id,
-    date: formatPerformedAt(item.performed_at),
+    date: toDateValue(item.performed_at),
     // 서버에 시술명 필드가 없어 시술 종류를 이어 붙여 제목으로 쓴다.
-    procedureName: serviceTypes.map(type => SERVICE_TYPE_LABEL[type] ?? "기타").join(" · "),
+    procedureName: formatServiceTypes(serviceTypes),
     salonName: item.salon_name ?? "",
     designerName: item.designer_name ?? "",
     rating: item.satisfaction ?? 0,

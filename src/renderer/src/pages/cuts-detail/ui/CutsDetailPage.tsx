@@ -3,17 +3,7 @@ import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { CutsDetailLayout } from "@/features/cuts";
 import { ShareQrModal } from "@/shared";
-import { useGetTreatmentRecord, type ServiceType } from "@/entities/record";
-
-const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
-  CUT: "커트",
-  PERM: "펌",
-  COLOR: "염색",
-  BLEACH: "탈색",
-  CLINIC: "클리닉",
-  STYLING: "스타일링",
-  OTHER: "기타",
-};
+import { formatServiceTypes, useGetTreatmentRecord } from "@/entities/record";
 
 interface ShareModalState {
   isShareModalOpen: boolean;
@@ -53,10 +43,7 @@ export const CutsDetailPage = () => {
   return (
     <cap-page>
       <CutsDetailLayout
-        title={
-          record?.service_types.map(serviceType => SERVICE_TYPE_LABEL[serviceType]).join(" · ") ??
-          "시술기록"
-        }
+        title={(record ? formatServiceTypes(record.service_types) : null) ?? "시술기록"}
       >
         <Outlet />
 
