@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, ArrowIcon } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -47,7 +46,7 @@ const PreferredStyleRegistrationPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1

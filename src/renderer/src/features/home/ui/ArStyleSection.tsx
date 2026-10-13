@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { font } from "@heddy/design-tokens";
-import { cn } from "@/shared";
+import { font, lightTheme } from "@heddy/design-tokens";
+import { ArrowIcon, cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
 import type { ArStyleType } from "../model/types";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
-import arrow from "../assets/arrow-green.svg";
 import dots from "../assets/carousel-dots.svg";
 
 interface ArStyleSectionProps {
@@ -50,7 +49,7 @@ const ArStyleSection = ({
           className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
         >
           전체보기
-          <img src={arrow} alt="" className="rotate-180" />
+          <ArrowIcon className="h-[8px] w-[8px] rotate-180" color={lightTheme.primary.normal} />
         </button>
       </div>
       {activeStyle && !isLoading && !isError ? (

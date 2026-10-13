@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import ratingStar from "@/shared/assets/rating-star.svg";
 import {
   formatDurationDisplay,
   getTreatmentRecordPhotoDisplayUrl,
@@ -10,6 +9,7 @@ import {
   formatServiceTypes,
 } from "@/entities/record";
 import { CutsRecordActions } from "@/features/cuts";
+import { cn, StarIcon } from "@/shared";
 
 /** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
 const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
@@ -136,17 +136,13 @@ const CutsDetailInfoPage = () => {
                 className="flex -space-x-[3px]"
               >
                 {SATISFACTION_SCORES.map(score => (
-                  <img
-                    alt=""
-                    className="h-[20px] w-[20px]"
+                  <StarIcon
                     key={score}
-                    /* 빈 별도 같은 에셋을 회색으로 바꿔 쓴다. 다른 에셋은 뷰박스 비율이 달라 크기가 어긋난다 */
-                    style={
-                      score <= (record.satisfaction ?? 0)
-                        ? undefined
-                        : { filter: "grayscale(1)", opacity: 0.35 }
-                    }
-                    src={ratingStar}
+                    /* 빈 별도 같은 별을 회색으로 바꿔 쓴다 */
+                    className={cn(
+                      "h-[20px] w-[20px]",
+                      score > (record.satisfaction ?? 0) && "opacity-35 grayscale"
+                    )}
                   />
                 ))}
               </dd>

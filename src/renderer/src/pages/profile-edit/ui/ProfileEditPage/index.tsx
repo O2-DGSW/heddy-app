@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { profileAvatar } from "@/shared";
+import { profileAvatar, ArrowIcon } from "@/shared";
 
 import { useProfileEdit } from "../../model/useProfileEdit";
 
@@ -86,7 +85,7 @@ const ProfileEditPage = () => {
             onClick={handleBack}
             type="button"
           >
-            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+            <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
           </button>
           <h1
             className={font.headline1.bold}
@@ -178,7 +177,10 @@ const ProfileEditPage = () => {
                   type="button"
                 >
                   <span>선호하는 머리 스타일을 선택하세요</span>
-                  <img alt="" className="h-[16px] w-[16px] -rotate-90" src={arrowIcon} />
+                  <ArrowIcon
+                    className="h-[16px] w-[16px] -rotate-90"
+                    color={lightTheme.label.neutral}
+                  />
                 </button>
               </div>
             </div>

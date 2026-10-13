@@ -1,11 +1,8 @@
 export {
-  arrowIcon,
   dateIcon,
   dropdownIcon,
   noIcon,
   pictureIcon,
-  starDisabledIcon,
-  starIcon,
 } from "./assets";
 export {
   DURATION_HOUR_OPTIONS,

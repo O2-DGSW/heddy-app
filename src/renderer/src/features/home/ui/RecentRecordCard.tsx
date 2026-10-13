@@ -1,7 +1,6 @@
-import { font } from "@heddy/design-tokens";
-import { cn } from "@/shared";
+import { font, lightTheme } from "@heddy/design-tokens";
+import { ArrowIcon, cn } from "@/shared";
 import type { RecentRecordCardProps } from "../model/types";
-import arrow from "../assets/arrow-white.svg";
 import colorDot from "../assets/color-dot.svg";
 import edit from "../assets/edit.svg";
 import HomeImage from "./HomeImage";
@@ -30,7 +29,7 @@ const RecentRecordCard = ({
         aria-label="시술 기록 전체보기"
       >
         전체보기
-        <img src={arrow} alt="" className="rotate-180" />
+        <ArrowIcon className="h-[10px] w-[10px] rotate-180" color={lightTheme.background.normal} />
       </button>
     </div>
     {record && !isLoading && !isError ? (

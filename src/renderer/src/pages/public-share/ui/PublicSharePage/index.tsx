@@ -5,7 +5,7 @@ import { formatLongDate, formatServiceTypes } from "@/entities/record";
 import { useGetPublicShare } from "@/entities/share";
 import type { PublicShareRecord, PublicShareSavedStyle } from "@/entities/share";
 import agerSad from "@/shared/assets/agerSad.svg";
-import ratingStar from "@/shared/assets/rating-star.svg";
+import { StarIcon } from "@/shared";
 
 const SectionTitle = ({ children }: { children: string }) => (
   <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
@@ -91,7 +91,7 @@ const SharedRecordSections = ({ record }: { record: PublicShareRecord }) => {
                     className="flex -space-x-[3px]"
                   >
                     {Array.from({ length: record.satisfaction ?? 0 }, (_, index) => (
-                      <img alt="" className="h-[20px] w-[20px]" key={index} src={ratingStar} />
+                      <StarIcon className="h-[20px] w-[20px]" key={index} />
                     ))}
                   </dd>
                 </div>
