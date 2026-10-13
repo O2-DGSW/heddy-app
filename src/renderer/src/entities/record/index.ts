@@ -83,6 +83,7 @@ export {
 } from "./api";
 export {
   recordQueryKeys,
+  TreatmentRecordPhotoUploadError,
   useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
   useDeleteTreatmentRecord,
