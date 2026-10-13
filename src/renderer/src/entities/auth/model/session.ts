@@ -6,12 +6,24 @@ import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from 
 let refreshTokenRequest: Promise<Awaited<ReturnType<typeof refreshTokenApi>>> | null = null;
 let restoreSessionRequest: Promise<boolean> | null = null;
 
-export const isRefreshTokenRejectedError = (error: unknown) => {
+// api 함수가 사용자용 메시지로 감싸서 던지므로 원본 axios 에러는 cause에 있다.
+const getErrorStatus = (error: unknown): number | undefined => {
   if (isAxiosError(error)) {
-    return error.response?.status === 401;
+    return error.response?.status;
   }
 
-  return true;
+  if (error instanceof Error && error.cause) {
+    return getErrorStatus(error.cause);
+  }
+
+  return undefined;
+};
+
+/** 서버가 refresh 토큰을 거부한 경우만 true. 네트워크 오류·서버 오류로는 토큰을 지우지 않는다 */
+export const isRefreshTokenRejectedError = (error: unknown) => {
+  const status = getErrorStatus(error);
+
+  return status === 401 || status === 403;
 };
 
 export const refreshAuthTokens = async () => {
