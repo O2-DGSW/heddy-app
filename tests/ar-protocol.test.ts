@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 
 import { parseArGrooms } from "../src/renderer/src/pages/ar/model/arServerApi.ts";
 import {
