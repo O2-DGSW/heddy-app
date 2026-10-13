@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
+  TreatmentRecordPhotoUploadError,
   arrowIcon,
   useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
@@ -23,6 +24,8 @@ const RecordAddPage = () => {
   const createRecord = useCreateTreatmentRecord();
   const addRecordPhotos = useAddTreatmentRecordPhotos();
   const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
+  // 일부 사진만 올라간 뒤 다시 저장하면 이미 올라간 사진은 건너뛴다
+  const [uploadedPhotoIds, setUploadedPhotoIds] = useState<string[]>([]);
 
   const submitErrorMessage = createRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
   const isSubmitting = createRecord.isPending || addRecordPhotos.isPending;
@@ -38,7 +41,12 @@ const RecordAddPage = () => {
     procedureTypes,
     rating,
   }: RecordFormSubmitValues) => {
+    // mapPhotoItemsToAddRequests는 파일이 있는 사진만 같은 순서로 요청으로 바꾼다(sort_order는 전체 순서)
     const photoRequests = mapPhotoItemsToAddRequests(photos);
+    const uploadTargets = photos
+      .filter(photo => photo.file !== undefined)
+      .map((photo, index) => ({ photoId: photo.id, request: photoRequests[index] }))
+      .filter(({ photoId }) => !uploadedPhotoIds.includes(photoId));
 
     try {
       const recordId =
@@ -51,13 +59,23 @@ const RecordAddPage = () => {
 
       setCreatedRecordId(recordId);
 
-      if (photoRequests.length > 0) {
-        await addRecordPhotos.mutateAsync({ recordId, photos: photoRequests });
+      if (uploadTargets.length > 0) {
+        await addRecordPhotos.mutateAsync({
+          recordId,
+          photos: uploadTargets.map(({ request }) => request),
+        });
       }
 
       handleClose();
-    } catch {
+    } catch (error) {
       // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+      if (error instanceof TreatmentRecordPhotoUploadError) {
+        const succeededIds = uploadTargets
+          .filter((_, index) => !error.failedIndexes.includes(index))
+          .map(({ photoId }) => photoId);
+
+        setUploadedPhotoIds(currentIds => [...currentIds, ...succeededIds]);
+      }
     }
   };
 

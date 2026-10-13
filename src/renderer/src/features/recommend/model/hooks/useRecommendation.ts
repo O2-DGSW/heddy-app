@@ -17,7 +17,7 @@ import { mapRecommendationToBasisRows } from "@/features/recommend/model/mapReco
 export const useRecommendation = () => {
   const queryClient = useQueryClient();
 
-  const { data, isPending, isError, error, refetch } = useGetLatestRecommendation();
+  const { data, isPending, isError, error, refetch, isRefetching } = useGetLatestRecommendation();
 
   const generate = useMutation({
     mutationFn: () => generateRecommendationApi({ force_refresh: true }),
@@ -44,6 +44,7 @@ export const useRecommendation = () => {
     isError,
     error,
     refetch,
+    isRefetching,
     generate: generate.mutate,
     isGenerating: generate.isPending,
     generateError: generate.error,

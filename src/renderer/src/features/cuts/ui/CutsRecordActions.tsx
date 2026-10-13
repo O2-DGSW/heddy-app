@@ -3,7 +3,7 @@ import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { useDeleteTreatmentRecord } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, showErrorToast } from "@/shared";
 
 interface CutsRecordActionsProps {
   /** 탭마다 배치가 달라 바깥 여백만 호출부에서 받는다 */
@@ -36,6 +36,9 @@ export const CutsRecordActions = ({ className }: CutsRecordActionsProps) => {
       onSuccess: () => {
         setDirection("back");
         navigate("/cuts", { replace: true });
+      },
+      onError: error => {
+        showErrorToast(error.message || "시술기록을 삭제하지 못했습니다. 다시 시도해주세요.");
       },
     });
   };

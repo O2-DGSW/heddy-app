@@ -126,6 +126,8 @@ export const useArServerConnection = (
   const desiredFitRef = useRef<DesiredGroomFit>({ groom, settings });
   const lastSentFitRef = useRef<DesiredGroomFit | null>(null);
   const pendingGroomRef = useRef<string | null>(null);
+  // 타임아웃 뒤에 늦게 도착한 스타일 응답을 화면 상태에 반영하려고, 타임아웃된 요청을 기억한다
+  const timedOutFitRef = useRef<DesiredGroomFit | null>(null);
   const groomTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const foreheadTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [stats, setStats] = useState<ArStats | null>(null);
@@ -163,11 +165,13 @@ export const useArServerConnection = (
         }
         // 서버가 요청 ID를 제공하지 않으므로 스타일 요청은 하나씩 보내고 최신 선택을 대기시킨다.
         pendingGroomRef.current = desired.groom;
+        timedOutFitRef.current = null;
         setGroomState({ groom: desired.groom, status: "loading" });
         clearTimeout(groomTimerRef.current);
         groomTimerRef.current = setTimeout(() => {
           pendingGroomRef.current = null;
           lastSentFitRef.current = null;
+          timedOutFitRef.current = desired;
           setGroomState({
             groom: desiredFitRef.current.groom,
             status: "error",
@@ -233,6 +237,7 @@ export const useArServerConnection = (
     clearTimeout(foreheadTimerRef.current);
     foreheadTimerRef.current = undefined;
     pendingGroomRef.current = null;
+    timedOutFitRef.current = null;
     lastSentFitRef.current = null;
     setControlReady(false);
     setStats(null);
@@ -300,6 +305,21 @@ export const useArServerConnection = (
                 setStats(serverEvent.data);
               } else if (serverEvent.type === "groom") {
                 const pending = pendingGroomRef.current;
+                const timedOutFit = timedOutFitRef.current;
+                // 타임아웃으로 오류 처리한 요청의 응답이 늦게 왔다면, 서버 실제 상태에 화면을 맞춘다
+                if (
+                  pending === null &&
+                  timedOutFit !== null &&
+                  (serverEvent.groom === undefined || serverEvent.groom === timedOutFit.groom)
+                ) {
+                  timedOutFitRef.current = null;
+                  if (serverEvent.status === "ok") {
+                    lastSentFitRef.current = timedOutFit;
+                    setGroomState({ groom: timedOutFit.groom, status: "ok" });
+                    syncGroomFit();
+                  }
+                  return;
+                }
                 if (
                   pending === null ||
                   (serverEvent.groom !== undefined && serverEvent.groom !== pending)
