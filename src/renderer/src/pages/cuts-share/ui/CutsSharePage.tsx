@@ -37,7 +37,9 @@ export const CutsSharePage = () => {
       {
         onSuccess: share => {
           setDirection("back");
+          // 공유 화면을 기록에서 지워, 상세에서 뒤로가기를 눌렀을 때 공유 화면이 다시 뜨지 않게 한다
           navigate(`/cuts/${selectedId}/info`, {
+            replace: true,
             state: { isShareModalOpen: true, shareUrl: share.share_url },
           });
         },
