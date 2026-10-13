@@ -66,3 +66,6 @@ AGENTS.md
 ._*
 .Spotlight-V100
 .Trashes
+
+# Bundle analysis report (pnpm build:analyze)
+bundle-stats.html
