@@ -104,11 +104,7 @@ const ProfilePage = () => {
   const { data: profile, isLoading } = useGetMyProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
-  const {
-    errorMessage: logoutErrorMessage,
-    handleLogout,
-    isPending: isLogoutPending,
-  } = useLogout();
+  const { handleLogout, isPending: isLogoutPending } = useLogout();
   const profileName = getProfileName(profile?.nickname, isLoading);
   const profileStats: ProfileStat[] = [
     { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
@@ -234,15 +230,6 @@ const ProfilePage = () => {
                 회원 탈퇴
               </button>
             </div>
-            {logoutErrorMessage && (
-              <p
-                className={font.label.medium}
-                role="alert"
-                style={{ color: lightTheme.status.error }}
-              >
-                {logoutErrorMessage}
-              </p>
-            )}
           </section>
         </div>
         {isAccountDeletionModalOpen && (

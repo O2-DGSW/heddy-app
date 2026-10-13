@@ -14,6 +14,7 @@ export {
   clearRefreshToken,
   getAccessToken,
   getRefreshToken,
+  isRefreshTokenRejectedError,
   refreshAuthTokens,
   restoreAuthSession,
   setAccessToken,

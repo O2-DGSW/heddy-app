@@ -40,4 +40,4 @@ export {
   setAuthTokens,
   setRefreshToken,
 } from "./token";
-export { refreshAuthTokens, restoreAuthSession } from "./session";
+export { isRefreshTokenRejectedError, refreshAuthTokens, restoreAuthSession } from "./session";

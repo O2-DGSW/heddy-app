@@ -31,7 +31,6 @@ export const useLoginForm = () => {
       queryClient.clear();
       navigate("/home", { replace: true });
     } catch (err) {
-      console.error("로그인 실패:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
