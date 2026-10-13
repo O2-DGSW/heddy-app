@@ -24,9 +24,12 @@ export const setAccessTokenGetter = (getter: AccessTokenGetter) => {
   getAccessTokenValue = getter;
 };
 
+// 공개 API(/public/)는 로그인 없이 보는 화면용이라 토큰을 보내지 않는다.
+const isPublicRequest = (url: string | undefined) => url?.startsWith("/public/") ?? false;
+
 // 인증이 필요한 API는 Bearer 토큰을 요구한다. 매 요청마다 저장된 토큰을 붙인다.
 api.interceptors.request.use(async config => {
-  if (!getAccessTokenValue) {
+  if (!getAccessTokenValue || isPublicRequest(config.url)) {
     return config;
   }
 

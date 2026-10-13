@@ -59,7 +59,9 @@ export const createShareApi = async (body: CreateShareRequest): Promise<ShareRes
  */
 export const getPublicShareApi = async (shareToken: string): Promise<PublicShareResponse> => {
   try {
-    const res = await api.get<ApiResponse<PublicShareResponse>>(`/public/shares/${shareToken}`);
+    const res = await api.get<ApiResponse<PublicShareResponse>>(
+      `/public/shares/${encodeURIComponent(shareToken)}`
+    );
     return res.data.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유된 기록을 불러오지 못했습니다."), {
