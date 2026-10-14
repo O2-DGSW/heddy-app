@@ -88,7 +88,7 @@ const CutsDetailInfoPage = () => {
               <img
                 alt={`시술 사진 ${index + 1}`}
                 className="h-[110px] w-[110px] rounded-[10px] object-cover"
-                key={index}
+                key={photoUrl}
                 src={photoUrl}
               />
             ))}

@@ -65,14 +65,17 @@ const PreferredStyleRegistrationPage = () => {
         style={{ borderColor: lightTheme.label.disable }}
       >
         <span
+          aria-hidden="true"
           className={cn(
-            "absolute bottom-[-1px] h-[3px] w-[56px] rounded-full transition-[left] duration-300 ease-out",
-            activeTab === "preferred"
-              ? "left-[25%] -translate-x-1/2"
-              : "left-[75%] -translate-x-1/2"
+            "absolute bottom-[-1px] left-0 flex w-1/2 justify-center transition-transform duration-300 ease-out",
+            activeTab === "preferred" ? "translate-x-0" : "translate-x-full"
           )}
-          style={{ backgroundColor: lightTheme.label.neutral }}
-        />
+        >
+          <span
+            className="h-[3px] w-[56px] rounded-full"
+            style={{ backgroundColor: lightTheme.label.neutral }}
+          />
+        </span>
 
         {PREFERRED_STYLE_TABS.map(tab => {
           const isActive = activeTab === tab;
