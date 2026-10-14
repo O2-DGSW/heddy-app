@@ -4,10 +4,10 @@ import type {
   SignupHairLengthType,
   SignupHairThicknessType,
   SignupHairType,
-  SocialSignupAgreements,
+  SignupAgreements,
 } from "@/entities/auth";
 
-export type SignupAgreements = SocialSignupAgreements;
+export type { SignupAgreements };
 export type SignupAgreementKey = keyof SignupAgreements;
 
 export type HairLengthType = SignupHairLengthType;
