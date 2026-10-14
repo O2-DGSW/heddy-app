@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import {
   DURATION_HOUR_OPTIONS,
@@ -223,4 +223,5 @@ const RecordDurationField = ({
   );
 };
 
-export default RecordDurationField;
+// 폼 전체가 다시 그려질 때 값이 그대로인 필드는 건너뛴다.
+export default memo(RecordDurationField);
