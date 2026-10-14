@@ -109,6 +109,7 @@ const RecordPhotoUploader = ({
       {errorMessage && (
         <span
           className={font.caption.regular}
+          data-form-error="true"
           id={errorId}
           style={{ color: lightTheme.status.error }}
         >

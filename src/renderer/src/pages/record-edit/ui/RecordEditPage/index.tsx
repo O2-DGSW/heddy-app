@@ -13,13 +13,15 @@ import {
   mapFormValuesToUpdateRequest,
   usePutTreatmentRecordPhotos,
 } from "@/features/record-add";
-import { ArrowIcon, ConfirmModal, useLeaveConfirm } from "@/shared";
+import { ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 const headingStyle = { color: lightTheme.label.neutral };
 
 /** 기록 추가 화면과 같은 폼을 쓰고, 기존 값을 채운 뒤 버튼만 취소·수정 완료로 바꾼다 */
+const SAVE_ERROR_MESSAGE = "시술기록을 수정하지 못했습니다. 다시 시도해 주세요.";
+
 const RecordEditPage = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
@@ -59,7 +61,6 @@ const RecordEditPage = () => {
     onLeave: handleClose,
   });
 
-  const submitErrorMessage = updateRecord.error?.message ?? syncPhotos.error?.message ?? null;
   const isSubmitting = updateRecord.isPending || syncPhotos.isPending;
 
   const handleSubmit = async ({
@@ -86,8 +87,9 @@ const RecordEditPage = () => {
       await syncPhotos.mutateAsync({ recordId: id, initialPhotos: initialPhotos ?? [], photos });
 
       handleClose();
-    } catch {
-      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+    } catch (error) {
+      // 폼이 길어 맨 위 문구는 보이지 않을 수 있어 토스트로 알린다.
+      showErrorToast(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
     }
   };
 
@@ -132,15 +134,6 @@ const RecordEditPage = () => {
           {/* 기존 값이 도착한 뒤에 폼을 그려야 초기값이 그대로 들어간다 */}
           {!isPending && !isError && (
             <>
-              {submitErrorMessage && (
-                <p
-                  className={`px-4 pt-4 text-center ${font.caption.regular}`}
-                  style={{ color: lightTheme.status.error }}
-                >
-                  {submitErrorMessage}
-                </p>
-              )}
-
               <RecordAddForm
                 mode="edit"
                 initialProcedureTypes={initialProcedureTypes}

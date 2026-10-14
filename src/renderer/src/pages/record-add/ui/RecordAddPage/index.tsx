@@ -13,11 +13,13 @@ import {
   mapFormValuesToCreateRequest,
   mapPhotoItemsToAddRequests,
 } from "@/features/record-add";
-import { ArrowIcon, ConfirmModal, useLeaveConfirm } from "@/shared";
+import { ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 const headingStyle = { color: lightTheme.label.neutral };
+
+const SAVE_ERROR_MESSAGE = "시술기록을 저장하지 못했습니다. 다시 시도해 주세요.";
 
 const RecordAddPage = () => {
   const navigate = useNavigate();
@@ -30,7 +32,6 @@ const RecordAddPage = () => {
   // 일부 사진만 올라간 뒤 다시 저장하면 이미 올라간 사진은 건너뛴다
   const [uploadedPhotoIds, setUploadedPhotoIds] = useState<string[]>([]);
 
-  const submitErrorMessage = createRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
   const isSubmitting = createRecord.isPending || addRecordPhotos.isPending;
 
   const handleClose = useCallback(() => {
@@ -77,7 +78,9 @@ const RecordAddPage = () => {
 
       handleClose();
     } catch (error) {
-      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+      // 폼이 길어 맨 위 문구는 보이지 않을 수 있어 토스트로 알린다.
+      showErrorToast(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
+
       if (error instanceof TreatmentRecordPhotoUploadError) {
         const succeededIds = uploadTargets
           .filter((_, index) => !error.failedIndexes.includes(index))
@@ -115,15 +118,6 @@ const RecordAddPage = () => {
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[clamp(18px,3dvh,26px)] no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {submitErrorMessage && (
-            <p
-              className={`px-4 pt-4 text-center ${font.caption.regular}`}
-              style={{ color: lightTheme.status.error }}
-            >
-              {submitErrorMessage}
-            </p>
-          )}
-
           <RecordAddForm
             isSubmitting={isSubmitting}
             onCancel={requestLeave}
