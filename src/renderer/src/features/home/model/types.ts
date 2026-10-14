@@ -47,10 +47,3 @@ export interface ArStyleType {
   name: string;
   imageUrl: string;
 }
-
-export interface HomeDataType {
-  profileName?: string;
-  recentRecord: RecentRecordType | null;
-  arStyles: ArStyleType[];
-  recommendations: RecommendationCardType[];
-}
