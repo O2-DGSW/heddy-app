@@ -2,7 +2,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import type { CSSProperties } from "react";
 
 import modalCloseImage from "../../assets/modal-close.png";
-import { cn } from "@/shared";
+import { cn, ModalShell } from "@/shared";
 
 interface ArCandidateSaveModalProps {
   memo: string;
@@ -21,11 +21,10 @@ const CANDIDATE_MEMO_STYLE = {
 } satisfies PlaceholderStyle;
 
 const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalProps) => (
-  <div
-    aria-labelledby="candidate-save-modal-title"
-    aria-modal="true"
-    className="ar-motion-overlay-enter fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50"
-    role="dialog"
+  <ModalShell
+    labelledBy="candidate-save-modal-title"
+    placement="center"
+    className="ar-motion-overlay-enter"
   >
     <div className="translate-y-[11.5px]">
       <div
@@ -98,7 +97,7 @@ const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalPr
         </div>
       </div>
     </div>
-  </div>
+  </ModalShell>
 );
 
 export default ArCandidateSaveModal;

@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { ShareQrModal } from "@/shared";
+import { ShareQrModal, ArrowIcon } from "@/shared";
 
 import { SavedStyleCard } from "../SavedStyleCard";
 import { useSavedStyles } from "../../model/useSavedStyles";
@@ -45,7 +44,7 @@ const SavedStylesPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1

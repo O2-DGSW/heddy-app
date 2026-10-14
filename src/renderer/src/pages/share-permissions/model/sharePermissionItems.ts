@@ -58,14 +58,6 @@ const SHARE_FIELD_LABEL_BY_TYPE: Record<ShareFieldType, string> = {
   SAVED_STYLES: "후보 스타일",
 };
 
-export const getErrorMessage = (error: unknown, fallbackMessage: string) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallbackMessage;
-};
-
 export const getConsentStatusByType = (consents: ConsentStatusResponse[] = []) =>
   consents.reduce<Partial<Record<ConsentType, ConsentStatusResponse>>>((statusByType, consent) => {
     statusByType[consent.consent_type] = consent;

@@ -1,6 +1,6 @@
-import { font } from "@heddy/design-tokens";
+import { font, lightTheme } from "@heddy/design-tokens";
+import { ArrowIcon } from "@/shared";
 import type { RecommendationSectionProps } from "../model/types";
-import arrow from "../assets/arrow-green.svg";
 import SectionFeedback from "./SectionFeedback";
 import RecommendationCard from "./RecommendationCard";
 
@@ -26,7 +26,7 @@ const RecommendationSection = ({
         className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
       >
         더보기
-        <img src={arrow} alt="" className="rotate-180" />
+        <ArrowIcon className="h-[8px] w-[8px] rotate-180" color={lightTheme.primary.normal} />
       </button>
     </div>
     {recommendations.length > 0 && !isLoading && !isError ? (

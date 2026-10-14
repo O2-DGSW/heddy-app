@@ -1,6 +1,8 @@
+import { lightTheme } from "@heddy/design-tokens";
+import { ArrowIcon } from "@/shared";
+
 import type { RecommendationCardProps } from "../model/types";
 import HomeImage from "./HomeImage";
-import arrow from "../assets/arrow.svg";
 import colorDot from "../assets/recommend-color-dot.svg";
 
 const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
@@ -34,7 +36,10 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
           : "일치도 정보 없음"}
       </span>
     </span>
-    <img src={arrow} alt="" className="shrink-0 rotate-180" />
+    <ArrowIcon
+      className="h-[10px] w-[10px] shrink-0 rotate-180"
+      color={lightTheme.label.alternative}
+    />
   </button>
 );
 export default RecommendationCard;

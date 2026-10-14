@@ -1,7 +1,8 @@
+import { lightTheme } from "@heddy/design-tokens";
 import { setNavigation } from "@capgo/capacitor-transitions/react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { arrowIcon } from "@/entities/record";
+import { ArrowIcon } from "@/shared";
 import { cn } from "@/shared/lib";
 
 interface AuthBackButtonProps {
@@ -39,7 +40,7 @@ const AuthBackButton = ({
       onClick={handleBack}
       type="button"
     >
-      <img alt="" aria-hidden="true" className="h-[20px] w-[20px]" src={arrowIcon} />
+      <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
     </button>
   );
 };

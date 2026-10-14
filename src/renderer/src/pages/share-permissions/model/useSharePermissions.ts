@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "@heddy/api";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,7 +13,6 @@ import {
   buildShareItem,
   getChangedConsents,
   getConsentStatusByType,
-  getErrorMessage,
   getShareIdFromItemId,
 } from "./sharePermissionItems";
 import type { ManagedConsentType } from "./sharePermissionItems";
@@ -49,7 +49,7 @@ export const useSharePermissions = () => {
   const isSaving = isConsentSaving || isShareSaving;
   const loadErrorMessage =
     consentsError || sharesError
-      ? getErrorMessage(consentsError ?? sharesError, "공유 권한 정보를 불러오지 못했습니다.")
+      ? getApiErrorMessage(consentsError ?? sharesError, "공유 권한 정보를 불러오지 못했습니다.")
       : null;
   const actionErrorMessage = saveErrorMessage ?? loadErrorMessage;
   const activeShares = shares?.items ?? EMPTY_SHARES;
@@ -175,7 +175,7 @@ export const useSharePermissions = () => {
 
       navigate(-1);
     } catch (error) {
-      setSaveErrorMessage(getErrorMessage(error, "공유 권한 저장에 실패했습니다."));
+      setSaveErrorMessage(getApiErrorMessage(error, "공유 권한 저장에 실패했습니다."));
     }
   };
 

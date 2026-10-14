@@ -1,13 +1,15 @@
 export {
-  addTreatmentRecordPhotoApi,
   createTreatmentRecordApi,
   deleteTreatmentRecordApi,
-  deleteTreatmentRecordPhotoApi,
   getTreatmentRecordApi,
   getTreatmentRecordsApi,
   updateTreatmentRecordApi,
-  updateTreatmentRecordPhotoApi,
 } from "./treatmentRecordApi";
+export {
+  addTreatmentRecordPhotoApi,
+  deleteTreatmentRecordPhotoApi,
+  updateTreatmentRecordPhotoApi,
+} from "./treatmentRecordPhotoApi";
 export { getLatestAnalysisApi } from "./analysisApi";
 export {
   TreatmentRecordPhotoUploadError,

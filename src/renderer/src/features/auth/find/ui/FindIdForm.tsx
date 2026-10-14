@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useFindId } from "@/features/auth/find/model/useFindId";
 
+import { FindTabs } from "./FindTabs";
+
 export const FindIdForm = () => {
-  const navigate = useNavigate();
   const {
     phone,
     verificationCode,
@@ -15,29 +15,7 @@ export const FindIdForm = () => {
 
   return (
     <div className="flex flex-col w-full flex-1">
-      <div
-        className="flex w-full mb-8"
-        style={{ borderBottom: `1px solid ${lightTheme.line.alternative}` }}
-      >
-        {[
-          { label: "아이디 찾기", path: "/find-id", isActive: true },
-          { label: "비밀번호 찾기", path: "/find-password", isActive: false },
-        ].map(({ label, path, isActive }) => (
-          <button
-            key={path}
-            className={`flex-1 pt-3 flex flex-col items-center ${font.body.bold}`}
-            style={{ color: isActive ? lightTheme.label.normal : lightTheme.label.assistive }}
-            onClick={() => !isActive && navigate(path, { replace: true })}
-            type="button"
-          >
-            <span className="pb-3">{label}</span>
-            <div
-              className="w-[60px] h-[2px] -mb-px"
-              style={{ backgroundColor: isActive ? lightTheme.label.normal : "transparent" }}
-            />
-          </button>
-        ))}
-      </div>
+      <FindTabs activePath="/find-id" />
 
       <div className="flex flex-col gap-4 flex-1">
         <div className="flex flex-col gap-1">

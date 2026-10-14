@@ -1,3 +1,5 @@
+import { isRecord } from "@/shared/lib";
+
 export interface ArStats {
   yaw?: number;
   yaw_ema?: number;
@@ -10,9 +12,6 @@ export type ArServerEvent =
   | { type: "groom"; status: "ok" | "error"; groom?: string; message?: string }
   | { type: "forehead"; status: "loading" | "ok" | "error"; message?: string }
   | { type: "error"; message: string };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 
 const getEventData = (value: Record<string, unknown>): Record<string, unknown> => {
   if (isRecord(value.data)) return value.data;

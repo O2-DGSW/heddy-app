@@ -1,7 +1,7 @@
+import { StarIcon } from "@/shared";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CutsStatusBadge } from "@/features/cuts/ui/CutsStatusBadge";
-import { CutsStarIcon } from "@/features/cuts/ui/icons/CutsStarIcon";
 import { CutsChevronRightIcon } from "@/features/cuts/ui/icons/CutsChevronRightIcon";
 import type { CutsRecord } from "@/features/cuts/model/types/CutsRecord.types";
 import type { CutsViewMode } from "@/features/cuts/model/types/CutsViewMode.types";
@@ -123,7 +123,11 @@ const CutsRatingStars = ({ rating }: { rating: number }) => {
   return (
     <span aria-label={`평점 ${rating}점`} className="flex shrink-0 items-center gap-0.5">
       {Array.from({ length: 5 }, (_, index) => (
-        <CutsStarIcon key={index} filled={index < rating} />
+        <StarIcon
+          key={index}
+          filled={index < rating}
+          className="h-3.5 w-3.5 max-[400px]:h-3 max-[400px]:w-3"
+        />
       ))}
     </span>
   );

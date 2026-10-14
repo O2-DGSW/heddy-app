@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "@heddy/api";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,14 +16,6 @@ import type { PreferredStyleTabType, StyleTag, StyleTagStatusType } from "./type
 const formatStyleTagLabel = (tagName: string) => {
   const trimmedTagName = tagName.trim();
   return trimmedTagName.startsWith("#") ? trimmedTagName : `#${trimmedTagName}`;
-};
-
-const getErrorMessage = (error: unknown, fallbackMessage: string) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallbackMessage;
 };
 
 const buildStyleTags = (
@@ -91,7 +84,7 @@ export const usePreferredStyleRegistration = () => {
   const isFetching = isStyleTagsFetching || isStylePreferencesFetching;
   const loadErrorMessage =
     styleTagError || stylePreferencesError
-      ? getErrorMessage(
+      ? getApiErrorMessage(
           styleTagError ?? stylePreferencesError,
           "스타일 정보를 불러오지 못했습니다."
         )
@@ -168,7 +161,7 @@ export const usePreferredStyleRegistration = () => {
       await putStylePreferences(body);
       navigate(-1);
     } catch (error) {
-      setSaveErrorMessage(getErrorMessage(error, "선호 스타일 저장에 실패했습니다."));
+      setSaveErrorMessage(getApiErrorMessage(error, "선호 스타일 저장에 실패했습니다."));
     }
   };
 

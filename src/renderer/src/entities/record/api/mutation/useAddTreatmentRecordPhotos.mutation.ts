@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { addTreatmentRecordPhotoApi } from "../treatmentRecordApi";
+import { addTreatmentRecordPhotoApi } from "../treatmentRecordPhotoApi";
 import { recordQueryKeys } from "../query/recordQueryKeys";
 import type { AddTreatmentRecordPhotoRequest } from "@/entities/record/model/treatmentRecord.types";
 

@@ -5,7 +5,6 @@ import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
   TreatmentRecordPhotoUploadError,
-  arrowIcon,
   useAddTreatmentRecordPhotos,
   useCreateTreatmentRecord,
 } from "@/entities/record";
@@ -14,6 +13,7 @@ import {
   mapFormValuesToCreateRequest,
   mapPhotoItemsToAddRequests,
 } from "@/features/record-add";
+import { ArrowIcon } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
@@ -96,7 +96,7 @@ const RecordAddPage = () => {
             onClick={handleClose}
             type="button"
           >
-            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+            <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
           </button>
 
           <h1 className={font.headline1.bold} id="record-add-title" style={headingStyle}>

@@ -3,11 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import {
-  arrowIcon,
-  useGetTreatmentRecord,
-  useUpdateTreatmentRecord,
-} from "@/entities/record";
+import { useGetTreatmentRecord, useUpdateTreatmentRecord } from "@/entities/record";
 import {
   RecordAddForm,
   mapDetailToFormValues,
@@ -17,6 +13,7 @@ import {
   mapFormValuesToUpdateRequest,
   usePutTreatmentRecordPhotos,
 } from "@/features/record-add";
+import { ArrowIcon } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
@@ -102,7 +99,7 @@ const RecordEditPage = () => {
             onClick={handleClose}
             type="button"
           >
-            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+            <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
           </button>
 
           <h1 className={font.headline1.bold} id="record-edit-title" style={headingStyle}>

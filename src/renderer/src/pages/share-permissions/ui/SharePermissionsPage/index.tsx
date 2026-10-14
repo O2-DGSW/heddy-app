@@ -1,7 +1,6 @@
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, ArrowIcon } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
 import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
@@ -138,7 +137,7 @@ const SharePermissionsPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1
