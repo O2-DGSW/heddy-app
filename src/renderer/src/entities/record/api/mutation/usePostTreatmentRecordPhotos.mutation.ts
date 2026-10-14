@@ -49,6 +49,8 @@ export const usePostTreatmentRecordPhotos = () => {
 
   return useMutation({
     mutationFn: uploadPhotos,
+    // 변수에 사진 File이 담겨 있어 화면을 떠나면 바로 캐시에서 지운다(기본 5분 보관).
+    gcTime: 0,
     // 일부만 성공해도 서버에는 사진이 붙었으므로 성공·실패 모두 다시 불러온다
     onSettled: (_photos, _error, { recordId }) => {
       void queryClient.invalidateQueries({ queryKey: recordQueryKeys.detail(recordId) });
