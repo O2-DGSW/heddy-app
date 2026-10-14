@@ -5,7 +5,6 @@ import { getArServerBaseUrl, requestArServerOffer } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArGroomState } from "@/entities/ar-groom";
 
 import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
-import type { ArStats } from "./arServerEvent";
 import {
   configureVideoSender,
   getArConnectionErrorMessage,
@@ -22,7 +21,8 @@ interface UseArServerConnectionResult {
   controlReady: boolean;
   groomState: ArGroomState;
   foreheadState: ArGroomState;
-  stats: ArStats | null;
+  /** 서버가 얼굴 yaw를 보내 주고 있는지. 매 stats마다 바뀌지 않도록 boolean만 state로 둔다 */
+  hasServerYaw: boolean;
   handleGroomRetry: () => void;
   handleForeheadRefresh: () => void;
 }
@@ -40,7 +40,7 @@ export const useArServerConnection = (
   // 언마운트 때는 effect cleanup보다 ref 해제가 먼저라 video ref가 이미 null이다.
   // 스트림을 붙인 요소를 따로 기억해 두고 정리할 때 이 목록으로 해제한다.
   const attachedVideosRef = useRef(new Set<HTMLVideoElement>());
-  const [stats, setStats] = useState<ArStats | null>(null);
+  const [hasServerYaw, setHasServerYaw] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
@@ -67,7 +67,7 @@ export const useArServerConnection = (
     attachedVideosRef.current.clear();
     resetGroomFit();
     setControlReady(false);
-    setStats(null);
+    setHasServerYaw(false);
   }, [resetGroomFit]);
 
   const attachStream = useCallback((video: HTMLVideoElement, stream: MediaStream) => {
@@ -124,8 +124,10 @@ export const useArServerConnection = (
             try {
               const serverEvent = parseArServerEvent(await parseDataChannelPayload(event.data));
               if (!isCurrentPeer() || !serverEvent) return;
-              if (serverEvent.type === "stats") setStats(serverEvent.data);
-              else handleControlEvent(serverEvent);
+              if (serverEvent.type === "stats") {
+                const { yaw, yaw_ema: yawEma } = serverEvent.data;
+                setHasServerYaw(typeof (yawEma ?? yaw) === "number");
+              } else handleControlEvent(serverEvent);
             } catch {
               // 잘못된 진단 메시지가 합성 영상 재생을 중단하지 않도록 무시한다.
             }
@@ -185,7 +187,7 @@ export const useArServerConnection = (
     controlReady,
     groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
     foreheadState,
-    stats,
+    hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
   };
