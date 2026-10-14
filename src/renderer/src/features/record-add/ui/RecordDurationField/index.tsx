@@ -71,6 +71,8 @@ const RecordDurationField = ({
   useHideBottomBarWhileOpen(isPickerOpen);
 
   const selectedLabel = formatDurationDisplay(value) || "입력";
+  // 0시간 0분은 저장할 수 없는 값이라 확인을 막고, 막은 이유를 바로 위에 보여 준다.
+  const isDraftEmpty = draftHour === 0 && draftMinute === 0;
   const selectedColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
 
   const handleOpenPicker = () => {
@@ -204,11 +206,23 @@ const RecordDurationField = ({
                 />
               </div>
 
+              <p
+                aria-live="polite"
+                className={cn(
+                  font.caption.regular,
+                  "mt-[clamp(14px,2.5dvh,20px)] min-h-[1.2em] text-center"
+                )}
+                style={{ color: lightTheme.label.assistive }}
+              >
+                {isDraftEmpty ? "1분 이상 골라 주세요." : ""}
+              </p>
+
               <button
                 className={cn(
                   font.headline2.semiBold,
-                  "mt-[clamp(22px,4dvh,32px)] h-[48px] w-full rounded-[10px] border-0"
+                  "mt-[8px] h-[48px] w-full rounded-[10px] border-0 disabled:opacity-50"
                 )}
+                disabled={isDraftEmpty}
                 onClick={handleConfirm}
                 style={confirmButtonStyle}
                 type="button"

@@ -136,7 +136,8 @@ const PreferredStyleRegistrationPage = () => {
                   ) : (
                     styleTags.map(tag => (
                       <StyleTagButton
-                        disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
+                        disabled={isSaving}
+                        isUnavailable={getIsTagDisabled(tag.status, activeTab)}
                         key={tag.id}
                         label={tag.label}
                         onClick={() => handleTagClick(tag.id)}

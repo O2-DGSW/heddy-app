@@ -132,7 +132,16 @@ export const usePreferredStyleRegistration = () => {
   const handleTagClick = (tagId: string) => {
     const targetTag = styleTags.find(tag => tag.id === tagId);
 
-    if (!targetTag || getIsTagDisabled(targetTag.status, activeTab)) {
+    if (!targetTag) {
+      return;
+    }
+
+    // 다른 탭에서 고른 태그는 여기서 바꿀 수 없다. 눌러도 반응이 없으면 고장 난 것처럼 보여 이유를 알린다.
+    if (getIsTagDisabled(targetTag.status, activeTab)) {
+      const otherTab = activeTab === "preferred" ? "excluded" : "preferred";
+      setSaveErrorMessage(
+        `${TAB_LABEL_BY_TYPE[otherTab]} 태그로 고른 스타일입니다. ${TAB_LABEL_BY_TYPE[otherTab]} 탭에서 먼저 빼 주세요.`
+      );
       return;
     }
 

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { ArrowIcon } from "@/shared";
+import { ArrowIcon, cn } from "@/shared";
 import { usePostShare } from "@/entities/share";
 import type { ShareFieldType } from "@/entities/share";
 import { CutsShareItemList } from "@/features/cuts";
@@ -49,6 +49,8 @@ export const CutsSharePage = () => {
 
   // 서버가 기록·항목 각각 1개 이상을 요구하므로 그 전에는 버튼을 막는다.
   const canCreateShare = Boolean(selectedId) && selectedFields.length > 0 && !createShare.isPending;
+  const createShareHint =
+    selectedFields.length === 0 ? "공유할 항목을 하나 이상 골라 주세요." : null;
 
   return (
     <cap-page>
@@ -91,7 +93,19 @@ export const CutsSharePage = () => {
             </p>
           )}
 
-          <div className="mt-auto grid grid-cols-2 gap-2 px-4 pt-6">
+          {createShareHint && (
+            <p
+              aria-live="polite"
+              className={cn("mt-auto px-4 pt-6 text-center", font.caption.regular)}
+              style={{ color: lightTheme.label.assistive }}
+            >
+              {createShareHint}
+            </p>
+          )}
+
+          <div
+            className={cn("grid grid-cols-2 gap-2 px-4", createShareHint ? "pt-2" : "mt-auto pt-6")}
+          >
             <button
               type="button"
               onClick={handleBack}
