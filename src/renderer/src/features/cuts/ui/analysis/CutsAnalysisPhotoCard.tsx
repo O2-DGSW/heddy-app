@@ -31,7 +31,12 @@ export const CutsAnalysisPhotoCard = ({ photoUrl, overlays }: CutsAnalysisPhotoC
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         {photoUrl ? (
-          <img src={photoUrl} alt="시술 분석 사진" className="h-full w-full object-cover" />
+          <img
+            decoding="async"
+            src={photoUrl}
+            alt="시술 분석 사진"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <p
             className={`flex h-full w-full items-center justify-center ${font.caption.regular}`}

@@ -24,6 +24,16 @@ const HomeImage = ({ src, alt, className }: HomeImageProps) => {
         사진 없음
       </span>
     );
-  return <img src={src} alt={alt} className={className} draggable={false} onError={handleError} />;
+  return (
+    <img
+      decoding="async"
+      loading="lazy"
+      src={src}
+      alt={alt}
+      className={className}
+      draggable={false}
+      onError={handleError}
+    />
+  );
 };
 export default HomeImage;

@@ -151,6 +151,8 @@ const ArHairstyleCarousel = ({
                 </span>
               ) : option.imageUrl ? (
                 <img
+                  decoding="async"
+                  loading="lazy"
                   alt={`${option.label} 참고 이미지`}
                   className="h-full w-full object-cover"
                   src={option.imageUrl}
