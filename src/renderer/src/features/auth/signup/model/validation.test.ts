@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 
-import { isPasswordMatch, isRequiredSignupAgreementsAccepted, isValidPhone } from "./validation";
+import {
+  hasEnteredFullPhone,
+  isPasswordMatch,
+  isRequiredSignupAgreementsAccepted,
+  isValidEmail,
+  isValidPhone,
+} from "./validation";
 
 const ALL_DECLINED = {
   terms_of_service: false,
@@ -35,5 +41,23 @@ describe("회원가입 검증", () => {
         privacy_policy: true,
       })
     ).toBe(true);
+  });
+});
+
+describe("isValidEmail", () => {
+  test("아이디@도메인.최상위 꼴만 통과한다", () => {
+    expect(isValidEmail("user@heddy.site")).toBe(true);
+    expect(isValidEmail(" user@heddy.site ")).toBe(true);
+    expect(isValidEmail("user@heddy")).toBe(false);
+    expect(isValidEmail("user heddy.site")).toBe(false);
+    expect(isValidEmail("")).toBe(false);
+  });
+});
+
+describe("hasEnteredFullPhone", () => {
+  test("숫자를 10자리 이상 입력해야 끝까지 입력한 것으로 본다", () => {
+    expect(hasEnteredFullPhone("010-1234")).toBe(false);
+    expect(hasEnteredFullPhone("011-123-4567")).toBe(true);
+    expect(hasEnteredFullPhone("010-1234-5678")).toBe(true);
   });
 });
