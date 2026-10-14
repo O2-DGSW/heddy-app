@@ -1,4 +1,5 @@
 /** AR 서버와의 WebRTC 연결에 쓰는 헬퍼. React 상태와 무관하다 */
+import { requestNativeCameraPermission } from "./cameraPermission";
 
 const ICE_GATHERING_TIMEOUT_MS = 10000;
 
@@ -66,10 +67,12 @@ export const configureVideoSender = (
 };
 
 /** 전면 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
-export const openFrontCamera = (): Promise<MediaStream> => {
+export const openFrontCamera = async (): Promise<MediaStream> => {
   if (!navigator.mediaDevices?.getUserMedia) {
-    throw new Error("카메라를 사용할 수 없습니다. HTTPS 또는 localhost에서 다시 시도해 주세요.");
+    throw new Error("이 환경에서는 카메라를 사용할 수 없습니다.");
   }
+
+  await requestNativeCameraPermission();
 
   return navigator.mediaDevices.getUserMedia({
     audio: false,
