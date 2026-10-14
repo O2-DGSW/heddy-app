@@ -15,10 +15,17 @@ export const GROOM_FIT_RANGES = {
   groom_fwd: { label: "앞뒤 위치", min: -15, max: 15, step: 0.5, unit: "cm" },
 } as const;
 
+type GroomFitKeyType = keyof typeof GROOM_FIT_RANGES;
+
+const isGroomFitKey = (key: string): key is GroomFitKeyType => key in GROOM_FIT_RANGES;
+
+const GROOM_FIT_KEYS = Object.keys(GROOM_FIT_RANGES).filter(isGroomFitKey);
+
 export const isValidGroomFitSettings = (settings: ArGroomFitSettings): boolean =>
   (settings.groom_color === "" || /^#[0-9a-f]{6}$/i.test(settings.groom_color)) &&
-  Object.entries(GROOM_FIT_RANGES).every(([key, range]) => {
-    const value = settings[key as keyof typeof GROOM_FIT_RANGES];
+  GROOM_FIT_KEYS.every(key => {
+    const range = GROOM_FIT_RANGES[key];
+    const value = settings[key];
     return Number.isFinite(value) && value >= range.min && value <= range.max;
   });
 
@@ -43,7 +50,7 @@ export const buildGroomFitCommand = (
       : DEFAULT_GROOM_FIT_SETTINGS;
   if (settings.groom_color !== previousSettings.groom_color)
     command.groom_color = settings.groom_color;
-  for (const key of Object.keys(GROOM_FIT_RANGES) as (keyof typeof GROOM_FIT_RANGES)[]) {
+  for (const key of GROOM_FIT_KEYS) {
     if (settings[key] !== previousSettings[key]) command[key] = settings[key];
   }
   return Object.keys(command).length > 1 ? command : null;

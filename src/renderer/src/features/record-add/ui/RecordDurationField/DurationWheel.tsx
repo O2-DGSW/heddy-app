@@ -51,11 +51,7 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
 
   /** 같은 후보를 여러 벌 이어 붙인 실제 렌더 목록 */
   const loopedOptions = useMemo(
-    () =>
-      Array.from(
-        { length: repeatCount * options.length },
-        (_, loopedIndex) => options[loopedIndex % options.length] as number
-      ),
+    () => Array.from({ length: repeatCount }, () => options).flat(),
     [options, repeatCount]
   );
 

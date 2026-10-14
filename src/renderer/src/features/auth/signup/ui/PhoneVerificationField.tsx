@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "@/entities/auth";
 import type { Carrier } from "@/entities/auth";
@@ -42,6 +43,11 @@ export const PhoneVerificationField = ({
   const isAlddulSelected = isMvnoCarrier(carrier);
   const canSend = canRequestVerification && !isSending;
 
+  const handleMvnoCarrierChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    if (isMvnoCarrier(value)) onCarrierChange(value);
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
@@ -62,7 +68,7 @@ export const PhoneVerificationField = ({
             color: isAlddulSelected ? lightTheme.primary.normal : lightTheme.label.assistive,
           }}
           value={isAlddulSelected ? carrier : ""}
-          onChange={e => onCarrierChange(e.target.value as Carrier)}
+          onChange={handleMvnoCarrierChange}
         >
           <option value="" disabled>
             알뜰폰

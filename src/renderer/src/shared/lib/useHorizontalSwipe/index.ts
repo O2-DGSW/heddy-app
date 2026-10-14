@@ -9,6 +9,14 @@ const DEFAULT_MIN_DISTANCE = 60;
 
 type SwipeAxis = "none" | "horizontal" | "vertical";
 
+interface SwipeGestureState {
+  startX: number;
+  startY: number;
+  isTracking: boolean;
+  axis: SwipeAxis;
+  shouldSuppressClick: boolean;
+}
+
 interface UseHorizontalSwipeOptions {
   /** 왼쪽으로 밀었을 때(다음 항목) */
   onSwipeLeft: () => void;
@@ -37,11 +45,11 @@ export const useHorizontalSwipe = ({
   onSwipeRight,
   minDistance = DEFAULT_MIN_DISTANCE,
 }: UseHorizontalSwipeOptions): HorizontalSwipeProps => {
-  const gesture = useRef({
+  const gesture = useRef<SwipeGestureState>({
     startX: 0,
     startY: 0,
     isTracking: false,
-    axis: "none" as SwipeAxis,
+    axis: "none",
     shouldSuppressClick: false,
   });
 

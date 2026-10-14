@@ -1,7 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "@/entities/auth";
-import type { Carrier, MvnoCarrier, useSmsVerification } from "@/entities/auth";
+import type { Carrier, useSmsVerification } from "@/entities/auth";
 import { RadioButton } from "@/shared/ui/radio/RadioButton";
 
 interface FieldState<TValue = string> {
@@ -70,7 +70,10 @@ export const FindPasswordVerifyStep = ({
                 : lightTheme.label.assistive,
             }}
             value={isMvnoCarrier(carrierField.value) ? carrierField.value : ""}
-            onChange={e => carrierField.onChange(e.target.value as MvnoCarrier)}
+            onChange={e => {
+              const { value } = e.target;
+              if (isMvnoCarrier(value)) carrierField.onChange(value);
+            }}
           >
             <option value="" disabled>
               알뜰폰
