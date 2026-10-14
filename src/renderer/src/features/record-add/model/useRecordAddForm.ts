@@ -19,6 +19,15 @@ import type {
 
 type RecordFormErrorKeyType = "date" | "procedureType" | "duration" | "photos";
 type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
+interface RecordFormSnapshot {
+  formValues: RecordFormValues;
+  photoIds: string[];
+  procedureTypes: ProcedureType[];
+  rating: number;
+}
+
+const serializeSnapshot = (snapshot: RecordFormSnapshot) => JSON.stringify(snapshot);
+
 type TextChangeHandlerType = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
@@ -53,9 +62,10 @@ export const useRecordAddForm = ({
   const isUnmountedRef = useRef(false);
   // 추가 화면은 오늘 시술을 적는 경우가 대부분이라 날짜를 오늘로 채워 두고 시작한다.
   // (수정 화면은 initialValues가 들어와 기존 날짜가 그대로 유지된다.)
-  const [formValues, setFormValues] = useState<RecordFormValues>(
+  const [initialFormValues] = useState<RecordFormValues>(
     () => initialValues ?? { ...INITIAL_FORM_VALUES, date: getTodayDateValue() }
   );
+  const [formValues, setFormValues] = useState<RecordFormValues>(initialFormValues);
   const [photos, setPhotos] = useState<PhotoItem[]>(initialPhotos ?? INITIAL_PHOTOS);
   // 압축을 기다리는 동안 다시 사진을 고르면 화면의 photos가 아직 갱신되지 않아 10장 제한이 깨진다.
   // 확정된 장수와 처리 중인 장수를 ref로 세서 고르는 즉시 남은 자리를 계산한다.
@@ -67,11 +77,27 @@ export const useRecordAddForm = ({
   );
   const [rating, setRating] = useState(initialRating ?? 0);
   const [formErrors, setFormErrors] = useState<RecordFormErrorsType>({});
+  // 처음 값과 비교해 저장하지 않은 입력이 있는지 본다(나갈 때 되물을지 정한다).
+  const [initialSnapshot] = useState(() =>
+    serializeSnapshot({
+      formValues: initialFormValues,
+      photoIds: (initialPhotos ?? INITIAL_PHOTOS).map(photo => photo.id),
+      procedureTypes: initialProcedureTypes ?? [],
+      rating: initialRating ?? 0,
+    })
+  );
 
   // 초기값 동기화는 따로 하지 않는다. 수정 화면이 서버 값을 받은 뒤에 폼을 렌더하므로
   // 위 useState 초기값만으로 충분하고, 편집 중에 값이 덮어써지는 사고도 막을 수 있다.
 
   const isPhotoLimitReached = photos.length >= MAX_PHOTO_COUNT;
+  const isDirty =
+    serializeSnapshot({
+      formValues,
+      photoIds: photos.map(photo => photo.id),
+      procedureTypes: selectedProcedureTypes,
+      rating,
+    }) !== initialSnapshot;
 
   const validateForm = () => {
     const nextFormErrors: RecordFormErrorsType = {};
@@ -253,6 +279,7 @@ export const useRecordAddForm = ({
   return {
     formErrors,
     formValues,
+    isDirty,
     isPhotoLimitReached,
     photoInputRef,
     photos,

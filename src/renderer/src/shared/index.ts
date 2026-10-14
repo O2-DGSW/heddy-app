@@ -1,4 +1,4 @@
-export { cn, shareLink } from "./lib";
+export { cn, shareLink, useLeaveConfirm } from "./lib";
 export { chevronRightIcon, profileAvatar, sadMascot } from "./assets";
 export { useBottomBarVisibility, useHideBottomBarWhileOpen } from "./model/bottom-bar-visibility";
 export { BottomBarVisibilityProvider } from "./ui/bottom-bar-visibility-provider";

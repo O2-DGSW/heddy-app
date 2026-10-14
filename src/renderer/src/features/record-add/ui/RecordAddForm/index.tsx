@@ -1,4 +1,5 @@
 import { lightTheme, font } from "@heddy/design-tokens";
+import { useEffect } from "react";
 
 import {
   ProcedureTypeSelector,
@@ -32,6 +33,8 @@ interface RecordAddFormProps {
   initialRating?: number;
   isSubmitting?: boolean;
   onSubmitValues?: (values: RecordFormSubmitValues) => void;
+  /** 저장하지 않은 입력이 생기거나 없어질 때. 화면이 나가기 전에 되물을지 정한다 */
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const closeButtonStyle = {
@@ -53,12 +56,14 @@ const RecordAddForm = ({
   initialRating,
   isSubmitting,
   onSubmitValues,
+  onDirtyChange,
 }: RecordAddFormProps) => {
   const isEditMode = mode === "edit";
 
   const {
     formErrors,
     formValues,
+    isDirty,
     isPhotoLimitReached,
     photoInputRef,
     photos,
@@ -84,6 +89,10 @@ const RecordAddForm = ({
       onSubmitValues?.({ formValues, photos, procedureTypes: selectedProcedureTypes, rating });
     },
   });
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   return (
     <form

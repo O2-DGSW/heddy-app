@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
@@ -13,7 +13,7 @@ import {
   mapFormValuesToCreateRequest,
   mapPhotoItemsToAddRequests,
 } from "@/features/record-add";
-import { ArrowIcon } from "@/shared";
+import { ArrowIcon, ConfirmModal, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
@@ -21,6 +21,9 @@ const headingStyle = { color: lightTheme.label.neutral };
 
 const RecordAddPage = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+  // 폼이 알려 주는 저장하지 않은 입력 여부. 나갈 때 되물을지 정한다.
+  const [isDirty, setIsDirty] = useState(false);
   const createRecord = usePostTreatmentRecord();
   const addRecordPhotos = usePostTreatmentRecordPhotos();
   const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
@@ -30,10 +33,16 @@ const RecordAddPage = () => {
   const submitErrorMessage = createRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
   const isSubmitting = createRecord.isPending || addRecordPhotos.isPending;
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setDirection("back");
     navigate(-1);
-  };
+  }, [navigate]);
+
+  const { isLeaveConfirmOpen, requestLeave, confirmLeave, cancelLeave } = useLeaveConfirm({
+    isDirty,
+    containerRef: sectionRef,
+    onLeave: handleClose,
+  });
 
   const handleSubmit = async ({
     formValues,
@@ -82,6 +91,7 @@ const RecordAddPage = () => {
   return (
     <cap-page>
       <section
+        ref={sectionRef}
         aria-labelledby="record-add-title"
         className="flex h-full min-h-0 flex-col overflow-hidden"
         style={pageStyle}
@@ -93,7 +103,7 @@ const RecordAddPage = () => {
           <button
             aria-label="뒤로 가기"
             className="absolute left-[14px] flex h-[44px] w-[44px] items-center justify-start border-0 bg-transparent p-0"
-            onClick={handleClose}
+            onClick={requestLeave}
             type="button"
           >
             <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
@@ -116,10 +126,23 @@ const RecordAddPage = () => {
 
           <RecordAddForm
             isSubmitting={isSubmitting}
-            onCancel={handleClose}
+            onCancel={requestLeave}
+            onDirtyChange={setIsDirty}
             onSubmitValues={handleSubmit}
           />
         </div>
+
+        {isLeaveConfirmOpen && (
+          <ConfirmModal
+            cancelLabel="계속 작성"
+            confirmLabel="나가기"
+            description="작성한 내용은 저장되지 않습니다."
+            onCancel={cancelLeave}
+            onConfirm={confirmLeave}
+            title="작성을 그만두고 나갈까요?"
+            tone="danger"
+          />
+        )}
       </section>
     </cap-page>
   );
