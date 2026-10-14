@@ -20,41 +20,65 @@ const getYawFromTransformationMatrix = (matrix: number[]): number | null => {
   return Number.isFinite(yaw) ? yaw : null;
 };
 
+const createFaceLandmarker = async () => {
+  const vision = await FilesetResolver.forVisionTasks(publicUrl("mediapipe"));
+
+  return FaceLandmarker.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: publicUrl("models/face_landmarker.task") },
+    minFaceDetectionConfidence: 0.6,
+    minFacePresenceConfidence: 0.6,
+    minTrackingConfidence: 0.6,
+    numFaces: 1,
+    outputFacialTransformationMatrixes: true,
+    runningMode: "VIDEO",
+  });
+};
+
+// WASM과 모델을 AR 화면에 들어올 때마다 다시 올리지 않도록 앱 수명 동안 한 번만 만든다.
+let faceLandmarkerPromise: Promise<FaceLandmarker> | null = null;
+
+const getFaceLandmarker = () => {
+  faceLandmarkerPromise ??= createFaceLandmarker().catch((error: unknown) => {
+    // 실패한 Promise를 남겨 두면 다음 진입에서도 계속 실패하므로 비운다.
+    faceLandmarkerPromise = null;
+    throw error;
+  });
+
+  return faceLandmarkerPromise;
+};
+
 export const useFaceYaw = (
   faceTrackingVideoRef: RefObject<HTMLVideoElement | null>
 ): UseFaceYawResult => {
-  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const lastDetectionAtRef = useRef(0);
   const previousYawRef = useRef<number | null>(null);
   const [yaw, setYaw] = useState<number | null>(null);
 
   useEffect(() => {
     let isActive = true;
+    let detectionTimer: number | null = null;
 
-    const runFaceDetection = () => {
+    // 감지는 120ms마다 한 번이면 충분해 매 프레임 도는 rAF 대신 타이머로 다음 감지를 건다.
+    const scheduleDetection = (faceLandmarker: FaceLandmarker) => {
+      detectionTimer = window.setTimeout(
+        () => runFaceDetection(faceLandmarker),
+        DETECTION_INTERVAL_MS
+      );
+    };
+
+    const runFaceDetection = (faceLandmarker: FaceLandmarker) => {
       if (!isActive) {
         return;
       }
 
-      const faceLandmarker = faceLandmarkerRef.current;
       const faceTrackingVideo = faceTrackingVideoRef.current;
-      const now = performance.now();
 
-      if (
-        !faceLandmarker ||
-        !faceTrackingVideo ||
-        faceTrackingVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
-        now - lastDetectionAtRef.current < DETECTION_INTERVAL_MS
-      ) {
-        animationFrameRef.current = window.requestAnimationFrame(runFaceDetection);
+      if (!faceTrackingVideo || faceTrackingVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        scheduleDetection(faceLandmarker);
         return;
       }
 
-      lastDetectionAtRef.current = now;
-
       try {
-        const result = faceLandmarker.detectForVideo(faceTrackingVideo, now);
+        const result = faceLandmarker.detectForVideo(faceTrackingVideo, performance.now());
         const matrix = result.facialTransformationMatrixes[0];
         const detectedYaw = matrix ? getYawFromTransformationMatrix(matrix.data) : null;
 
@@ -75,29 +99,16 @@ export const useFaceYaw = (
         setYaw(null);
       }
 
-      animationFrameRef.current = window.requestAnimationFrame(runFaceDetection);
+      scheduleDetection(faceLandmarker);
     };
 
     const initializeFaceLandmarker = async () => {
       try {
-        const vision = await FilesetResolver.forVisionTasks(publicUrl("mediapipe"));
-        const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-          baseOptions: { modelAssetPath: publicUrl("models/face_landmarker.task") },
-          minFaceDetectionConfidence: 0.6,
-          minFacePresenceConfidence: 0.6,
-          minTrackingConfidence: 0.6,
-          numFaces: 1,
-          outputFacialTransformationMatrixes: true,
-          runningMode: "VIDEO",
-        });
+        const faceLandmarker = await getFaceLandmarker();
 
-        if (!isActive) {
-          faceLandmarker.close();
-          return;
+        if (isActive) {
+          runFaceDetection(faceLandmarker);
         }
-
-        faceLandmarkerRef.current = faceLandmarker;
-        animationFrameRef.current = window.requestAnimationFrame(runFaceDetection);
       } catch {
         if (isActive) {
           setYaw(null);
@@ -110,12 +121,9 @@ export const useFaceYaw = (
     return () => {
       isActive = false;
 
-      if (animationFrameRef.current !== null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
+      if (detectionTimer !== null) {
+        window.clearTimeout(detectionTimer);
       }
-
-      faceLandmarkerRef.current?.close();
-      faceLandmarkerRef.current = null;
     };
   }, [faceTrackingVideoRef]);
 
