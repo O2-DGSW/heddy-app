@@ -20,6 +20,8 @@ interface ArHairstyleCarouselProps {
   onSelect: (hairstyleId: HairstyleOptionId) => void;
 }
 
+// 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
+const HAIRSTYLE_BASE_SIZE = getHairstyleSize(0);
 const SWIPE_THRESHOLD = 24;
 const WHEEL_STEP_INTERVAL = 280;
 
@@ -118,12 +120,17 @@ const ArHairstyleCarousel = ({
         const isNoStyle = option.id === "none";
         const size = getHairstyleSize(offset);
         const isFocusable = Math.abs(offset) <= 2;
+        const translateX = getHairstyleItemLeft(offset) + size / 2 - HAIRSTYLE_BASE_SIZE / 2;
 
         return (
           <div
-            className="absolute top-1/2 -translate-y-1/2 transition-[left,width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            className="absolute left-0 top-1/2 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
             key={position}
-            style={{ height: size, left: getHairstyleItemLeft(offset), width: size }}
+            style={{
+              height: HAIRSTYLE_BASE_SIZE,
+              width: HAIRSTYLE_BASE_SIZE,
+              transform: `translate(${translateX}px, -50%) scale(${size / HAIRSTYLE_BASE_SIZE})`,
+            }}
           >
             <button
               aria-label={isNoStyle ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
@@ -139,7 +146,7 @@ const ArHairstyleCarousel = ({
               type="button"
             >
               {isNoStyle ? (
-                <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.5)]">
                   <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
                 </span>
               ) : option.imageUrl ? (
@@ -151,7 +158,7 @@ const ArHairstyleCarousel = ({
               ) : (
                 <span
                   className={cn(
-                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/20 px-1 text-center text-[9px] font-semibold leading-tight text-white backdrop-blur",
+                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/30 px-1 text-center text-[9px] font-semibold leading-tight text-white",
                     size === 80 && "border-[2.5px] border-black"
                   )}
                 >

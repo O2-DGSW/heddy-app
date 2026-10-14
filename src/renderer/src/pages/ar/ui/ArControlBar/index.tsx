@@ -24,7 +24,7 @@ const ArControlBar = ({
   <div className="flex w-[calc(100%-24px)] max-w-[332px] items-center gap-[8px]">
     <button
       aria-label="후보 스타일 저장"
-      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"
       onClick={handleModalOpen}
       type="button"
     >
@@ -32,7 +32,7 @@ const ArControlBar = ({
     </button>
     <span
       className={cn(
-        "flex h-[37px] min-w-0 flex-1 items-center justify-center truncate rounded-full bg-white/20 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)] backdrop-blur",
+        "flex h-[37px] min-w-0 flex-1 items-center justify-center truncate rounded-full bg-white/30 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)]",
         font.label.medium
       )}
       style={{ color: lightTheme.label.disable }}
@@ -41,7 +41,7 @@ const ArControlBar = ({
     </span>
     <button
       aria-label="스타일 선택 초기화"
-      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"
       onClick={handleStyleReset}
       type="button"
     >
@@ -49,7 +49,7 @@ const ArControlBar = ({
     </button>
     <button
       aria-label={isExpanded ? "AR 화면 축소" : "AR 화면 확대"}
-      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] backdrop-blur-[1.779px]"
+      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"
       onClick={handleExpandedToggle}
       type="button"
     >
