@@ -16,4 +16,4 @@ export type {
   ArGroomStatusType,
   ArHairstyleOption,
   HairstyleOptionId,
-} from "./model/types";
+} from "./model/arGroom.types";

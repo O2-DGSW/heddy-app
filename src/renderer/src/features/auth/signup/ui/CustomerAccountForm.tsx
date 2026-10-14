@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { Link } from "react-router-dom";
-import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/types";
+import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/signup.types";
 import { useAccountForm } from "@/features/auth/signup/model/useAccountForm";
 import { useSmsVerification } from "@/entities/auth";
 import { AccountFormFields } from "@/features/auth/signup/ui/AccountFormFields";

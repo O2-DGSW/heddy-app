@@ -3,7 +3,10 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { SIGNUP_AGREEMENT_ITEMS } from "@/features/auth/signup/constants/signup";
 import { LEGAL_TERMS_CONTENT } from "@/features/auth/signup/constants/legalTermsContent";
-import type { SignupAgreementKey, SignupAgreements } from "@/features/auth/signup/model/types";
+import type {
+  SignupAgreementKey,
+  SignupAgreements,
+} from "@/features/auth/signup/model/signup.types";
 import { TermsDetailModal } from "@/features/auth/signup/ui/TermsDetailModal";
 
 interface SignupAgreementsFieldProps {

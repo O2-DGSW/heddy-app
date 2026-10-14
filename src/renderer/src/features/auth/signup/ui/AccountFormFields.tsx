@@ -2,7 +2,10 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { PasswordFields } from "@/features/auth/signup/ui/PasswordFields";
 import { PhoneVerificationField } from "@/features/auth/signup/ui/PhoneVerificationField";
 
-import type { CustomerAccountForm, SmsVerificationState } from "@/features/auth/signup/model/types";
+import type {
+  CustomerAccountForm,
+  SmsVerificationState,
+} from "@/features/auth/signup/model/signup.types";
 
 interface AccountFormFieldsProps {
   form: CustomerAccountForm;

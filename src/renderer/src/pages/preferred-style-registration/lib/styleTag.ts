@@ -1,4 +1,4 @@
-import type { PreferredStyleTabType, StyleTagStatusType } from "../model/types";
+import type { PreferredStyleTabType, StyleTagStatusType } from "../model/preferredStyle.types";
 
 export const getIsTagDisabled = (status: StyleTagStatusType, activeTab: PreferredStyleTabType) => {
   if (activeTab === "preferred") {

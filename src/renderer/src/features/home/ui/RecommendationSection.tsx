@@ -3,7 +3,7 @@ import { ArrowIcon } from "@/shared";
 import SectionFeedback from "./SectionFeedback";
 import RecommendationCard from "./RecommendationCard";
 
-import type { RecommendationCardType } from "../model/types";
+import type { RecommendationCardType } from "../model/home.types";
 
 interface RecommendationSectionProps {
   recommendations: RecommendationCardType[];

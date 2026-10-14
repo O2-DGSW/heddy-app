@@ -4,7 +4,7 @@ import { ArrowIcon } from "@/shared";
 import HomeImage from "./HomeImage";
 import colorDot from "../assets/recommend-color-dot.svg";
 
-import type { RecommendationCardType } from "../model/types";
+import type { RecommendationCardType } from "../model/home.types";
 
 interface RecommendationCardProps {
   card: RecommendationCardType;

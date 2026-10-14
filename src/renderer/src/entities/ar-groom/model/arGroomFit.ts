@@ -1,4 +1,4 @@
-import type { ArGroomFitSettings } from "./types";
+import type { ArGroomFitSettings } from "./arGroom.types";
 
 export const DEFAULT_GROOM_FIT_SETTINGS: ArGroomFitSettings = {
   groom_color: "",

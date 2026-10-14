@@ -6,7 +6,7 @@ import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
 import RatingStars from "./RatingStars";
 
-import type { RecentRecordType } from "../model/types";
+import type { RecentRecordType } from "../model/home.types";
 
 interface RecentRecordCardProps {
   onAddClick: () => void;

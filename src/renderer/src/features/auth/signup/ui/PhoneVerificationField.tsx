@@ -4,7 +4,7 @@ import type { Carrier } from "@/entities/auth";
 import { RadioButton } from "@/shared/ui/radio/RadioButton";
 import { formatPhone } from "@/shared/utils/formatPhone";
 
-import type { SmsVerificationState } from "@/features/auth/signup/model/types";
+import type { SmsVerificationState } from "@/features/auth/signup/model/signup.types";
 
 interface PhoneVerificationFieldProps {
   carrier: Carrier;

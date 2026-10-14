@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupApi } from "@/entities/auth";
 import { isRequiredSignupAgreementsAccepted } from "./validation";
-import type { CustomerAccountForm } from "./types";
+import type { CustomerAccountForm } from "./signup.types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   id: "",

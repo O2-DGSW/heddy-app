@@ -3,7 +3,10 @@ import { font, lightTheme, palette } from "@heddy/design-tokens";
 import { cn, ArrowIcon } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
-import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
+import type {
+  SharePermissionItem,
+  SharePermissionSection,
+} from "../../model/sharePermission.types";
 
 interface PermissionToggleProps {
   checked: boolean;

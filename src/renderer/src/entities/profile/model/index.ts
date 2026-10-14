@@ -7,4 +7,4 @@ export type {
   GetMyProfileResponse,
   UpdateMyProfileApiResponse,
   UpdateMyProfileRequest,
-} from "./types";
+} from "./profile.types";

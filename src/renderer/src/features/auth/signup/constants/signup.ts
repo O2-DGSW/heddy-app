@@ -1,4 +1,7 @@
-import type { SignupAgreementItem, SignupAgreementKey } from "@/features/auth/signup/model/types";
+import type {
+  SignupAgreementItem,
+  SignupAgreementKey,
+} from "@/features/auth/signup/model/signup.types";
 
 export const REQUIRED_SIGNUP_AGREEMENT_KEYS: SignupAgreementKey[] = [
   "terms_of_service",
