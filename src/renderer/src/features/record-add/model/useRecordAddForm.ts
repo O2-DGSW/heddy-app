@@ -7,7 +7,7 @@ import {
   getTodayDateValue,
 } from "@/entities/record";
 
-import { compressPhotoFile } from "./compressPhotoFile";
+import { compressPhotoFiles } from "./compressPhotoFile";
 
 import type { ChangeEvent, FormEvent } from "react";
 import type {
@@ -48,6 +48,8 @@ export const useRecordAddForm = ({
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photoIdSequenceRef = useRef(1);
   const objectUrlsRef = useRef(new Set<string>());
+  // 압축을 기다리는 사이 화면을 나가면 cleanup이 이미 끝났으므로 ObjectURL을 만들지 않는다.
+  const isUnmountedRef = useRef(false);
   // 추가 화면은 오늘 시술을 적는 경우가 대부분이라 날짜를 오늘로 채워 두고 시작한다.
   // (수정 화면은 initialValues가 들어와 기존 날짜가 그대로 유지된다.)
   const [formValues, setFormValues] = useState<RecordFormValues>(
@@ -116,22 +118,25 @@ export const useRecordAddForm = ({
     pendingPhotoCountRef.current += selectedFiles.length;
 
     try {
-      const addedPhotos = await Promise.all(
-        selectedFiles.map(async (file): Promise<PhotoItem> => {
-          const uploadFile = await compressPhotoFile(file);
-          const src = URL.createObjectURL(uploadFile);
-          const id = `selected-photo-${photoIdSequenceRef.current}`;
-          photoIdSequenceRef.current += 1;
-          objectUrlsRef.current.add(src);
+      const uploadFiles = await compressPhotoFiles(selectedFiles);
 
-          return {
-            file: uploadFile,
-            id,
-            src,
-            isObjectUrl: true,
-          };
-        })
-      );
+      if (isUnmountedRef.current) {
+        return;
+      }
+
+      const addedPhotos = uploadFiles.map((uploadFile): PhotoItem => {
+        const src = URL.createObjectURL(uploadFile);
+        const id = `selected-photo-${photoIdSequenceRef.current}`;
+        photoIdSequenceRef.current += 1;
+        objectUrlsRef.current.add(src);
+
+        return {
+          file: uploadFile,
+          id,
+          src,
+          isObjectUrl: true,
+        };
+      });
 
       photoCountRef.current += addedPhotos.length;
       setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
@@ -218,8 +223,10 @@ export const useRecordAddForm = ({
 
   useEffect(() => {
     const objectUrls = objectUrlsRef.current;
+    isUnmountedRef.current = false;
 
     return () => {
+      isUnmountedRef.current = true;
       objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
       objectUrls.clear();
     };
