@@ -84,7 +84,7 @@ export const useProfileEdit = () => {
   };
 
   const handleStyleSelect = () => {
-    showErrorToast("머리 스타일 선택 기능을 준비 중입니다.");
+    navigate("/profile/preferred-style");
   };
 
   return {
