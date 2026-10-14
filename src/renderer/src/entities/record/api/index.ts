@@ -20,5 +20,8 @@ export { usePostTreatmentRecord } from "./mutation/usePostTreatmentRecord.mutati
 export { usePatchTreatmentRecord } from "./mutation/usePatchTreatmentRecord.mutation";
 export { recordQueryKeys } from "./query/recordQueryKeys";
 export { useGetLatestAnalysis } from "./query/useGetLatestAnalysis.query";
-export { useGetTreatmentRecord } from "./query/useGetTreatmentRecord.query";
+export {
+  useGetTreatmentRecord,
+  usePrefetchTreatmentRecord,
+} from "./query/useGetTreatmentRecord.query";
 export { useGetTreatmentRecords } from "./query/useGetTreatmentRecords.query";

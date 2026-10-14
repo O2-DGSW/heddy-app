@@ -86,6 +86,7 @@ export {
   useDeleteTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
+  usePrefetchTreatmentRecord,
   useGetTreatmentRecords,
   usePatchTreatmentRecord,
 } from "./api";

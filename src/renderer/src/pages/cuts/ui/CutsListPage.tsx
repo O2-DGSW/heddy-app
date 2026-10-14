@@ -3,6 +3,8 @@ import { lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
+import { usePrefetchTreatmentRecord } from "@/entities/record";
+
 import { CutsLayout } from "@/features/cuts";
 import { CutsCategoryFilter } from "@/features/cuts";
 import { CutsViewModeToggle } from "@/features/cuts";
@@ -18,6 +20,7 @@ import type { CutsViewMode } from "@/features/cuts";
 
 export const CutsListPage = () => {
   const navigate = useNavigate();
+  const prefetchTreatmentRecord = usePrefetchTreatmentRecord();
   const [categoryFilter, setCategoryFilter] = useState<CutsCategoryFilterValue>(CUTS_CATEGORIES[0]);
   const [viewMode, setViewMode] = useState<CutsViewMode>("list");
 
@@ -38,6 +41,7 @@ export const CutsListPage = () => {
   });
 
   const handleRecordClick = (record: CutsRecord) => {
+    prefetchTreatmentRecord(record.id);
     setDirection("forward");
     navigate(`/cuts/${record.id}`);
   };
