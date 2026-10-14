@@ -2,4 +2,4 @@ export { deleteSavedStyleApi, getSavedStylesApi, saveStyleApi } from "./savedSty
 export { savedStyleQueryKeys } from "./query/savedStyleQueryKeys";
 export { useGetSavedStyles } from "./query/useGetSavedStyles.query";
 export { useDeleteSavedStyle } from "./mutation/useDeleteSavedStyle.mutation";
-export { useSaveStyle } from "./mutation/useSaveStyle.mutation";
+export { usePostSavedStyle } from "./mutation/usePostSavedStyle.mutation";

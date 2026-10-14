@@ -11,7 +11,7 @@ import type {
 
 import { getIsTagDisabled, getNextTagStatus } from "../lib/styleTag";
 import { MAX_STYLE_TAG_SELECTION, TAB_LABEL_BY_TYPE } from "./constants";
-import type { PreferredStyleTabType, StyleTag, StyleTagStatusType } from "./types";
+import type { PreferredStyleTabType, StyleTag, StyleTagStatusType } from "./preferredStyle.types";
 
 const formatStyleTagLabel = (tagName: string) => {
   const trimmedTagName = tagName.trim();

@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { cn } from "@/shared";
 
 import { SELECTED_BACKGROUND_COLOR } from "../../model/constants";
-import type { StyleTagStatusType } from "../../model/types";
+import type { StyleTagStatusType } from "../../model/preferredStyle.types";
 
 interface StyleTagButtonProps {
   label: string;

@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { useGetTreatmentRecord, useUpdateTreatmentRecord } from "@/entities/record";
+import { useGetTreatmentRecord, usePatchTreatmentRecord } from "@/entities/record";
 import {
   RecordAddForm,
   mapDetailToFormValues,
@@ -24,7 +24,7 @@ const RecordEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data: record, isPending, isError, error } = useGetTreatmentRecord(id);
-  const updateRecord = useUpdateTreatmentRecord();
+  const updateRecord = usePatchTreatmentRecord();
   const syncPhotos = usePutTreatmentRecordPhotos();
 
   const initialValues = useMemo(

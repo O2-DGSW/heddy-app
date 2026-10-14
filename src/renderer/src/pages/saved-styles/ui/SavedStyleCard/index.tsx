@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import type { SavedStyleItem } from "../../model/types";
+import type { SavedStyleItem } from "../../model/savedStyles.types";
 
 interface SavedStyleCardProps {
   isSharing: boolean;

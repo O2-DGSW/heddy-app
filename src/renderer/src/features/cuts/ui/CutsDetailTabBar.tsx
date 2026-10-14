@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { useTabIndicator } from "@/features/cuts/model/hooks/useTabIndicator";
-import { CUTS_DETAIL_TABS } from "@/features/cuts/constrants/detailTabs";
+import { CUTS_DETAIL_TABS } from "@/features/cuts/constants/detailTabs";
 
 /**
  * 시술 상세 정보/분석 탭

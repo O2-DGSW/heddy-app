@@ -16,7 +16,7 @@ import {
   getShareIdFromItemId,
 } from "./sharePermissionItems";
 import type { ManagedConsentType } from "./sharePermissionItems";
-import type { SharePermissionSection } from "./types";
+import type { SharePermissionSection } from "./sharePermission.types";
 
 export const useSharePermissions = () => {
   const navigate = useNavigate();

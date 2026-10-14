@@ -1,7 +1,7 @@
 import type { ConsentStatusResponse, ConsentType } from "@/entities/consent";
 import type { GetSharesParams, ShareFieldType, ShareSummaryResponse } from "@/entities/share";
 
-import type { SharePermissionItem } from "./types";
+import type { SharePermissionItem } from "./sharePermission.types";
 
 const DEFAULT_CONSENT_POLICY_VERSION = "2026-08-01";
 const ACTIVE_SHARE_LIST_SIZE = 50;

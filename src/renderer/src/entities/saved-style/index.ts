@@ -5,7 +5,7 @@ export {
   savedStyleQueryKeys,
   useDeleteSavedStyle,
   useGetSavedStyles,
-  useSaveStyle,
+  usePostSavedStyle,
 } from "./api";
 export type {
   HairColorResponse,

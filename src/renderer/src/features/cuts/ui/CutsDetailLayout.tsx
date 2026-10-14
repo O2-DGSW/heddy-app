@@ -4,7 +4,11 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { ArrowIcon } from "@/shared";
 import { CutsDetailTabBar } from "@/features/cuts/ui/CutsDetailTabBar";
-import type { CutsDetailLayoutProps } from "@/features/cuts/model/types/CutsDetailLayout.types";
+
+interface CutsDetailLayoutProps {
+  title: string;
+  children: React.ReactNode;
+}
 
 export const CutsDetailLayout = ({ title, children }: CutsDetailLayoutProps) => {
   const navigate = useNavigate();

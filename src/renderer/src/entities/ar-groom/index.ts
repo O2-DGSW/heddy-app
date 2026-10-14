@@ -4,7 +4,7 @@ export {
   parseArGrooms,
   requestArServerOffer,
 } from "./api/arServerApi";
-export { useGetArGrooms } from "./api/useGetArGrooms.query";
+export { useGetArGrooms } from "./api/query/useGetArGrooms.query";
 export {
   DEFAULT_GROOM_FIT_SETTINGS,
   buildGroomFitCommand,
@@ -16,4 +16,4 @@ export type {
   ArGroomStatusType,
   ArHairstyleOption,
   HairstyleOptionId,
-} from "./model/types";
+} from "./model/arGroom.types";

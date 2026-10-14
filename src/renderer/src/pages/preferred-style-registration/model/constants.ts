@@ -1,4 +1,4 @@
-import type { PreferredStyleTabType, StyleTag } from "./types";
+import type { PreferredStyleTabType, StyleTag } from "./preferredStyle.types";
 
 export const SELECTED_BACKGROUND_COLOR = "#F4FBF8";
 

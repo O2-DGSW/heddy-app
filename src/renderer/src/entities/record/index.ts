@@ -1,9 +1,4 @@
-export {
-  dateIcon,
-  dropdownIcon,
-  noIcon,
-  pictureIcon,
-} from "./assets";
+export { dateIcon, dropdownIcon, noIcon, pictureIcon } from "./assets";
 export {
   DURATION_HOUR_OPTIONS,
   DURATION_MINUTE_OPTIONS,
@@ -86,13 +81,13 @@ export {
 export {
   recordQueryKeys,
   TreatmentRecordPhotoUploadError,
-  useAddTreatmentRecordPhotos,
-  useCreateTreatmentRecord,
+  usePostTreatmentRecordPhotos,
+  usePostTreatmentRecord,
   useDeleteTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
   useGetTreatmentRecords,
-  useUpdateTreatmentRecord,
+  usePatchTreatmentRecord,
 } from "./api";
 export {
   ProcedureTypeSelector,

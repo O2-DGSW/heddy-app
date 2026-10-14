@@ -4,7 +4,7 @@ import { saveStyleApi } from "../savedStyleApi";
 import { savedStyleQueryKeys } from "../query/savedStyleQueryKeys";
 import type { SaveStyleRequest } from "@/entities/saved-style/model/savedStyle.types";
 
-export const useSaveStyle = () => {
+export const usePostSavedStyle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

@@ -1,7 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { CutsShareItemToggle } from "@/features/cuts/ui/share/CutsShareItemToggle";
-import { CUTS_SHARE_ITEMS } from "@/features/cuts/constrants/shareItems";
+import { CUTS_SHARE_ITEMS } from "@/features/cuts/constants/shareItems";
 import type { ShareFieldType } from "@/entities/share";
 
 interface CutsShareItemListProps {

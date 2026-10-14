@@ -1,9 +1,15 @@
 import { lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon } from "@/shared";
 
-import type { RecommendationCardProps } from "../model/types";
 import HomeImage from "./HomeImage";
 import colorDot from "../assets/recommend-color-dot.svg";
+
+import type { RecommendationCardType } from "../model/home.types";
+
+interface RecommendationCardProps {
+  card: RecommendationCardType;
+  onClick: () => void;
+}
 
 const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
   <button

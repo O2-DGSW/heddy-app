@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { formatLongDate } from "@/entities/record";
 import { useGetPublicShare } from "@/entities/share";
-import agerSad from "@/shared/assets/agerSad.svg";
+import sadMascot from "@/shared/assets/sad-mascot.svg";
 
 import SavedStyleSection from "../SavedStyleSection";
 import SharedRecordSections from "../SharedRecordSections";
@@ -57,7 +57,7 @@ const PublicSharePage = () => {
 
         {(isPending || isError) && (
           <div className="flex flex-col items-center justify-center gap-[12px] px-[19px] py-[120px]">
-            {isError && <img alt="" className="h-[110px] w-[110px]" src={agerSad} />}
+            {isError && <img alt="" className="h-[110px] w-[110px]" src={sadMascot} />}
             <p
               className={`text-center ${font.body.medium}`}
               style={{ color: lightTheme.label.assistive }}

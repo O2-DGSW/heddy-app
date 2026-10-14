@@ -3,9 +3,17 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { SIGNUP_AGREEMENT_ITEMS } from "@/features/auth/signup/constants/signup";
 import { LEGAL_TERMS_CONTENT } from "@/features/auth/signup/constants/legalTermsContent";
-import type { SignupAgreementKey } from "@/features/auth/signup/model/types";
-import type { SignupAgreementsFieldProps as Props } from "@/features/auth/signup/ui/types";
+import type {
+  SignupAgreementKey,
+  SignupAgreements,
+} from "@/features/auth/signup/model/signup.types";
 import { TermsDetailModal } from "@/features/auth/signup/ui/TermsDetailModal";
+
+interface SignupAgreementsFieldProps {
+  agreements: SignupAgreements;
+  showError?: boolean;
+  onChange: (agreements: SignupAgreements) => void;
+}
 
 interface AgreementCheckboxProps {
   id: string;
@@ -41,7 +49,11 @@ const AgreementCheckbox = ({ id, checked, className = "", onChange }: AgreementC
   );
 };
 
-export const SignupAgreementsField = ({ agreements, showError = false, onChange }: Props) => {
+export const SignupAgreementsField = ({
+  agreements,
+  showError = false,
+  onChange,
+}: SignupAgreementsFieldProps) => {
   const [openTermsKey, setOpenTermsKey] = useState<SignupAgreementKey | null>(null);
 
   const allAgreementsAccepted = SIGNUP_AGREEMENT_ITEMS.every(item => agreements[item.key]);

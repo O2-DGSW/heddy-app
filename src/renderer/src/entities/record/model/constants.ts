@@ -1,4 +1,4 @@
-import type { PhotoItem, RecordFieldConfig, RecordFormValues } from "./types";
+import type { PhotoItem, RecordFieldConfig, RecordFormValues } from "./recordForm.types";
 
 export const MAX_PHOTO_COUNT = 10;
 export const YEAR_OPTIONS = Array.from(

@@ -34,7 +34,7 @@ export type {
   RecordFieldConfig,
   RecordFieldNameType,
   RecordFormValues,
-} from "./types";
+} from "./recordForm.types";
 export type { ProcedureType } from "./constants";
 export type {
   AnalysisApiData,

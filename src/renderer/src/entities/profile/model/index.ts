@@ -1,4 +1,3 @@
-export { profileQueryKeys } from "./queryKeys";
 export type {
   DeleteMyAccountApiResponse,
   DeleteMyAccountRequest,
@@ -7,4 +6,4 @@ export type {
   GetMyProfileResponse,
   UpdateMyProfileApiResponse,
   UpdateMyProfileRequest,
-} from "./types";
+} from "./profile.types";

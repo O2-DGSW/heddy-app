@@ -1,4 +1,4 @@
-import type { CalendarDay } from "./types";
+import type { CalendarDay } from "./recordForm.types";
 
 export const padDatePart = (value: number) => String(value).padStart(2, "0");
 

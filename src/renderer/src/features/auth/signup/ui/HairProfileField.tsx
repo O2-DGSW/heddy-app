@@ -16,7 +16,7 @@ import type {
   HairProfileForm,
   HairThicknessType,
   HairType,
-} from "@/features/auth/signup/model/types";
+} from "@/features/auth/signup/model/signup.types";
 import { cn } from "@/shared";
 
 interface HairProfileFieldProps {

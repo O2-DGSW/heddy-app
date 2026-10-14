@@ -1,4 +1,4 @@
-import type { SignupAgreementKey } from "@/features/auth/signup/model/types";
+import type { SignupAgreementKey } from "@/features/auth/signup/model/signup.types";
 
 export type LegalTermsSection = {
   heading: string;

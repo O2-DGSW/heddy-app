@@ -2,7 +2,7 @@ import { useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
-import type { ArStyleType } from "../model/types";
+import type { ArStyleType } from "../model/home.types";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
 import dots from "../assets/carousel-dots.svg";

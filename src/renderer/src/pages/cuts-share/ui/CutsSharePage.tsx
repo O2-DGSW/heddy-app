@@ -4,7 +4,7 @@ import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { ArrowIcon } from "@/shared";
-import { useCreateShare } from "@/entities/share";
+import { usePostShare } from "@/entities/share";
 import type { ShareFieldType } from "@/entities/share";
 import { CutsShareItemList } from "@/features/cuts";
 import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts";
@@ -17,7 +17,7 @@ export const CutsSharePage = () => {
   const selectedId = id ?? "";
 
   const [selectedFields, setSelectedFields] = useState<ShareFieldType[]>(DEFAULT_CUTS_SHARE_FIELDS);
-  const createShare = useCreateShare();
+  const createShare = usePostShare();
 
   const handleToggleField = (field: ShareFieldType) => {
     setSelectedFields(current =>

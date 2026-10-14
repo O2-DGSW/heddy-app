@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import agerSad from "@/shared/assets/agerSad.svg";
+import sadMascot from "@/shared/assets/sad-mascot.svg";
 
 interface RecommendStatusProps {
   message: string;
@@ -21,7 +21,7 @@ export const RecommendStatus = ({
 }: RecommendStatusProps) => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4">
-      {hasIllustration && <img src={agerSad} alt="" className="h-28 w-28" />}
+      {hasIllustration && <img src={sadMascot} alt="" className="h-28 w-28" />}
 
       <p
         className={`whitespace-pre-line text-center ${font.body.regular}`}

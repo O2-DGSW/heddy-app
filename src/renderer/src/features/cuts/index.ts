@@ -1,6 +1,6 @@
-export { CUTS_CATEGORIES, isCutsCategory } from "./constrants/categories";
-export type { CutsCategoryFilterValue } from "./constrants/categories";
-export { DEFAULT_CUTS_SHARE_FIELDS } from "./constrants/shareItems";
+export { CUTS_CATEGORIES, isCutsCategory } from "./constants/categories";
+export type { CutsCategoryFilterValue } from "./constants/categories";
+export { DEFAULT_CUTS_SHARE_FIELDS } from "./constants/shareItems";
 export { useCutsRecords } from "./model/hooks/useCutsRecords";
 export { mapAnalysisToResult, pickAnalysisPhotoUrl } from "./model/mapAnalysis";
 export { SERVICE_TYPE_BY_CATEGORY } from "./model/mapTreatmentRecord";

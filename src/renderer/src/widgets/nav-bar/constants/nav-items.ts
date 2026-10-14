@@ -1,4 +1,4 @@
-import type { NavItem } from "../model/types.ts";
+import type { NavItem } from "../model/navBar.types";
 
 import ArIcon from "../assets/ar.svg?react";
 import CutsIcon from "../assets/cuts.svg?react";

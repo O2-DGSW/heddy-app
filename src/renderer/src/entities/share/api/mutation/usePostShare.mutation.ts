@@ -4,7 +4,7 @@ import type { CreateShareRequest } from "../../model";
 import { createShareApi } from "../shareApi";
 import { shareQueryKeys } from "../query/shareQueryKeys";
 
-export const useCreateShare = () => {
+export const usePostShare = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

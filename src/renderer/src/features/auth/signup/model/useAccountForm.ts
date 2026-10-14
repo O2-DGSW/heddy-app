@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { BaseAccountForm } from "@/features/auth/signup/model/types.ts";
+import type { BaseAccountForm } from "@/features/auth/signup/model/signup.types";
 import { isValidPhone, isPasswordMatch, isRequiredSignupAgreementsAccepted } from "./validation";
 
 export const useAccountForm = (form: BaseAccountForm, extraValid: boolean) => {
