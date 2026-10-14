@@ -44,7 +44,7 @@ const uploadPhotos = async ({ recordId, photos }: AddTreatmentRecordPhotosVariab
   return results.flatMap(result => (result.status === "fulfilled" ? [result.value] : []));
 };
 
-export const useAddTreatmentRecordPhotos = () => {
+export const usePostTreatmentRecordPhotos = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

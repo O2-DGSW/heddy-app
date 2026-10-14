@@ -9,7 +9,7 @@ interface UpdateTreatmentRecordVariables {
   body: UpdateTreatmentRecordRequest;
 }
 
-export const useUpdateTreatmentRecord = () => {
+export const usePatchTreatmentRecord = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

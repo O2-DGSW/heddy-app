@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import { useDeleteSavedStyle, useGetSavedStyles } from "@/entities/saved-style";
-import { useCreateShare } from "@/entities/share";
+import { usePostShare } from "@/entities/share";
 
 import { mapSavedStyleToItem } from "./mapSavedStyle";
 
@@ -14,7 +14,7 @@ export const useSavedStyles = () => {
 
   const { data, isPending, isError, error } = useGetSavedStyles();
   const deleteSavedStyle = useDeleteSavedStyle();
-  const createShare = useCreateShare();
+  const createShare = usePostShare();
 
   const savedStyles = useMemo(() => (data?.items ?? []).map(mapSavedStyleToItem), [data?.items]);
 

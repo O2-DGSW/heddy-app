@@ -5,8 +5,8 @@ import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
   TreatmentRecordPhotoUploadError,
-  useAddTreatmentRecordPhotos,
-  useCreateTreatmentRecord,
+  usePostTreatmentRecordPhotos,
+  usePostTreatmentRecord,
 } from "@/entities/record";
 import {
   RecordAddForm,
@@ -21,8 +21,8 @@ const headingStyle = { color: lightTheme.label.neutral };
 
 const RecordAddPage = () => {
   const navigate = useNavigate();
-  const createRecord = useCreateTreatmentRecord();
-  const addRecordPhotos = useAddTreatmentRecordPhotos();
+  const createRecord = usePostTreatmentRecord();
+  const addRecordPhotos = usePostTreatmentRecordPhotos();
   const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
   // 일부 사진만 올라간 뒤 다시 저장하면 이미 올라간 사진은 건너뛴다
   const [uploadedPhotoIds, setUploadedPhotoIds] = useState<string[]>([]);

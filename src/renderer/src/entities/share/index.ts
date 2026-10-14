@@ -4,7 +4,7 @@ export {
   getPublicShareApi,
   getSharesApi,
   shareQueryKeys,
-  useCreateShare,
+  usePostShare,
   useDeleteShare,
   useGetPublicShare,
   useGetShares,

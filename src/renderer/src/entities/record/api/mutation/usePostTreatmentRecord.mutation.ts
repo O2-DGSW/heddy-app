@@ -4,7 +4,7 @@ import { createTreatmentRecordApi } from "../treatmentRecordApi";
 import { recordQueryKeys } from "../query/recordQueryKeys";
 import type { CreateTreatmentRecordRequest } from "@/entities/record/model/treatmentRecord.types";
 
-export const useCreateTreatmentRecord = () => {
+export const usePostTreatmentRecord = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
