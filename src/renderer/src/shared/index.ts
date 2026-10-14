@@ -7,6 +7,7 @@ export { ArrowIcon } from "./ui/icons/ArrowIcon";
 export { StarIcon } from "./ui/icons/StarIcon";
 export { ConfirmModal } from "./ui/confirm-modal";
 export { ModalShell } from "./ui/modal";
+export { PageLoading } from "./ui/page-loading";
 export { PageTitle } from "./ui/page-title/PageTitle";
 export { ShareQrModal } from "./ui/share-qr-modal/ShareQrModal";
 export { showErrorToast, showInfoToast, showSuccessToast, ToastProvider } from "./ui/toast";
