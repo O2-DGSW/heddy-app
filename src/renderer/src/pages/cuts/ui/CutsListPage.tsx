@@ -40,6 +40,11 @@ export const CutsListPage = () => {
       : undefined,
   });
 
+  const handleAddRecord = () => {
+    setDirection("forward");
+    navigate("/cuts/add");
+  };
+
   const handleRecordClick = (record: CutsRecord) => {
     prefetchTreatmentRecord(record.id);
     setDirection("forward");
@@ -64,6 +69,8 @@ export const CutsListPage = () => {
         ) : (
           <>
             <CutsRecordList
+              isFiltered={isCutsCategory(categoryFilter)}
+              onAddRecord={handleAddRecord}
               onRecordClick={handleRecordClick}
               records={records}
               viewMode={viewMode}
