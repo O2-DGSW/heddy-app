@@ -97,22 +97,6 @@ export const AppRoutes = () => {
             <Route path="/find-password" element={<FindPage />} />
           </Route>
         </Route>
-
-        {/*<Route element={<RequireAuth />}>*/}
-        {/*    <Route path="/" element={<MainPage />} />*/}
-        {/*    <Route path="/profile/*" element={<ProfilePage />} />*/}
-        {/*    <Route path="/cuts/add" element={<AddProcedureNotePage />} />*/}
-        {/*    <Route path="/cuts/customer-search" element={<CustomerSearchPage />} />*/}
-        {/*    <Route path="/cuts/*" element={<ProcedureNotePage />} />*/}
-        {/*    <Route path="/reservation" element={<ReservationPage />} />*/}
-        {/*    <Route path="/shop/*" element={<ShopPage />} />*/}
-        {/*    <Route path="/ai-style-recommendation" element={<AiStyleRecommendationListPage />} />*/}
-        {/*    <Route*/}
-        {/*        path="/ai-style-recommendation/detail"*/}
-        {/*        element={<AiStyleRecommendationDetailPage />}*/}
-        {/*    />*/}
-        {/*    <Route path="*" element={<Navigate replace to="/" />} />*/}
-        {/*</Route>*/}
       </Route>
     </Routes>
   );
