@@ -1,27 +1,100 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
+
+import type { ComponentType } from "react";
 
 import { AuthTransitionOutlet, MobileLayout, MainTransitionOutlet } from "./layouts";
 import { RequireAuth, RequireGuest } from "./routes/AuthRouteGuard";
 import { restoreAuthSession } from "@/entities/auth";
-import { CutsListPage } from "@/pages/cuts";
-import { CutsDetailPage, CutsDetailInfoPage, CutsDetailAnalysisPage } from "@/pages/cuts-detail";
-import { CutsSharePage } from "@/pages/cuts-share";
+// 앱을 열면 바로 보이는 화면은 첫 번들에 둔다. 나머지는 처음 들어갈 때 불러온다.
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
-import { PreferredStyleRegistrationPage } from "@/pages/preferred-style-registration";
-import { SignupPage } from "@/pages/auth/signup";
-import { RecordAddPage } from "@/pages/record-add";
-import { RecordEditPage } from "@/pages/record-edit";
-import { FindPage } from "@/pages/auth/find";
-import { ArHairstylePage } from "@/pages/ar";
-import { RecommendPage } from "@/pages/recommend";
-import { SavedStylesPage } from "@/pages/saved-styles";
-import { SharePermissionsPage } from "@/pages/share-permissions";
-import { ProfilePage } from "@/pages/profile";
-import { ProfileEditPage } from "@/pages/profile-edit";
 import { HomePage } from "@/pages/home";
-import { PublicSharePage } from "@/pages/public-share";
+
+/** 화면 단위로 나눠 불러온다. 불러오는 동안 레이아웃·하단 바는 그대로 두고 그 화면 자리만 비운다 */
+const lazyPage = <TModule,>(
+  load: () => Promise<TModule>,
+  pick: (module: TModule) => ComponentType
+): ComponentType => {
+  const Page = lazy(() => load().then(module => ({ default: pick(module) })));
+
+  const SuspendedPage = () => (
+    <Suspense fallback={null}>
+      <Page />
+    </Suspense>
+  );
+
+  return SuspendedPage;
+};
+
+const CutsListPage = lazyPage(
+  () => import("@/pages/cuts"),
+  m => m.CutsListPage
+);
+const CutsDetailPage = lazyPage(
+  () => import("@/pages/cuts-detail"),
+  m => m.CutsDetailPage
+);
+const CutsDetailInfoPage = lazyPage(
+  () => import("@/pages/cuts-detail"),
+  m => m.CutsDetailInfoPage
+);
+const CutsDetailAnalysisPage = lazyPage(
+  () => import("@/pages/cuts-detail"),
+  m => m.CutsDetailAnalysisPage
+);
+const CutsSharePage = lazyPage(
+  () => import("@/pages/cuts-share"),
+  m => m.CutsSharePage
+);
+const PreferredStyleRegistrationPage = lazyPage(
+  () => import("@/pages/preferred-style-registration"),
+  m => m.PreferredStyleRegistrationPage
+);
+const SignupPage = lazyPage(
+  () => import("@/pages/auth/signup"),
+  m => m.SignupPage
+);
+const RecordAddPage = lazyPage(
+  () => import("@/pages/record-add"),
+  m => m.RecordAddPage
+);
+const RecordEditPage = lazyPage(
+  () => import("@/pages/record-edit"),
+  m => m.RecordEditPage
+);
+const FindPage = lazyPage(
+  () => import("@/pages/auth/find"),
+  m => m.FindPage
+);
+const ArHairstylePage = lazyPage(
+  () => import("@/pages/ar"),
+  m => m.ArHairstylePage
+);
+const RecommendPage = lazyPage(
+  () => import("@/pages/recommend"),
+  m => m.RecommendPage
+);
+const SavedStylesPage = lazyPage(
+  () => import("@/pages/saved-styles"),
+  m => m.SavedStylesPage
+);
+const SharePermissionsPage = lazyPage(
+  () => import("@/pages/share-permissions"),
+  m => m.SharePermissionsPage
+);
+const ProfilePage = lazyPage(
+  () => import("@/pages/profile"),
+  m => m.ProfilePage
+);
+const ProfileEditPage = lazyPage(
+  () => import("@/pages/profile-edit"),
+  m => m.ProfileEditPage
+);
+const PublicSharePage = lazyPage(
+  () => import("@/pages/public-share"),
+  m => m.PublicSharePage
+);
 
 type EntryStatusType = "checking" | "authenticated" | "unauthenticated";
 

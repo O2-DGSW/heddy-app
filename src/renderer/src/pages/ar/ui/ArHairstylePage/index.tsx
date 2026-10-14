@@ -42,11 +42,11 @@ const ArHairstylePage = () => {
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom =
     selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? "" : selectedHairstyle.id;
-  const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
-  const { connectionStatus, errorMessage, controlReady, groomState, foreheadState, stats } =
+  const { connectionStatus, errorMessage, controlReady, groomState, foreheadState, hasServerYaw } =
     useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
-  const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw;
-  const isFaceTracked = typeof faceYaw === "number";
+  // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
+  const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
+  const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;

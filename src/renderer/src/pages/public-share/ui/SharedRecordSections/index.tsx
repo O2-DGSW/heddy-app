@@ -40,9 +40,13 @@ const SharedRecordSections = ({ record }: SharedRecordSectionsProps) => {
             <div className="flex gap-[11px] overflow-x-auto pl-[6px] no-scrollbar">
               {photoUrls.map((photoUrl, index) => (
                 <img
+                  decoding="async"
+                  loading="lazy"
+                  width={110}
+                  height={110}
                   alt={`시술 사진 ${index + 1}`}
                   className="h-[110px] w-[110px] rounded-[10px] object-cover"
-                  key={index}
+                  key={photoUrl}
                   src={photoUrl}
                 />
               ))}

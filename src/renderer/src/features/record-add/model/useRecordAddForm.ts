@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   INITIAL_FORM_VALUES,
@@ -19,6 +19,7 @@ import type {
 
 type RecordFormErrorKeyType = "date" | "procedureType" | "duration" | "photos";
 type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
+type TextChangeHandlerType = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
 const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 한 장 이상 올려주세요.";
@@ -161,52 +162,69 @@ export const useRecordAddForm = ({
     setPhotos(currentPhotos => currentPhotos.filter(photo => photo.id !== photoId));
   };
 
-  const handleDateChange = (date: string) => {
+  // 아래 핸들러는 memo로 감싼 필드에 넘긴다. 한 글자 입력마다 휠·달력까지 다시 그리지 않도록
+  // 함수가 렌더마다 바뀌지 않게 고정한다(상태는 updater로만 바꿔 의존성이 없다).
+  const handleDateChange = useCallback((date: string) => {
     setFormValues(currentValues => ({ ...currentValues, date }));
     setFormErrors(currentErrors => ({
       ...currentErrors,
       date: date ? undefined : currentErrors.date,
     }));
-  };
+  }, []);
 
-  const handleDurationChange = (duration: string) => {
+  const handleDurationChange = useCallback((duration: string) => {
     setFormValues(currentValues => ({ ...currentValues, duration }));
     setFormErrors(currentErrors => ({
       ...currentErrors,
       duration: duration ? undefined : currentErrors.duration,
     }));
-  };
+  }, []);
 
-  const handleFieldChange =
-    (fieldName: RecordFieldNameType) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { value } = event.currentTarget;
+  const fieldChangeHandlers = useMemo(() => {
+    const createFieldChangeHandler =
+      (fieldName: RecordFieldNameType): TextChangeHandlerType =>
+      event => {
+        const { value } = event.currentTarget;
 
-      setFormValues(currentValues => ({
-        ...currentValues,
-        [fieldName]: value,
-      }));
-    };
+        setFormValues(currentValues => ({
+          ...currentValues,
+          [fieldName]: value,
+        }));
+      };
 
-  const handleDetailsChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return {
+      salon: createFieldChangeHandler("salon"),
+      price: createFieldChangeHandler("price"),
+      duration: createFieldChangeHandler("duration"),
+      designer: createFieldChangeHandler("designer"),
+      procedureContent: createFieldChangeHandler("procedureContent"),
+    } satisfies Record<RecordFieldNameType, TextChangeHandlerType>;
+  }, []);
+
+  const handleFieldChange = useCallback(
+    (fieldName: RecordFieldNameType) => fieldChangeHandlers[fieldName],
+    [fieldChangeHandlers]
+  );
+
+  const handleDetailsChange = useCallback<TextChangeHandlerType>(event => {
     const { value } = event.currentTarget;
 
     setFormValues(currentValues => ({ ...currentValues, details: value }));
-  };
+  }, []);
 
   /** 이미 고른 종류를 다시 누르면 선택을 푼다 */
-  const handleProcedureTypeToggle = (procedureType: ProcedureType) => {
+  const handleProcedureTypeToggle = useCallback((procedureType: ProcedureType) => {
     setSelectedProcedureTypes(currentTypes =>
       currentTypes.includes(procedureType)
         ? currentTypes.filter(type => type !== procedureType)
         : [...currentTypes, procedureType]
     );
     setFormErrors(currentErrors => ({ ...currentErrors, procedureType: undefined }));
-  };
+  }, []);
 
-  const handleRatingChange = (nextRating: number) => {
+  const handleRatingChange = useCallback((nextRating: number) => {
     setRating(nextRating);
-  };
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

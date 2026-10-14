@@ -28,6 +28,8 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
       >
         {recommendation.thumbnailUrl && (
           <img
+            decoding="async"
+            loading="lazy"
             src={recommendation.thumbnailUrl}
             alt={`${recommendation.styleName} 추천 스타일`}
             className="h-full w-full object-cover"

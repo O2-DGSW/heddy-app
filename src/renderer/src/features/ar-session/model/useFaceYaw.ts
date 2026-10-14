@@ -1,13 +1,12 @@
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { publicUrl } from "@/shared/lib";
 
 interface UseFaceYawResult {
-  yaw: number | null;
+  isFaceTracked: boolean;
 }
 
 const DETECTION_INTERVAL_MS = 120;
-const YAW_SMOOTHING_FACTOR = 0.28;
 
 const getYawFromTransformationMatrix = (matrix: number[]): number | null => {
   if (matrix.length < 16) {
@@ -47,13 +46,22 @@ const getFaceLandmarker = () => {
   return faceLandmarkerPromise;
 };
 
+/**
+ * 기기에서 얼굴 방향(yaw)을 감지해 인식 여부만 알린다. 매 감지마다 화면을 다시 그리지 않도록
+ * yaw 값은 state로 내보내지 않는다.
+ * enabled가 false면(서버가 yaw를 주는 동안) 감지를 멈춘다.
+ */
 export const useFaceYaw = (
-  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>
+  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
+  enabled = true
 ): UseFaceYawResult => {
-  const previousYawRef = useRef<number | null>(null);
-  const [yaw, setYaw] = useState<number | null>(null);
+  const [isFaceTracked, setIsFaceTracked] = useState(false);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     let isActive = true;
     let detectionTimer: number | null = null;
 
@@ -82,21 +90,10 @@ export const useFaceYaw = (
         const matrix = result.facialTransformationMatrixes[0];
         const detectedYaw = matrix ? getYawFromTransformationMatrix(matrix.data) : null;
 
-        if (detectedYaw === null) {
-          previousYawRef.current = null;
-          setYaw(null);
-        } else {
-          const smoothedYaw =
-            previousYawRef.current === null
-              ? detectedYaw
-              : previousYawRef.current +
-                (detectedYaw - previousYawRef.current) * YAW_SMOOTHING_FACTOR;
-
-          previousYawRef.current = smoothedYaw;
-          setYaw(smoothedYaw);
-        }
+        // 값이 같으면 React가 다시 그리지 않으므로 인식 여부가 바뀔 때만 렌더링된다.
+        setIsFaceTracked(detectedYaw !== null);
       } catch {
-        setYaw(null);
+        setIsFaceTracked(false);
       }
 
       scheduleDetection(faceLandmarker);
@@ -111,7 +108,7 @@ export const useFaceYaw = (
         }
       } catch {
         if (isActive) {
-          setYaw(null);
+          setIsFaceTracked(false);
         }
       }
     };
@@ -120,12 +117,14 @@ export const useFaceYaw = (
 
     return () => {
       isActive = false;
+      // 감지를 멈추면 마지막 결과를 들고 있지 않는다.
+      setIsFaceTracked(false);
 
       if (detectionTimer !== null) {
         window.clearTimeout(detectionTimer);
       }
     };
-  }, [faceTrackingVideoRef]);
+  }, [enabled, faceTrackingVideoRef]);
 
-  return { yaw };
+  return { isFaceTracked };
 };

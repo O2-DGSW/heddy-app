@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { getTreatmentRecordsApi, recordQueryKeys } from "@/entities";
 import { mapTreatmentRecordToCutsRecord } from "@/features/cuts/model/mapTreatmentRecord";
@@ -35,6 +35,7 @@ export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isPlaceholderData,
   } = useInfiniteQuery({
     // 필터가 바뀌면 서버에 다시 물어야 하므로 키에 함께 넣는다.
     queryKey: recordQueryKeys.infiniteList(listParams),
@@ -45,6 +46,8 @@ export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
       }),
     initialPageParam: FIRST_PAGE,
     getNextPageParam: lastPage => (lastPage.page?.has_next ? lastPage.page.number + 1 : undefined),
+    // 카테고리를 바꾸는 동안 목록이 로딩 화면으로 깜빡이지 않게 이전 결과를 그대로 보여 준다.
+    placeholderData: keepPreviousData,
   });
 
   const records = useMemo(
@@ -59,7 +62,8 @@ export const useCutsRecords = ({ serviceType }: UseCutsRecordsOptions = {}) => {
     error,
     refetch,
     fetchNextPage,
-    hasNextPage,
+    // 이전 필터 결과를 보여 주는 동안에는 그 목록의 다음 페이지를 불러오지 않는다.
+    hasNextPage: hasNextPage && !isPlaceholderData,
     isFetchingNextPage,
   };
 };

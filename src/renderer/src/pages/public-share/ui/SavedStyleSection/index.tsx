@@ -24,6 +24,10 @@ const SavedStyleSection = ({ savedStyles }: SavedStyleSectionProps) => (
         >
           {style.image_url && (
             <img
+              decoding="async"
+              loading="lazy"
+              width={70}
+              height={70}
               alt=""
               className="h-[70px] w-[70px] shrink-0 rounded-[10px] object-cover"
               src={style.image_url}

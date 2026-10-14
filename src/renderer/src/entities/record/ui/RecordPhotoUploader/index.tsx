@@ -87,6 +87,7 @@ const RecordPhotoUploader = ({
               key={photo.id}
             >
               <img
+                decoding="async"
                 alt={`선택된 시술 사진 ${index + 1}`}
                 className="absolute bottom-0 left-0 h-[var(--record-photo-size)] w-[var(--record-photo-size)] rounded-[10px] object-cover"
                 src={photo.src}

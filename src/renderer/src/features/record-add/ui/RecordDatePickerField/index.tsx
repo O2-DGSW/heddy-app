@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { dateIcon, formatDateDisplay, noIcon, RecordRequiredMark } from "@/entities/record";
@@ -160,4 +161,5 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
   );
 };
 
-export default RecordDatePickerField;
+// 폼 전체가 다시 그려질 때 값이 그대로인 필드는 건너뛴다.
+export default memo(RecordDatePickerField);

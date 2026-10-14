@@ -29,6 +29,8 @@ export const SavedStyleCard = ({ isSharing, onDelete, onShare, style }: SavedSty
       >
         {style.imageUrl && (
           <img
+            decoding="async"
+            loading="lazy"
             alt={`${style.name} 미리보기`}
             className="h-full w-full object-cover"
             src={style.imageUrl}

@@ -4,6 +4,10 @@ import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
+// 요청마다 Keychain(SecureStorage)을 읽으면 네이티브 브리지를 매번 건넌다.
+// 한 번 읽은 값은 메모리에 두고, 저장·삭제할 때 같이 바꾼다. null은 "토큰 없음"으로 읽은 상태다.
+const tokenCache = new Map<string, string | null>();
+
 const getLocalStorage = () => {
   try {
     return typeof window !== "undefined" ? window.localStorage : null;
@@ -18,13 +22,14 @@ const setToken = async (key: string, token: string) => {
   if (shouldUseNativeSecureStorage()) {
     await SecureStoragePlugin.set({ key, value: token });
     getLocalStorage()?.removeItem(key);
-    return;
+  } else {
+    getLocalStorage()?.setItem(key, token);
   }
 
-  getLocalStorage()?.setItem(key, token);
+  tokenCache.set(key, token);
 };
 
-const getToken = async (key: string) => {
+const readToken = async (key: string) => {
   if (!shouldUseNativeSecureStorage()) {
     return getLocalStorage()?.getItem(key) ?? null;
   }
@@ -45,7 +50,28 @@ const getToken = async (key: string) => {
   }
 };
 
+const getToken = async (key: string) => {
+  const cachedToken = tokenCache.get(key);
+
+  if (cachedToken !== undefined) {
+    return cachedToken;
+  }
+
+  const token = await readToken(key);
+  // 읽는 사이 저장·삭제가 먼저 끝났다면 그 값이 최신이다.
+  const latestToken = tokenCache.get(key);
+
+  if (latestToken !== undefined) {
+    return latestToken;
+  }
+
+  tokenCache.set(key, token);
+  return token;
+};
+
 const clearToken = async (key: string) => {
+  tokenCache.set(key, null);
+
   if (shouldUseNativeSecureStorage()) {
     try {
       await SecureStoragePlugin.remove({ key });

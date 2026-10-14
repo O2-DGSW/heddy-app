@@ -31,6 +31,8 @@ export const CutsRecordCard = ({ record, onClick, viewMode = "list" }: CutsRecor
         >
           {record.thumbnailUrl && (
             <img
+              decoding="async"
+              loading="lazy"
               alt={`${record.procedureName} 시술 사진`}
               className="h-full w-full object-cover"
               src={record.thumbnailUrl}
@@ -81,6 +83,8 @@ export const CutsRecordCard = ({ record, onClick, viewMode = "list" }: CutsRecor
       >
         {record.thumbnailUrl && (
           <img
+            decoding="async"
+            loading="lazy"
             src={record.thumbnailUrl}
             alt={`${record.procedureName} 시술 사진`}
             className="h-full w-full object-cover"
