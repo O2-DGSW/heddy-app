@@ -37,13 +37,21 @@ export const FindPasswordVerifyStep = ({
   <>
     <div className="flex flex-col gap-6 flex-1">
       <div className="flex flex-col gap-1">
-        <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
-          아이디
-        </p>
+        {/* 가입할 때 쓴 이름과 같게 "이메일"로 부른다 */}
+        <label
+          htmlFor="find-password-email"
+          className={`${font.label.medium} pl-2`}
+          style={{ color: lightTheme.label.assistive }}
+        >
+          이메일
+        </label>
         <input
+          id="find-password-email"
+          type="email"
+          autoComplete="email"
           className={`w-full px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
           style={inputStyle}
-          placeholder="아이디"
+          placeholder="이메일"
           value={idField.value}
           onChange={e => idField.onChange(e.target.value)}
         />

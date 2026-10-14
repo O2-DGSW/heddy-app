@@ -10,6 +10,7 @@ interface FieldState {
 interface FindPasswordResetStepProps {
   passwordField: FieldState;
   passwordConfirmField: FieldState;
+  isPasswordMismatch: boolean;
   resetError: string | null;
   isResetting: boolean;
   canResetPassword: boolean;
@@ -20,6 +21,7 @@ interface FindPasswordResetStepProps {
 export const FindPasswordResetStep = ({
   passwordField,
   passwordConfirmField,
+  isPasswordMismatch,
   resetError,
   isResetting,
   canResetPassword,
@@ -44,6 +46,15 @@ export const FindPasswordResetStep = ({
             value={passwordConfirmField.value}
             onChange={passwordConfirmField.onChange}
           />
+          {isPasswordMismatch && (
+            <p
+              className={`${font.caption.regular} mt-1 pl-2`}
+              role="alert"
+              style={{ color: lightTheme.status.error }}
+            >
+              비밀번호가 일치하지 않습니다.
+            </p>
+          )}
         </div>
       </div>
     </div>

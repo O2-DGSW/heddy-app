@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupApi } from "@/entities/auth";
+import { showSuccessToast } from "@/shared";
 import { isRequiredSignupAgreementsAccepted } from "./validation";
 import type { CustomerAccountForm } from "./signup.types";
 
@@ -65,6 +66,7 @@ export const useSignup = () => {
         },
       });
 
+      showSuccessToast("가입이 완료됐습니다. 로그인해 주세요.");
       navigate("/login", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
