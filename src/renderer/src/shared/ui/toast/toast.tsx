@@ -17,3 +17,8 @@ export const showErrorToast = (message: string) => {
 export const showSuccessToast = (message: string) => {
   showToast(message, "success");
 };
+
+/** 성공·실패가 아닌 안내(예: 아직 준비 중이라 누를 수 없을 때) */
+export const showInfoToast = (message: string) => {
+  showToast(message, "info");
+};

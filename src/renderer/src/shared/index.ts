@@ -8,4 +8,4 @@ export { StarIcon } from "./ui/icons/StarIcon";
 export { ModalShell } from "./ui/modal";
 export { PageTitle } from "./ui/page-title/PageTitle";
 export { ShareQrModal } from "./ui/share-qr-modal/ShareQrModal";
-export { showErrorToast, showSuccessToast, ToastProvider } from "./ui/toast";
+export { showErrorToast, showInfoToast, showSuccessToast, ToastProvider } from "./ui/toast";
