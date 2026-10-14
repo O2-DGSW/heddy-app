@@ -1,5 +1,10 @@
-export { deleteMyAccountApi, getMyProfileApi, useGetMyProfile, usePatchMyProfile } from "./api";
-export { profileQueryKeys } from "./model";
+export {
+  deleteMyAccountApi,
+  getMyProfileApi,
+  profileQueryKeys,
+  useGetMyProfile,
+  usePatchMyProfile,
+} from "./api";
 export type {
   DeleteMyAccountApiResponse,
   DeleteMyAccountRequest,
