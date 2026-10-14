@@ -5,20 +5,18 @@ import type { ArConnectionStatusType } from "@/features/ar-session";
 
 interface ArRecognitionBadgeProps {
   connectionStatus: ArConnectionStatusType;
-  errorMessage: string | null;
   isFaceTracked: boolean;
   isExpanded: boolean;
 }
 
 const ArRecognitionBadge = ({
   connectionStatus,
-  errorMessage,
   isFaceTracked,
   isExpanded,
 }: ArRecognitionBadgeProps) => {
+  // 자세한 이유와 다시 연결 버튼은 하단 안내(ArStatusNotice)가 맡고, 배지는 짧은 상태만 보여 준다.
   const label =
-    errorMessage ??
-    (connectionStatus === "error"
+    connectionStatus === "error"
       ? "AR 연결 실패"
       : connectionStatus === "connecting"
         ? "AR 연결 중"
@@ -26,11 +24,10 @@ const ArRecognitionBadge = ({
           ? "얼굴 인식 완료"
           : connectionStatus === "connected"
             ? "얼굴 위치 확인 중"
-            : "AR 연결 준비 중");
+            : "AR 연결 준비 중";
 
   return (
     <span
-      aria-label={errorMessage ?? label}
       aria-live="polite"
       role="status"
       className={cn(

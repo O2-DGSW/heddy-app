@@ -104,9 +104,11 @@ export const getArConnectionErrorMessage = (error: unknown): string => {
     }
   }
 
-  if (error instanceof Error && error.message) {
+  // 앱이 직접 만든 Error만 문구를 그대로 쓴다. TypeError·DOMException 등 브라우저 오류의 문구는
+  // 기술 용어라 사용자에게 보여 주지 않는다.
+  if (error instanceof Error && error.name === "Error" && error.message) {
     return error.message;
   }
 
-  return "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요.";
+  return "AR 서버에 연결하지 못했습니다. 네트워크를 확인하고 다시 연결해 주세요.";
 };
