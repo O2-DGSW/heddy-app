@@ -21,27 +21,6 @@ export interface RecentRecordType {
   memo?: string;
 }
 
-export interface RecentRecordCardProps {
-  onAddClick: () => void;
-  record?: RecentRecordType | null;
-  isLoading?: boolean;
-  isError?: boolean;
-  onClick: () => void;
-}
-
-export interface RecommendationSectionProps {
-  recommendations: RecommendationCardType[];
-  isLoading?: boolean;
-  isError?: boolean;
-  onMoreClick: () => void;
-  onRecommendationClick: () => void;
-}
-
-export interface RecommendationCardProps {
-  card: RecommendationCardType;
-  onClick: () => void;
-}
-
 export interface ArStyleType {
   id: string;
   name: string;

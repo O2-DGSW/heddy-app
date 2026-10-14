@@ -51,3 +51,13 @@ export type CustomerAccountForm = {
   hairProfile: HairProfileForm;
   agreements: SignupAgreements;
 };
+
+export interface SmsVerificationState {
+  isSent: boolean;
+  isVerified: boolean;
+  isSending: boolean;
+  isVerifying: boolean;
+  smsError: string | null;
+  onSendCode: () => void;
+  onVerifyCode: () => void;
+}

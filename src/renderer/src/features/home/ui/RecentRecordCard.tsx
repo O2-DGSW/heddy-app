@@ -1,11 +1,20 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
-import type { RecentRecordCardProps } from "../model/types";
 import colorDot from "../assets/color-dot.svg";
 import edit from "../assets/edit.svg";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
 import RatingStars from "./RatingStars";
+
+import type { RecentRecordType } from "../model/types";
+
+interface RecentRecordCardProps {
+  onAddClick: () => void;
+  record?: RecentRecordType | null;
+  isLoading?: boolean;
+  isError?: boolean;
+  onClick: () => void;
+}
 
 const RecentRecordCard = ({
   record,

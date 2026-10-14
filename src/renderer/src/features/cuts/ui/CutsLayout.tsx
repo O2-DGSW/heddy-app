@@ -1,7 +1,12 @@
 import { lightTheme } from "@heddy/design-tokens";
 
 import { PageTitle } from "@/shared";
-import type { CutsLayoutProps } from "@/features/cuts/model/types/CutsLayout.types";
+
+interface CutsLayoutProps {
+  children: React.ReactNode;
+  header?: React.ReactNode;
+  floatingAction?: React.ReactNode;
+}
 
 export const CutsLayout = ({ children, header, floatingAction }: CutsLayoutProps) => {
   return (

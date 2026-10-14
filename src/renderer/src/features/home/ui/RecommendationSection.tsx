@@ -1,8 +1,17 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon } from "@/shared";
-import type { RecommendationSectionProps } from "../model/types";
 import SectionFeedback from "./SectionFeedback";
 import RecommendationCard from "./RecommendationCard";
+
+import type { RecommendationCardType } from "../model/types";
+
+interface RecommendationSectionProps {
+  recommendations: RecommendationCardType[];
+  isLoading?: boolean;
+  isError?: boolean;
+  onMoreClick: () => void;
+  onRecommendationClick: () => void;
+}
 
 const RecommendationSection = ({
   recommendations,

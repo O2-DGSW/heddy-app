@@ -1,6 +1,13 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import type { PasswordFieldsProps as Props } from "@/features/auth/signup/ui/types";
 import { PasswordInput } from "@/shared/ui/password-input/PasswordInput";
+
+interface PasswordFieldsProps {
+  password: string;
+  passwordConfirm: string;
+  showError?: boolean;
+  onPasswordChange: (value: string) => void;
+  onPasswordConfirmChange: (value: string) => void;
+}
 
 export const PasswordFields = ({
   password,
@@ -8,7 +15,7 @@ export const PasswordFields = ({
   showError = false,
   onPasswordChange,
   onPasswordConfirmChange,
-}: Props) => {
+}: PasswordFieldsProps) => {
   return (
     <div className="flex flex-col gap-1">
       <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
