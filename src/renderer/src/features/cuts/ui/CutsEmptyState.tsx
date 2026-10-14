@@ -1,6 +1,5 @@
+import { sadMascot } from "@/shared";
 import { font, lightTheme } from "@heddy/design-tokens";
-
-import sadMascot from "@/shared/assets/sad-mascot.svg";
 
 export const CutsEmptyState = () => {
   return (

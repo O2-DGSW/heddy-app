@@ -1,9 +1,9 @@
+import { sadMascot } from "@/shared";
 import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { formatLongDate } from "@/entities/record";
 import { useGetPublicShare } from "@/entities/share";
-import sadMascot from "@/shared/assets/sad-mascot.svg";
 
 import SavedStyleSection from "../SavedStyleSection";
 import SharedRecordSections from "../SharedRecordSections";
