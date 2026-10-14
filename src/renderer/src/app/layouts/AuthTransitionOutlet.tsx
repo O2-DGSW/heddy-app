@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { setupRouterOutlet } from "@capgo/capacitor-transitions/react";
 
-import { initCapgoTransitions } from "./initCapgoTransitions";
+import { MAX_CACHED_PAGES, initCapgoTransitions } from "./initCapgoTransitions";
 
 const AUTH_TRANSITION_DURATION = 380;
 
@@ -16,6 +16,7 @@ export const AuthTransitionOutlet = () => {
       setupRouterOutlet(outletRef.current, {
         platform: "auto",
         duration: AUTH_TRANSITION_DURATION,
+        maxCached: MAX_CACHED_PAGES,
         swipeGesture: "auto",
       });
     }
