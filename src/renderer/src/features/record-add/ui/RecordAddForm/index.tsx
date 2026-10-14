@@ -72,6 +72,7 @@ const RecordAddForm = ({
     isPhotoLimitReached,
     photoInputRef,
     photos,
+    processingPhotoCount,
     rating,
     selectedProcedureTypes,
     handleDateChange,
@@ -126,6 +127,7 @@ const RecordAddForm = ({
         onPhotoSelection={handlePhotoSelection}
         onRemovePhoto={handleRemovePhoto}
         photos={photos}
+        processingPhotoCount={processingPhotoCount}
       />
 
       <RecordDatePickerField

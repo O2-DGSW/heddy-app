@@ -13,6 +13,8 @@ interface RecordPhotoUploaderProps {
   isPhotoLimitReached: boolean;
   isRequired?: boolean;
   photos: PhotoItem[];
+  /** 압축하느라 아직 목록에 들어오지 않은 사진 수. 그만큼 "준비 중" 칸을 그린다 */
+  processingPhotoCount?: number;
   errorMessage?: string;
   onOpenPhotoPicker: () => void;
   onPhotoSelection: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -32,6 +34,7 @@ const RecordPhotoUploader = ({
   isPhotoLimitReached,
   isRequired = false,
   photos,
+  processingPhotoCount = 0,
   onOpenPhotoPicker,
   onPhotoSelection,
   onRemovePhoto,
@@ -81,6 +84,21 @@ const RecordPhotoUploader = ({
             </span>
           </button>
 
+          {Array.from({ length: processingPhotoCount }, (_, index) => (
+            <div
+              aria-busy="true"
+              aria-label="사진 준비 중"
+              className="flex h-[var(--record-photo-size)] w-[var(--record-photo-size)] shrink-0 animate-pulse items-center justify-center rounded-[10px]"
+              key={`processing-${index}`}
+              role="img"
+              style={{ backgroundColor: lightTheme.fill.normal }}
+            >
+              <span className={font.caption.regular} style={{ color: lightTheme.label.assistive }}>
+                준비 중
+              </span>
+            </div>
+          ))}
+
           {photos.map((photo, index) => (
             <div
               className="relative h-[calc(var(--record-photo-size)+6px)] w-[var(--record-photo-size)] shrink-0"
@@ -105,6 +123,13 @@ const RecordPhotoUploader = ({
           ))}
         </div>
       </div>
+
+      {/* 추가 버튼이 왜 꺼졌는지 알려 준다 */}
+      {isPhotoLimitReached && !errorMessage && (
+        <span className={font.caption.regular} style={{ color: lightTheme.label.assistive }}>
+          사진은 최대 {MAX_PHOTO_COUNT}장까지 올릴 수 있어요.
+        </span>
+      )}
 
       {errorMessage && (
         <span
