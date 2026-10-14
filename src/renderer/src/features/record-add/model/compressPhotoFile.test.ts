@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { compressPhotoFile } from "./compressPhotoFile";
+import { compressPhotoFile, compressPhotoFiles } from "./compressPhotoFile";
 
 describe("compressPhotoFile", () => {
   test("이미지가 아니면 그대로 돌려준다", async () => {
@@ -20,5 +20,19 @@ describe("compressPhotoFile", () => {
     const file = new File([new Uint8Array(2 * 1024 * 1024)], "large.jpg", { type: "image/jpeg" });
 
     await expect(compressPhotoFile(file)).resolves.toBe(file);
+  });
+});
+
+describe("compressPhotoFiles", () => {
+  test("여러 장을 처리해도 고른 순서를 지킨다", async () => {
+    const files = ["a", "b", "c", "d", "e"].map(
+      name => new File([name], `${name}.txt`, { type: "text/plain" })
+    );
+
+    await expect(compressPhotoFiles(files)).resolves.toEqual(files);
+  });
+
+  test("빈 목록은 빈 목록을 돌려준다", async () => {
+    await expect(compressPhotoFiles([])).resolves.toEqual([]);
   });
 });

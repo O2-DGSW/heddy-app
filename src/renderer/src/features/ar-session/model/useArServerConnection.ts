@@ -37,6 +37,9 @@ export const useArServerConnection = (
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
+  // 언마운트 때는 effect cleanup보다 ref 해제가 먼저라 video ref가 이미 null이다.
+  // 스트림을 붙인 요소를 따로 기억해 두고 정리할 때 이 목록으로 해제한다.
+  const attachedVideosRef = useRef(new Set<HTMLVideoElement>());
   const [stats, setStats] = useState<ArStats | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,12 +61,20 @@ export const useArServerConnection = (
     peer?.close();
     localStreamRef.current?.getTracks().forEach(track => track.stop());
     localStreamRef.current = null;
-    if (previewVideoRef.current) previewVideoRef.current.srcObject = null;
-    if (faceTrackingVideoRef.current) faceTrackingVideoRef.current.srcObject = null;
+    attachedVideosRef.current.forEach(video => {
+      video.srcObject = null;
+    });
+    attachedVideosRef.current.clear();
     resetGroomFit();
     setControlReady(false);
     setStats(null);
-  }, [faceTrackingVideoRef, previewVideoRef, resetGroomFit]);
+  }, [resetGroomFit]);
+
+  const attachStream = useCallback((video: HTMLVideoElement, stream: MediaStream) => {
+    video.srcObject = stream;
+    attachedVideosRef.current.add(video);
+    void video.play().catch(() => undefined);
+  }, []);
 
   const failConnection = useCallback(
     (message: string) => {
@@ -89,9 +100,7 @@ export const useArServerConnection = (
         }
         localStreamRef.current = localStream;
         for (const video of [previewVideoRef.current, faceTrackingVideoRef.current]) {
-          if (!video) continue;
-          video.srcObject = localStream;
-          void video.play().catch(() => undefined);
+          if (video) attachStream(video, localStream);
         }
 
         const peer = new RTCPeerConnection();
@@ -126,8 +135,7 @@ export const useArServerConnection = (
         localStream.getVideoTracks().forEach(track => configureVideoSender(peer, track));
         peer.addEventListener("track", event => {
           if (signal.aborted || event.track.kind !== "video" || !previewVideoRef.current) return;
-          previewVideoRef.current.srcObject = event.streams[0] ?? new MediaStream([event.track]);
-          void previewVideoRef.current.play().catch(() => undefined);
+          attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));
         });
         peer.addEventListener("connectionstatechange", () => {
           if (!isCurrentPeer()) return;
@@ -151,7 +159,14 @@ export const useArServerConnection = (
         failConnection(getArConnectionErrorMessage(error));
       }
     },
-    [failConnection, faceTrackingVideoRef, handleControlEvent, previewVideoRef, syncGroomFit]
+    [
+      attachStream,
+      failConnection,
+      faceTrackingVideoRef,
+      handleControlEvent,
+      previewVideoRef,
+      syncGroomFit,
+    ]
   );
 
   useEffect(() => {
