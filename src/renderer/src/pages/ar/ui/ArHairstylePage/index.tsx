@@ -59,6 +59,7 @@ const ArHairstylePage = () => {
   const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
+  const isConnectionPending = connectionStatus === "idle" || connectionStatus === "connecting";
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
   const listMessage = isGroomsPending
@@ -90,22 +91,27 @@ const ArHairstylePage = () => {
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
-    setIsBottomBarHidden(isExpanded);
+    setIsBottomBarHidden(isExpanded || isConnectionPending);
 
     return () => {
       setIsBottomBarHidden(false);
     };
-  }, [isExpanded, setIsBottomBarHidden]);
+  }, [isConnectionPending, isExpanded, setIsBottomBarHidden]);
 
   return (
     <cap-page>
       <section
         aria-labelledby="ar-hairstyle-title"
-        className="ar-motion-page-enter flex h-full min-h-0 flex-col overflow-hidden"
+        aria-busy={isConnectionPending}
+        className="ar-motion-page-enter relative flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
         {!isExpanded && (
-          <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
+          <header
+            aria-hidden={isConnectionPending}
+            className="flex h-[58px] shrink-0 items-center justify-center px-[20px]"
+            inert={isConnectionPending}
+          >
             <h1
               className={font.headline1.bold}
               id="ar-hairstyle-title"
@@ -118,10 +124,12 @@ const ArHairstylePage = () => {
 
         <main
           aria-label="AR 미리보기"
+          aria-hidden={isConnectionPending}
           className={cn(
             "min-h-0 flex-1 overflow-hidden",
             isExpanded ? "fixed inset-x-0 z-[25]" : "relative"
           )}
+          inert={isConnectionPending}
           style={{
             backgroundColor: lightTheme.label.normal,
             ...(isExpanded && { bottom: "0px", top: "0px" }),
@@ -205,7 +213,7 @@ const ArHairstylePage = () => {
           </div>
         </main>
 
-        {isHairstyleBrowserOpen && (
+        {!isConnectionPending && isHairstyleBrowserOpen && (
           <ArHairstyleBrowser
             activeHairstyleName={selectedHairstyle.name}
             disabled={!controlReady || isForeheadLoading}
@@ -216,12 +224,32 @@ const ArHairstylePage = () => {
           />
         )}
 
-        {activeModal === "candidate-save" && (
+        {!isConnectionPending && activeModal === "candidate-save" && (
           <ArCandidateSaveModal
             memo={candidateMemo}
             onClose={handleModalClose}
             setMemo={setCandidateMemo}
           />
+        )}
+
+        {isConnectionPending && (
+          <div
+            aria-live="polite"
+            className="absolute inset-0 z-[60] flex items-center justify-center"
+            role="status"
+            style={{ backgroundColor: lightTheme.background.normal }}
+          >
+            <div className="flex flex-col items-center gap-4">
+              <span
+                aria-hidden="true"
+                className="size-10 animate-spin rounded-full border-[3px] border-current border-t-transparent motion-reduce:animate-none"
+                style={{ color: lightTheme.primary.normal }}
+              />
+              <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
+                AR 연결 중...
+              </p>
+            </div>
+          </div>
         )}
       </section>
     </cap-page>
