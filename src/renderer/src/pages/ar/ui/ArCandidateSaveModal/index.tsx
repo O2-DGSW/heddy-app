@@ -5,8 +5,10 @@ import modalCloseImage from "../../assets/modal-close.png";
 import { cn, ModalShell } from "@/shared";
 
 interface ArCandidateSaveModalProps {
+  isPending: boolean;
   memo: string;
   onClose: () => void;
+  onSave: () => void;
   setMemo: (memo: string) => void;
 }
 
@@ -20,7 +22,13 @@ const CANDIDATE_MEMO_STYLE = {
   color: lightTheme.label.neutral,
 } satisfies PlaceholderStyle;
 
-const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalProps) => (
+const ArCandidateSaveModal = ({
+  isPending,
+  memo,
+  onClose,
+  onSave,
+  setMemo,
+}: ArCandidateSaveModalProps) => (
   <ModalShell
     labelledBy="candidate-save-modal-title"
     placement="center"
@@ -28,6 +36,7 @@ const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalPr
   >
     <div className="translate-y-[11.5px]">
       <div
+        aria-busy={isPending}
         className="ar-motion-modal-enter w-[290px] rounded-[10px] px-[14px] pb-[14px] pt-[15px]"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
@@ -42,6 +51,7 @@ const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalPr
           <button
             aria-label="후보 스타일 저장 모달 닫기"
             className="ar-motion-press flex h-[28px] w-[28px] items-center justify-center rounded-full"
+            disabled={isPending}
             onClick={onClose}
             style={{ backgroundColor: lightTheme.fill.normal }}
             type="button"
@@ -70,9 +80,10 @@ const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalPr
         <div className="mt-[16px] flex gap-[6px]">
           <button
             className={cn(
-              "ar-motion-press h-[26px] w-[128px] rounded-[5px] border",
+              "ar-motion-press h-[26px] w-[128px] rounded-[5px] border disabled:cursor-not-allowed disabled:opacity-60",
               font.label.medium
             )}
+            disabled={isPending}
             onClick={onClose}
             style={{
               backgroundColor: lightTheme.label.buttonText,
@@ -84,15 +95,19 @@ const ArCandidateSaveModal = ({ memo, onClose, setMemo }: ArCandidateSaveModalPr
             취소
           </button>
           <button
-            className={cn("ar-motion-press h-[26px] w-[128px] rounded-[5px]", font.label.medium)}
-            onClick={onClose}
+            className={cn(
+              "ar-motion-press h-[26px] w-[128px] rounded-[5px] disabled:cursor-not-allowed disabled:opacity-60",
+              font.label.medium
+            )}
+            disabled={isPending}
+            onClick={onSave}
             style={{
               backgroundColor: lightTheme.primary.normal,
               color: lightTheme.label.buttonText,
             }}
             type="button"
           >
-            저장
+            {isPending ? "저장 중..." : "저장"}
           </button>
         </div>
       </div>
