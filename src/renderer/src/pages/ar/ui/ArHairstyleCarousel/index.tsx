@@ -149,6 +149,7 @@ const ArHairstyleCarousel = ({
               aria-disabled={disabled}
               className={cn(
                 "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
+                !isNoStyle && "bg-[rgba(103,103,103,0.5)]",
                 isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
               )}
               onClick={() => handleSelect(option.name)}
