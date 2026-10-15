@@ -17,11 +17,14 @@ import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 
+const AR_CONNECTION_SLOW_NOTICE_DELAY_MS = 5000;
+
 const ArHairstylePage = () => {
   const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
+  const [isConnectionSlow, setIsConnectionSlow] = useState(false);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     data: serverHairstyleOptions = [],
@@ -109,6 +112,19 @@ const ArHairstylePage = () => {
       setIsBottomBarHidden(false);
     };
   }, [isExpanded, setIsBottomBarHidden]);
+
+  useEffect(() => {
+    if (!isConnectionPending) {
+      const resetTimeout = window.setTimeout(() => setIsConnectionSlow(false), 0);
+      return () => window.clearTimeout(resetTimeout);
+    }
+
+    const slowConnectionTimeout = window.setTimeout(() => {
+      setIsConnectionSlow(true);
+    }, AR_CONNECTION_SLOW_NOTICE_DELAY_MS);
+
+    return () => window.clearTimeout(slowConnectionTimeout);
+  }, [isConnectionPending]);
 
   return (
     <cap-page ref={pageRef}>
@@ -240,6 +256,15 @@ const ArHairstylePage = () => {
                 <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
                   AR 연결 중...
                 </p>
+                {isConnectionSlow && (
+                  <p
+                    className={cn(font.caption.medium, "max-w-[280px] text-center")}
+                    style={{ color: lightTheme.label.assistive }}
+                  >
+                    연결이 예상보다 오래 걸리고 있어요. 네트워크 연결을 확인하고 잠시만 더 기다려
+                    주세요.
+                  </p>
+                )}
               </div>
             </div>
           )}
