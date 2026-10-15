@@ -71,6 +71,7 @@ const ArHairstylePage = () => {
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
   const isConnectionPending = connectionStatus === "idle" || connectionStatus === "connecting";
+  const isStyleLoading = selectedGroom !== "" && groomState.status === "loading";
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
   const listMessage = isGroomsPending
@@ -156,7 +157,7 @@ const ArHairstylePage = () => {
 
         <main
           aria-label="AR 미리보기"
-          aria-busy={isConnectionPending}
+          aria-busy={isConnectionPending || isStyleLoading}
           className="relative min-h-0 flex-1 overflow-hidden"
           style={{ backgroundColor: lightTheme.label.normal }}
         >
@@ -181,6 +182,30 @@ const ArHairstylePage = () => {
               playsInline
               ref={faceTrackingVideoRef}
             />
+            {isStyleLoading && (
+              <div
+                aria-live="polite"
+                className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+                role="status"
+              >
+                <span className="sr-only">헤어스타일을 적용하고 있어요</span>
+                <svg
+                  aria-hidden="true"
+                  className="size-12 animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
+                  fill="currentColor"
+                  viewBox="0 0 48 48"
+                >
+                  <circle cx="24" cy="5" opacity="0.32" r="1.8" />
+                  <circle cx="37.4" cy="10.6" opacity="0.4" r="2.2" />
+                  <circle cx="43" cy="24" opacity="0.5" r="2.8" />
+                  <circle cx="37.4" cy="37.4" opacity="0.6" r="3.4" />
+                  <circle cx="24" cy="43" opacity="0.7" r="4" />
+                  <circle cx="10.6" cy="37.4" opacity="0.8" r="4.4" />
+                  <circle cx="5" cy="24" opacity="0.9" r="4.6" />
+                  <circle cx="10.6" cy="10.6" r="4.2" />
+                </svg>
+              </div>
+            )}
             <ArRecognitionBadge connectionStatus={connectionStatus} isFaceTracked={isFaceTracked} />
             <ArColorPicker
               disabled={!canAdjust}
