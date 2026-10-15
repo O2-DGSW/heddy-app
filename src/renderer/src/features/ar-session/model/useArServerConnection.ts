@@ -25,6 +25,8 @@ interface UseArServerConnectionResult {
   hasServerYaw: boolean;
   handleGroomRetry: () => void;
   handleForeheadRefresh: () => void;
+  /** 캐시된 AR 페이지로 돌아왔을 때 연결과 비디오 재생을 복구한다 */
+  handlePageEnter: () => void;
   /** 연결이 실패하거나 끊긴 뒤 처음부터 다시 연결한다 */
   handleReconnect: () => void;
 }
@@ -187,8 +189,54 @@ export const useArServerConnection = (
   }, [connectionAttempt, startConnection, stopConnection]);
 
   const handleReconnect = useCallback(() => {
+    setConnectionStatus("connecting");
+    setErrorMessage(null);
     setConnectionAttempt(attempt => attempt + 1);
   }, []);
+
+  const handlePageEnter = useCallback(() => {
+    if (connectionStatus === "idle" || connectionStatus === "connecting") return;
+
+    const peer = peerConnectionRef.current;
+    const previewVideo = previewVideoRef.current;
+    const faceTrackingVideo = faceTrackingVideoRef.current;
+    const hasLiveCameraTrack = localStreamRef.current
+      ?.getVideoTracks()
+      .some(track => track.readyState === "live");
+    const hasLivePreviewTrack =
+      previewVideo?.srcObject instanceof MediaStream &&
+      previewVideo.srcObject.getVideoTracks().some(track => track.readyState === "live");
+    const hasLiveTrackingTrack =
+      faceTrackingVideo?.srcObject instanceof MediaStream &&
+      faceTrackingVideo.srcObject.getVideoTracks().some(track => track.readyState === "live");
+
+    if (
+      connectionStatus !== "connected" ||
+      peer?.connectionState !== "connected" ||
+      !hasLiveCameraTrack ||
+      !hasLivePreviewTrack ||
+      !hasLiveTrackingTrack
+    ) {
+      handleReconnect();
+      return;
+    }
+
+    let reconnectRequested = false;
+    const handlePlaybackFailure = () => {
+      if (reconnectRequested || peerConnectionRef.current !== peer) return;
+      reconnectRequested = true;
+      handleReconnect();
+    };
+
+    for (const video of [previewVideo, faceTrackingVideo]) {
+      if (!video?.srcObject) {
+        handlePlaybackFailure();
+        continue;
+      }
+
+      void video.play().catch(handlePlaybackFailure);
+    }
+  }, [connectionStatus, faceTrackingVideoRef, handleReconnect, previewVideoRef]);
 
   return {
     connectionStatus,
@@ -199,6 +247,7 @@ export const useArServerConnection = (
     hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
+    handlePageEnter,
     handleReconnect,
   };
 };

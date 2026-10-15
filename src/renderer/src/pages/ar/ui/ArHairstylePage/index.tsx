@@ -28,6 +28,7 @@ const ArHairstylePage = () => {
   const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
+  const handlePageEnterRef = useRef<() => void>(() => undefined);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
   const [savedStyleIdsByHairstyle, setSavedStyleIdsByHairstyle] = useState<
     Record<string, string | null>
@@ -64,6 +65,7 @@ const ArHairstylePage = () => {
     hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
+    handlePageEnter,
     handleReconnect,
   } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
   // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
@@ -129,11 +131,16 @@ const ArHairstylePage = () => {
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
+    handlePageEnterRef.current = handlePageEnter;
+  }, [handlePageEnter]);
+
+  useEffect(() => {
     const pageElement = pageRef.current;
     if (!pageElement) return;
 
     return setupPage(pageElement, {
       onWillEnter: () => handleGroomColorReset(),
+      onDidEnter: () => handlePageEnterRef.current(),
     });
   }, [handleGroomColorReset]);
 
