@@ -200,7 +200,7 @@ const ArHairstylePage = () => {
                 <span className="sr-only">헤어스타일을 적용하고 있어요</span>
                 <svg
                   aria-hidden="true"
-                  className="w-[min(24rem,80vw)] animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
+                  className="w-[min(18rem,64vw)] animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
                   fill="currentColor"
                   viewBox="0 0 360 360"
                 >
