@@ -17,22 +17,11 @@ import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 
-const AR_CONNECTION_SLOW_NOTICE_DELAY_MS = 5000;
-const AR_CONNECTION_SLOW_NOTICE_INTERVAL_MS = 12000;
-const AR_CONNECTION_SLOW_NOTICE_TRANSITION_MS = 300;
-const AR_CONNECTION_SLOW_NOTICES = [
-  { title: "연결이 조금 늦네", description: "조금만 더 기다려 줄래?" },
-  { title: "아직 연결 중이야", description: "인터넷 연결도 한번 확인해 봐!" },
-  { title: "생각보다 오래 걸리네", description: "네트워크가 괜찮은지 확인해 볼까?" },
-] as const;
-
 const ArHairstylePage = () => {
   const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
-  const [connectionNoticeIndex, setConnectionNoticeIndex] = useState(-1);
-  const [isConnectionNoticeVisible, setIsConnectionNoticeVisible] = useState(false);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     data: serverHairstyleOptions = [],
@@ -74,7 +63,6 @@ const ArHairstylePage = () => {
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
   const isConnectionPending = connectionStatus === "idle" || connectionStatus === "connecting";
-  const connectionNotice = AR_CONNECTION_SLOW_NOTICES[connectionNoticeIndex] ?? null;
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
   const listMessage = isGroomsPending
@@ -121,34 +109,6 @@ const ArHairstylePage = () => {
       setIsBottomBarHidden(false);
     };
   }, [isExpanded, setIsBottomBarHidden]);
-
-  useEffect(() => {
-    if (!isConnectionPending) {
-      const resetTimeout = window.setTimeout(() => {
-        setConnectionNoticeIndex(-1);
-        setIsConnectionNoticeVisible(false);
-      }, 0);
-      return () => window.clearTimeout(resetTimeout);
-    }
-
-    const noticeTimeouts: number[] = [];
-    AR_CONNECTION_SLOW_NOTICES.forEach((_, index) => {
-      const timeout = window.setTimeout(
-        () => {
-          setIsConnectionNoticeVisible(false);
-          const revealTimeout = window.setTimeout(() => {
-            setConnectionNoticeIndex(index);
-            setIsConnectionNoticeVisible(true);
-          }, AR_CONNECTION_SLOW_NOTICE_TRANSITION_MS);
-          noticeTimeouts.push(revealTimeout);
-        },
-        AR_CONNECTION_SLOW_NOTICE_DELAY_MS + AR_CONNECTION_SLOW_NOTICE_INTERVAL_MS * index
-      );
-      noticeTimeouts.push(timeout);
-    });
-
-    return () => noticeTimeouts.forEach(timeout => window.clearTimeout(timeout));
-  }, [isConnectionPending]);
 
   return (
     <cap-page ref={pageRef}>
@@ -280,25 +240,12 @@ const ArHairstylePage = () => {
                 <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
                   AR 연결 중...
                 </p>
-                <div className="pointer-events-none absolute left-1/2 top-full mt-3 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
+                <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
                   <p
-                    aria-hidden={!connectionNotice}
-                    className={cn(
-                      font.caption.medium,
-                      "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
-                      isConnectionNoticeVisible
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-1 opacity-0"
-                    )}
+                    className={cn(font.caption.medium, "whitespace-nowrap")}
                     style={{ color: lightTheme.label.assistive }}
                   >
-                    {connectionNotice && (
-                      <>
-                        <span className={font.caption.semiBold}>{connectionNotice.title}</span>
-                        <br />
-                        {connectionNotice.description}
-                      </>
-                    )}
+                    AR 화면을 준비하고 있어요
                   </p>
                 </div>
               </div>
