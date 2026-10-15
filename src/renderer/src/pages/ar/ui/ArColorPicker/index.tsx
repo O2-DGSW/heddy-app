@@ -1,4 +1,4 @@
-import { font, lightTheme } from "@heddy/design-tokens";
+import { lightTheme } from "@heddy/design-tokens";
 
 import { HAIR_COLOR_OPTIONS } from "../../model/constants";
 import { cn } from "@/shared";
@@ -27,20 +27,17 @@ const ArColorPicker = ({ isExpanded, disabled, selectedColor, onSelect }: ArColo
           aria-pressed={option.color === selectedColor}
           className={cn(
             "ar-motion-press h-9 w-9 shrink-0 rounded-full border-2 disabled:cursor-not-allowed disabled:opacity-45",
-            option.color === selectedColor ? "border-current" : "border-transparent",
-            font.caption.medium
+            option.color === selectedColor ? "border-current" : "border-transparent"
           )}
           disabled={disabled}
           key={option.id}
           onClick={() => handleSelect(option.color)}
           style={{
-            backgroundColor: option.color || lightTheme.background.normal,
+            backgroundColor: option.color,
             color: lightTheme.primary.normal,
           }}
           type="button"
-        >
-          {option.color === "" && "자동"}
-        </button>
+        />
       ))}
     </div>
   );

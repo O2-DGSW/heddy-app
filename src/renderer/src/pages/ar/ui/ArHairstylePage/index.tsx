@@ -3,7 +3,7 @@ import { setupPage } from "@capgo/capacitor-transitions/react";
 import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
-import type { HairstyleOptionId } from "@/entities/ar-groom";
+import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
@@ -17,6 +17,14 @@ import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 
+const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
+  const firstOption = options.find(option => option.name === "hippie-perm");
+
+  if (!firstOption) return options;
+
+  return [firstOption, ...options.filter(option => option.name !== firstOption.name)];
+};
+
 const ArHairstylePage = () => {
   const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
@@ -29,7 +37,10 @@ const ArHairstylePage = () => {
     isPending: isGroomsPending,
     refetch: refetchGrooms,
   } = useGetArGrooms();
-  const hairstyleOptions = [ORIGINAL_HAIRSTYLE_OPTION, ...serverHairstyleOptions];
+  const hairstyleOptions = [
+    ORIGINAL_HAIRSTYLE_OPTION,
+    ...prioritizeHippiePerm(serverHairstyleOptions),
+  ];
   const {
     activeHairstylePosition,
     activeModal,

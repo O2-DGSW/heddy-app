@@ -6,11 +6,10 @@ export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
 };
 
 export const HAIR_COLOR_OPTIONS = [
-  { id: "auto", label: "원래 머리색 자동 맞춤", color: "" },
+  { id: "ash-brown", label: "애쉬 브라운", color: "#8A8178" },
   { id: "black", label: "블랙", color: "#3B3632" },
   { id: "dark-brown", label: "다크 브라운", color: "#4A342C" },
   { id: "choco-brown", label: "초코 브라운", color: "#6A4534" },
-  { id: "ash-brown", label: "애쉬 브라운", color: "#8A8178" },
   { id: "milk-brown", label: "밀크 브라운", color: "#B28B6C" },
 ] as const;
 
