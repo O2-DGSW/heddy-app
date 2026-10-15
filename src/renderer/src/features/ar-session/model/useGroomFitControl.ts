@@ -15,6 +15,8 @@ interface DesiredGroomFit {
 
 const GROOM_TIMEOUT_MS = 15000;
 const FOREHEAD_TIMEOUT_MS = 60000;
+const FOREHEAD_AUTO_RETRY_DELAY_MS = 1000;
+const MAX_FOREHEAD_AUTO_RETRIES = 1;
 // 슬라이더를 끄는 동안 명령이 쏟아지지 않게 마지막 값만 보낸다
 const SYNC_DEBOUNCE_MS = 80;
 
@@ -34,6 +36,7 @@ export const useGroomFitControl = (
   const timedOutFitRef = useRef<DesiredGroomFit | null>(null);
   const groomTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const foreheadTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const foreheadAutoRetryCountRef = useRef(0);
   const [groomState, setGroomState] = useState<ArGroomState>({ status: "idle" });
   const [foreheadState, setForeheadState] = useState<ArGroomState>({ status: "idle" });
 
@@ -207,6 +210,25 @@ export const useGroomFitControl = (
     setGroomState({ status: "idle" });
     setForeheadState({ status: "idle" });
   }, []);
+
+  useEffect(() => {
+    if (foreheadState.status === "idle" || foreheadState.status === "ok") {
+      foreheadAutoRetryCountRef.current = 0;
+      return;
+    }
+
+    if (
+      foreheadState.status !== "error" ||
+      foreheadAutoRetryCountRef.current >= MAX_FOREHEAD_AUTO_RETRIES
+    )
+      return;
+
+    // 사용자가 다시 누르지 않아도 한 번 재시도하되, 실패가 반복되면 요청 루프를 막는다.
+    foreheadAutoRetryCountRef.current += 1;
+    const retryTimeout = window.setTimeout(handleForeheadRefresh, FOREHEAD_AUTO_RETRY_DELAY_MS);
+
+    return () => window.clearTimeout(retryTimeout);
+  }, [foreheadState.status, handleForeheadRefresh]);
 
   useEffect(() => {
     desiredFitRef.current = { groom, settings };

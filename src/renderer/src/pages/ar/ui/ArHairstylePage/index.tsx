@@ -193,6 +193,7 @@ const ArHairstylePage = () => {
                 onForeheadRefresh={handleForeheadRefresh}
                 onGroomRetry={handleGroomRetry}
                 onReconnect={handleReconnect}
+                showForeheadStatus={false}
               />
               <ArControlBar
                 handleExpandedToggle={handleExpandedToggle}
