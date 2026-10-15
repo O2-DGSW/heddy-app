@@ -15,7 +15,7 @@ export const HAIR_COLOR_OPTIONS = [
 
 export const DEFAULT_AR_HAIR_COLOR = HAIR_COLOR_OPTIONS[0].color;
 
-export const HAIRSTYLE_GAP = 25;
+export const HAIRSTYLE_GAP = 14;
 export const HAIRSTYLE_CENTER_POSITION = 202;
 export const HAIRSTYLE_VISIBLE_RANGE = 4;
 export const HAIRSTYLE_VISIBLE_OFFSETS = Array.from(
@@ -44,7 +44,15 @@ export const getHairstyleSize = (offset: number) => {
     return 62;
   }
 
-  return 50;
+  if (distance === 2) {
+    return 46;
+  }
+
+  if (distance === 3) {
+    return 30;
+  }
+
+  return 16;
 };
 
 export const getHairstyleItemLeft = (offset: number) => {

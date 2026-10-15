@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TouchEvent, WheelEvent } from "react";
+import { lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
@@ -24,8 +25,32 @@ interface ArHairstyleCarouselProps {
 
 // 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
 const HAIRSTYLE_BASE_SIZE = getHairstyleSize(0);
-const SWIPE_THRESHOLD = 24;
-const WHEEL_STEP_INTERVAL = 280;
+const HAIRSTYLE_CENTER = getHairstyleItemLeft(0) + HAIRSTYLE_BASE_SIZE / 2;
+const HAIRSTYLE_STEP_DISTANCE =
+  getHairstyleItemLeft(1) + getHairstyleSize(1) / 2 - HAIRSTYLE_CENTER;
+const SCROLL_COMMIT_THRESHOLD = 0.5;
+const CLICK_SUPPRESSION_DISTANCE = 8;
+const WHEEL_SETTLE_DELAY = 120;
+
+const getHairstyleVisualLayout = (offset: number) => {
+  const direction = offset < 0 ? -1 : 1;
+  const distance = Math.abs(offset);
+  const lowerDistance = Math.floor(distance);
+  const progress = distance - lowerDistance;
+  const lowerOffset = direction * lowerDistance;
+  const upperOffset = direction * (lowerDistance + 1);
+  const lowerSize = getHairstyleSize(lowerOffset);
+  const upperSize = getHairstyleSize(upperOffset);
+  const lowerCenter = getHairstyleItemLeft(lowerOffset) + lowerSize / 2;
+  const upperCenter = getHairstyleItemLeft(upperOffset) + upperSize / 2;
+
+  return {
+    center: lowerCenter + (upperCenter - lowerCenter) * progress,
+    size: lowerSize + (upperSize - lowerSize) * progress,
+  };
+};
+
+const clampScrollProgress = (progress: number) => Math.max(-1, Math.min(1, progress));
 
 const ArHairstyleCarousel = ({
   activeHairstylePosition,
@@ -37,7 +62,23 @@ const ArHairstyleCarousel = ({
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
-  const lastWheelAtRef = useRef(0);
+  const wheelSettleTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const scrollProgressRef = useRef(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const updateScrollProgress = (progress: number) => {
+    const clampedProgress = clampScrollProgress(progress);
+    scrollProgressRef.current = clampedProgress;
+    setScrollProgress(clampedProgress);
+  };
+
+  const clearWheelSettleTimeout = () => {
+    if (wheelSettleTimeoutRef.current === null) return;
+
+    window.clearTimeout(wheelSettleTimeoutRef.current);
+    wheelSettleTimeoutRef.current = null;
+  };
 
   const handleMove = (offset: -1 | 1) => {
     if (disabled) {
@@ -48,8 +89,26 @@ const ArHairstyleCarousel = ({
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    clearWheelSettleTimeout();
     touchStartXRef.current = event.touches[0]?.clientX ?? null;
     didSwipeRef.current = false;
+    setIsDragging(true);
+    updateScrollProgress(0);
+  };
+
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const touchStartX = touchStartXRef.current;
+    const touchX = event.touches[0]?.clientX;
+
+    if (touchStartX === null || touchX === undefined) return;
+
+    const distance = touchStartX - touchX;
+
+    if (Math.abs(distance) >= CLICK_SUPPRESSION_DISTANCE) {
+      didSwipeRef.current = true;
+    }
+
+    updateScrollProgress(distance / HAIRSTYLE_STEP_DISTANCE);
   };
 
   const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
@@ -57,37 +116,60 @@ const ArHairstyleCarousel = ({
     const touchEndX = event.changedTouches[0]?.clientX;
 
     touchStartXRef.current = null;
+    setIsDragging(false);
+    updateScrollProgress(0);
 
     if (touchStartX === null || touchEndX === undefined) {
       return;
     }
 
-    const distance = touchEndX - touchStartX;
+    const progress = clampScrollProgress((touchStartX - touchEndX) / HAIRSTYLE_STEP_DISTANCE);
+    didSwipeRef.current = Math.abs(touchEndX - touchStartX) >= CLICK_SUPPRESSION_DISTANCE;
 
-    if (Math.abs(distance) < SWIPE_THRESHOLD) {
-      return;
+    if (didSwipeRef.current) {
+      window.setTimeout(() => {
+        didSwipeRef.current = false;
+      }, 0);
     }
 
-    didSwipeRef.current = true;
-    handleMove(distance > 0 ? -1 : 1);
+    if (Math.abs(progress) >= SCROLL_COMMIT_THRESHOLD) {
+      handleMove(progress > 0 ? 1 : -1);
+    }
+  };
+
+  const handleTouchCancel = () => {
+    touchStartXRef.current = null;
+    didSwipeRef.current = false;
+    setIsDragging(false);
+    updateScrollProgress(0);
   };
 
   const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
     const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    const now = Date.now();
 
-    if (Math.abs(delta) < 4) {
-      return;
-    }
+    if (Math.abs(delta) < 1) return;
 
     event.preventDefault();
 
-    if (now - lastWheelAtRef.current < WHEEL_STEP_INTERVAL) {
+    if (disabled) {
+      onDisabledSelect();
       return;
     }
 
-    lastWheelAtRef.current = now;
-    handleMove(delta > 0 ? 1 : -1);
+    setIsDragging(true);
+    updateScrollProgress(scrollProgressRef.current + delta / HAIRSTYLE_STEP_DISTANCE);
+    clearWheelSettleTimeout();
+    wheelSettleTimeoutRef.current = window.setTimeout(() => {
+      const progress = scrollProgressRef.current;
+
+      wheelSettleTimeoutRef.current = null;
+      setIsDragging(false);
+      updateScrollProgress(0);
+
+      if (Math.abs(progress) >= SCROLL_COMMIT_THRESHOLD) {
+        handleMove(progress > 0 ? 1 : -1);
+      }
+    }, WHEEL_SETTLE_DELAY);
   };
 
   const handleSelect = (hairstyleName: HairstyleOptionId) => {
@@ -96,6 +178,10 @@ const ArHairstyleCarousel = ({
       return;
     }
 
+    clearWheelSettleTimeout();
+    setIsDragging(false);
+    updateScrollProgress(0);
+
     if (disabled) {
       onDisabledSelect();
       return;
@@ -103,6 +189,15 @@ const ArHairstyleCarousel = ({
 
     onSelect(hairstyleName);
   };
+
+  useEffect(
+    () => () => {
+      if (wheelSettleTimeoutRef.current !== null) {
+        window.clearTimeout(wheelSettleTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   if (loadingMessage || hairstyleOptions.length === 0) {
     return (
@@ -119,7 +214,9 @@ const ArHairstyleCarousel = ({
     <div
       aria-label="헤어스타일 선택"
       className="relative h-[80px] w-[404px] shrink-0 touch-pan-y select-none overflow-hidden"
+      onTouchCancel={handleTouchCancel}
       onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
       onWheel={handleWheel}
     >
@@ -128,13 +225,18 @@ const ArHairstyleCarousel = ({
         const option = getCircularHairstyleOption(position, hairstyleOptions);
         const isSelected = offset === 0;
         const isNoStyle = option.name === "";
-        const size = getHairstyleSize(offset);
+        const visualOffset = offset - scrollProgress;
+        const { center, size } = getHairstyleVisualLayout(visualOffset);
         const isFocusable = Math.abs(offset) <= 2;
-        const translateX = getHairstyleItemLeft(offset) + size / 2 - HAIRSTYLE_BASE_SIZE / 2;
+        const translateX = center - HAIRSTYLE_BASE_SIZE / 2;
 
         return (
           <div
-            className="absolute left-0 top-1/2 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            className={cn(
+              "absolute left-0 top-1/2 will-change-transform",
+              !isDragging &&
+                "transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            )}
             key={position}
             style={{
               height: HAIRSTYLE_BASE_SIZE,
@@ -149,8 +251,7 @@ const ArHairstyleCarousel = ({
               aria-disabled={disabled}
               className={cn(
                 "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
-                !isNoStyle && "bg-[rgba(103,103,103,0.5)]",
-                isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
+                !isNoStyle && "bg-[rgba(103,103,103,0.5)]"
               )}
               onClick={() => handleSelect(option.name)}
               tabIndex={isFocusable ? 0 : -1}
@@ -171,8 +272,7 @@ const ArHairstyleCarousel = ({
               ) : (
                 <span
                   className={cn(
-                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/30 px-1 text-center text-[9px] font-semibold leading-tight text-white",
-                    size === 80 && "border-[2.5px] border-black"
+                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/30 px-1 text-center text-[9px] font-semibold leading-tight text-white"
                   )}
                 >
                   {option.label}
@@ -182,6 +282,11 @@ const ArHairstyleCarousel = ({
           </div>
         );
       })}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-[80px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+        style={{ borderColor: lightTheme.label.buttonText }}
+      />
     </div>
   );
 };
