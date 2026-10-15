@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import type { TouchEvent, WheelEvent } from "react";
-import { lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
@@ -154,7 +153,6 @@ const ArHairstyleCarousel = ({
               )}
               onClick={() => handleSelect(option.name)}
               tabIndex={isFocusable ? 0 : -1}
-              style={{ backgroundColor: isNoStyle ? undefined : lightTheme.background.neutral }}
               type="button"
             >
               {isNoStyle ? (
@@ -168,7 +166,6 @@ const ArHairstyleCarousel = ({
                   alt={`${option.label} 헤어스타일 썸네일`}
                   className="h-full w-full rounded-full p-[3px] object-contain"
                   src={option.thumbUrl}
-                  style={{ backgroundColor: lightTheme.background.neutral }}
                 />
               ) : (
                 <span
