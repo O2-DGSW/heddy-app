@@ -309,7 +309,7 @@ const ArHairstyleCarousel = ({
       })}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-[80px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-[80px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px]"
         style={{ borderColor: lightTheme.label.buttonText }}
       />
     </div>
