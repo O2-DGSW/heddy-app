@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
-import { useDeleteSavedStyle, usePostSavedStyle } from "@/entities/saved-style";
+import { useDeleteSavedStyle, useGetSavedStyles, usePostSavedStyle } from "@/entities/saved-style";
 import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
@@ -31,11 +31,14 @@ const ArHairstylePage = () => {
   const handlePageEnterRef = useRef<() => void>(() => undefined);
   const handlePageLeaveRef = useRef<() => void>(() => undefined);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
-  const [savedStyleIdsByHairstyle, setSavedStyleIdsByHairstyle] = useState<
-    Record<string, string | null>
-  >({});
   const saveStyleMutation = usePostSavedStyle();
   const deleteSavedStyleMutation = useDeleteSavedStyle();
+  const {
+    data: savedStylesData,
+    error: savedStylesError,
+    isFetching: isSavedStylesFetching,
+    isPending: isSavedStylesPending,
+  } = useGetSavedStyles();
   const {
     data: serverHairstyleOptions = [],
     error: groomsError,
@@ -55,7 +58,9 @@ const ArHairstylePage = () => {
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom = selectedHairstyle.name;
-  const savedStyleId = savedStyleIdsByHairstyle[selectedHairstyle.name] ?? null;
+  const savedStyleId =
+    savedStylesData?.items.find(style => style.hairstyle_id === selectedHairstyle.name)
+      ?.saved_style_id ?? null;
   const {
     connectionStatus,
     errorMessage,
@@ -107,17 +112,17 @@ const ArHairstylePage = () => {
       return;
     }
 
+    if (savedStylesError && !savedStylesData) {
+      showErrorToast(savedStylesError.message);
+      return;
+    }
+
     try {
       if (savedStyleId) {
         await deleteSavedStyleMutation.mutateAsync(savedStyleId);
-        setSavedStyleIdsByHairstyle(current => ({ ...current, [hairstyleId]: null }));
         showSuccessToast("후보 스타일 저장을 취소했어요.");
       } else {
-        const savedStyle = await saveStyleMutation.mutateAsync({ hairstyle_id: hairstyleId });
-        setSavedStyleIdsByHairstyle(current => ({
-          ...current,
-          [hairstyleId]: savedStyle.saved_style_id,
-        }));
+        await saveStyleMutation.mutateAsync({ hairstyle_id: hairstyleId });
         showSuccessToast("후보 스타일을 저장했어요.");
       }
     } catch (error) {
@@ -239,7 +244,12 @@ const ArHairstylePage = () => {
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
                 isCandidateSaved={Boolean(savedStyleId)}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
-                isSavePending={saveStyleMutation.isPending || deleteSavedStyleMutation.isPending}
+                isSavePending={
+                  saveStyleMutation.isPending ||
+                  deleteSavedStyleMutation.isPending ||
+                  isSavedStylesPending ||
+                  isSavedStylesFetching
+                }
                 selectedHairstyleLabel={selectedHairstyle.label}
               />
               <ArHairstyleCarousel
