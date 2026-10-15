@@ -63,13 +63,35 @@ const ArHairstyleCarousel = ({
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
   const wheelSettleTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
   const scrollProgressRef = useRef(0);
+  const pendingScrollProgressRef = useRef(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const updateScrollProgress = (progress: number) => {
     const clampedProgress = clampScrollProgress(progress);
     scrollProgressRef.current = clampedProgress;
+    pendingScrollProgressRef.current = clampedProgress;
+
+    if (scrollFrameRef.current !== null) return;
+
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      setScrollProgress(pendingScrollProgressRef.current);
+    });
+  };
+
+  const flushScrollProgress = (progress: number) => {
+    const clampedProgress = clampScrollProgress(progress);
+    scrollProgressRef.current = clampedProgress;
+    pendingScrollProgressRef.current = clampedProgress;
+
+    if (scrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(scrollFrameRef.current);
+      scrollFrameRef.current = null;
+    }
+
     setScrollProgress(clampedProgress);
   };
 
@@ -93,7 +115,7 @@ const ArHairstyleCarousel = ({
     touchStartXRef.current = event.touches[0]?.clientX ?? null;
     didSwipeRef.current = false;
     setIsDragging(true);
-    updateScrollProgress(0);
+    flushScrollProgress(0);
   };
 
   const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
@@ -117,7 +139,7 @@ const ArHairstyleCarousel = ({
 
     touchStartXRef.current = null;
     setIsDragging(false);
-    updateScrollProgress(0);
+    flushScrollProgress(0);
 
     if (touchStartX === null || touchEndX === undefined) {
       return;
@@ -141,7 +163,7 @@ const ArHairstyleCarousel = ({
     touchStartXRef.current = null;
     didSwipeRef.current = false;
     setIsDragging(false);
-    updateScrollProgress(0);
+    flushScrollProgress(0);
   };
 
   const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -164,7 +186,7 @@ const ArHairstyleCarousel = ({
 
       wheelSettleTimeoutRef.current = null;
       setIsDragging(false);
-      updateScrollProgress(0);
+      flushScrollProgress(0);
 
       if (Math.abs(progress) >= SCROLL_COMMIT_THRESHOLD) {
         handleMove(progress > 0 ? 1 : -1);
@@ -180,7 +202,7 @@ const ArHairstyleCarousel = ({
 
     clearWheelSettleTimeout();
     setIsDragging(false);
-    updateScrollProgress(0);
+    flushScrollProgress(0);
 
     if (disabled) {
       onDisabledSelect();
@@ -194,6 +216,9 @@ const ArHairstyleCarousel = ({
     () => () => {
       if (wheelSettleTimeoutRef.current !== null) {
         window.clearTimeout(wheelSettleTimeoutRef.current);
+      }
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
       }
     },
     []
