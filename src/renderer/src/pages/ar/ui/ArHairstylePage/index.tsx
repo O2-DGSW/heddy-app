@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
-import { usePostSavedStyle } from "@/entities/saved-style";
+import { useDeleteSavedStyle, useGetSavedStyles, usePostSavedStyle } from "@/entities/saved-style";
 import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, showErrorToast, showInfoToast, showSuccessToast } from "@/shared";
-import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
 import ArHairstyleBrowser from "../ArHairstyleBrowser";
@@ -31,6 +30,8 @@ const ArHairstylePage = () => {
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
   const saveStyleMutation = usePostSavedStyle();
+  const deleteSavedStyleMutation = useDeleteSavedStyle();
+  const savedStylesQuery = useGetSavedStyles();
   const {
     data: serverHairstyleOptions = [],
     error: groomsError,
@@ -43,19 +44,17 @@ const ArHairstylePage = () => {
   ];
   const {
     activeHairstylePosition,
-    activeModal,
-    candidateMemo,
     handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
-    handleModalClose,
-    handleModalOpen,
     handleStyleReset,
     fitSettings,
     handleFitSettingsChange,
-    setCandidateMemo,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom = selectedHairstyle.name;
+  const savedCandidate = savedStylesQuery.data?.items.find(
+    item => item.hairstyle_id === selectedHairstyle.name
+  );
   const {
     connectionStatus,
     errorMessage,
@@ -105,18 +104,23 @@ const ArHairstylePage = () => {
       return;
     }
 
-    try {
-      const memo = candidateMemo.trim();
+    if (savedStylesQuery.isPending) return;
 
-      await saveStyleMutation.mutateAsync({
-        hairstyle_id: selectedHairstyle.name,
-        ...(memo ? { memo } : {}),
-      });
-      setCandidateMemo("");
-      handleModalClose();
-      showSuccessToast("후보 스타일을 저장했어요.");
+    if (savedStylesQuery.isError || !savedStylesQuery.data) {
+      showErrorToast(savedStylesQuery.error?.message ?? "저장한 후보 목록을 불러오지 못했습니다.");
+      return;
+    }
+
+    try {
+      if (savedCandidate) {
+        await deleteSavedStyleMutation.mutateAsync(savedCandidate.saved_style_id);
+        showSuccessToast("후보 스타일 저장을 취소했어요.");
+      } else {
+        await saveStyleMutation.mutateAsync({ hairstyle_id: selectedHairstyle.name });
+        showSuccessToast("후보 스타일을 저장했어요.");
+      }
     } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : "후보 스타일을 저장하지 못했습니다.");
+      showErrorToast(error instanceof Error ? error.message : "후보 스타일을 변경하지 못했습니다.");
     }
   };
 
@@ -195,10 +199,16 @@ const ArHairstylePage = () => {
                 showForeheadStatus={false}
               />
               <ArControlBar
+                handleCandidateSave={() => void handleCandidateSave()}
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
-                handleModalOpen={() => handleModalOpen("candidate-save")}
                 handleStyleReset={handleReset}
+                isCandidateSaved={Boolean(savedCandidate)}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
+                isSavePending={
+                  savedStylesQuery.isPending ||
+                  saveStyleMutation.isPending ||
+                  deleteSavedStyleMutation.isPending
+                }
                 selectedHairstyleLabel={selectedHairstyle.label}
               />
               <ArHairstyleCarousel
@@ -258,16 +268,6 @@ const ArHairstylePage = () => {
             onClose={handleHairstyleBrowserClose}
             onDisabledSelect={handleDisabledHairstyleSelect}
             onSelect={handleHairstyleSelect}
-          />
-        )}
-
-        {!isConnectionPending && activeModal === "candidate-save" && (
-          <ArCandidateSaveModal
-            isPending={saveStyleMutation.isPending}
-            memo={candidateMemo}
-            onClose={handleModalClose}
-            onSave={() => void handleCandidateSave()}
-            setMemo={setCandidateMemo}
           />
         )}
       </section>

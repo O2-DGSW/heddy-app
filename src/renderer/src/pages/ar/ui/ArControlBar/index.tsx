@@ -6,27 +6,39 @@ import { cn } from "@/shared";
 
 interface ArControlBarProps {
   handleHairstyleBrowserOpen: () => void;
-  handleModalOpen: () => void;
+  handleCandidateSave: () => void;
   handleStyleReset: () => void;
+  isCandidateSaved: boolean;
   isHairstyleBrowserOpen: boolean;
+  isSavePending: boolean;
   selectedHairstyleLabel: string;
 }
 
 const ArControlBar = ({
   handleHairstyleBrowserOpen,
-  handleModalOpen,
+  handleCandidateSave,
   handleStyleReset,
+  isCandidateSaved,
   isHairstyleBrowserOpen,
+  isSavePending,
   selectedHairstyleLabel,
 }: ArControlBarProps) => (
   <div className="flex w-[calc(100%-24px)] max-w-[332px] items-center gap-[8px]">
     <button
-      aria-label="후보 스타일 저장"
-      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"
-      onClick={handleModalOpen}
+      aria-label={isCandidateSaved ? "후보 스타일 저장 취소" : "후보 스타일 저장"}
+      aria-busy={isSavePending}
+      aria-pressed={isCandidateSaved}
+      className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)] disabled:opacity-50"
+      disabled={isSavePending}
+      onClick={handleCandidateSave}
+      style={isCandidateSaved ? { backgroundColor: lightTheme.primary.normal } : undefined}
       type="button"
     >
-      <img alt="" className="h-[19px] w-[15px]" src={bookmarkIcon} />
+      <img
+        alt=""
+        className={cn("h-[19px] w-[15px]", isCandidateSaved && "brightness-0 invert")}
+        src={bookmarkIcon}
+      />
     </button>
     <button
       aria-expanded={isHairstyleBrowserOpen}

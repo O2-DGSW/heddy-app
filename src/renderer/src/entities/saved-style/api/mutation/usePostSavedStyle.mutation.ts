@@ -9,8 +9,8 @@ export const usePostSavedStyle = () => {
 
   return useMutation({
     mutationFn: (body: SaveStyleRequest) => saveStyleApi(body),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: savedStyleQueryKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: savedStyleQueryKeys.all });
     },
   });
 };

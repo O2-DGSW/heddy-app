@@ -8,8 +8,8 @@ export const useDeleteSavedStyle = () => {
 
   return useMutation({
     mutationFn: (savedStyleId: string) => deleteSavedStyleApi(savedStyleId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: savedStyleQueryKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: savedStyleQueryKeys.all });
     },
   });
 };
