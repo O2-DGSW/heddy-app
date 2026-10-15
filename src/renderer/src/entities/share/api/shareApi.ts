@@ -1,5 +1,6 @@
-import { api, getApiErrorMessage } from "@/shared/lib/api";
-import type { ApiResponse } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage } from "@heddy/api";
+import type { ApiResponse } from "@heddy/api";
+import { toWebShareUrl } from "@/shared/lib/share";
 
 import type {
   CreateShareRequest,
@@ -13,7 +14,7 @@ export const getSharesApi = async (
   params: GetSharesParams = {}
 ): Promise<PageResponseShareSummaryResponse> => {
   try {
-    const res = await api.get<ApiResponse<PageResponseShareSummaryResponse>>("/shares", {
+    const res = await apiClient.get<ApiResponse<PageResponseShareSummaryResponse>>("/shares", {
       params,
     });
     return res.data.data;
@@ -26,7 +27,7 @@ export const getSharesApi = async (
 
 export const deleteShareApi = async (shareId: string): Promise<void> => {
   try {
-    await api.delete(`/shares/${shareId}`);
+    await apiClient.delete(`/shares/${shareId}`);
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유 철회에 실패했습니다."), {
       cause: error,
@@ -40,8 +41,10 @@ export const deleteShareApi = async (shareId: string): Promise<void> => {
  */
 export const createShareApi = async (body: CreateShareRequest): Promise<ShareResponse> => {
   try {
-    const res = await api.post<ApiResponse<ShareResponse>>("/shares", body);
-    return res.data.data;
+    const res = await apiClient.post<ApiResponse<ShareResponse>>("/shares", body);
+    const share = res.data.data;
+
+    return { ...share, share_url: toWebShareUrl(share.share_url) };
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유 링크를 만들지 못했습니다."), {
       cause: error,
@@ -56,7 +59,9 @@ export const createShareApi = async (body: CreateShareRequest): Promise<ShareRes
  */
 export const getPublicShareApi = async (shareToken: string): Promise<PublicShareResponse> => {
   try {
-    const res = await api.get<ApiResponse<PublicShareResponse>>(`/public/shares/${shareToken}`);
+    const res = await apiClient.get<ApiResponse<PublicShareResponse>>(
+      `/public/shares/${encodeURIComponent(shareToken)}`
+    );
     return res.data.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "공유된 기록을 불러오지 못했습니다."), {

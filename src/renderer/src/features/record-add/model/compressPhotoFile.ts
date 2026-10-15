@@ -5,6 +5,8 @@ const INITIAL_IMAGE_QUALITY = 0.82;
 const MIN_IMAGE_QUALITY = 0.5;
 const IMAGE_QUALITY_STEP = 0.08;
 const IMAGE_DIMENSION_STEP_RATIO = 0.8;
+// 원본 사진을 한꺼번에 디코딩하면 iOS WebView 메모리가 순간적으로 크게 뛴다.
+const PHOTO_COMPRESSION_CONCURRENCY = 2;
 
 const getCompressedFileName = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf(".");
@@ -80,6 +82,12 @@ const createImageCanvas = (image: HTMLImageElement, maxDimension: number) => {
   return canvas;
 };
 
+/** iOS Safari는 canvas 메모리를 늦게 돌려주므로 크기를 0으로 줄여 바로 놓아준다 */
+const releaseCanvas = (canvas: HTMLCanvasElement) => {
+  canvas.width = 0;
+  canvas.height = 0;
+};
+
 const compressImage = async (image: HTMLImageElement) => {
   let maxDimension = MAX_UPLOAD_PHOTO_DIMENSION;
   let smallestBlob: Blob | null = null;
@@ -92,15 +100,21 @@ const compressImage = async (image: HTMLImageElement) => {
     }
 
     let quality = INITIAL_IMAGE_QUALITY;
-    let compressedBlob = await canvasToBlob(canvas, quality);
-    smallestBlob =
-      !smallestBlob || compressedBlob.size < smallestBlob.size ? compressedBlob : smallestBlob;
+    let compressedBlob: Blob;
 
-    while (compressedBlob.size > MAX_UPLOAD_PHOTO_BYTES && quality > MIN_IMAGE_QUALITY) {
-      quality = Math.max(MIN_IMAGE_QUALITY, quality - IMAGE_QUALITY_STEP);
+    try {
       compressedBlob = await canvasToBlob(canvas, quality);
       smallestBlob =
         !smallestBlob || compressedBlob.size < smallestBlob.size ? compressedBlob : smallestBlob;
+
+      while (compressedBlob.size > MAX_UPLOAD_PHOTO_BYTES && quality > MIN_IMAGE_QUALITY) {
+        quality = Math.max(MIN_IMAGE_QUALITY, quality - IMAGE_QUALITY_STEP);
+        compressedBlob = await canvasToBlob(canvas, quality);
+        smallestBlob =
+          !smallestBlob || compressedBlob.size < smallestBlob.size ? compressedBlob : smallestBlob;
+      }
+    } finally {
+      releaseCanvas(canvas);
     }
 
     if (compressedBlob.size <= MAX_UPLOAD_PHOTO_BYTES) {
@@ -133,4 +147,22 @@ export const compressPhotoFile = async (file: File): Promise<File> => {
   } catch {
     return file;
   }
+};
+
+/** 여러 장을 고르면 동시에 최대 2장만 압축한다. 결과는 고른 순서를 그대로 따른다 */
+export const compressPhotoFiles = async (files: File[]): Promise<File[]> => {
+  const results = [...files];
+  const entries = files.entries();
+
+  const compressNext = async () => {
+    for (const [index, file] of entries) {
+      results[index] = await compressPhotoFile(file);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(PHOTO_COMPRESSION_CONCURRENCY, files.length) }, compressNext)
+  );
+
+  return results;
 };

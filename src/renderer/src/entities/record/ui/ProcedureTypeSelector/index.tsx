@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
@@ -74,4 +75,5 @@ const ProcedureTypeSelector = ({
   );
 };
 
-export default ProcedureTypeSelector;
+// 폼 전체가 다시 그려질 때 값이 그대로인 필드는 건너뛴다.
+export default memo(ProcedureTypeSelector);

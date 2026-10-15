@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { profileAvatar } from "@/shared";
+import { profileAvatar, ArrowIcon } from "@/shared";
 
 import { useProfileEdit } from "../../model/useProfileEdit";
 
@@ -86,7 +85,7 @@ const ProfileEditPage = () => {
             onClick={handleBack}
             type="button"
           >
-            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+            <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
           </button>
           <h1
             className={font.headline1.bold}
@@ -139,7 +138,8 @@ const ProfileEditPage = () => {
                 label="비밀번호"
                 name="password"
                 onChange={value => handleChange("password", value)}
-                placeholder="비밀번호를 입력하세요"
+                // 여기서는 바꿀 수 없어, 입력을 요구하지 않고 바꾸는 곳을 알려 준다.
+                placeholder="비밀번호 찾기에서 변경할 수 있어요"
                 type="password"
                 value={formValues.password}
               />
@@ -178,7 +178,10 @@ const ProfileEditPage = () => {
                   type="button"
                 >
                   <span>선호하는 머리 스타일을 선택하세요</span>
-                  <img alt="" className="h-[16px] w-[16px] -rotate-90" src={arrowIcon} />
+                  <ArrowIcon
+                    className="h-[16px] w-[16px] -rotate-90"
+                    color={lightTheme.label.neutral}
+                  />
                 </button>
               </div>
             </div>

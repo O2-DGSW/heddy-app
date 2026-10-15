@@ -8,4 +8,3 @@ export {
   mapFormValuesToUpdateRequest,
   mapPhotoItemsToAddRequests,
 } from "./mapRecordForm";
-export { syncRecordPhotos } from "./syncRecordPhotos";

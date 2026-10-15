@@ -1,76 +1,36 @@
-import { useMemo } from "react";
 import { font } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
-
-import { HOME_RECENT_RECORD_PARAMS } from "../model/constants";
-import { mapRecommendationToHomeCards } from "../model/mapRecommendationToHomeCards";
-import { mapTreatmentRecordToRecentRecord } from "../model/mapTreatmentRecordToRecentRecord";
-
-import { useGetLatestRecommendation, useGetTreatmentRecords } from "@/entities";
-import { useGetMyProfile } from "@/entities/profile";
-import { useGetSavedStyles } from "@/entities/saved-style";
 import { cn } from "@/shared";
-
 import {
   ArStyleSection,
+  ShareRecordBanner,
   HomeHeader,
   RecentRecordCard,
   RecommendationSection,
-  ShareRecordBanner,
   homeTheme,
 } from "@/features/home";
 
+import { useHomeData } from "../model/useHomeData";
+
 const HomePage = () => {
   const navigate = useNavigate();
-  const { data: profile } = useGetMyProfile();
-  const {
-    data: savedStyles,
-    isPending: isSavedStylesPending,
-    isError: isSavedStylesError,
-    refetch: refetchSavedStyles,
-  } = useGetSavedStyles();
-  const {
-    data: treatmentRecordList,
-    isPending: isRecentRecordPending,
-    isError: isRecentRecordError,
-    refetch: refetchRecentRecord,
-  } = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
-  const {
-    data: latestRecommendation,
-    isPending: isRecommendationPending,
-    isFetching: isRecommendationFetching,
-    isError: isRecommendationError,
-    refetch: refetchRecommendation,
-  } = useGetLatestRecommendation();
-  const recentRecord = useMemo(() => {
-    const latestRecord = treatmentRecordList?.items[0];
-
-    return latestRecord ? mapTreatmentRecordToRecentRecord(latestRecord) : null;
-  }, [treatmentRecordList]);
-  const recommendations = useMemo(
-    () => mapRecommendationToHomeCards(latestRecommendation ?? null),
-    [latestRecommendation]
-  );
-  const profileName = profile?.nickname?.trim();
-  const hasRecentRecord = isRecentRecordPending || Boolean(recentRecord);
-  const isRecommendationLoading =
-    isRecommendationPending || (isRecommendationError && isRecommendationFetching);
+  const { profileName, recentRecord, arStyles, recommendations } = useHomeData();
+  const displayName = profileName.trim();
+  const hasRecentRecord = recentRecord.isLoading || Boolean(recentRecord.data);
 
   const handleRecentRecordListClick = () => {
-    if (isRecentRecordError) {
-      void refetchRecentRecord();
+    if (recentRecord.isError) {
+      void recentRecord.refetch();
       return;
     }
-
     navigate("/cuts");
   };
 
   const handleRecommendationClick = () => {
-    if (isRecommendationError) {
-      void refetchRecommendation();
+    if (recommendations.isError) {
+      void recommendations.refetch();
       return;
     }
-
     navigate("/recommend");
   };
 
@@ -85,31 +45,31 @@ const HomePage = () => {
           <HomeHeader onProfileClick={() => navigate("/profile")} />
           <div className="mt-5 mb-6 flex flex-col gap-1">
             <h1 id="home-greeting" className={font.headline1.bold}>
-              {profileName && `${profileName}님, `}오늘도 예쁜 하루 되세요!
+              {displayName && `${displayName}님, `}오늘도 예쁜 하루 되세요!
             </h1>
             <p className={cn(font.label.medium, "text-[var(--home-muted)]")}>
               시술 기록을 저장하고, 스타일을 추천받으세요
             </p>
           </div>
           <RecentRecordCard
-            record={recentRecord}
-            isLoading={isRecentRecordPending}
-            isError={isRecentRecordError}
+            record={recentRecord.data}
+            isLoading={recentRecord.isLoading}
+            isError={recentRecord.isError}
             onAddClick={() => navigate("/cuts/add")}
             onClick={handleRecentRecordListClick}
           />
           <div className="mt-6 grid grid-cols-[minmax(0,1.126fr)_minmax(0,1fr)] gap-[14px] max-[374px]:grid-cols-1">
             <ArStyleSection
-              styles={savedStyles?.items ?? []}
-              isLoading={isSavedStylesPending}
-              isError={isSavedStylesError}
-              onRetry={() => void refetchSavedStyles()}
+              styles={arStyles.data}
+              isLoading={arStyles.isLoading}
+              isError={arStyles.isError}
+              onRetry={() => void arStyles.refetch()}
               onMoreClick={() => navigate("/profile/saved-styles")}
             />
             <RecommendationSection
-              recommendations={recommendations}
-              isLoading={isRecommendationLoading}
-              isError={isRecommendationError}
+              recommendations={recommendations.data}
+              isLoading={recommendations.isLoading}
+              isError={recommendations.isError}
               onMoreClick={handleRecommendationClick}
               onRecommendationClick={handleRecommendationClick}
             />

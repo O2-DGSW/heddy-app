@@ -5,6 +5,8 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { shareLink } from "@/shared/lib/share";
 import { CloseIcon } from "@/shared/ui/icons/CloseIcon";
 import { CopyIcon } from "@/shared/ui/icons/CopyIcon";
+import { ModalShell } from "@/shared/ui/modal";
+import { ShareIcon } from "@/shared/ui/icons/ShareIcon";
 
 interface ShareQrModalProps {
   shareUrl: string;
@@ -44,82 +46,73 @@ export const ShareQrModal = ({ shareUrl, title = "공유", onClose }: ShareQrMod
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="share-modal-title"
-      className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
+    <ModalShell
+      labelledBy="share-modal-title"
+      placement="center"
+      onBackdropClick={onClose}
+      backdropLabel="공유 닫기"
     >
-      <button
-        type="button"
-        aria-label="공유 닫기"
-        onClick={onClose}
-        className="absolute inset-0 h-full w-full border-0 p-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      />
-
-      <div className="absolute inset-0 flex items-center justify-center px-6">
-        <div
-          className="flex w-full flex-col gap-6 rounded-lg px-6 py-6"
-          style={{ backgroundColor: lightTheme.background.normal }}
-        >
-          <div className="flex items-center justify-between">
-            <h2
-              id="share-modal-title"
-              className={font.headline1.bold}
-              style={{ color: lightTheme.label.neutral }}
-            >
-              {title}
-            </h2>
-            <button
-              type="button"
-              aria-label="공유 닫기"
-              onClick={onClose}
-              className="flex h-[34px] w-[34px] items-center justify-center rounded-full border-0 p-0"
-              style={{ backgroundColor: lightTheme.fill.normal }}
-            >
-              <CloseIcon />
-            </button>
-          </div>
-
-          <div className="flex justify-center">
-            <QRCodeSVG value={shareUrl} size={200} level="M" />
-          </div>
-
+      <div
+        className="flex w-full flex-col gap-6 rounded-lg px-6 py-6"
+        style={{ backgroundColor: lightTheme.background.normal }}
+      >
+        <div className="flex items-center justify-between">
+          <h2
+            id="share-modal-title"
+            className={font.headline1.bold}
+            style={{ color: lightTheme.label.neutral }}
+          >
+            {title}
+          </h2>
           <button
             type="button"
-            onClick={handleNativeShare}
-            className={`rounded-xl py-3 text-center ${font.headline2.semiBold}`}
-            style={{
-              backgroundColor: lightTheme.primary.normal,
-              color: lightTheme.label.buttonText,
-            }}
+            aria-label="공유 닫기"
+            onClick={onClose}
+            className="flex h-[34px] w-[34px] items-center justify-center rounded-full border-0 p-0"
+            style={{ backgroundColor: lightTheme.fill.neutral }}
           >
-            다른 앱으로 공유
+            <CloseIcon />
           </button>
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <span className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
-              {isCopied ? "링크를 복사했어요" : "공유 링크"}
-            </span>
+        <div className="flex justify-center">
+          <QRCodeSVG value={shareUrl} size={200} level="M" />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className={font.label.medium} style={{ color: lightTheme.label.assistive }}>
+            {isCopied ? "링크를 복사했어요" : "공유 링크"}
+          </span>
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={handleCopy}
               aria-label="공유 링크 복사"
-              className="flex items-center justify-center gap-2 rounded-xl px-4 py-3"
+              className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-xl px-5 py-3"
               style={{ backgroundColor: lightTheme.fill.normal }}
             >
               <span
-                className={`truncate ${font.body.regular}`}
+                className={`truncate ${font.label.semiBold}`}
                 style={{ color: lightTheme.label.neutral }}
               >
                 {shareUrl}
               </span>
-              <CopyIcon />
+              <span className="shrink-0">
+                <CopyIcon />
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={handleNativeShare}
+              aria-label="다른 앱으로 공유"
+              className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full border-0 p-0"
+              style={{ backgroundColor: lightTheme.fill.normal }}
+            >
+              <ShareIcon />
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 };

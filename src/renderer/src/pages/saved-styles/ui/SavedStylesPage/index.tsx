@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { ShareQrModal } from "@/shared";
+import { ConfirmModal, ShareQrModal, ArrowIcon } from "@/shared";
 
 import { SavedStyleCard } from "../SavedStyleCard";
 import { useSavedStyles } from "../../model/useSavedStyles";
@@ -23,10 +22,14 @@ const SavedStylesPage = () => {
     loadErrorMessage,
     shareUrl,
     isSharing,
+    isDeleteConfirmOpen,
+    isDeleting,
     actionErrorMessage,
     handleBack,
     handleCloseShareResult,
     handleDelete,
+    handleDeleteCancel,
+    handleDeleteConfirm,
     handleRetryWithAr,
     handleShare,
   } = useSavedStyles();
@@ -45,7 +48,7 @@ const SavedStylesPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1
@@ -116,6 +119,18 @@ const SavedStylesPage = () => {
       >
         AR로 다시 체험하기
       </button>
+
+      {isDeleteConfirmOpen && (
+        <ConfirmModal
+          confirmLabel={isDeleting ? "삭제 중" : "삭제"}
+          description="삭제한 후보 스타일은 되돌릴 수 없어요."
+          isPending={isDeleting}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="이 후보 스타일을 삭제할까요?"
+          tone="danger"
+        />
+      )}
 
       {/* 공유 링크는 생성 응답에만 들어 있어, 받은 즉시 모달로 띄워 복사할 수 있게 한다 */}
       {shareUrl && (

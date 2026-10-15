@@ -1,32 +1,18 @@
 import { useParams } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import ratingStar from "@/shared/assets/rating-star.svg";
 import {
   formatDurationDisplay,
   getTreatmentRecordPhotoDisplayUrl,
   useGetTreatmentRecord,
-  type ServiceType,
+  formatLongDate,
+  formatServiceTypes,
 } from "@/entities/record";
-import { CutsRecordActions } from "@/features/cuts/ui/CutsRecordActions";
+import { CutsRecordActions } from "@/features/cuts";
+import { cn, StarIcon } from "@/shared";
 
 /** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
 const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
-
-const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
-  CUT: "커트",
-  PERM: "펌",
-  COLOR: "염색",
-  BLEACH: "탈색",
-  CLINIC: "클리닉",
-  STYLING: "스타일링",
-  OTHER: "기타",
-};
-
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "long", day: "numeric" }).format(
-    new Date(value)
-  );
 
 const formatPrice = (price: { amount: number; currency: string } | null | undefined) => {
   if (!price) {
@@ -65,12 +51,12 @@ const CutsDetailInfoPage = () => {
   }
 
   const recordInformation = [
-    { label: "시술 날짜", value: formatDate(record.performed_at) },
+    { label: "시술 날짜", value: formatLongDate(record.performed_at) },
     { label: "미용실", value: record.salon_name ?? "미입력" },
     { label: "담당 디자이너", value: record.designer_name ?? "미입력" },
     {
       label: "시술 종류",
-      value: record.service_types.map(serviceType => SERVICE_TYPE_LABEL[serviceType]).join(" · "),
+      value: formatServiceTypes(record.service_types),
     },
     { label: "시술 내용", value: record.treatment_content ?? "미입력" },
     {
@@ -100,9 +86,13 @@ const CutsDetailInfoPage = () => {
           <div className="flex gap-[11px] overflow-x-auto pl-[6px] no-scrollbar">
             {photoUrls.map((photoUrl, index) => (
               <img
+                decoding="async"
+                loading="lazy"
+                width={110}
+                height={110}
                 alt={`시술 사진 ${index + 1}`}
                 className="h-[110px] w-[110px] rounded-[10px] object-cover"
-                key={index}
+                key={photoUrl}
                 src={photoUrl}
               />
             ))}
@@ -150,17 +140,13 @@ const CutsDetailInfoPage = () => {
                 className="flex -space-x-[3px]"
               >
                 {SATISFACTION_SCORES.map(score => (
-                  <img
-                    alt=""
-                    className="h-[20px] w-[20px]"
+                  <StarIcon
                     key={score}
-                    /* 빈 별도 같은 에셋을 회색으로 바꿔 쓴다. 다른 에셋은 뷰박스 비율이 달라 크기가 어긋난다 */
-                    style={
-                      score <= (record.satisfaction ?? 0)
-                        ? undefined
-                        : { filter: "grayscale(1)", opacity: 0.35 }
-                    }
-                    src={ratingStar}
+                    /* 빈 별도 같은 별을 회색으로 바꿔 쓴다 */
+                    className={cn(
+                      "h-[20px] w-[20px]",
+                      score > (record.satisfaction ?? 0) && "opacity-35 grayscale"
+                    )}
                   />
                 ))}
               </dd>

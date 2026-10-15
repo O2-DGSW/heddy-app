@@ -10,7 +10,7 @@ import {
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
 } from "../model/constants";
-import type { ArHairstyleOption, HairstyleOptionId } from "../model/types";
+import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
@@ -19,8 +19,12 @@ interface ArHairstyleCarouselProps {
   disabled: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
   compact?: boolean;
+  /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
+  onDisabledSelect?: () => void;
 }
 
+// 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
+const HAIRSTYLE_BASE_SIZE = getHairstyleSize(0);
 const SWIPE_THRESHOLD = 24;
 const WHEEL_STEP_INTERVAL = 280;
 
@@ -31,13 +35,17 @@ const ArHairstyleCarousel = ({
   disabled,
   onSelect,
   compact = false,
+  onDisabledSelect,
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
   const lastWheelAtRef = useRef(0);
 
   const handleMove = (offset: -1 | 1) => {
-    if (disabled) return;
+    if (disabled) {
+      onDisabledSelect?.();
+      return;
+    }
     onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
   };
 
@@ -85,9 +93,13 @@ const ArHairstyleCarousel = ({
   };
 
   const handleSelect = (hairstyleId: HairstyleOptionId) => {
-    if (disabled) return;
     if (didSwipeRef.current) {
       didSwipeRef.current = false;
+      return;
+    }
+
+    if (disabled) {
+      onDisabledSelect?.();
       return;
     }
 
@@ -155,19 +167,25 @@ const ArHairstyleCarousel = ({
         const isNoStyle = option.id === "none";
         const size = getHairstyleSize(offset);
         const isFocusable = Math.abs(offset) <= 2;
+        const translateX = getHairstyleItemLeft(offset) + size / 2 - HAIRSTYLE_BASE_SIZE / 2;
 
         return (
           <div
-            className="absolute top-1/2 -translate-y-1/2 transition-[left,width,height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            className="absolute left-0 top-1/2 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
             key={position}
-            style={{ height: size, left: getHairstyleItemLeft(offset), width: size }}
+            style={{
+              height: HAIRSTYLE_BASE_SIZE,
+              width: HAIRSTYLE_BASE_SIZE,
+              transform: `translate(${translateX}px, -50%) scale(${size / HAIRSTYLE_BASE_SIZE})`,
+            }}
           >
             <button
               aria-label={isNoStyle ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
               aria-pressed={isSelected}
-              disabled={disabled}
+              // disabled 속성을 쓰면 탭 자체가 막혀 안내를 띄울 수 없어 aria-disabled로 표시만 한다.
+              aria-disabled={disabled}
               className={cn(
-                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] disabled:opacity-45",
+                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
                 size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
                 isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
               )}
@@ -176,11 +194,13 @@ const ArHairstyleCarousel = ({
               type="button"
             >
               {isNoStyle ? (
-                <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.3)] backdrop-blur-[5px]">
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.5)]">
                   <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
                 </span>
               ) : option.imageUrl ? (
                 <img
+                  decoding="async"
+                  loading="lazy"
                   alt={`${option.label} 참고 이미지`}
                   className="h-full w-full object-cover"
                   src={option.imageUrl}
@@ -188,7 +208,7 @@ const ArHairstyleCarousel = ({
               ) : (
                 <span
                   className={cn(
-                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/20 px-1 text-center text-[9px] font-semibold leading-tight text-white backdrop-blur",
+                    "flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white/30 px-1 text-center text-[9px] font-semibold leading-tight text-white",
                     size === 80 && "border-[2.5px] border-black"
                   )}
                 >

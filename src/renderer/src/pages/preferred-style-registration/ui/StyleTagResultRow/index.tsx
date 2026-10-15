@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { cn } from "@/shared";
 
 import { MAX_VISIBLE_RESULT_TAGS } from "../../model/constants";
-import type { StyleTag, StyleTagStatusType } from "../../model/types";
+import type { StyleTag, StyleTagStatusType } from "../../model/preferredStyle.types";
 import StyleTagButton from "../StyleTagButton";
 
 interface StyleTagResultRowProps {

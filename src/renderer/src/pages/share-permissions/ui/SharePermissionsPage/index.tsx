@@ -1,10 +1,12 @@
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, ArrowIcon } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
-import type { SharePermissionItem, SharePermissionSection } from "../../model/types";
+import type {
+  SharePermissionItem,
+  SharePermissionSection,
+} from "../../model/sharePermission.types";
 
 interface PermissionToggleProps {
   checked: boolean;
@@ -48,8 +50,8 @@ const PermissionToggle = ({
     >
       <span
         className={cn(
-          "absolute top-1/2 h-[21px] w-[21px] -translate-y-1/2 rounded-full transition-[left] duration-200",
-          checked ? "left-[21px]" : "left-[3px]"
+          "absolute left-[3px] top-1/2 h-[21px] w-[21px] -translate-y-1/2 rounded-full transition-transform duration-200",
+          checked ? "translate-x-[18px]" : "translate-x-0"
         )}
         style={{ backgroundColor: palette.neutral[95] }}
       />
@@ -138,7 +140,7 @@ const SharePermissionsPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1

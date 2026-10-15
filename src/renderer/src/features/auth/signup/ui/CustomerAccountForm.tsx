@@ -1,9 +1,9 @@
 import type { FormEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { Link } from "react-router-dom";
-import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/types";
+import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/signup.types";
 import { useAccountForm } from "@/features/auth/signup/model/useAccountForm";
-import { useSmsVerification } from "@/features/auth/signup/model/useSmsVerification";
+import { useSmsVerification } from "@/entities/auth";
 import { AccountFormFields } from "@/features/auth/signup/ui/AccountFormFields";
 import HairProfileField from "@/features/auth/signup/ui/HairProfileField";
 import { SignupAgreementsField } from "@/features/auth/signup/ui/SignupAgreementsField";
@@ -28,6 +28,7 @@ export const CustomerAccountForm = ({
   const {
     isValid,
     canRequestVerification,
+    showEmailError,
     showPasswordError,
     showPhoneError,
     showNameError,
@@ -49,6 +50,7 @@ export const CustomerAccountForm = ({
     <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
       <AccountFormFields
         form={form}
+        showEmailError={showEmailError}
         showPasswordError={showPasswordError}
         showPhoneError={showPhoneError}
         showNameError={showNameError}

@@ -1,7 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { cn } from "@/shared";
+import { cn, ArrowIcon, ConfirmModal } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -11,6 +10,10 @@ import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
   const {
+    sectionRef,
+    isLeaveConfirmOpen,
+    handleLeaveConfirm,
+    handleLeaveCancel,
     activeTab,
     actionErrorMessage,
     excludedTags,
@@ -35,6 +38,7 @@ const PreferredStyleRegistrationPage = () => {
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby="preferred-style-registration-title"
       aria-busy={isFetching || isSaving}
       className="flex h-full min-h-0 flex-col overflow-x-clip"
@@ -47,7 +51,7 @@ const PreferredStyleRegistrationPage = () => {
           onClick={handleBack}
           type="button"
         >
-          <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+          <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
         </button>
 
         <h1
@@ -66,14 +70,17 @@ const PreferredStyleRegistrationPage = () => {
         style={{ borderColor: lightTheme.label.disable }}
       >
         <span
+          aria-hidden="true"
           className={cn(
-            "absolute bottom-[-1px] h-[3px] w-[56px] rounded-full transition-[left] duration-300 ease-out",
-            activeTab === "preferred"
-              ? "left-[25%] -translate-x-1/2"
-              : "left-[75%] -translate-x-1/2"
+            "absolute bottom-[-1px] left-0 flex w-1/2 justify-center transition-transform duration-300 ease-out",
+            activeTab === "preferred" ? "translate-x-0" : "translate-x-full"
           )}
-          style={{ backgroundColor: lightTheme.label.neutral }}
-        />
+        >
+          <span
+            className="h-[3px] w-[56px] rounded-full"
+            style={{ backgroundColor: lightTheme.label.neutral }}
+          />
+        </span>
 
         {PREFERRED_STYLE_TABS.map(tab => {
           const isActive = activeTab === tab;
@@ -129,7 +136,8 @@ const PreferredStyleRegistrationPage = () => {
                   ) : (
                     styleTags.map(tag => (
                       <StyleTagButton
-                        disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
+                        disabled={isSaving}
+                        isUnavailable={getIsTagDisabled(tag.status, activeTab)}
                         key={tag.id}
                         label={tag.label}
                         onClick={() => handleTagClick(tag.id)}
@@ -246,6 +254,18 @@ const PreferredStyleRegistrationPage = () => {
           </div>
         </div>
       </div>
+
+      {isLeaveConfirmOpen && (
+        <ConfirmModal
+          cancelLabel="계속 고르기"
+          confirmLabel="나가기"
+          description="고른 스타일은 저장되지 않습니다."
+          onCancel={handleLeaveCancel}
+          onConfirm={handleLeaveConfirm}
+          title="저장하지 않고 나갈까요?"
+          tone="danger"
+        />
+      )}
     </section>
   );
 };

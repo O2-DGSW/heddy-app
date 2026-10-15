@@ -1,7 +1,1 @@
-export interface ArHairstyleOption {
-  id: string;
-  imageUrl?: string;
-  label: string;
-}
-
-export type HairstyleOptionId = string;
+export type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";

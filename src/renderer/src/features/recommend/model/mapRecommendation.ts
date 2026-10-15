@@ -1,8 +1,5 @@
-import { createDateValue } from "@/entities/record/model/date";
-import type {
-  RecommendationApiData,
-  RecommendationItemApiData,
-} from "@/entities/recommendation/model/recommendation.types";
+import { toDateValue } from "@/entities/record";
+import type { RecommendationApiData, RecommendationItemApiData } from "@/entities/recommendation";
 import type {
   RecommendationItem,
   RecommendReasonType,
@@ -35,21 +32,6 @@ const REASON_TYPE_BY_STRATEGY: Record<string, RecommendReasonType> = {
   TREATMENT_HISTORY: "이력 기반",
 };
 
-/** ISO 8601 시술일시를 화면에 쓸 YYYY-MM-DD로 바꾼다(기기 시간대 기준) */
-const formatPerformedAt = (performedAt: string) => {
-  const performedDate = new Date(performedAt);
-
-  if (Number.isNaN(performedDate.getTime())) {
-    return "";
-  }
-
-  return createDateValue(
-    performedDate.getFullYear(),
-    performedDate.getMonth() + 1,
-    performedDate.getDate()
-  );
-};
-
 /** 참고한 시술기록을 "2026-07-18 기록" 형태로 만든다. 서버가 시술 종류를 주지 않아 날짜만 쓴다. */
 const buildReferenceRecordLabel = (item: RecommendationItemApiData) => {
   const performedAt = item.reference_records?.[0]?.performed_at;
@@ -58,7 +40,7 @@ const buildReferenceRecordLabel = (item: RecommendationItemApiData) => {
     return "";
   }
 
-  const formattedDate = formatPerformedAt(performedAt);
+  const formattedDate = toDateValue(performedAt);
 
   return formattedDate ? `${formattedDate} 기록` : "";
 };

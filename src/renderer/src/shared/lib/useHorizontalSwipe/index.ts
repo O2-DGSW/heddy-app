@@ -9,6 +9,14 @@ const DEFAULT_MIN_DISTANCE = 60;
 
 type SwipeAxis = "none" | "horizontal" | "vertical";
 
+interface SwipeGestureState {
+  startX: number;
+  startY: number;
+  isTracking: boolean;
+  axis: SwipeAxis;
+  shouldSuppressClick: boolean;
+}
+
 interface UseHorizontalSwipeOptions {
   /** 왼쪽으로 밀었을 때(다음 항목) */
   onSwipeLeft: () => void;
@@ -37,11 +45,11 @@ export const useHorizontalSwipe = ({
   onSwipeRight,
   minDistance = DEFAULT_MIN_DISTANCE,
 }: UseHorizontalSwipeOptions): HorizontalSwipeProps => {
-  const gesture = useRef({
+  const gesture = useRef<SwipeGestureState>({
     startX: 0,
     startY: 0,
     isTracking: false,
-    axis: "none" as SwipeAxis,
+    axis: "none",
     shouldSuppressClick: false,
   });
 
@@ -51,6 +59,9 @@ export const useHorizontalSwipe = ({
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
+    // 스와이프 뒤에 click이 오지 않는 경우(영역 밖에서 손을 뗌 등)가 있어, 새 제스처가 시작되면
+    // 이전 제스처의 클릭 막기를 풀어야 다음 탭이 무시되지 않는다.
+    gesture.current.shouldSuppressClick = false;
     const startXInElement = event.clientX - event.currentTarget.getBoundingClientRect().left;
 
     if (!event.isPrimary || startXInElement <= EDGE_BACK_GESTURE_WIDTH) {

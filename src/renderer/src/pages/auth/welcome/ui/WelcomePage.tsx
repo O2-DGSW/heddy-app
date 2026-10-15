@@ -45,7 +45,7 @@ const WelcomePage = () => {
             </div>
           </div>
 
-          <img src={publicUrl("agua.svg")} alt="아거!" className="w-35" />
+          <img src={publicUrl("agua.webp")} alt="아거!" className="w-35" />
 
           <div className="flex w-full flex-col items-center gap-6">
             <button

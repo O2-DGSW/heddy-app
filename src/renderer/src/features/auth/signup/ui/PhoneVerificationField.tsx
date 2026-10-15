@@ -1,12 +1,24 @@
+import type { ChangeEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
-import type { Carrier, MvnoCarrier } from "@/features/auth/signup/model/types";
-import { MAIN_CARRIERS, MVNO_CARRIERS } from "@/features/auth/signup/constants/signup";
+import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "@/entities/auth";
+import type { Carrier } from "@/entities/auth";
 import { RadioButton } from "@/shared/ui/radio/RadioButton";
 import { formatPhone } from "@/shared/utils/formatPhone";
-import type { PhoneVerificationFieldProps as Props } from "@/features/auth/signup/ui/types";
 
-const MVNO_SET = new Set<string>(MVNO_CARRIERS);
-const isMvno = (c: Carrier): c is MvnoCarrier => MVNO_SET.has(c);
+import type { SmsVerificationState } from "@/features/auth/signup/model/signup.types";
+
+interface PhoneVerificationFieldProps {
+  carrier: Carrier;
+  phone: string;
+  verificationCode: string;
+  canRequestVerification: boolean;
+  showPhoneError?: boolean;
+  showVerificationError?: boolean;
+  smsVerification: SmsVerificationState;
+  onCarrierChange: (carrier: Carrier) => void;
+  onPhoneChange: (value: string) => void;
+  onVerificationCodeChange: (value: string) => void;
+}
 
 export const PhoneVerificationField = ({
   carrier,
@@ -19,7 +31,7 @@ export const PhoneVerificationField = ({
   onCarrierChange,
   onPhoneChange,
   onVerificationCodeChange,
-}: Props) => {
+}: PhoneVerificationFieldProps) => {
   const { isSent, isVerified, isSending, isVerifying, smsError, onSendCode, onVerifyCode } =
     smsVerification;
 
@@ -28,8 +40,13 @@ export const PhoneVerificationField = ({
     color: lightTheme.label.normal,
   };
 
-  const isAlddulSelected = isMvno(carrier);
+  const isAlddulSelected = isMvnoCarrier(carrier);
   const canSend = canRequestVerification && !isSending;
+
+  const handleMvnoCarrierChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    if (isMvnoCarrier(value)) onCarrierChange(value);
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -51,7 +68,7 @@ export const PhoneVerificationField = ({
             color: isAlddulSelected ? lightTheme.primary.normal : lightTheme.label.assistive,
           }}
           value={isAlddulSelected ? carrier : ""}
-          onChange={e => onCarrierChange(e.target.value as Carrier)}
+          onChange={handleMvnoCarrierChange}
         >
           <option value="" disabled>
             알뜰폰

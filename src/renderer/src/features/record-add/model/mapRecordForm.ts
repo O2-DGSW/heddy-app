@@ -1,15 +1,15 @@
-import { createDateValue, parseDateValue } from "@/entities/record/model/date";
-import { getTreatmentRecordPhotoDisplayUrl } from "@/entities/record/model/photo";
-import type { ProcedureType } from "@/entities/record/model/constants";
-import type { PhotoItem, RecordFormValues } from "@/entities/record/model/types";
+import { toDateValue, getTreatmentRecordPhotoDisplayUrl, parseDateValue } from "@/entities/record";
 import type {
   AddTreatmentRecordPhotoRequest,
   CreateTreatmentRecordRequest,
+  PhotoItem,
+  ProcedureType,
+  RecordFormValues,
   ServiceType,
   TreatmentRecordDetailApiData,
   TreatmentRecordPhotoApiData,
   UpdateTreatmentRecordRequest,
-} from "@/entities/record/model/treatmentRecord.types";
+} from "@/entities/record";
 
 const PRICE_CURRENCY = "KRW";
 
@@ -26,21 +26,6 @@ const PROCEDURE_TYPE_BY_SERVICE_TYPE: Partial<Record<ServiceType, ProcedureType>
   PERM: "#펌",
   COLOR: "#염색",
   CLINIC: "#클리닉",
-};
-
-/** ISO 8601 시술일시를 폼이 쓰는 YYYY-MM-DD로 바꾼다(기기 시간대 기준) */
-const toFormDate = (performedAt: string) => {
-  const performedDate = new Date(performedAt);
-
-  if (Number.isNaN(performedDate.getTime())) {
-    return "";
-  }
-
-  return createDateValue(
-    performedDate.getFullYear(),
-    performedDate.getMonth() + 1,
-    performedDate.getDate()
-  );
 };
 
 /** 폼의 YYYY-MM-DD를 서버가 받는 ISO 8601로 되돌린다. 시각 정보가 없어 그날 정오로 맞춘다. */
@@ -76,7 +61,7 @@ const hasUploadFile = (photo: PhotoItem): photo is PhotoItem & { file: File } =>
 
 /** 서버 상세 응답을 수정 폼의 초기값으로 바꾼다 */
 export const mapDetailToFormValues = (detail: TreatmentRecordDetailApiData): RecordFormValues => ({
-  date: toFormDate(detail.performed_at),
+  date: toDateValue(detail.performed_at),
   salon: detail.salon_name ?? "",
   price: detail.price ? String(detail.price.amount) : "",
   duration: detail.duration_minutes ? String(detail.duration_minutes) : "",

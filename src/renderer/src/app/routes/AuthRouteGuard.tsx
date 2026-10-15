@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { restoreAuthSession } from "@/entities/auth";
+import { PageLoading } from "@/shared";
 
 type AuthStatusType = "checking" | "authenticated" | "unauthenticated";
 
@@ -32,7 +33,7 @@ export const RequireAuth = () => {
   const authStatus = useAuthStatus();
 
   if (authStatus === "checking") {
-    return null;
+    return <PageLoading />;
   }
 
   if (authStatus === "unauthenticated") {
@@ -46,7 +47,7 @@ export const RequireGuest = () => {
   const authStatus = useAuthStatus();
 
   if (authStatus === "checking") {
-    return null;
+    return <PageLoading />;
   }
 
   if (authStatus === "authenticated") {

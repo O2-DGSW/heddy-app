@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import {
   CUTS_CATEGORIES,
   type CutsCategoryFilterValue,
-} from "@/features/cuts/constrants/categories";
+} from "@/features/cuts/constants/categories";
 
 interface CutsCategoryFilterProps {
   selected: CutsCategoryFilterValue;

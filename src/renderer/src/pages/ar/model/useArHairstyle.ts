@@ -1,12 +1,8 @@
 import { useState } from "react";
 
-import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "./arGroomFit";
-import type {
-  ArGroomFitSettings,
-  ArHairstyleOption,
-  ArModalType,
-  HairstyleOptionId,
-} from "./types";
+import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "@/entities/ar-groom";
+import type { ArGroomFitSettings, ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
+import type { ArModalType } from "./ar.types";
 
 export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);

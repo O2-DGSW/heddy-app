@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { useTabIndicator } from "@/features/cuts/model/hooks/useTabIndicator";
-import { CUTS_DETAIL_TABS } from "@/features/cuts/constrants/detailTabs";
+import { CUTS_DETAIL_TABS } from "@/features/cuts/constants/detailTabs";
 
 /**
  * 시술 상세 정보/분석 탭
@@ -11,7 +11,10 @@ import { CUTS_DETAIL_TABS } from "@/features/cuts/constrants/detailTabs";
 export const CutsDetailTabBar = () => {
   const { pathname } = useLocation();
   const selectedIndex = CUTS_DETAIL_TABS.findIndex(({ path }) => pathname.endsWith(path));
-  const { indicatorLeftPercent } = useTabIndicator(CUTS_DETAIL_TABS.length, selectedIndex);
+  const { tabWidthPercent, indicatorTranslatePercent } = useTabIndicator(
+    CUTS_DETAIL_TABS.length,
+    selectedIndex
+  );
 
   return (
     <nav
@@ -34,13 +37,18 @@ export const CutsDetailTabBar = () => {
       ))}
 
       <div
-        className="absolute -bottom-px h-0.75 w-12 rounded-full transition-[left] duration-200 ease-out"
+        aria-hidden="true"
+        className="absolute -bottom-px left-0 flex justify-center transition-transform duration-200 ease-out"
         style={{
-          backgroundColor: lightTheme.label.strong,
-          left: `${indicatorLeftPercent}%`,
-          transform: "translateX(-50%)",
+          width: `${tabWidthPercent}%`,
+          transform: `translateX(${indicatorTranslatePercent}%)`,
         }}
-      />
+      >
+        <div
+          className="h-0.75 w-12 rounded-full"
+          style={{ backgroundColor: lightTheme.label.strong }}
+        />
+      </div>
     </nav>
   );
 };

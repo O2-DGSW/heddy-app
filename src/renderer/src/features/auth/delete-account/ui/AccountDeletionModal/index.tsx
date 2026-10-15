@@ -1,5 +1,7 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
+import { ModalShell } from "@/shared";
+
 import { useDeleteAccount } from "../../model/useDeleteAccount";
 
 interface AccountDeletionModalProps {
@@ -10,12 +12,7 @@ const AccountDeletionModal = ({ onClose }: AccountDeletionModalProps) => {
   const { handleDeleteAccount, isPending, password, setPassword } = useDeleteAccount({ onClose });
 
   return (
-    <div
-      aria-labelledby="account-deletion-modal-title"
-      aria-modal="true"
-      className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center bg-black/50 px-[24px]"
-      role="dialog"
-    >
+    <ModalShell labelledBy="account-deletion-modal-title" placement="center">
       <form
         aria-busy={isPending}
         className="w-full rounded-[15px] px-[20px] pb-[20px] pt-[22px]"
@@ -88,7 +85,7 @@ const AccountDeletionModal = ({ onClose }: AccountDeletionModalProps) => {
           </button>
         </div>
       </form>
-    </div>
+    </ModalShell>
   );
 };
 

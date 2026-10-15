@@ -1,53 +1,55 @@
-import type { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { configureApiClient } from "@heddy/api";
 
-import { clearAuthTokens, getAccessToken, refreshAuthTokens } from "@/entities/auth";
-import { api, setAccessTokenGetter } from "@/shared/lib/api";
+import {
+  clearAuthTokens,
+  getAccessToken,
+  isRefreshTokenRejectedError,
+  refreshAuthTokens,
+} from "@/entities/auth";
+import { env } from "@/shared/config";
 
-interface RetryableRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
+import { queryClient } from "./queryClient";
+import { notifySessionExpired } from "./sessionExpiry";
 
-let isInitialized = false;
+// 로그인·재발급·회원가입의 401은 토큰 만료가 아니라 요청 자체의 실패라 재발급하지 않는다.
+// 로그아웃·탈퇴 재인증 같은 나머지 /auth/ 요청은 토큰이 만료됐으면 재발급 후 다시 보낸다.
+const NO_REFRESH_PATHS = ["/auth/login/", "/auth/token/refresh", "/auth/signup/"];
 
-const isAuthenticationRequest = (url: string | undefined) => url?.startsWith("/auth/") ?? false;
+const shouldSkipRefresh = (url: string | undefined) =>
+  url ? NO_REFRESH_PATHS.some(path => url.startsWith(path)) : false;
+
+// 공개 API(/public/)는 로그인 없이 보는 화면용이라 토큰을 보내지 않는다.
+const isPublicRequest = (url: string | undefined) => url?.startsWith("/public/") ?? false;
+
+const expireSession = async () => {
+  await clearAuthTokens();
+  queryClient.clear();
+  notifySessionExpired();
+};
+
+/** 401을 받으면 토큰을 재발급한다. 서버가 거부했을 때만 세션을 끝내고, 네트워크 오류면 토큰을 남긴다 */
+const refreshAccessToken = async () => {
+  try {
+    const tokens = await refreshAuthTokens();
+
+    if (!tokens) {
+      await expireSession();
+      return null;
+    }
+
+    return tokens.accessToken;
+  } catch (error) {
+    if (isRefreshTokenRejectedError(error)) {
+      await expireSession();
+    }
+
+    return null;
+  }
+};
 
 export const setupApiAuth = () => {
-  if (isInitialized) {
-    return;
-  }
-
-  isInitialized = true;
-  setAccessTokenGetter(getAccessToken);
-
-  api.interceptors.response.use(
-    response => response,
-    async (error: AxiosError) => {
-      const originalRequest = error.config as RetryableRequestConfig | undefined;
-
-      if (
-        error.response?.status !== 401 ||
-        !originalRequest ||
-        originalRequest._retry ||
-        isAuthenticationRequest(originalRequest.url)
-      ) {
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
-
-      try {
-        const tokens = await refreshAuthTokens();
-
-        if (!tokens) {
-          await clearAuthTokens();
-          return Promise.reject(error);
-        }
-
-        originalRequest.headers.set("Authorization", `Bearer ${tokens.accessToken}`);
-        return api.request(originalRequest);
-      } catch {
-        return Promise.reject(error);
-      }
-    }
-  );
+  configureApiClient({
+    baseURL: env.apiBaseUrl,
+    auth: { getAccessToken, refreshAccessToken, shouldSkipRefresh, isPublicRequest },
+  });
 };

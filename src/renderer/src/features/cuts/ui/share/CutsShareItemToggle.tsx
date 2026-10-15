@@ -1,5 +1,7 @@
 import { lightTheme, palette } from "@heddy/design-tokens";
 
+import { cn } from "@/shared";
+
 interface CutsShareItemToggleProps {
   label: string;
   checked: boolean;
@@ -17,8 +19,11 @@ export const CutsShareItemToggle = ({ label, checked, onToggle }: CutsShareItemT
       style={{ backgroundColor: checked ? lightTheme.primary.normal : lightTheme.line.neutral }}
     >
       <span
-        className="absolute top-1/2 h-[21px] w-[21px] -translate-y-1/2 rounded-full transition-[left] duration-200"
-        style={{ left: checked ? "21px" : "3px", backgroundColor: palette.neutral[95] }}
+        className={cn(
+          "absolute left-[3px] top-1/2 h-[21px] w-[21px] -translate-y-1/2 rounded-full transition-transform duration-200",
+          checked ? "translate-x-[18px]" : "translate-x-0"
+        )}
+        style={{ backgroundColor: palette.neutral[95] }}
       />
     </button>
   );

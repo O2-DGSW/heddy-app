@@ -9,11 +9,16 @@ export {
   smsVerifyApi,
 } from "./api";
 export {
+  MAIN_CARRIERS,
+  MVNO_CARRIERS,
+  isMvnoCarrier,
+  useSmsVerification,
   clearAccessToken,
   clearAuthTokens,
   clearRefreshToken,
   getAccessToken,
   getRefreshToken,
+  isRefreshTokenRejectedError,
   refreshAuthTokens,
   restoreAuthSession,
   setAccessToken,
@@ -21,6 +26,9 @@ export {
   setRefreshToken,
 } from "./model";
 export type {
+  Carrier,
+  MainCarrier,
+  MvnoCarrier,
   AuthApiResponse,
   AuthTokensApiData,
   AuthTokensResponse,
@@ -46,8 +54,8 @@ export type {
   SignupHairType,
   SignupRequest,
   SignupResponse,
-  SocialSignupAgreements,
-  SocialSignupResponse,
+  SignupAgreements,
+  AuthSessionResponse,
   SmsPurpose,
   SmsSendRequest,
   SmsVerifyRequest,

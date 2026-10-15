@@ -1,5 +1,5 @@
-import { api, getApiErrorMessage } from "@/shared/lib/api";
-import type { ApiResponse } from "@/shared/lib/api";
+import { apiClient, getApiErrorMessage } from "@heddy/api";
+import type { ApiResponse } from "@heddy/api";
 
 import type {
   ChangeConsentRequest,
@@ -10,7 +10,7 @@ import type {
 
 export const getConsentsApi = async (): Promise<ConsentsResponse> => {
   try {
-    const res = await api.get<ApiResponse<ConsentsResponse>>("/me/consents");
+    const res = await apiClient.get<ApiResponse<ConsentsResponse>>("/me/consents");
     return res.data.data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "동의 상태 조회에 실패했습니다."), {
@@ -24,7 +24,7 @@ export const putConsentApi = async (
   body: ChangeConsentRequest
 ): Promise<ConsentStatusResponse> => {
   try {
-    const res = await api.put<ApiResponse<ConsentStatusResponse>>(
+    const res = await apiClient.put<ApiResponse<ConsentStatusResponse>>(
       `/me/consents/${consentType}`,
       body
     );

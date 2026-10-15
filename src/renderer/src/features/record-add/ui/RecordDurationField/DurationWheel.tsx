@@ -1,7 +1,5 @@
-import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/shared";
 import { triggerSelectionHaptic } from "@/shared/lib";
 
 import {
@@ -10,6 +8,7 @@ import {
   WHEEL_VISIBLE_ITEM_COUNT,
   getWheelRepeatCount,
 } from "./constants";
+import DurationWheelOption from "./DurationWheelOption";
 
 interface DurationWheelProps {
   /** 스크린리더가 어느 휠인지 읽어 주는 이름 */
@@ -51,11 +50,7 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
 
   /** 같은 후보를 여러 벌 이어 붙인 실제 렌더 목록 */
   const loopedOptions = useMemo(
-    () =>
-      Array.from(
-        { length: repeatCount * options.length },
-        (_, loopedIndex) => options[loopedIndex % options.length] as number
-      ),
+    () => Array.from({ length: repeatCount }, () => options).flat(),
     [options, repeatCount]
   );
 
@@ -115,12 +110,13 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
     }, SCROLL_SETTLE_DELAY);
   };
 
-  const handleOptionClick = (loopedIndex: number) => {
+  // 칸이 memo라 매 렌더 새 함수를 넘기면 전부 다시 그려진다. ref만 쓰므로 한 번만 만든다.
+  const handleOptionClick = useCallback((loopedIndex: number) => {
     listRef.current?.scrollTo({
       top: (loopedIndex - WHEEL_EDGE_ITEM_COUNT) * WHEEL_ITEM_HEIGHT,
       behavior: "smooth",
     });
-  };
+  }, []);
 
   // 열릴 때와 밖에서 값이 바뀔 때 고른 칸을 가운데 벌의 선택줄에 맞춘다.
   useEffect(() => {
@@ -157,30 +153,17 @@ const DurationWheel = ({ label, options, unit, value, onChange }: DurationWheelP
       style={{ height: WHEEL_VISIBLE_ITEM_COUNT * WHEEL_ITEM_HEIGHT }}
       tabIndex={0}
     >
-      {loopedOptions.map((option, loopedIndex) => {
-        const isActive = loopedIndex % options.length === activeIndex;
-
-        return (
-          <button
-            aria-selected={loopedIndex === activeLoopedIndex}
-            className={cn(
-              "flex w-full snap-center items-center justify-center border-0 bg-transparent p-0",
-              isActive ? font.headline1.bold : font.headline2.semiBold
-            )}
-            key={`${loopedIndex}-${option}`}
-            onClick={() => handleOptionClick(loopedIndex)}
-            role="option"
-            style={{
-              height: WHEEL_ITEM_HEIGHT,
-              color: isActive ? lightTheme.label.neutral : lightTheme.line.normal,
-            }}
-            type="button"
-          >
-            {option}
-            <span className={cn(font.body.regular, "ml-[3px]")}>{unit}</span>
-          </button>
-        );
-      })}
+      {loopedOptions.map((option, loopedIndex) => (
+        <DurationWheelOption
+          isActive={loopedIndex % options.length === activeIndex}
+          isSelected={loopedIndex === activeLoopedIndex}
+          key={`${loopedIndex}-${option}`}
+          loopedIndex={loopedIndex}
+          onSelect={handleOptionClick}
+          option={option}
+          unit={unit}
+        />
+      ))}
     </div>
   );
 };

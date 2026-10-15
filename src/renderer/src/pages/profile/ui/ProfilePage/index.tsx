@@ -6,6 +6,7 @@ import { AccountDeletionModal } from "@/features/auth/delete-account";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetMyProfile } from "@/entities/profile";
+import { useGetSavedStyles } from "@/entities/saved-style";
 import { useGetShares } from "@/entities/share";
 import { chevronRightIcon, profileAvatar } from "@/shared";
 
@@ -104,16 +105,14 @@ const ProfilePage = () => {
   const { data: profile, isLoading } = useGetMyProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
-  const {
-    errorMessage: logoutErrorMessage,
-    handleLogout,
-    isPending: isLogoutPending,
-  } = useLogout();
+  // 후보 목록 API는 페이지 없이 전부 내려 주므로 개수만 센다.
+  const { data: savedStyles } = useGetSavedStyles();
+  const { handleLogout, isPending: isLogoutPending } = useLogout();
   const profileName = getProfileName(profile?.nickname, isLoading);
   const profileStats: ProfileStat[] = [
     { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
-    { label: "AI 분석", value: 0 },
-    { label: "AR 후보", value: 0 },
+    // AI 분석 개수는 분석 기능이 서버에 연결되면 다시 넣는다(지금은 셀 값이 없다).
+    { label: "AR 후보", value: getProfileStatCount(savedStyles?.items.length) },
     { label: "공유 중", value: getProfileStatCount(shares?.page?.total_elements) },
   ];
 
@@ -158,7 +157,7 @@ const ProfilePage = () => {
               </div>
 
               <dl
-                className="grid h-[87px] grid-cols-4 place-items-center rounded-[15px]"
+                className="grid h-[87px] grid-cols-3 place-items-center rounded-[15px]"
                 style={{ backgroundColor: "#F4FBF8" }}
               >
                 {profileStats.map(stat => (
@@ -234,15 +233,6 @@ const ProfilePage = () => {
                 회원 탈퇴
               </button>
             </div>
-            {logoutErrorMessage && (
-              <p
-                className={font.label.medium}
-                role="alert"
-                style={{ color: lightTheme.status.error }}
-              >
-                {logoutErrorMessage}
-              </p>
-            )}
           </section>
         </div>
         {isAccountDeletionModalOpen && (

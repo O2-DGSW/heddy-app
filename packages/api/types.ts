@@ -1,0 +1,19 @@
+export type ApiError = {
+  code?: string;
+  message?: string;
+} | null;
+
+/** 앱 서버 공통 응답 형태 */
+export interface ApiResponse<TData = unknown> {
+  success?: boolean;
+  message?: string;
+  data: TData;
+  error?: ApiError;
+  request_id?: string;
+}
+
+export interface ApiErrorResponse<TError = unknown> {
+  message: string;
+  errors?: TError;
+  statusCode?: number;
+}

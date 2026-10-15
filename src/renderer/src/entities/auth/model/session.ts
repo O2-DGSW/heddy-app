@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import { getHttpStatus } from "@heddy/api";
 
 import { refreshTokenApi } from "../api";
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "./token";
@@ -6,12 +6,11 @@ import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from 
 let refreshTokenRequest: Promise<Awaited<ReturnType<typeof refreshTokenApi>>> | null = null;
 let restoreSessionRequest: Promise<boolean> | null = null;
 
+/** 서버가 refresh 토큰을 거부한 경우만 true. 네트워크 오류·서버 오류로는 토큰을 지우지 않는다 */
 export const isRefreshTokenRejectedError = (error: unknown) => {
-  if (isAxiosError(error)) {
-    return error.response?.status === 401;
-  }
+  const status = getHttpStatus(error);
 
-  return true;
+  return status === 401 || status === 403;
 };
 
 export const refreshAuthTokens = async () => {

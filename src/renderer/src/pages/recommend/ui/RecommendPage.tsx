@@ -1,10 +1,10 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-import { RecommendHeader } from "@/features/recommend/ui/RecommendHeader";
-import { RecommendBasisSection } from "@/features/recommend/ui/RecommendBasisSection";
-import { RecommendResultSection } from "@/features/recommend/ui/RecommendResultSection";
-import { RecommendStatus } from "@/features/recommend/ui/RecommendStatus";
-import { useRecommendation } from "@/features/recommend/model/hooks/useRecommendation";
+import { RecommendHeader } from "@/features/recommend";
+import { RecommendBasisSection } from "@/features/recommend";
+import { RecommendResultSection } from "@/features/recommend";
+import { RecommendStatus } from "@/features/recommend";
+import { useRecommendation } from "@/features/recommend";
 
 export const RecommendPage = () => {
   const {
@@ -14,6 +14,8 @@ export const RecommendPage = () => {
     isPending,
     isError,
     error,
+    refetch,
+    isRefetching,
     generate,
     isGenerating,
     generateError,
@@ -35,8 +37,8 @@ export const RecommendPage = () => {
               hasIllustration
               message={error?.message ?? "추천을 불러오지 못했습니다."}
               actionLabel="다시 시도"
-              isActionPending={isGenerating}
-              onAction={generate}
+              isActionPending={isRefetching}
+              onAction={() => void refetch()}
             />
           )}
 

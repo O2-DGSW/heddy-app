@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { font } from "@heddy/design-tokens";
-import type { SavedStyleResponse } from "@/entities/saved-style";
-import { cn } from "@/shared";
+import { font, lightTheme } from "@heddy/design-tokens";
+import type { ArStyleType } from "../model/home.types";
+import { ArrowIcon, cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
-import arrow from "../assets/arrow-green.svg";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
 
 interface ArStyleSectionProps {
-  styles: SavedStyleResponse[];
+  styles: ArStyleType[];
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
@@ -30,7 +29,7 @@ const ArStyleSection = ({
     minDistance: 30,
   });
   const activeStyle = styles[selectedIndex % Math.max(styles.length, 1)];
-  const styleName = activeStyle?.style_name?.trim() || "저장한 스타일";
+  const styleName = activeStyle?.name?.trim() || "저장한 스타일";
 
   const handlePrevious = () =>
     setSelectedIndex(index => (index + styles.length - 1) % Math.max(styles.length, 1));
@@ -52,7 +51,7 @@ const ArStyleSection = ({
           className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
         >
           전체보기
-          <img src={arrow} alt="" className="rotate-180" />
+          <ArrowIcon className="h-2 w-2 rotate-180" color={lightTheme.primary.normal} />
         </button>
       </div>
       {activeStyle && !isLoading && !isError ? (
@@ -60,7 +59,7 @@ const ArStyleSection = ({
           <figure {...swipe} className="absolute inset-0 flex min-h-0 flex-col gap-2 px-2">
             <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg">
               <HomeImage
-                src={activeStyle.image_url ?? undefined}
+                src={activeStyle.imageUrl ?? undefined}
                 alt={styleName}
                 className="absolute inset-0 size-full object-cover"
               />
@@ -72,7 +71,7 @@ const ArStyleSection = ({
                     onClick={handlePrevious}
                     className="absolute left-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
                   >
-                    <img src={arrow} alt="" className="h-3" />
+                    <ArrowIcon className="size-3" color={lightTheme.primary.normal} />
                   </button>
                   <button
                     type="button"
@@ -80,7 +79,7 @@ const ArStyleSection = ({
                     onClick={handleNext}
                     className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
                   >
-                    <img src={arrow} alt="" className="h-3 rotate-180" />
+                    <ArrowIcon className="size-3 rotate-180" color={lightTheme.primary.normal} />
                   </button>
                 </>
               )}

@@ -16,7 +16,7 @@ export type AuthTokensResponse = {
 
 export type LoginResponse = AuthTokensResponse;
 
-export type LoginApiResponse = AuthApiResponse<SocialSignupResponse>;
+export type LoginApiResponse = AuthApiResponse<AuthSessionResponse>;
 
 export type AuthTokensApiData = {
   access_token: string;
@@ -86,15 +86,15 @@ export type SignupRequest = {
   email: string;
   password: string;
   nickname: string;
-  agreements: SocialSignupAgreements;
+  agreements: SignupAgreements;
   hair_profile: SignupHairProfileRequest;
 };
 
-export type SignupResponse = SocialSignupResponse;
+export type SignupResponse = AuthSessionResponse;
 
 export type SignupApiResponse = AuthApiResponse<SignupResponse>;
 
-export type SocialSignupAgreements = {
+export type SignupAgreements = {
   terms_of_service: boolean;
   privacy_policy: boolean;
   ai_training: boolean;
@@ -102,7 +102,7 @@ export type SocialSignupAgreements = {
   marketing_notification: boolean;
 };
 
-export type SocialSignupResponse = {
+export type AuthSessionResponse = {
   user: {
     user_id: string;
     email: string;

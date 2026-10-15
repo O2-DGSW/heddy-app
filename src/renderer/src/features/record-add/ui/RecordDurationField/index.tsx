@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import {
   DURATION_HOUR_OPTIONS,
@@ -10,7 +10,7 @@ import {
   parseDurationValue,
   RecordRequiredMark,
 } from "@/entities/record";
-import { cn, useHideBottomBarWhileOpen } from "@/shared";
+import { cn, ModalShell, useHideBottomBarWhileOpen } from "@/shared";
 
 import DurationWheel from "./DurationWheel";
 import { WHEEL_ITEM_HEIGHT } from "./constants";
@@ -31,7 +31,6 @@ const fieldStyle = {
   color: lightTheme.label.neutral,
 } satisfies CSSProperties;
 
-const pickerOverlayStyle = { backgroundColor: "rgba(0,0,0,0.5)" };
 const pickerPanelStyle = { backgroundColor: lightTheme.background.normal };
 const confirmButtonStyle = {
   backgroundColor: lightTheme.primary.normal,
@@ -72,6 +71,8 @@ const RecordDurationField = ({
   useHideBottomBarWhileOpen(isPickerOpen);
 
   const selectedLabel = formatDurationDisplay(value) || "입력";
+  // 0시간 0분은 저장할 수 없는 값이라 확인을 막고, 막은 이유를 바로 위에 보여 준다.
+  const isDraftEmpty = draftHour === 0 && draftMinute === 0;
   const selectedColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
 
   const handleOpenPicker = () => {
@@ -141,21 +142,14 @@ const RecordDurationField = ({
       )}
 
       {isPickerOpen && (
-        <div
-          aria-labelledby="duration-picker-title"
-          aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
-          role="dialog"
+        <ModalShell
+          labelledBy="duration-picker-title"
+          placement="bottom"
+          onBackdropClick={handleClosePicker}
+          backdropLabel="소요 시간 선택 닫기"
         >
-          <button
-            aria-label="소요 시간 선택 닫기"
-            className="absolute inset-0 h-full w-full border-0 p-0"
-            onClick={handleClosePicker}
-            style={pickerOverlayStyle}
-            type="button"
-          />
           <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
+            className="flex flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
             style={pickerPanelStyle}
           >
             <div className="flex w-full max-w-[354px] flex-col items-center">
@@ -212,11 +206,23 @@ const RecordDurationField = ({
                 />
               </div>
 
+              <p
+                aria-live="polite"
+                className={cn(
+                  font.caption.regular,
+                  "mt-[clamp(14px,2.5dvh,20px)] min-h-[1.2em] text-center"
+                )}
+                style={{ color: lightTheme.label.assistive }}
+              >
+                {isDraftEmpty ? "1분 이상 골라 주세요." : ""}
+              </p>
+
               <button
                 className={cn(
                   font.headline2.semiBold,
-                  "mt-[clamp(22px,4dvh,32px)] h-[48px] w-full rounded-[10px] border-0"
+                  "mt-[8px] h-[48px] w-full rounded-[10px] border-0 disabled:opacity-50"
                 )}
+                disabled={isDraftEmpty}
                 onClick={handleConfirm}
                 style={confirmButtonStyle}
                 type="button"
@@ -225,10 +231,11 @@ const RecordDurationField = ({
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );
 };
 
-export default RecordDurationField;
+// 폼 전체가 다시 그려질 때 값이 그대로인 필드는 건너뛴다.
+export default memo(RecordDurationField);

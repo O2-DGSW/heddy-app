@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupApi } from "@/entities/auth";
+import { showSuccessToast } from "@/shared";
 import { isRequiredSignupAgreementsAccepted } from "./validation";
-import type { CustomerAccountForm } from "./types";
+import type { CustomerAccountForm } from "./signup.types";
 
 const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
   id: "",
@@ -17,7 +18,6 @@ const INITIAL_ACCOUNT_FORM: CustomerAccountForm = {
     hairCondition: "HEALTHY",
     hairType: "STRAIGHT",
     hairThickness: "THIN",
-    availableCareTimeMinutes: "",
   },
   agreements: {
     terms_of_service: false,
@@ -62,12 +62,11 @@ export const useSignup = () => {
           hair_condition: customerForm.hairProfile.hairCondition,
           hair_length: customerForm.hairProfile.hairLength,
           hair_thickness: customerForm.hairProfile.hairThickness,
-          available_care_time_minutes: Number(
-            customerForm.hairProfile.availableCareTimeMinutes || 0
-          ),
+          available_care_time_minutes: 0,
         },
       });
 
+      showSuccessToast("가입이 완료됐습니다. 로그인해 주세요.");
       navigate("/login", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");

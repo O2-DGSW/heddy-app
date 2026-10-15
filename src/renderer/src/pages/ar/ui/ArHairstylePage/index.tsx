@@ -1,18 +1,18 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect, useRef } from "react";
 
-import { useArServerConnection } from "../../model/useArServerConnection";
-import { useGetArGrooms } from "../../model/useGetArGrooms.query";
-import type { HairstyleOptionId } from "../../model/types";
+import { useGetArGrooms } from "@/entities/ar-groom";
+import type { HairstyleOptionId } from "@/entities/ar-groom";
+import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
-import { useFaceYaw } from "../../model/useFaceYaw";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
-import { cn, useBottomBarVisibility } from "@/shared";
+import { cn, showInfoToast, useBottomBarVisibility } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArColorPicker from "../ArColorPicker";
 import { ArCameraViewport, ArControlBar, ArHairstyleCarousel } from "@/features/ar-preview";
 import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArRecognitionBadge from "../ArRecognitionBadge";
+import ArStatusNotice from "../ArStatusNotice";
 
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
@@ -42,11 +42,20 @@ const ArHairstylePage = () => {
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom =
     selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? "" : selectedHairstyle.id;
-  const { yaw: clientFaceYaw } = useFaceYaw(faceTrackingVideoRef);
-  const { connectionStatus, errorMessage, controlReady, groomState, foreheadState, stats } =
-    useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
-  const faceYaw = stats?.yaw_ema ?? stats?.yaw ?? clientFaceYaw;
-  const isFaceTracked = typeof faceYaw === "number";
+  const {
+    connectionStatus,
+    errorMessage,
+    controlReady,
+    groomState,
+    foreheadState,
+    hasServerYaw,
+    handleGroomRetry,
+    handleForeheadRefresh,
+    handleReconnect,
+  } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
+  // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
+  const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
+  const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
@@ -57,6 +66,16 @@ const ArHairstylePage = () => {
 
   const handleHairstyleSelect = (id: HairstyleOptionId) => {
     if (controlReady && !isForeheadLoading) selectHairstyle(id);
+  };
+
+  const handleDisabledHairstyleSelect = () => {
+    if (connectionStatus === "error") {
+      showInfoToast("AR 연결이 끊어졌습니다. 다시 연결한 뒤 스타일을 골라 주세요.");
+    } else if (isForeheadLoading) {
+      showInfoToast("이마를 만드는 중입니다. 끝나면 스타일을 바꿀 수 있습니다.");
+    } else {
+      showInfoToast("AR에 연결하는 중입니다. 연결되면 스타일을 고를 수 있습니다.");
+    }
   };
 
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
@@ -119,7 +138,6 @@ const ArHairstylePage = () => {
             />
             <ArRecognitionBadge
               connectionStatus={connectionStatus}
-              errorMessage={errorMessage}
               isFaceTracked={isFaceTracked}
               isExpanded={isExpanded}
             />
@@ -135,6 +153,15 @@ const ArHairstylePage = () => {
                 isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
               )}
             >
+              <ArStatusNotice
+                connectionErrorMessage={errorMessage}
+                connectionStatus={connectionStatus}
+                foreheadState={foreheadState}
+                groomState={groomState}
+                onForeheadRefresh={handleForeheadRefresh}
+                onGroomRetry={handleGroomRetry}
+                onReconnect={handleReconnect}
+              />
               <ArControlBar
                 handleExpandedToggle={handleExpandedToggle}
                 handleModalOpen={() => handleModalOpen("candidate-save")}
@@ -147,6 +174,7 @@ const ArHairstylePage = () => {
                 hairstyleOptions={hairstyleOptions}
                 loadingMessage={listMessage}
                 disabled={!controlReady || isForeheadLoading}
+                onDisabledSelect={handleDisabledHairstyleSelect}
                 onSelect={handleHairstyleSelect}
               />
               {groomsError && (

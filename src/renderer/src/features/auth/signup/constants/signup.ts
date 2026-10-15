@@ -1,13 +1,7 @@
 import type {
-  MainCarrier,
-  MvnoCarrier,
   SignupAgreementItem,
   SignupAgreementKey,
-} from "@/features/auth/signup/model/types";
-
-export const MAIN_CARRIERS: MainCarrier[] = ["SKT", "KT", "LG U+"];
-
-export const MVNO_CARRIERS: MvnoCarrier[] = ["SKT 알뜰폰", "KT 알뜰폰", "LGU+ 알뜰폰"];
+} from "@/features/auth/signup/model/signup.types";
 
 export const REQUIRED_SIGNUP_AGREEMENT_KEYS: SignupAgreementKey[] = [
   "terms_of_service",

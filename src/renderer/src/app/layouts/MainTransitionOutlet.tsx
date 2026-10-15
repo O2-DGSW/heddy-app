@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { setupRouterOutlet } from "@capgo/capacitor-transitions/react";
 
-import { initCapgoTransitions } from "./initCapgoTransitions";
+import { MAX_CACHED_PAGES, initCapgoTransitions } from "./initCapgoTransitions";
 
 // 앱 시작 시 한 번만 초기화하면 되므로 모듈 스코프에서 호출한다.
 initCapgoTransitions();
@@ -16,7 +16,11 @@ export const MainTransitionOutlet = () => {
 
   useEffect(() => {
     if (outletRef.current) {
-      setupRouterOutlet(outletRef.current, { platform: "auto", swipeGesture: "auto" });
+      setupRouterOutlet(outletRef.current, {
+        platform: "auto",
+        maxCached: MAX_CACHED_PAGES,
+        swipeGesture: "auto",
+      });
     }
   }, []);
 

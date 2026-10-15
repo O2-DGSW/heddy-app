@@ -3,11 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { arrowIcon } from "@/entities/record";
-import { useCreateShare } from "@/entities/share";
+import { ArrowIcon, cn } from "@/shared";
+import { usePostShare } from "@/entities/share";
 import type { ShareFieldType } from "@/entities/share";
-import { CutsShareItemList } from "@/features/cuts/ui/share/CutsShareItemList";
-import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts/constrants/shareItems";
+import { CutsShareItemList } from "@/features/cuts";
+import { DEFAULT_CUTS_SHARE_FIELDS } from "@/features/cuts";
 
 export const CutsSharePage = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export const CutsSharePage = () => {
   const selectedId = id ?? "";
 
   const [selectedFields, setSelectedFields] = useState<ShareFieldType[]>(DEFAULT_CUTS_SHARE_FIELDS);
-  const createShare = useCreateShare();
+  const createShare = usePostShare();
 
   const handleToggleField = (field: ShareFieldType) => {
     setSelectedFields(current =>
@@ -37,7 +37,9 @@ export const CutsSharePage = () => {
       {
         onSuccess: share => {
           setDirection("back");
+          // 공유 화면을 기록에서 지워, 상세에서 뒤로가기를 눌렀을 때 공유 화면이 다시 뜨지 않게 한다
           navigate(`/cuts/${selectedId}/info`, {
+            replace: true,
             state: { isShareModalOpen: true, shareUrl: share.share_url },
           });
         },
@@ -47,6 +49,8 @@ export const CutsSharePage = () => {
 
   // 서버가 기록·항목 각각 1개 이상을 요구하므로 그 전에는 버튼을 막는다.
   const canCreateShare = Boolean(selectedId) && selectedFields.length > 0 && !createShare.isPending;
+  const createShareHint =
+    selectedFields.length === 0 ? "공유할 항목을 하나 이상 골라 주세요." : null;
 
   return (
     <cap-page>
@@ -67,7 +71,7 @@ export const CutsSharePage = () => {
             aria-label="뒤로 가기"
             className="absolute left-[14px] flex h-[44px] w-[44px] items-center justify-start border-0 bg-transparent p-0"
           >
-            <img alt="" className="h-[20px] w-[20px]" src={arrowIcon} />
+            <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
           </button>
           <h1 className={font.headline1.bold} style={{ color: lightTheme.label.neutral }}>
             기록 공유
@@ -89,7 +93,19 @@ export const CutsSharePage = () => {
             </p>
           )}
 
-          <div className="mt-auto grid grid-cols-2 gap-2 px-4 pt-6">
+          {createShareHint && (
+            <p
+              aria-live="polite"
+              className={cn("mt-auto px-4 pt-6 text-center", font.caption.regular)}
+              style={{ color: lightTheme.label.assistive }}
+            >
+              {createShareHint}
+            </p>
+          )}
+
+          <div
+            className={cn("grid grid-cols-2 gap-2 px-4", createShareHint ? "pt-2" : "mt-auto pt-6")}
+          >
             <button
               type="button"
               onClick={handleBack}

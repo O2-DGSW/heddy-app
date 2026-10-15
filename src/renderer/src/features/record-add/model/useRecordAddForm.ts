@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   INITIAL_FORM_VALUES,
@@ -6,8 +6,9 @@ import {
   MAX_PHOTO_COUNT,
   getTodayDateValue,
 } from "@/entities/record";
+import { showErrorToast, showInfoToast } from "@/shared";
 
-import { compressPhotoFile } from "./compressPhotoFile";
+import { compressPhotoFiles } from "./compressPhotoFile";
 
 import type { ChangeEvent, FormEvent } from "react";
 import type {
@@ -19,6 +20,16 @@ import type {
 
 type RecordFormErrorKeyType = "date" | "procedureType" | "duration" | "photos";
 type RecordFormErrorsType = Partial<Record<RecordFormErrorKeyType, string>>;
+interface RecordFormSnapshot {
+  formValues: RecordFormValues;
+  photoIds: string[];
+  procedureTypes: ProcedureType[];
+  rating: number;
+}
+
+const serializeSnapshot = (snapshot: RecordFormSnapshot) => JSON.stringify(snapshot);
+
+type TextChangeHandlerType = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 
 const REQUIRED_FIELD_ERROR_MESSAGE = "필수로 작성해야 합니다.";
 const PHOTO_REQUIRED_ERROR_MESSAGE = "사진을 한 장 이상 올려주세요.";
@@ -48,23 +59,48 @@ export const useRecordAddForm = ({
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photoIdSequenceRef = useRef(1);
   const objectUrlsRef = useRef(new Set<string>());
+  // 압축을 기다리는 사이 화면을 나가면 cleanup이 이미 끝났으므로 ObjectURL을 만들지 않는다.
+  const isUnmountedRef = useRef(false);
   // 추가 화면은 오늘 시술을 적는 경우가 대부분이라 날짜를 오늘로 채워 두고 시작한다.
   // (수정 화면은 initialValues가 들어와 기존 날짜가 그대로 유지된다.)
-  const [formValues, setFormValues] = useState<RecordFormValues>(
+  const [initialFormValues] = useState<RecordFormValues>(
     () => initialValues ?? { ...INITIAL_FORM_VALUES, date: getTodayDateValue() }
   );
+  const [formValues, setFormValues] = useState<RecordFormValues>(initialFormValues);
   const [photos, setPhotos] = useState<PhotoItem[]>(initialPhotos ?? INITIAL_PHOTOS);
+  // 압축을 기다리는 동안 다시 사진을 고르면 화면의 photos가 아직 갱신되지 않아 10장 제한이 깨진다.
+  // 확정된 장수와 처리 중인 장수를 ref로 세서 고르는 즉시 남은 자리를 계산한다.
+  const photoCountRef = useRef((initialPhotos ?? INITIAL_PHOTOS).length);
+  const pendingPhotoCountRef = useRef(0);
+  // 화면에 "준비 중" 칸을 그리기 위한 값. 제한 계산은 위 ref로 한다.
+  const [processingPhotoCount, setProcessingPhotoCount] = useState(0);
   // 한 번 방문에 커트+염색처럼 여러 시술을 받는 경우가 있어 여러 개를 고를 수 있다.
   const [selectedProcedureTypes, setSelectedProcedureTypes] = useState<ProcedureType[]>(
     initialProcedureTypes ?? []
   );
   const [rating, setRating] = useState(initialRating ?? 0);
   const [formErrors, setFormErrors] = useState<RecordFormErrorsType>({});
+  // 처음 값과 비교해 저장하지 않은 입력이 있는지 본다(나갈 때 되물을지 정한다).
+  const [initialSnapshot] = useState(() =>
+    serializeSnapshot({
+      formValues: initialFormValues,
+      photoIds: (initialPhotos ?? INITIAL_PHOTOS).map(photo => photo.id),
+      procedureTypes: initialProcedureTypes ?? [],
+      rating: initialRating ?? 0,
+    })
+  );
 
   // 초기값 동기화는 따로 하지 않는다. 수정 화면이 서버 값을 받은 뒤에 폼을 렌더하므로
   // 위 useState 초기값만으로 충분하고, 편집 중에 값이 덮어써지는 사고도 막을 수 있다.
 
   const isPhotoLimitReached = photos.length >= MAX_PHOTO_COUNT;
+  const isDirty =
+    serializeSnapshot({
+      formValues,
+      photoIds: photos.map(photo => photo.id),
+      procedureTypes: selectedProcedureTypes,
+      rating,
+    }) !== initialSnapshot;
 
   const validateForm = () => {
     const nextFormErrors: RecordFormErrorsType = {};
@@ -95,11 +131,39 @@ export const useRecordAddForm = ({
   };
 
   const handlePhotoSelection = async (event: ChangeEvent<HTMLInputElement>) => {
-    const availablePhotoCount = MAX_PHOTO_COUNT - photos.length;
-    const selectedFiles = Array.from(event.currentTarget.files ?? []).slice(0, availablePhotoCount);
-    const addedPhotos = await Promise.all(
-      selectedFiles.map(async (file): Promise<PhotoItem> => {
-        const uploadFile = await compressPhotoFile(file);
+    // React는 이벤트 처리가 끝나면 currentTarget을 비운다. await 전에 파일을 꺼내고 입력값을 비워
+    // 같은 사진을 다시 고를 수 있게 한다.
+    const input = event.currentTarget;
+    const files = Array.from(input.files ?? []);
+    input.value = "";
+
+    const availablePhotoCount =
+      MAX_PHOTO_COUNT - photoCountRef.current - pendingPhotoCountRef.current;
+    const selectedFiles = files.slice(0, Math.max(availablePhotoCount, 0));
+
+    if (selectedFiles.length < files.length) {
+      showInfoToast(
+        selectedFiles.length === 0
+          ? `사진은 최대 ${MAX_PHOTO_COUNT}장까지 올릴 수 있어요.`
+          : `사진은 최대 ${MAX_PHOTO_COUNT}장까지라 ${selectedFiles.length}장만 추가했어요.`
+      );
+    }
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    pendingPhotoCountRef.current += selectedFiles.length;
+    setProcessingPhotoCount(count => count + selectedFiles.length);
+
+    try {
+      const uploadFiles = await compressPhotoFiles(selectedFiles);
+
+      if (isUnmountedRef.current) {
+        return;
+      }
+
+      const addedPhotos = uploadFiles.map((uploadFile): PhotoItem => {
         const src = URL.createObjectURL(uploadFile);
         const id = `selected-photo-${photoIdSequenceRef.current}`;
         photoIdSequenceRef.current += 1;
@@ -111,17 +175,20 @@ export const useRecordAddForm = ({
           src,
           isObjectUrl: true,
         };
-      })
-    );
+      });
 
-    if (addedPhotos.length === 0) {
-      event.currentTarget.value = "";
-      return;
+      photoCountRef.current += addedPhotos.length;
+      setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
+      setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
+    } catch {
+      showErrorToast("사진을 불러오지 못했습니다. 다른 사진으로 다시 시도해 주세요.");
+    } finally {
+      pendingPhotoCountRef.current -= selectedFiles.length;
+
+      if (!isUnmountedRef.current) {
+        setProcessingPhotoCount(count => count - selectedFiles.length);
+      }
     }
-
-    setPhotos(currentPhotos => [...addedPhotos, ...currentPhotos]);
-    setFormErrors(currentErrors => ({ ...currentErrors, photos: undefined }));
-    event.currentTarget.value = "";
   };
 
   const handleRemovePhoto = (photoId: string) => {
@@ -132,55 +199,76 @@ export const useRecordAddForm = ({
       objectUrlsRef.current.delete(removedPhoto.src);
     }
 
+    if (removedPhoto) {
+      photoCountRef.current -= 1;
+    }
+
     setPhotos(currentPhotos => currentPhotos.filter(photo => photo.id !== photoId));
   };
 
-  const handleDateChange = (date: string) => {
+  // 아래 핸들러는 memo로 감싼 필드에 넘긴다. 한 글자 입력마다 휠·달력까지 다시 그리지 않도록
+  // 함수가 렌더마다 바뀌지 않게 고정한다(상태는 updater로만 바꿔 의존성이 없다).
+  const handleDateChange = useCallback((date: string) => {
     setFormValues(currentValues => ({ ...currentValues, date }));
     setFormErrors(currentErrors => ({
       ...currentErrors,
       date: date ? undefined : currentErrors.date,
     }));
-  };
+  }, []);
 
-  const handleDurationChange = (duration: string) => {
+  const handleDurationChange = useCallback((duration: string) => {
     setFormValues(currentValues => ({ ...currentValues, duration }));
     setFormErrors(currentErrors => ({
       ...currentErrors,
       duration: duration ? undefined : currentErrors.duration,
     }));
-  };
+  }, []);
 
-  const handleFieldChange =
-    (fieldName: RecordFieldNameType) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { value } = event.currentTarget;
+  const fieldChangeHandlers = useMemo(() => {
+    const createFieldChangeHandler =
+      (fieldName: RecordFieldNameType): TextChangeHandlerType =>
+      event => {
+        const { value } = event.currentTarget;
 
-      setFormValues(currentValues => ({
-        ...currentValues,
-        [fieldName]: value,
-      }));
-    };
+        setFormValues(currentValues => ({
+          ...currentValues,
+          [fieldName]: value,
+        }));
+      };
 
-  const handleDetailsChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return {
+      salon: createFieldChangeHandler("salon"),
+      price: createFieldChangeHandler("price"),
+      duration: createFieldChangeHandler("duration"),
+      designer: createFieldChangeHandler("designer"),
+      procedureContent: createFieldChangeHandler("procedureContent"),
+    } satisfies Record<RecordFieldNameType, TextChangeHandlerType>;
+  }, []);
+
+  const handleFieldChange = useCallback(
+    (fieldName: RecordFieldNameType) => fieldChangeHandlers[fieldName],
+    [fieldChangeHandlers]
+  );
+
+  const handleDetailsChange = useCallback<TextChangeHandlerType>(event => {
     const { value } = event.currentTarget;
 
     setFormValues(currentValues => ({ ...currentValues, details: value }));
-  };
+  }, []);
 
   /** 이미 고른 종류를 다시 누르면 선택을 푼다 */
-  const handleProcedureTypeToggle = (procedureType: ProcedureType) => {
+  const handleProcedureTypeToggle = useCallback((procedureType: ProcedureType) => {
     setSelectedProcedureTypes(currentTypes =>
       currentTypes.includes(procedureType)
         ? currentTypes.filter(type => type !== procedureType)
         : [...currentTypes, procedureType]
     );
     setFormErrors(currentErrors => ({ ...currentErrors, procedureType: undefined }));
-  };
+  }, []);
 
-  const handleRatingChange = (nextRating: number) => {
+  const handleRatingChange = useCallback((nextRating: number) => {
     setRating(nextRating);
-  };
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -197,8 +285,10 @@ export const useRecordAddForm = ({
 
   useEffect(() => {
     const objectUrls = objectUrlsRef.current;
+    isUnmountedRef.current = false;
 
     return () => {
+      isUnmountedRef.current = true;
       objectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
       objectUrls.clear();
     };
@@ -207,9 +297,11 @@ export const useRecordAddForm = ({
   return {
     formErrors,
     formValues,
+    isDirty,
     isPhotoLimitReached,
     photoInputRef,
     photos,
+    processingPhotoCount,
     rating,
     selectedProcedureTypes,
     handleDateChange,

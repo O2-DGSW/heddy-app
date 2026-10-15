@@ -1,24 +1,13 @@
-import { font, lightTheme, palette } from "@heddy/design-tokens";
-import { useEffect, useRef, useState } from "react";
+import { memo } from "react";
+import { font, lightTheme } from "@heddy/design-tokens";
 
-import {
-  WEEK_DAYS,
-  YEAR_OPTIONS,
-  createCalendarDays,
-  createDateValue,
-  dateIcon,
-  dropdownIcon,
-  formatDateDisplay,
-  getDaysInMonth,
-  getTodayDateValue,
-  noIcon,
-  parseDateValue,
-  RecordRequiredMark,
-} from "@/entities/record";
-import { cn, useHideBottomBarWhileOpen } from "@/shared";
+import { dateIcon, formatDateDisplay, noIcon, RecordRequiredMark } from "@/entities/record";
+import { cn, ModalShell } from "@/shared";
+
+import { useRecordDatePicker } from "../../model/useRecordDatePicker";
+import DatePickerCalendar from "./DatePickerCalendar";
 
 import type { CSSProperties } from "react";
-import type { CalendarDay } from "@/entities/record";
 
 type PlaceholderStyle = CSSProperties & {
   "--placeholder-color": string;
@@ -37,7 +26,6 @@ const fieldStyle = {
   color: lightTheme.label.neutral,
 } satisfies PlaceholderStyle;
 
-const datePickerOverlayStyle = { backgroundColor: "rgba(0,0,0,0.5)" };
 const datePickerPanelStyle = { backgroundColor: lightTheme.background.normal };
 const confirmButtonStyle = {
   backgroundColor: lightTheme.primary.normal,
@@ -49,150 +37,31 @@ const fieldClassName = cn(
   font.body.regular
 );
 
-const getCalendarDayStyle = (day: CalendarDay, isSelected: boolean): CSSProperties => {
-  if (isSelected) {
-    return {
-      backgroundColor: lightTheme.primary.normal,
-      color: lightTheme.background.normal,
-    };
-  }
-
-  if (!day.isCurrentMonth) {
-    return {
-      color: day.tone === "mutedSunday" ? palette.red[90] : lightTheme.line.normal,
-    };
-  }
-
-  return { color: lightTheme.label.alternative };
-};
-
-const getClampedDateValue = (year: number, month: number, day: number) =>
-  createDateValue(year, month, Math.min(day, getDaysInMonth(year, month)));
-
-const getShiftedMonthDateValue = (dateValue: string, monthOffset: number) => {
-  const { year, month, day } = parseDateValue(dateValue);
-  const shiftedDate = new Date(year, month - 1 + monthOffset, 1);
-
-  return getClampedDateValue(shiftedDate.getFullYear(), shiftedDate.getMonth() + 1, day);
-};
-
-const MonthChevronIcon = ({ direction }: { direction: "previous" | "next" }) => (
-  <svg
-    aria-hidden="true"
-    className={cn("h-[24px] w-[24px]", direction === "next" && "rotate-180")}
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <path
-      d="M14.5 6L8.5 12L14.5 18"
-      stroke={lightTheme.label.assistive}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-    />
-  </svg>
-);
-
 const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePickerFieldProps) => {
-  const selectedYearRef = useRef<HTMLButtonElement>(null);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
-  const [draftDate, setDraftDate] = useState(() => getTodayDateValue());
-
-  useHideBottomBarWhileOpen(isDatePickerOpen);
+  const {
+    selectedYearRef,
+    isDatePickerOpen,
+    isYearSelectOpen,
+    draftDate,
+    draftDateParts,
+    calendarDays,
+    hasSixCalendarRows,
+    canSelectPreviousMonth,
+    canSelectNextMonth,
+    handleOpenDatePicker,
+    handleCloseDatePicker,
+    handleToggleYearSelect,
+    handleYearSelect,
+    handlePreviousMonth,
+    handleNextMonth,
+    handleCalendarDateSelect,
+    handleConfirmDate,
+  } = useRecordDatePicker({ value, onChange });
 
   const hasError = Boolean(errorMessage);
   const errorId = "record-date-error";
-  const draftDateParts = parseDateValue(draftDate);
-  const calendarDays = createCalendarDays(draftDateParts.year, draftDateParts.month);
-  const hasSixCalendarRows = calendarDays.length > 35;
-  const firstYearOption = YEAR_OPTIONS[0] ?? draftDateParts.year;
-  const lastYearOption = YEAR_OPTIONS[YEAR_OPTIONS.length - 1] ?? draftDateParts.year;
-  const canSelectPreviousMonth =
-    draftDateParts.year > firstYearOption ||
-    (draftDateParts.year === firstYearOption && draftDateParts.month > 1);
-  const canSelectNextMonth =
-    draftDateParts.year < lastYearOption ||
-    (draftDateParts.year === lastYearOption && draftDateParts.month < 12);
   const selectedDateLabel = value ? formatDateDisplay(value) : "입력";
   const selectedDateColor = value ? lightTheme.label.neutral : lightTheme.line.normal;
-
-  const handleOpenDatePicker = () => {
-    setDraftDate(value || getTodayDateValue());
-    setIsYearSelectOpen(false);
-    setIsDatePickerOpen(true);
-  };
-
-  const handleCloseDatePicker = () => {
-    setIsYearSelectOpen(false);
-    setIsDatePickerOpen(false);
-  };
-
-  const handleToggleYearSelect = () => {
-    setIsYearSelectOpen(currentValue => !currentValue);
-  };
-
-  const handleYearSelect = (year: number) => {
-    setDraftDate(getClampedDateValue(year, draftDateParts.month, draftDateParts.day));
-    setIsYearSelectOpen(false);
-  };
-
-  const handlePreviousMonth = () => {
-    if (!canSelectPreviousMonth) {
-      return;
-    }
-
-    setDraftDate(currentDate => getShiftedMonthDateValue(currentDate, -1));
-    setIsYearSelectOpen(false);
-  };
-
-  const handleNextMonth = () => {
-    if (!canSelectNextMonth) {
-      return;
-    }
-
-    setDraftDate(currentDate => getShiftedMonthDateValue(currentDate, 1));
-    setIsYearSelectOpen(false);
-  };
-
-  const handleCalendarDateSelect = (day: CalendarDay) => {
-    if (!day.isCurrentMonth || !day.day) {
-      return;
-    }
-
-    setDraftDate(createDateValue(draftDateParts.year, draftDateParts.month, day.day));
-  };
-
-  const handleConfirmDate = () => {
-    onChange(draftDate);
-    setIsDatePickerOpen(false);
-  };
-
-  useEffect(() => {
-    if (!isDatePickerOpen) {
-      return;
-    }
-
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsDatePickerOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscapeKey);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscapeKey);
-    };
-  }, [isDatePickerOpen]);
-
-  useEffect(() => {
-    if (!isYearSelectOpen) {
-      return;
-    }
-
-    selectedYearRef.current?.scrollIntoView({ block: "center" });
-  }, [isYearSelectOpen]);
 
   return (
     <div className="flex w-full flex-col gap-[10px]">
@@ -227,21 +96,14 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
       )}
 
       {isDatePickerOpen && (
-        <div
-          aria-labelledby="date-picker-title"
-          aria-modal="true"
-          className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2"
-          role="dialog"
+        <ModalShell
+          labelledBy="date-picker-title"
+          placement="bottom"
+          onBackdropClick={handleCloseDatePicker}
+          backdropLabel="날짜 선택 닫기"
         >
-          <button
-            aria-label="날짜 선택 닫기"
-            className="absolute inset-0 h-full w-full border-0 p-0"
-            onClick={handleCloseDatePicker}
-            style={datePickerOverlayStyle}
-            type="button"
-          />
           <div
-            className="absolute inset-x-0 bottom-0 flex h-[526px] max-h-[calc(100dvh-24px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
+            className="flex h-[526px] max-h-[calc(100dvh-24px)] flex-col items-center overflow-hidden rounded-tl-[32px] rounded-tr-[32px] px-[clamp(18px,5.6vw,24px)] pb-[clamp(24px,5dvh,44px)] pt-[clamp(18px,3.2dvh,22px)]"
             style={datePickerPanelStyle}
           >
             <div className="flex h-full min-h-0 w-full max-w-[354px] flex-col items-center">
@@ -264,143 +126,21 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
                 </button>
               </div>
 
-              <div
-                className={cn(
-                  "mt-[clamp(22px,5dvh,36px)] flex w-full min-h-0 flex-col",
-                  hasSixCalendarRows
-                    ? "gap-[clamp(10px,2.6dvh,16px)]"
-                    : "gap-[clamp(14px,3dvh,24px)]"
-                )}
-              >
-                <div className="flex w-full items-center justify-between">
-                  <button
-                    aria-label="이전 달"
-                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 disabled:opacity-30"
-                    disabled={!canSelectPreviousMonth}
-                    onClick={handlePreviousMonth}
-                    type="button"
-                  >
-                    <MonthChevronIcon direction="previous" />
-                  </button>
-
-                  <div className="relative">
-                    <button
-                      aria-controls="date-picker-year-list"
-                      aria-expanded={isYearSelectOpen}
-                      aria-label="년도 선택"
-                      className="flex items-center gap-[7px] border-0 bg-transparent p-0"
-                      onClick={handleToggleYearSelect}
-                      type="button"
-                    >
-                      <span
-                        className={font.headline1.bold}
-                        style={{ color: lightTheme.label.neutral }}
-                      >
-                        {draftDateParts.year}. {draftDateParts.month}
-                      </span>
-                      <img alt="" className="h-[24px] w-[24px]" src={dropdownIcon} />
-                    </button>
-
-                    {isYearSelectOpen && (
-                      <div
-                        className="scrollbar-hidden absolute left-1/2 top-[34px] z-10 flex h-[81px] w-[96px] -translate-x-1/2 flex-col overflow-y-auto rounded-[10px] shadow-[1px_2px_2px_rgba(0,0,0,0.08)]"
-                        id="date-picker-year-list"
-                        role="listbox"
-                        style={{ backgroundColor: lightTheme.background.normal }}
-                      >
-                        {YEAR_OPTIONS.map(year => {
-                          const isSelected = draftDateParts.year === year;
-
-                          return (
-                            <button
-                              aria-selected={isSelected}
-                              className={cn(
-                                font.label.medium,
-                                "h-[27px] w-full shrink-0 border-0 text-center"
-                              )}
-                              key={year}
-                              onClick={() => handleYearSelect(year)}
-                              ref={isSelected ? selectedYearRef : null}
-                              role="option"
-                              style={{
-                                backgroundColor: isSelected
-                                  ? palette.main[90]
-                                  : lightTheme.background.normal,
-                                color: isSelected
-                                  ? lightTheme.primary.normal
-                                  : lightTheme.line.normal,
-                              }}
-                              type="button"
-                            >
-                              {year}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    aria-label="다음 달"
-                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 disabled:opacity-30"
-                    disabled={!canSelectNextMonth}
-                    onClick={handleNextMonth}
-                    type="button"
-                  >
-                    <MonthChevronIcon direction="next" />
-                  </button>
-                </div>
-
-                <div className="flex w-full flex-col gap-[8px]">
-                  <div className="grid w-full grid-cols-7 justify-items-center">
-                    {WEEK_DAYS.map((weekDay, index) => (
-                      <span
-                        className={cn(
-                          font.body.medium,
-                          "flex h-[21px] w-[clamp(32px,9vw,36px)] items-center justify-center"
-                        )}
-                        key={weekDay}
-                        style={{
-                          color:
-                            index === 0 ? lightTheme.status.error : lightTheme.label.alternative,
-                        }}
-                      >
-                        {weekDay}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div
-                    className={cn(
-                      "grid w-full grid-cols-7 justify-items-center",
-                      hasSixCalendarRows ? "gap-y-[4px]" : "gap-y-[8px]"
-                    )}
-                  >
-                    {calendarDays.map(day => {
-                      const isSelected = draftDate === day.id;
-
-                      return (
-                        <button
-                          aria-label={`${day.label}일`}
-                          aria-pressed={isSelected}
-                          className={cn(
-                            font.body.semiBold,
-                            "flex h-[clamp(32px,8.8vw,36px)] w-[clamp(32px,8.8vw,36px)] items-center justify-center rounded-full border-0 bg-transparent p-0",
-                            day.isCurrentMonth ? "cursor-pointer" : "cursor-default"
-                          )}
-                          disabled={!day.isCurrentMonth}
-                          key={day.id}
-                          onClick={() => handleCalendarDateSelect(day)}
-                          style={getCalendarDayStyle(day, isSelected)}
-                          type="button"
-                        >
-                          {day.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+              <DatePickerCalendar
+                draftDate={draftDate}
+                draftDateParts={draftDateParts}
+                calendarDays={calendarDays}
+                hasSixCalendarRows={hasSixCalendarRows}
+                isYearSelectOpen={isYearSelectOpen}
+                canSelectPreviousMonth={canSelectPreviousMonth}
+                canSelectNextMonth={canSelectNextMonth}
+                selectedYearRef={selectedYearRef}
+                onPreviousMonth={handlePreviousMonth}
+                onNextMonth={handleNextMonth}
+                onToggleYearSelect={handleToggleYearSelect}
+                onYearSelect={handleYearSelect}
+                onDateSelect={handleCalendarDateSelect}
+              />
 
               <button
                 className={cn(
@@ -415,10 +155,11 @@ const RecordDatePickerField = ({ errorMessage, value, onChange }: RecordDatePick
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );
 };
 
-export default RecordDatePickerField;
+// 폼 전체가 다시 그려질 때 값이 그대로인 필드는 건너뛴다.
+export default memo(RecordDatePickerField);

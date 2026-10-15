@@ -1,4 +1,4 @@
-import type { RecommendationApiData, RecommendationItemApiData } from "@/entities";
+import type { RecommendationApiData, RecommendationItemApiData } from "@/entities/recommendation";
 
 import type { RecommendationCardType } from "@/features/home";
 

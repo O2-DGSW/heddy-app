@@ -27,14 +27,14 @@ export type TreatmentRecordListParams = {
 export type TreatmentRecordSummaryApiData = {
   record_id: string;
   performed_at: string;
-  salon_name: string;
-  designer_name: string;
-  service_types: ServiceType[];
-  satisfaction: number;
-  thumbnail_url: string;
+  is_shared?: boolean;
+  salon_name?: string | null;
+  designer_name?: string | null;
+  service_types?: ServiceType[];
+  satisfaction?: number | null;
+  thumbnail_url?: string | null;
   photos?: TreatmentRecordPhotoApiData[];
-  analysis_status: string;
-  is_shared: boolean;
+  analysis_status?: string | null;
 };
 
 export type PageApiData = {

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { loginApi, setAuthTokens } from "@/entities/auth";
-import { queryClient } from "@/app/queryClient";
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +10,7 @@ export const useLoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleLogin = async () => {
     if (isLoading) {
@@ -31,7 +32,6 @@ export const useLoginForm = () => {
       queryClient.clear();
       navigate("/home", { replace: true });
     } catch (err) {
-      console.error("로그인 실패:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {

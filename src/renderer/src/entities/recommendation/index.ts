@@ -7,6 +7,7 @@ export {
 export type {
   GenerateRecommendationRequest,
   RecommendationApiData,
+  RecommendationBasisApiData,
   RecommendationApiResponse,
   RecommendationHairstyleApiData,
   RecommendationItemApiData,

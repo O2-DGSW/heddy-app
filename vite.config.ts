@@ -5,6 +5,7 @@ import { checkServerIdentity } from "node:tls";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
+import { visualizer } from "rollup-plugin-visualizer";
 import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config
@@ -66,7 +67,40 @@ export default defineConfig(({ command, mode, isPreview }) => {
     root: new URL("src/renderer/src", import.meta.url).pathname,
     envDir: new URL(".", import.meta.url).pathname,
     publicDir: new URL("public", import.meta.url).pathname,
-    plugins: [react(), tailwindcss(), svgr()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      svgr(),
+      // pnpm build:analyze 일 때만 번들 구성 보고서를 만든다 (저장소 루트 bundle-stats.html)
+      ...(process.env.ANALYZE === "true"
+        ? [
+            visualizer({
+              filename: new URL("bundle-stats.html", import.meta.url).pathname,
+              gzipSize: true,
+              template: "treemap",
+            }),
+          ]
+        : []),
+    ],
+    build: {
+      rolldownOptions: {
+        output: {
+          // 자주 바뀌지 않는 라이브러리를 앱 코드와 분리해, 앱만 바뀌었을 때 캐시를 재사용한다
+          codeSplitting: {
+            groups: [
+              {
+                name: "react",
+                test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/,
+              },
+              { name: "query", test: /node_modules[\\/]@tanstack[\\/]/ },
+              { name: "capacitor", test: /node_modules[\\/](@capacitor|@capgo|capacitor-)/ },
+              { name: "mediapipe", test: /node_modules[\\/]@mediapipe[\\/]/ },
+              { name: "vendor", test: /node_modules[\\/]/ },
+            ],
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         "@": new URL("src/renderer/src", import.meta.url).pathname,

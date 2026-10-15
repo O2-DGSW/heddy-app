@@ -1,12 +1,4 @@
-export {
-  arrowIcon,
-  dateIcon,
-  dropdownIcon,
-  noIcon,
-  pictureIcon,
-  starDisabledIcon,
-  starIcon,
-} from "./assets";
+export { dateIcon, dropdownIcon, noIcon, pictureIcon } from "./assets";
 export {
   DURATION_HOUR_OPTIONS,
   DURATION_MINUTE_OPTIONS,
@@ -24,6 +16,11 @@ export {
   createDurationValue,
   formatDateDisplay,
   formatDurationDisplay,
+  formatLongDate,
+  formatServiceTypes,
+  getServiceTypeLabel,
+  SERVICE_TYPE_LABEL,
+  toDateValue,
   getDaysInMonth,
   getTreatmentRecordPhotoDisplayUrl,
   getTreatmentRecordThumbnailUrl,
@@ -83,13 +80,15 @@ export {
 } from "./api";
 export {
   recordQueryKeys,
-  useAddTreatmentRecordPhotos,
-  useCreateTreatmentRecord,
+  TreatmentRecordPhotoUploadError,
+  usePostTreatmentRecordPhotos,
+  usePostTreatmentRecord,
   useDeleteTreatmentRecord,
   useGetLatestAnalysis,
   useGetTreatmentRecord,
+  usePrefetchTreatmentRecord,
   useGetTreatmentRecords,
-  useUpdateTreatmentRecord,
+  usePatchTreatmentRecord,
 } from "./api";
 export {
   ProcedureTypeSelector,

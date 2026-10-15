@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import { useDeleteSavedStyle, useGetSavedStyles } from "@/entities/saved-style";
-import { useCreateShare } from "@/entities/share";
+import { usePostShare } from "@/entities/share";
 
 import { mapSavedStyleToItem } from "./mapSavedStyle";
 
@@ -11,10 +11,12 @@ import { mapSavedStyleToItem } from "./mapSavedStyle";
 export const useSavedStyles = () => {
   const navigate = useNavigate();
   const [shareUrl, setShareUrl] = useState("");
+  // 삭제는 되돌릴 수 없어 확인 창을 띄운 뒤에만 지운다.
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const { data, isPending, isError, error } = useGetSavedStyles();
   const deleteSavedStyle = useDeleteSavedStyle();
-  const createShare = useCreateShare();
+  const createShare = usePostShare();
 
   const savedStyles = useMemo(() => (data?.items ?? []).map(mapSavedStyleToItem), [data?.items]);
 
@@ -24,7 +26,19 @@ export const useSavedStyles = () => {
   };
 
   const handleDelete = (styleId: string) => {
-    deleteSavedStyle.mutate(styleId);
+    setDeleteTargetId(styleId);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteTargetId(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTargetId) {
+      return;
+    }
+
+    deleteSavedStyle.mutate(deleteTargetId, { onSettled: () => setDeleteTargetId(null) });
   };
 
   /** 공유 링크는 생성 시점에만 내려오므로 받은 자리에서 들고 있는다 */
@@ -51,12 +65,16 @@ export const useSavedStyles = () => {
     loadErrorMessage: error?.message ?? "",
     shareUrl,
     isSharing: createShare.isPending,
+    isDeleteConfirmOpen: deleteTargetId !== null,
+    isDeleting: deleteSavedStyle.isPending,
     actionErrorMessage:
       (createShare.isError ? createShare.error.message : "") ||
       (deleteSavedStyle.isError ? deleteSavedStyle.error.message : ""),
     handleBack,
     handleCloseShareResult,
     handleDelete,
+    handleDeleteCancel,
+    handleDeleteConfirm,
     handleRetryWithAr,
     handleShare,
   };
