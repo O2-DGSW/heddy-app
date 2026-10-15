@@ -25,8 +25,10 @@ interface UseArServerConnectionResult {
   hasServerYaw: boolean;
   handleGroomRetry: () => void;
   handleForeheadRefresh: () => void;
-  /** 캐시된 AR 페이지로 돌아왔을 때 연결과 비디오 재생을 복구한다 */
+  /** 캐시된 AR 페이지로 돌아왔을 때 새 연결을 시작한다 */
   handlePageEnter: () => void;
+  /** AR 페이지를 벗어날 때 카메라와 WebRTC 연결을 정리한다 */
+  handlePageLeave: () => void;
   /** 연결이 실패하거나 끊긴 뒤 처음부터 다시 연결한다 */
   handleReconnect: () => void;
 }
@@ -48,6 +50,7 @@ export const useArServerConnection = (
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
+  const [isPageActive, setIsPageActive] = useState(true);
   // 값이 바뀌면 연결 effect가 다시 실행된다(다시 연결 버튼).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const {
@@ -179,6 +182,8 @@ export const useArServerConnection = (
   );
 
   useEffect(() => {
+    if (!isPageActive) return;
+
     const controller = new AbortController();
     const timer = setTimeout(() => void startConnection(controller.signal), 0);
     return () => {
@@ -186,7 +191,7 @@ export const useArServerConnection = (
       controller.abort();
       stopConnection();
     };
-  }, [connectionAttempt, startConnection, stopConnection]);
+  }, [connectionAttempt, isPageActive, startConnection, stopConnection]);
 
   const handleReconnect = useCallback(() => {
     setConnectionStatus("connecting");
@@ -195,48 +200,16 @@ export const useArServerConnection = (
   }, []);
 
   const handlePageEnter = useCallback(() => {
-    if (connectionStatus === "idle" || connectionStatus === "connecting") return;
+    setIsPageActive(true);
+    setConnectionStatus("connecting");
+    setErrorMessage(null);
+  }, []);
 
-    const peer = peerConnectionRef.current;
-    const previewVideo = previewVideoRef.current;
-    const faceTrackingVideo = faceTrackingVideoRef.current;
-    const hasLiveCameraTrack = localStreamRef.current
-      ?.getVideoTracks()
-      .some(track => track.readyState === "live");
-    const hasLivePreviewTrack =
-      previewVideo?.srcObject instanceof MediaStream &&
-      previewVideo.srcObject.getVideoTracks().some(track => track.readyState === "live");
-    const hasLiveTrackingTrack =
-      faceTrackingVideo?.srcObject instanceof MediaStream &&
-      faceTrackingVideo.srcObject.getVideoTracks().some(track => track.readyState === "live");
-
-    if (
-      connectionStatus !== "connected" ||
-      peer?.connectionState !== "connected" ||
-      !hasLiveCameraTrack ||
-      !hasLivePreviewTrack ||
-      !hasLiveTrackingTrack
-    ) {
-      handleReconnect();
-      return;
-    }
-
-    let reconnectRequested = false;
-    const handlePlaybackFailure = () => {
-      if (reconnectRequested || peerConnectionRef.current !== peer) return;
-      reconnectRequested = true;
-      handleReconnect();
-    };
-
-    for (const video of [previewVideo, faceTrackingVideo]) {
-      if (!video?.srcObject) {
-        handlePlaybackFailure();
-        continue;
-      }
-
-      void video.play().catch(handlePlaybackFailure);
-    }
-  }, [connectionStatus, faceTrackingVideoRef, handleReconnect, previewVideoRef]);
+  const handlePageLeave = useCallback(() => {
+    setIsPageActive(false);
+    setConnectionStatus("idle");
+    setErrorMessage(null);
+  }, []);
 
   return {
     connectionStatus,
@@ -248,6 +221,7 @@ export const useArServerConnection = (
     handleGroomRetry,
     handleForeheadRefresh,
     handlePageEnter,
+    handlePageLeave,
     handleReconnect,
   };
 };
