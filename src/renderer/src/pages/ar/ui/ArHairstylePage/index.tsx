@@ -191,18 +191,18 @@ const ArHairstylePage = () => {
                 <span className="sr-only">헤어스타일을 적용하고 있어요</span>
                 <svg
                   aria-hidden="true"
-                  className="size-12 animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
+                  className="size-36 animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
                   fill="currentColor"
-                  viewBox="0 0 48 48"
+                  viewBox="0 0 160 160"
                 >
-                  <circle cx="24" cy="5" opacity="0.32" r="1.8" />
-                  <circle cx="37.4" cy="10.6" opacity="0.4" r="2.2" />
-                  <circle cx="43" cy="24" opacity="0.5" r="2.8" />
-                  <circle cx="37.4" cy="37.4" opacity="0.6" r="3.4" />
-                  <circle cx="24" cy="43" opacity="0.7" r="4" />
-                  <circle cx="10.6" cy="37.4" opacity="0.8" r="4.4" />
-                  <circle cx="5" cy="24" opacity="0.9" r="4.6" />
-                  <circle cx="10.6" cy="10.6" r="4.2" />
+                  <circle cx="80" cy="16" opacity="0.32" r="3.5" />
+                  <circle cx="125.3" cy="34.7" opacity="0.4" r="4" />
+                  <circle cx="144" cy="80" opacity="0.5" r="4.8" />
+                  <circle cx="125.3" cy="125.3" opacity="0.6" r="5.6" />
+                  <circle cx="80" cy="144" opacity="0.7" r="6.4" />
+                  <circle cx="34.7" cy="125.3" opacity="0.8" r="7" />
+                  <circle cx="16" cy="80" opacity="0.9" r="7.4" />
+                  <circle cx="34.7" cy="34.7" r="7" />
                 </svg>
               </div>
             )}
