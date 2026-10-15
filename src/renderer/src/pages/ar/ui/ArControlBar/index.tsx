@@ -8,16 +8,20 @@ import { cn } from "@/shared";
 
 interface ArControlBarProps {
   handleExpandedToggle: () => void;
+  handleHairstyleBrowserOpen: () => void;
   handleModalOpen: () => void;
   handleStyleReset: () => void;
+  isHairstyleBrowserOpen: boolean;
   isExpanded: boolean;
   selectedHairstyleLabel: string;
 }
 
 const ArControlBar = ({
   handleExpandedToggle,
+  handleHairstyleBrowserOpen,
   handleModalOpen,
   handleStyleReset,
+  isHairstyleBrowserOpen,
   isExpanded,
   selectedHairstyleLabel,
 }: ArControlBarProps) => (
@@ -30,15 +34,23 @@ const ArControlBar = ({
     >
       <img alt="" className="h-[19px] w-[15px]" src={bookmarkIcon} />
     </button>
-    <span
+    <button
+      aria-expanded={isHairstyleBrowserOpen}
+      aria-haspopup="dialog"
+      aria-label="헤어스타일 목록 열기"
       className={cn(
-        "flex h-[37px] min-w-0 flex-1 items-center justify-center truncate rounded-full bg-white/30 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)]",
+        "ar-motion-press flex h-[37px] min-w-0 flex-1 items-center justify-center gap-1 truncate rounded-full bg-white/30 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)]",
         font.label.medium
       )}
+      onClick={handleHairstyleBrowserOpen}
       style={{ color: lightTheme.label.disable }}
+      type="button"
     >
-      {selectedHairstyleLabel}
-    </span>
+      <span className="truncate">{selectedHairstyleLabel}</span>
+      <span aria-hidden="true" className="shrink-0">
+        ⌄
+      </span>
+    </button>
     <button
       aria-label="스타일 선택 초기화"
       className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"

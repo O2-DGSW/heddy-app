@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import type { TouchEvent, WheelEvent } from "react";
+import { lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
@@ -17,7 +18,7 @@ interface ArHairstyleCarouselProps {
   hairstyleOptions: ArHairstyleOption[];
   loadingMessage: string | null;
   disabled: boolean;
-  onSelect: (hairstyleId: HairstyleOptionId) => void;
+  onSelect: (hairstyleName: HairstyleOptionId) => void;
   /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
   onDisabledSelect: () => void;
 }
@@ -44,7 +45,7 @@ const ArHairstyleCarousel = ({
       onDisabledSelect();
       return;
     }
-    onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
+    onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).name);
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
@@ -90,7 +91,7 @@ const ArHairstyleCarousel = ({
     handleMove(delta > 0 ? 1 : -1);
   };
 
-  const handleSelect = (hairstyleId: HairstyleOptionId) => {
+  const handleSelect = (hairstyleName: HairstyleOptionId) => {
     if (didSwipeRef.current) {
       didSwipeRef.current = false;
       return;
@@ -101,7 +102,7 @@ const ArHairstyleCarousel = ({
       return;
     }
 
-    onSelect(hairstyleId);
+    onSelect(hairstyleName);
   };
 
   if (loadingMessage || hairstyleOptions.length === 0) {
@@ -127,7 +128,7 @@ const ArHairstyleCarousel = ({
         const position = activeHairstylePosition + offset;
         const option = getCircularHairstyleOption(position, hairstyleOptions);
         const isSelected = offset === 0;
-        const isNoStyle = option.id === "none";
+        const isNoStyle = option.name === "";
         const size = getHairstyleSize(offset);
         const isFocusable = Math.abs(offset) <= 2;
         const translateX = getHairstyleItemLeft(offset) + size / 2 - HAIRSTYLE_BASE_SIZE / 2;
@@ -149,24 +150,25 @@ const ArHairstyleCarousel = ({
               aria-disabled={disabled}
               className={cn(
                 "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
-                size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
                 isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
               )}
-              onClick={() => handleSelect(option.id)}
+              onClick={() => handleSelect(option.name)}
               tabIndex={isFocusable ? 0 : -1}
+              style={{ backgroundColor: isNoStyle ? undefined : lightTheme.background.neutral }}
               type="button"
             >
               {isNoStyle ? (
                 <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.5)]">
                   <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
                 </span>
-              ) : option.imageUrl ? (
+              ) : option.thumbUrl ? (
                 <img
                   decoding="async"
                   loading="lazy"
-                  alt={`${option.label} 참고 이미지`}
-                  className="h-full w-full object-cover"
-                  src={option.imageUrl}
+                  alt={`${option.label} 헤어스타일 썸네일`}
+                  className="h-full w-full rounded-full p-[3px] object-contain"
+                  src={option.thumbUrl}
+                  style={{ backgroundColor: lightTheme.background.neutral }}
                 />
               ) : (
                 <span

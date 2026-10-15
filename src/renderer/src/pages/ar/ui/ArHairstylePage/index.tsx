@@ -1,5 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { HairstyleOptionId } from "@/entities/ar-groom";
@@ -11,6 +11,7 @@ import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
 import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
+import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
@@ -18,6 +19,7 @@ import ArStatusNotice from "../ArStatusNotice";
 const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
+  const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
   const { setIsBottomBarHidden } = useBottomBarVisibility();
   const {
     data: serverHairstyleOptions = [],
@@ -41,8 +43,7 @@ const ArHairstylePage = () => {
     setCandidateMemo,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
-  const selectedGroom =
-    selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? "" : selectedHairstyle.id;
+  const selectedGroom = selectedHairstyle.name;
   const {
     connectionStatus,
     errorMessage,
@@ -65,8 +66,8 @@ const ArHairstylePage = () => {
     : (groomsError?.message ??
       (serverHairstyleOptions.length === 0 ? "서버에 등록된 헤어스타일이 없습니다." : null));
 
-  const handleHairstyleSelect = (id: HairstyleOptionId) => {
-    if (controlReady && !isForeheadLoading) selectHairstyle(id);
+  const handleHairstyleSelect = (name: HairstyleOptionId) => {
+    if (controlReady && !isForeheadLoading) selectHairstyle(name);
   };
 
   const handleDisabledHairstyleSelect = () => {
@@ -84,6 +85,9 @@ const ArHairstylePage = () => {
   const handleReset = () => {
     if (!isForeheadLoading) handleStyleReset();
   };
+
+  const handleHairstyleBrowserOpen = () => setIsHairstyleBrowserOpen(true);
+  const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
     setIsBottomBarHidden(isExpanded);
@@ -172,8 +176,10 @@ const ArHairstylePage = () => {
             />
             <ArControlBar
               handleExpandedToggle={handleExpandedToggle}
+              handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
               handleModalOpen={() => handleModalOpen("candidate-save")}
               handleStyleReset={handleReset}
+              isHairstyleBrowserOpen={isHairstyleBrowserOpen}
               isExpanded={isExpanded}
               selectedHairstyleLabel={selectedHairstyle.label}
             />
@@ -198,6 +204,17 @@ const ArHairstylePage = () => {
             {isExpanded && <ArExpandedBottomMenu />}
           </div>
         </main>
+
+        {isHairstyleBrowserOpen && (
+          <ArHairstyleBrowser
+            activeHairstyleName={selectedHairstyle.name}
+            disabled={!controlReady || isForeheadLoading}
+            hairstyleOptions={hairstyleOptions}
+            onClose={handleHairstyleBrowserClose}
+            onDisabledSelect={handleDisabledHairstyleSelect}
+            onSelect={handleHairstyleSelect}
+          />
+        )}
 
         {activeModal === "candidate-save" && (
           <ArCandidateSaveModal

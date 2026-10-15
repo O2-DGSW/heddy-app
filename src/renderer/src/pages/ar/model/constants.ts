@@ -3,7 +3,7 @@ import { lightTheme } from "@heddy/design-tokens";
 import type { ArHairstyleOption } from "@/entities/ar-groom";
 
 export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
-  id: "none",
+  name: "",
   label: "원본 스타일",
 };
 

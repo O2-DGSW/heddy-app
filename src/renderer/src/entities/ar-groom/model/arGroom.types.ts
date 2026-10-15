@@ -1,8 +1,13 @@
 /** AR 서버에 등록된 헤어스타일(groom) 하나 */
 export interface ArHairstyleOption {
-  id: string;
-  imageUrl?: string;
+  /** 서버에 스타일을 적용할 때 전송하는 groom 식별자 */
+  name: string;
   label: string;
+  gender?: string;
+  type?: string;
+  tags?: string[];
+  thumbUrl?: string;
+  viewsUrl?: string;
 }
 
 export type HairstyleOptionId = string;

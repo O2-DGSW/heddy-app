@@ -19,8 +19,8 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     setActiveModal(null);
   };
 
-  const handleHairstyleSelect = (selectedId: HairstyleOptionId) => {
-    const selectedIndex = hairstyleOptions.findIndex(option => option.id === selectedId);
+  const handleHairstyleSelect = (selectedName: HairstyleOptionId) => {
+    const selectedIndex = hairstyleOptions.findIndex(option => option.name === selectedName);
 
     if (selectedIndex < 0 || hairstyleOptions.length === 0) {
       return;
