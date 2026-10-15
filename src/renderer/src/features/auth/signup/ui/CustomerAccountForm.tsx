@@ -28,6 +28,7 @@ export const CustomerAccountForm = ({
   const {
     isValid,
     canRequestVerification,
+    showEmailError,
     showPasswordError,
     showPhoneError,
     showNameError,
@@ -49,6 +50,7 @@ export const CustomerAccountForm = ({
     <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
       <AccountFormFields
         form={form}
+        showEmailError={showEmailError}
         showPasswordError={showPasswordError}
         showPhoneError={showPhoneError}
         showNameError={showNameError}

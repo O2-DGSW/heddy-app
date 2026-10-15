@@ -1,4 +1,5 @@
 import { lightTheme, font } from "@heddy/design-tokens";
+import { useEffect, useRef } from "react";
 
 import {
   ProcedureTypeSelector,
@@ -9,6 +10,7 @@ import {
   RecordTextField,
 } from "@/entities/record";
 import type { PhotoItem, ProcedureType, RecordFormValues } from "@/entities/record";
+import type { FormEvent } from "react";
 import { cn } from "@/shared";
 
 import { useRecordAddForm } from "../../model";
@@ -32,6 +34,8 @@ interface RecordAddFormProps {
   initialRating?: number;
   isSubmitting?: boolean;
   onSubmitValues?: (values: RecordFormSubmitValues) => void;
+  /** 저장하지 않은 입력이 생기거나 없어질 때. 화면이 나가기 전에 되물을지 정한다 */
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const closeButtonStyle = {
@@ -44,6 +48,9 @@ const saveButtonStyle = {
   color: lightTheme.label.buttonText,
 };
 
+/** 사진 칸은 입력 요소가 아니라 aria-invalid 대신 오류 문구에 data-form-error를 단다 */
+const FIRST_ERROR_SELECTOR = '[aria-invalid="true"], [data-form-error]';
+
 const RecordAddForm = ({
   onCancel,
   mode = "create",
@@ -53,15 +60,19 @@ const RecordAddForm = ({
   initialRating,
   isSubmitting,
   onSubmitValues,
+  onDirtyChange,
 }: RecordAddFormProps) => {
   const isEditMode = mode === "edit";
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     formErrors,
     formValues,
+    isDirty,
     isPhotoLimitReached,
     photoInputRef,
     photos,
+    processingPhotoCount,
     rating,
     selectedProcedureTypes,
     handleDateChange,
@@ -85,10 +96,26 @@ const RecordAddForm = ({
     },
   });
 
+  // 필수 칸이 화면 밖에 있으면 저장이 왜 안 되는지 보이지 않아, 첫 오류 칸으로 데려간다.
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    handleSubmit(event);
+
+    window.requestAnimationFrame(() => {
+      formRef.current
+        ?.querySelector(FIRST_ERROR_SELECTOR)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
   return (
     <form
       className="mx-auto flex w-full max-w-[391px] flex-col items-center gap-[clamp(22px,3.4dvh,28px)] px-[clamp(14px,4.2vw,20px)] pb-[clamp(20px,3.4dvh,30px)] pt-[clamp(8px,1.5dvh,12px)]"
-      onSubmit={handleSubmit}
+      onSubmit={handleFormSubmit}
+      ref={formRef}
     >
       {/* 필수 항목(사진·날짜·시술 종류·소요 시간)을 위로 모아, 아래로 내리지 않아도 저장에 필요한 게 다 보이게 한다 */}
       <RecordPhotoUploader
@@ -100,6 +127,7 @@ const RecordAddForm = ({
         onPhotoSelection={handlePhotoSelection}
         onRemovePhoto={handleRemovePhoto}
         photos={photos}
+        processingPhotoCount={processingPhotoCount}
       />
 
       <RecordDatePickerField

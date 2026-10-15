@@ -18,6 +18,8 @@ interface ArHairstyleCarouselProps {
   loadingMessage: string | null;
   disabled: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
+  /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
+  onDisabledSelect: () => void;
 }
 
 // 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
@@ -31,13 +33,17 @@ const ArHairstyleCarousel = ({
   loadingMessage,
   disabled,
   onSelect,
+  onDisabledSelect,
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
   const didSwipeRef = useRef(false);
   const lastWheelAtRef = useRef(0);
 
   const handleMove = (offset: -1 | 1) => {
-    if (disabled) return;
+    if (disabled) {
+      onDisabledSelect();
+      return;
+    }
     onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
   };
 
@@ -85,9 +91,13 @@ const ArHairstyleCarousel = ({
   };
 
   const handleSelect = (hairstyleId: HairstyleOptionId) => {
-    if (disabled) return;
     if (didSwipeRef.current) {
       didSwipeRef.current = false;
+      return;
+    }
+
+    if (disabled) {
+      onDisabledSelect();
       return;
     }
 
@@ -135,9 +145,10 @@ const ArHairstyleCarousel = ({
             <button
               aria-label={isNoStyle ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
               aria-pressed={isSelected}
-              disabled={disabled}
+              // disabled 속성을 쓰면 탭 자체가 막혀 안내를 띄울 수 없어 aria-disabled로 표시만 한다.
+              aria-disabled={disabled}
               className={cn(
-                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] disabled:opacity-45",
+                "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
                 size === 80 && "bg-[#F4FBF8]/90 p-[4px]",
                 isSelected && size !== 80 && "ring-[2px] ring-[#F4FBF8]"
               )}

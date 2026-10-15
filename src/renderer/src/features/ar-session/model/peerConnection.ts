@@ -1,4 +1,5 @@
 /** AR 서버와의 WebRTC 연결에 쓰는 헬퍼. React 상태와 무관하다 */
+import { requestNativeCameraPermission } from "./cameraPermission";
 
 const ICE_GATHERING_TIMEOUT_MS = 10000;
 
@@ -66,10 +67,12 @@ export const configureVideoSender = (
 };
 
 /** 전면 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
-export const openFrontCamera = (): Promise<MediaStream> => {
+export const openFrontCamera = async (): Promise<MediaStream> => {
   if (!navigator.mediaDevices?.getUserMedia) {
-    throw new Error("카메라를 사용할 수 없습니다. HTTPS 또는 localhost에서 다시 시도해 주세요.");
+    throw new Error("이 환경에서는 카메라를 사용할 수 없습니다.");
   }
+
+  await requestNativeCameraPermission();
 
   return navigator.mediaDevices.getUserMedia({
     audio: false,
@@ -101,9 +104,11 @@ export const getArConnectionErrorMessage = (error: unknown): string => {
     }
   }
 
-  if (error instanceof Error && error.message) {
+  // 앱이 직접 만든 Error만 문구를 그대로 쓴다. TypeError·DOMException 등 브라우저 오류의 문구는
+  // 기술 용어라 사용자에게 보여 주지 않는다.
+  if (error instanceof Error && error.name === "Error" && error.message) {
     return error.message;
   }
 
-  return "AR 서버에 연결하지 못했습니다. 네트워크와 카메라 권한을 확인해 주세요.";
+  return "AR 서버에 연결하지 못했습니다. 네트워크를 확인하고 다시 연결해 주세요.";
 };

@@ -10,6 +10,8 @@ import { restoreAuthSession } from "@/entities/auth";
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { HomePage } from "@/pages/home";
+import { NotFoundPage } from "@/pages/not-found";
+import { PageLoading } from "@/shared";
 
 /** 화면 단위로 나눠 불러온다. 불러오는 동안 레이아웃·하단 바는 그대로 두고 그 화면 자리만 비운다 */
 const lazyPage = <TModule,>(
@@ -126,7 +128,7 @@ const EntryRedirect = () => {
   }, []);
 
   if (entryStatus === "checking") {
-    return null;
+    return <PageLoading />;
   }
 
   return <Navigate replace to={entryStatus === "authenticated" ? "/home" : "/welcome"} />;
@@ -159,7 +161,7 @@ export const AppRoutes = () => {
           <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
           <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
           <Route path="/profile/saved-styles" element={<SavedStylesPage />} />
-          <Route path="*" element={<>404p</>} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
         <Route element={<RequireGuest />}>
           <Route element={<AuthTransitionOutlet />}>

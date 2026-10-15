@@ -25,6 +25,8 @@ interface UseArServerConnectionResult {
   hasServerYaw: boolean;
   handleGroomRetry: () => void;
   handleForeheadRefresh: () => void;
+  /** 연결이 실패하거나 끊긴 뒤 처음부터 다시 연결한다 */
+  handleReconnect: () => void;
 }
 
 /** AR 서버와 WebRTC로 연결해 카메라 영상을 보내고 합성 영상·진단 정보를 받는다 */
@@ -44,6 +46,8 @@ export const useArServerConnection = (
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
+  // 값이 바뀌면 연결 effect가 다시 실행된다(다시 연결 버튼).
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
   const {
     groomState,
     foreheadState,
@@ -117,7 +121,7 @@ export const useArServerConnection = (
         });
         channel.addEventListener("close", () => {
           if (!isCurrentPeer()) return;
-          failConnection("AR 서버 제어 연결이 종료되었습니다. 화면에 다시 진입해 주세요.");
+          failConnection("AR 연결이 끊어졌습니다. 다시 연결해 주세요.");
         });
         channel.addEventListener("message", event => {
           void (async () => {
@@ -143,7 +147,7 @@ export const useArServerConnection = (
           if (!isCurrentPeer()) return;
           if (peer.connectionState === "connected") setConnectionStatus("connected");
           else if (peer.connectionState === "failed" || peer.connectionState === "closed") {
-            failConnection("AR 서버 연결이 종료되었습니다. 화면에 다시 진입해 주세요.");
+            failConnection("AR 연결이 끊어졌습니다. 다시 연결해 주세요.");
           }
         });
 
@@ -152,7 +156,8 @@ export const useArServerConnection = (
         await peer.setLocalDescription(offer);
         await waitForIceGatheringComplete(peer, signal);
         const localDescription = peer.localDescription;
-        if (!localDescription) throw new Error("AR 연결 offer를 생성하지 못했습니다.");
+        if (!localDescription)
+          throw new Error("AR 연결을 준비하지 못했습니다. 다시 연결해 주세요.");
         const answer = await requestArServerOffer(baseUrl, localDescription, signal);
         signal.throwIfAborted();
         await peer.setRemoteDescription(answer);
@@ -179,7 +184,11 @@ export const useArServerConnection = (
       controller.abort();
       stopConnection();
     };
-  }, [startConnection, stopConnection]);
+  }, [connectionAttempt, startConnection, stopConnection]);
+
+  const handleReconnect = useCallback(() => {
+    setConnectionAttempt(attempt => attempt + 1);
+  }, []);
 
   return {
     connectionStatus,
@@ -190,5 +199,6 @@ export const useArServerConnection = (
     hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
+    handleReconnect,
   };
 };

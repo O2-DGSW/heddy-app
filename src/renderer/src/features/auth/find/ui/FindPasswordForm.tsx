@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSmsVerification } from "@/entities/auth";
+import { showSuccessToast } from "@/shared";
 import { useFindPassword } from "@/features/auth/find/model/useFindPassword";
 import { useResetPassword } from "@/features/auth/find/model/useResetPassword";
 
@@ -23,6 +24,7 @@ export const FindPasswordForm = () => {
     passwordField,
     passwordConfirmField,
     canSubmit: canReset,
+    isPasswordMismatch,
     error: resetError,
     isLoading: isResetting,
     submitResetPassword,
@@ -36,6 +38,7 @@ export const FindPasswordForm = () => {
     const isSuccess = await submitResetPassword(phoneField.value);
 
     if (isSuccess) {
+      showSuccessToast("비밀번호를 바꿨습니다. 새 비밀번호로 로그인해 주세요.");
       navigate("/login", { replace: true });
     }
   };
@@ -47,6 +50,7 @@ export const FindPasswordForm = () => {
         <FindPasswordResetStep
           passwordField={passwordField}
           passwordConfirmField={passwordConfirmField}
+          isPasswordMismatch={isPasswordMismatch}
           resetError={resetError}
           isResetting={isResetting}
           canResetPassword={canResetPassword}

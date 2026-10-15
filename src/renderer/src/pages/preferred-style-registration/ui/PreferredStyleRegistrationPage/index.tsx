@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { cn, ArrowIcon } from "@/shared";
+import { cn, ArrowIcon, ConfirmModal } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -10,6 +10,10 @@ import StyleTagResultRow from "../StyleTagResultRow";
 
 const PreferredStyleRegistrationPage = () => {
   const {
+    sectionRef,
+    isLeaveConfirmOpen,
+    handleLeaveConfirm,
+    handleLeaveCancel,
     activeTab,
     actionErrorMessage,
     excludedTags,
@@ -34,6 +38,7 @@ const PreferredStyleRegistrationPage = () => {
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby="preferred-style-registration-title"
       aria-busy={isFetching || isSaving}
       className="flex h-full min-h-0 flex-col overflow-x-clip"
@@ -131,7 +136,8 @@ const PreferredStyleRegistrationPage = () => {
                   ) : (
                     styleTags.map(tag => (
                       <StyleTagButton
-                        disabled={isSaving || getIsTagDisabled(tag.status, activeTab)}
+                        disabled={isSaving}
+                        isUnavailable={getIsTagDisabled(tag.status, activeTab)}
                         key={tag.id}
                         label={tag.label}
                         onClick={() => handleTagClick(tag.id)}
@@ -248,6 +254,18 @@ const PreferredStyleRegistrationPage = () => {
           </div>
         </div>
       </div>
+
+      {isLeaveConfirmOpen && (
+        <ConfirmModal
+          cancelLabel="계속 고르기"
+          confirmLabel="나가기"
+          description="고른 스타일은 저장되지 않습니다."
+          onCancel={handleLeaveCancel}
+          onConfirm={handleLeaveConfirm}
+          title="저장하지 않고 나갈까요?"
+          tone="danger"
+        />
+      )}
     </section>
   );
 };

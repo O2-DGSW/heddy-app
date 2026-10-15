@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
@@ -13,15 +13,20 @@ import {
   mapFormValuesToUpdateRequest,
   usePutTreatmentRecordPhotos,
 } from "@/features/record-add";
-import { ArrowIcon } from "@/shared";
+import { ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 const headingStyle = { color: lightTheme.label.neutral };
 
 /** 기록 추가 화면과 같은 폼을 쓰고, 기존 값을 채운 뒤 버튼만 취소·수정 완료로 바꾼다 */
+const SAVE_ERROR_MESSAGE = "시술기록을 수정하지 못했습니다. 다시 시도해 주세요.";
+
 const RecordEditPage = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+  // 폼이 알려 주는 저장하지 않은 입력 여부. 나갈 때 되물을지 정한다.
+  const [isDirty, setIsDirty] = useState(false);
   const { id } = useParams();
   const { data: record, isPending, isError, error } = useGetTreatmentRecord(id);
   const updateRecord = usePatchTreatmentRecord();
@@ -45,12 +50,17 @@ const RecordEditPage = () => {
     [record]
   );
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setDirection("back");
     navigate(-1);
-  };
+  }, [navigate]);
 
-  const submitErrorMessage = updateRecord.error?.message ?? syncPhotos.error?.message ?? null;
+  const { isLeaveConfirmOpen, requestLeave, confirmLeave, cancelLeave } = useLeaveConfirm({
+    isDirty,
+    containerRef: sectionRef,
+    onLeave: handleClose,
+  });
+
   const isSubmitting = updateRecord.isPending || syncPhotos.isPending;
 
   const handleSubmit = async ({
@@ -77,14 +87,16 @@ const RecordEditPage = () => {
       await syncPhotos.mutateAsync({ recordId: id, initialPhotos: initialPhotos ?? [], photos });
 
       handleClose();
-    } catch {
-      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+    } catch (error) {
+      // 폼이 길어 맨 위 문구는 보이지 않을 수 있어 토스트로 알린다.
+      showErrorToast(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
     }
   };
 
   return (
     <cap-page>
       <section
+        ref={sectionRef}
         aria-labelledby="record-edit-title"
         className="flex h-full min-h-0 flex-col overflow-hidden"
         style={pageStyle}
@@ -96,7 +108,7 @@ const RecordEditPage = () => {
           <button
             aria-label="뒤로 가기"
             className="absolute left-[14px] flex h-[44px] w-[44px] items-center justify-start border-0 bg-transparent p-0"
-            onClick={handleClose}
+            onClick={requestLeave}
             type="button"
           >
             <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
@@ -122,15 +134,6 @@ const RecordEditPage = () => {
           {/* 기존 값이 도착한 뒤에 폼을 그려야 초기값이 그대로 들어간다 */}
           {!isPending && !isError && (
             <>
-              {submitErrorMessage && (
-                <p
-                  className={`px-4 pt-4 text-center ${font.caption.regular}`}
-                  style={{ color: lightTheme.status.error }}
-                >
-                  {submitErrorMessage}
-                </p>
-              )}
-
               <RecordAddForm
                 mode="edit"
                 initialProcedureTypes={initialProcedureTypes}
@@ -138,12 +141,25 @@ const RecordEditPage = () => {
                 initialRating={record?.satisfaction ?? undefined}
                 initialValues={initialValues}
                 isSubmitting={isSubmitting}
-                onCancel={handleClose}
+                onCancel={requestLeave}
+                onDirtyChange={setIsDirty}
                 onSubmitValues={handleSubmit}
               />
             </>
           )}
         </div>
+
+        {isLeaveConfirmOpen && (
+          <ConfirmModal
+            cancelLabel="계속 작성"
+            confirmLabel="나가기"
+            description="작성한 내용은 저장되지 않습니다."
+            onCancel={cancelLeave}
+            onConfirm={confirmLeave}
+            title="작성을 그만두고 나갈까요?"
+            tone="danger"
+          />
+        )}
       </section>
     </cap-page>
   );

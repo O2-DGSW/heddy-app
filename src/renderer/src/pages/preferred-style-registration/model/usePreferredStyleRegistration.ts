@@ -1,8 +1,9 @@
 import { getApiErrorMessage } from "@heddy/api";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useGetStylePreferences, useGetStyleTags, usePutStylePreferences } from "@/entities/style";
+import { useLeaveConfirm } from "@/shared";
 import type {
   StylePreferencesRequest,
   StylePreferencesResponse,
@@ -12,6 +13,11 @@ import type {
 import { getIsTagDisabled, getNextTagStatus } from "../lib/styleTag";
 import { MAX_STYLE_TAG_SELECTION, TAB_LABEL_BY_TYPE } from "./constants";
 import type { PreferredStyleTabType, StyleTag, StyleTagStatusType } from "./preferredStyle.types";
+
+const isSameIdSet = (ids: string[], otherIds: string[]) => {
+  const idSet = new Set(ids);
+  return idSet.size === new Set(otherIds).size && otherIds.every(id => idSet.has(id));
+};
 
 const formatStyleTagLabel = (tagName: string) => {
   const trimmedTagName = tagName.trim();
@@ -91,9 +97,31 @@ export const usePreferredStyleRegistration = () => {
       : null;
   const actionErrorMessage = saveErrorMessage ?? loadErrorMessage;
   const isSaveDisabled = isFetching || isSaving || Boolean(loadErrorMessage);
+  // 태그를 하나도 건드리지 않았으면(불러오는 중 포함) 저장할 변경이 없다.
+  const isDirty =
+    Object.keys(styleTagStatusById).length > 0 &&
+    (!isSameIdSet(
+      preferredTags.map(tag => tag.id),
+      stylePreferences?.preferred_tag_ids ?? []
+    ) ||
+      !isSameIdSet(
+        excludedTags.map(tag => tag.id),
+        stylePreferences?.excluded_tag_ids ?? []
+      ));
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const leaveScreen = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  const { isLeaveConfirmOpen, requestLeave, confirmLeave, cancelLeave } = useLeaveConfirm({
+    isDirty,
+    containerRef: sectionRef,
+    onLeave: leaveScreen,
+  });
 
   const handleBack = () => {
-    navigate(-1);
+    requestLeave();
   };
 
   const handleTabClick = (tab: PreferredStyleTabType) => {
@@ -104,7 +132,16 @@ export const usePreferredStyleRegistration = () => {
   const handleTagClick = (tagId: string) => {
     const targetTag = styleTags.find(tag => tag.id === tagId);
 
-    if (!targetTag || getIsTagDisabled(targetTag.status, activeTab)) {
+    if (!targetTag) {
+      return;
+    }
+
+    // 다른 탭에서 고른 태그는 여기서 바꿀 수 없다. 눌러도 반응이 없으면 고장 난 것처럼 보여 이유를 알린다.
+    if (getIsTagDisabled(targetTag.status, activeTab)) {
+      const otherTab = activeTab === "preferred" ? "excluded" : "preferred";
+      setSaveErrorMessage(
+        `${TAB_LABEL_BY_TYPE[otherTab]} 태그로 고른 스타일입니다. ${TAB_LABEL_BY_TYPE[otherTab]} 탭에서 먼저 빼 주세요.`
+      );
       return;
     }
 
@@ -135,7 +172,7 @@ export const usePreferredStyleRegistration = () => {
   };
 
   const handleCancel = () => {
-    navigate(-1);
+    requestLeave();
   };
 
   const handleRetry = () => {
@@ -159,13 +196,17 @@ export const usePreferredStyleRegistration = () => {
 
     try {
       await putStylePreferences(body);
-      navigate(-1);
+      leaveScreen();
     } catch (error) {
       setSaveErrorMessage(getApiErrorMessage(error, "선호 스타일 저장에 실패했습니다."));
     }
   };
 
   return {
+    sectionRef,
+    isLeaveConfirmOpen,
+    handleLeaveConfirm: confirmLeave,
+    handleLeaveCancel: cancelLeave,
     activeTab,
     actionErrorMessage,
     excludedTags,

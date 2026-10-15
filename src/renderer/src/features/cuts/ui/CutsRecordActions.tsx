@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 import { font, lightTheme } from "@heddy/design-tokens";
 
 import { useDeleteTreatmentRecord } from "@/entities/record";
-import { cn, showErrorToast } from "@/shared";
+import { cn, ConfirmModal, showErrorToast } from "@/shared";
 
 interface CutsRecordActionsProps {
   /** 탭마다 배치가 달라 바깥 여백만 호출부에서 받는다 */
@@ -15,6 +16,7 @@ export const CutsRecordActions = ({ className }: CutsRecordActionsProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const deleteRecord = useDeleteTreatmentRecord();
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const handleEditClick = () => {
     setDirection("forward");
@@ -26,9 +28,18 @@ export const CutsRecordActions = ({ className }: CutsRecordActionsProps) => {
     navigate("../share");
   };
 
-  /** 삭제는 되돌릴 수 없어 한 번 되묻고, 지운 뒤에는 없는 화면에 남지 않도록 목록으로 보낸다 */
+  /** 삭제는 되돌릴 수 없어 한 번 되묻는다 */
   const handleDeleteClick = () => {
-    if (!id || !window.confirm("이 시술기록을 삭제할까요? 되돌릴 수 없어요")) {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteConfirmOpen(false);
+  };
+
+  /** 지운 뒤에는 없는 화면에 남지 않도록 목록으로 보낸다 */
+  const handleDeleteConfirm = () => {
+    if (!id) {
       return;
     }
 
@@ -38,6 +49,7 @@ export const CutsRecordActions = ({ className }: CutsRecordActionsProps) => {
         navigate("/cuts", { replace: true });
       },
       onError: error => {
+        setIsDeleteConfirmOpen(false);
         showErrorToast(error.message || "시술기록을 삭제하지 못했습니다. 다시 시도해주세요.");
       },
     });
@@ -70,6 +82,18 @@ export const CutsRecordActions = ({ className }: CutsRecordActionsProps) => {
       >
         {deleteRecord.isPending ? "삭제 중" : "삭제"}
       </button>
+
+      {isDeleteConfirmOpen && (
+        <ConfirmModal
+          confirmLabel={deleteRecord.isPending ? "삭제 중" : "삭제"}
+          description="삭제한 시술기록은 되돌릴 수 없어요."
+          isPending={deleteRecord.isPending}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="이 시술기록을 삭제할까요?"
+          tone="danger"
+        />
+      )}
     </div>
   );
 };

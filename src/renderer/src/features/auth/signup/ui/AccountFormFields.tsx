@@ -9,6 +9,7 @@ import type {
 
 interface AccountFormFieldsProps {
   form: CustomerAccountForm;
+  showEmailError?: boolean;
   showPasswordError: boolean;
   showPhoneError: boolean;
   showNameError?: boolean;
@@ -21,6 +22,7 @@ interface AccountFormFieldsProps {
 
 export const AccountFormFields = ({
   form,
+  showEmailError = false,
   showPasswordError,
   showPhoneError,
   showNameError,
@@ -55,8 +57,20 @@ export const AccountFormFields = ({
           style={inputStyle}
           placeholder="이메일"
           value={form.id}
+          aria-invalid={showEmailError || undefined}
+          aria-describedby={showEmailError ? "signup-email-error" : undefined}
           onChange={e => onChange({ ...form, id: e.target.value })}
         />
+
+        {showEmailError && (
+          <p
+            id="signup-email-error"
+            className={`${font.caption.regular} pl-2`}
+            style={{ color: lightTheme.status.error }}
+          >
+            올바른 이메일을 입력해주세요.
+          </p>
+        )}
       </div>
 
       <PasswordFields

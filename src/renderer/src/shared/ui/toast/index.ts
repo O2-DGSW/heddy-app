@@ -1,2 +1,2 @@
 export { default as ToastProvider } from "./ToastProvider";
-export { showErrorToast, showSuccessToast } from "./toast";
+export { showErrorToast, showInfoToast, showSuccessToast } from "./toast";

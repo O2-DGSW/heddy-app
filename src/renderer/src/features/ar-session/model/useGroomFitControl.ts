@@ -153,9 +153,11 @@ export const useGroomFitControl = (
         setGroomState({
           groom: pending,
           status: event.status,
+          // 서버 문구는 기술 용어일 수 있어 화면에는 앱 문구만 보여 준다.
           message:
-            event.message ??
-            (event.status === "error" ? "스타일을 적용하지 못했습니다." : undefined),
+            event.status === "error"
+              ? "스타일을 적용하지 못했습니다. 다시 시도해 주세요."
+              : undefined,
         });
         if (desiredFitRef.current.groom !== pending || event.status === "ok") syncGroomFit();
         return;
@@ -166,10 +168,9 @@ export const useGroomFitControl = (
         setForeheadState({
           status: event.status,
           message:
-            event.message ??
-            (event.status === "error"
-              ? "이마를 생성하지 못했습니다. 정면을 보고 다시 시도해 주세요."
-              : undefined),
+            event.status === "error"
+              ? "이마를 만들지 못했습니다. 정면을 보고 다시 시도해 주세요."
+              : undefined,
         });
         if (event.status === "loading") startForeheadTimeout();
         else clearForeheadTimer();
@@ -179,7 +180,10 @@ export const useGroomFitControl = (
       // 이름 없는 오류: 이마 요청만 진행 중이면 이마 오류, 아니면 스타일 오류로 본다
       if (pendingGroomRef.current === null && foreheadTimerRef.current !== undefined) {
         clearForeheadTimer();
-        setForeheadState({ status: "error", message: event.message });
+        setForeheadState({
+          status: "error",
+          message: "이마를 만들지 못했습니다. 정면을 보고 다시 시도해 주세요.",
+        });
         return;
       }
       clearTimeout(groomTimerRef.current);
@@ -187,7 +191,7 @@ export const useGroomFitControl = (
       setGroomState({
         groom: desiredFitRef.current.groom,
         status: "error",
-        message: event.message,
+        message: "스타일을 적용하지 못했습니다. 다시 시도해 주세요.",
       });
     },
     [startForeheadTimeout, syncGroomFit]

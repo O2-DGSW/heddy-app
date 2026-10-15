@@ -5,6 +5,7 @@ import AVFoundation
 class ViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(ArServerHttpPlugin())
+        bridge?.registerPluginInstance(CameraPermissionPlugin())
     }
 
     override func viewDidLoad() {
@@ -23,14 +24,21 @@ class ViewController: CAPBridgeViewController {
         webView?.backgroundColor = .white
         webView?.scrollView.backgroundColor = .white
     }
+}
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+/// 카메라 권한을 앱 시작이 아니라 AR 화면에 들어갈 때 웹에서 요청하도록 연결한다.
+/// 이미 정해진 권한이면 시스템 창 없이 현재 상태만 돌려준다.
+@objc(CameraPermissionPlugin)
+public class CameraPermissionPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "CameraPermissionPlugin"
+    public let jsName = "CameraPermission"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "request", returnType: CAPPluginReturnPromise),
+    ]
 
-        guard AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined else {
-            return
+    @objc func request(_ call: CAPPluginCall) {
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            call.resolve(["granted": granted])
         }
-
-        AVCaptureDevice.requestAccess(for: .video) { _ in }
     }
 }

@@ -1,6 +1,6 @@
 import { lightTheme } from "@heddy/design-tokens";
 
-export type ToastStatusType = "error" | "success";
+export type ToastStatusType = "error" | "success" | "info";
 
 interface ToastMessageProps {
   message: string;

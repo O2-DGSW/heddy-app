@@ -138,7 +138,8 @@ const ProfileEditPage = () => {
                 label="비밀번호"
                 name="password"
                 onChange={value => handleChange("password", value)}
-                placeholder="비밀번호를 입력하세요"
+                // 여기서는 바꿀 수 없어, 입력을 요구하지 않고 바꾸는 곳을 알려 준다.
+                placeholder="비밀번호 찾기에서 변경할 수 있어요"
                 type="password"
                 value={formValues.password}
               />

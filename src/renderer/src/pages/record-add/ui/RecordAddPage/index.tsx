@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
@@ -13,27 +13,37 @@ import {
   mapFormValuesToCreateRequest,
   mapPhotoItemsToAddRequests,
 } from "@/features/record-add";
-import { ArrowIcon } from "@/shared";
+import { ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 const headingStyle = { color: lightTheme.label.neutral };
 
+const SAVE_ERROR_MESSAGE = "시술기록을 저장하지 못했습니다. 다시 시도해 주세요.";
+
 const RecordAddPage = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+  // 폼이 알려 주는 저장하지 않은 입력 여부. 나갈 때 되물을지 정한다.
+  const [isDirty, setIsDirty] = useState(false);
   const createRecord = usePostTreatmentRecord();
   const addRecordPhotos = usePostTreatmentRecordPhotos();
   const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
   // 일부 사진만 올라간 뒤 다시 저장하면 이미 올라간 사진은 건너뛴다
   const [uploadedPhotoIds, setUploadedPhotoIds] = useState<string[]>([]);
 
-  const submitErrorMessage = createRecord.error?.message ?? addRecordPhotos.error?.message ?? null;
   const isSubmitting = createRecord.isPending || addRecordPhotos.isPending;
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setDirection("back");
     navigate(-1);
-  };
+  }, [navigate]);
+
+  const { isLeaveConfirmOpen, requestLeave, confirmLeave, cancelLeave } = useLeaveConfirm({
+    isDirty,
+    containerRef: sectionRef,
+    onLeave: handleClose,
+  });
 
   const handleSubmit = async ({
     formValues,
@@ -68,7 +78,9 @@ const RecordAddPage = () => {
 
       handleClose();
     } catch (error) {
-      // 오류 메시지는 각 mutation의 error 상태로 화면에 표시한다.
+      // 폼이 길어 맨 위 문구는 보이지 않을 수 있어 토스트로 알린다.
+      showErrorToast(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
+
       if (error instanceof TreatmentRecordPhotoUploadError) {
         const succeededIds = uploadTargets
           .filter((_, index) => !error.failedIndexes.includes(index))
@@ -82,6 +94,7 @@ const RecordAddPage = () => {
   return (
     <cap-page>
       <section
+        ref={sectionRef}
         aria-labelledby="record-add-title"
         className="flex h-full min-h-0 flex-col overflow-hidden"
         style={pageStyle}
@@ -93,7 +106,7 @@ const RecordAddPage = () => {
           <button
             aria-label="뒤로 가기"
             className="absolute left-[14px] flex h-[44px] w-[44px] items-center justify-start border-0 bg-transparent p-0"
-            onClick={handleClose}
+            onClick={requestLeave}
             type="button"
           >
             <ArrowIcon className="h-[20px] w-[20px]" color={lightTheme.label.neutral} />
@@ -105,21 +118,25 @@ const RecordAddPage = () => {
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[clamp(18px,3dvh,26px)] no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {submitErrorMessage && (
-            <p
-              className={`px-4 pt-4 text-center ${font.caption.regular}`}
-              style={{ color: lightTheme.status.error }}
-            >
-              {submitErrorMessage}
-            </p>
-          )}
-
           <RecordAddForm
             isSubmitting={isSubmitting}
-            onCancel={handleClose}
+            onCancel={requestLeave}
+            onDirtyChange={setIsDirty}
             onSubmitValues={handleSubmit}
           />
         </div>
+
+        {isLeaveConfirmOpen && (
+          <ConfirmModal
+            cancelLabel="계속 작성"
+            confirmLabel="나가기"
+            description="작성한 내용은 저장되지 않습니다."
+            onCancel={cancelLeave}
+            onConfirm={confirmLeave}
+            title="작성을 그만두고 나갈까요?"
+            tone="danger"
+          />
+        )}
       </section>
     </cap-page>
   );

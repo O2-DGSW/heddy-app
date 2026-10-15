@@ -8,6 +8,8 @@ export const useResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const canSubmit = password.length > 0 && password === passwordConfirm;
+  // 확인 칸을 입력하기 시작했는데 다르면 바로 알려 준다. 버튼만 꺼져 있으면 이유를 알 수 없다.
+  const isPasswordMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
 
   const submitResetPassword = async (phoneNumber: string) => {
     if (!canSubmit || isLoading) {
@@ -35,6 +37,7 @@ export const useResetPassword = () => {
     passwordField: { value: password, onChange: setPassword },
     passwordConfirmField: { value: passwordConfirm, onChange: setPasswordConfirm },
     canSubmit,
+    isPasswordMismatch,
     error,
     isLoading,
     submitResetPassword,
