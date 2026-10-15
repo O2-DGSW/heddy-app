@@ -7,7 +7,7 @@ import { cn } from "@/shared";
 interface ArControlBarProps {
   handleHairstyleBrowserOpen: () => void;
   handleCandidateSave: () => void;
-  handleStyleReset: () => void;
+  handleCameraSwitch: () => void;
   isCandidateSaved: boolean;
   isHairstyleBrowserOpen: boolean;
   isSavePending: boolean;
@@ -17,7 +17,7 @@ interface ArControlBarProps {
 const ArControlBar = ({
   handleHairstyleBrowserOpen,
   handleCandidateSave,
-  handleStyleReset,
+  handleCameraSwitch,
   isCandidateSaved,
   isHairstyleBrowserOpen,
   isSavePending,
@@ -58,9 +58,9 @@ const ArControlBar = ({
       </span>
     </button>
     <button
-      aria-label="스타일 선택 초기화"
+      aria-label="전면·후면 카메라 전환"
       className="ar-motion-press flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full bg-white/20 shadow-[0_0_8.222px_rgba(0,0,0,0.07)]"
-      onClick={handleStyleReset}
+      onClick={handleCameraSwitch}
       type="button"
     >
       <img alt="" className="h-[20px] w-[20px]" src={refreshIcon} />

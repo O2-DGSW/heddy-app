@@ -50,7 +50,6 @@ const ArHairstylePage = () => {
     activeHairstylePosition,
     handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
-    handleStyleReset,
     fitSettings,
     handleFitSettingsChange,
   } = useArHairstyle(hairstyleOptions);
@@ -69,6 +68,7 @@ const ArHairstylePage = () => {
     handlePageEnter,
     handlePageLeave,
     handleReconnect,
+    handleCameraSwitch,
   } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
   // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
   const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
@@ -98,10 +98,6 @@ const ArHairstylePage = () => {
   };
 
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
-
-  const handleReset = () => {
-    if (!isForeheadLoading) handleStyleReset();
-  };
 
   const handleCandidateSave = async () => {
     const hairstyleId = selectedHairstyle.name;
@@ -239,8 +235,8 @@ const ArHairstylePage = () => {
               />
               <ArControlBar
                 handleCandidateSave={() => void handleCandidateSave()}
+                handleCameraSwitch={handleCameraSwitch}
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
-                handleStyleReset={handleReset}
                 isCandidateSaved={Boolean(savedStyleId)}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
                 isSavePending={saveStyleMutation.isPending || deleteSavedStyleMutation.isPending}
