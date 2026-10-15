@@ -1,6 +1,3 @@
-import { lightTheme } from "@heddy/design-tokens";
-import { ArrowIcon } from "@/shared";
-
 import HomeImage from "./HomeImage";
 import colorDot from "../assets/recommend-color-dot.svg";
 
@@ -22,15 +19,17 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
       <HomeImage
         src={card.imageUrl}
         alt={`${card.title} 추천 사진`}
-        className="absolute left-[-2px] top-[-8px] h-[83px] w-12 max-w-none"
+        className="absolute inset-0 size-full object-cover"
       />
     </span>
     <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
-      <span className="flex items-center gap-1">
+      <span className="flex w-full min-w-0 items-start gap-1">
         <span className="flex size-[10px] shrink-0 items-center justify-center rounded-full bg-[var(--home-primary)] text-[8px] font-semibold text-[var(--home-note)]">
           {card.rank}
         </span>
-        <span className="text-[10px] font-semibold">{card.title}</span>
+        <span className="line-clamp-2 min-w-0 text-ellipsis text-[10px] font-semibold">
+          {card.title}
+        </span>
       </span>
       <span className="inline-flex items-center gap-0.5 rounded-full border-[0.5px] border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
         {card.colorName && <img src={colorDot} alt="" />}
@@ -42,10 +41,6 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
           : "일치도 정보 없음"}
       </span>
     </span>
-    <ArrowIcon
-      className="h-[10px] w-[10px] shrink-0 rotate-180"
-      color={lightTheme.label.alternative}
-    />
   </button>
 );
 export default RecommendationCard;

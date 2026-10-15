@@ -15,7 +15,24 @@ import { useHomeData } from "../model/useHomeData";
 const HomePage = () => {
   const navigate = useNavigate();
   const { profileName, recentRecord, arStyles, recommendations } = useHomeData();
-  const displayName = profileName.trim() || "고객";
+  const displayName = profileName.trim();
+  const hasRecentRecord = recentRecord.isLoading || Boolean(recentRecord.data);
+
+  const handleRecentRecordListClick = () => {
+    if (recentRecord.isError) {
+      void recentRecord.refetch();
+      return;
+    }
+    navigate("/cuts");
+  };
+
+  const handleRecommendationClick = () => {
+    if (recommendations.isError) {
+      void recommendations.refetch();
+      return;
+    }
+    navigate("/recommend");
+  };
 
   return (
     <cap-page>
@@ -28,7 +45,7 @@ const HomePage = () => {
           <HomeHeader onProfileClick={() => navigate("/profile")} />
           <div className="mt-5 mb-6 flex flex-col gap-1">
             <h1 id="home-greeting" className={font.headline1.bold}>
-              {displayName}님, 오늘도 예쁜 하루 되세요!
+              {displayName && `${displayName}님, `}오늘도 예쁜 하루 되세요!
             </h1>
             <p className={cn(font.label.medium, "text-[var(--home-muted)]")}>
               시술 기록을 저장하고, 스타일을 추천받으세요
@@ -39,28 +56,28 @@ const HomePage = () => {
             isLoading={recentRecord.isLoading}
             isError={recentRecord.isError}
             onAddClick={() => navigate("/cuts/add")}
-            onClick={() => navigate("/cuts")}
+            onClick={handleRecentRecordListClick}
           />
           <div className="mt-6 grid grid-cols-[minmax(0,1.126fr)_minmax(0,1fr)] gap-[14px] max-[374px]:grid-cols-1">
             <ArStyleSection
               styles={arStyles.data}
               isLoading={arStyles.isLoading}
               isError={arStyles.isError}
-              onMoreClick={() => navigate("/ar")}
-              onTryClick={() => navigate("/ar")}
+              onRetry={() => void arStyles.refetch()}
+              onMoreClick={() => navigate("/profile/saved-styles")}
             />
             <RecommendationSection
               recommendations={recommendations.data}
               isLoading={recommendations.isLoading}
               isError={recommendations.isError}
-              onMoreClick={() => navigate("/recommend")}
-              onRecommendationClick={() => navigate("/recommend")}
+              onMoreClick={handleRecommendationClick}
+              onRecommendationClick={handleRecommendationClick}
             />
           </div>
           <div className="mt-6">
             <ShareRecordBanner
-              hasRecord={Boolean(recentRecord.data)}
-              onClick={() => navigate(recentRecord.data ? "/cuts" : "/cuts/add")}
+              hasRecord={hasRecentRecord}
+              onClick={() => navigate(hasRecentRecord ? "/cuts" : "/cuts/add")}
             />
           </div>
         </div>

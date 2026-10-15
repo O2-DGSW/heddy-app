@@ -3,13 +3,13 @@ import type { TouchEvent, WheelEvent } from "react";
 
 import { cn } from "@/shared";
 
-import noStyleIcon from "../../assets/no-style.svg";
+import noStyleIcon from "../assets/no-style.svg";
 import {
   getCircularHairstyleOption,
   getHairstyleItemLeft,
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
-} from "../../model/constants";
+} from "../model/constants";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 
 interface ArHairstyleCarouselProps {
@@ -18,8 +18,9 @@ interface ArHairstyleCarouselProps {
   loadingMessage: string | null;
   disabled: boolean;
   onSelect: (hairstyleId: HairstyleOptionId) => void;
+  compact?: boolean;
   /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
-  onDisabledSelect: () => void;
+  onDisabledSelect?: () => void;
 }
 
 // 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
@@ -33,6 +34,7 @@ const ArHairstyleCarousel = ({
   loadingMessage,
   disabled,
   onSelect,
+  compact = false,
   onDisabledSelect,
 }: ArHairstyleCarouselProps) => {
   const touchStartXRef = useRef<number | null>(null);
@@ -41,7 +43,7 @@ const ArHairstyleCarousel = ({
 
   const handleMove = (offset: -1 | 1) => {
     if (disabled) {
-      onDisabledSelect();
+      onDisabledSelect?.();
       return;
     }
     onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).id);
@@ -97,12 +99,47 @@ const ArHairstyleCarousel = ({
     }
 
     if (disabled) {
-      onDisabledSelect();
+      onDisabledSelect?.();
       return;
     }
 
     onSelect(hairstyleId);
   };
+
+  if (compact) {
+    return (
+      <div
+        aria-label="헤어스타일 선택"
+        className="flex w-full items-center justify-center gap-2 overflow-x-auto px-3"
+      >
+        {hairstyleOptions.map(option => (
+          <button
+            key={option.id}
+            type="button"
+            aria-label={option.id === "none" ? "헤어스타일 적용 안 함" : option.label + " 선택"}
+            aria-pressed={
+              getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions).id === option.id
+            }
+            disabled={disabled}
+            onClick={() => handleSelect(option.id)}
+            className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/80 bg-white/20 p-1 disabled:opacity-45"
+          >
+            {option.id === "none" ? (
+              <img src={noStyleIcon} alt="" className="size-full p-1" />
+            ) : option.imageUrl ? (
+              <img
+                src={option.imageUrl}
+                alt={option.label}
+                className="size-full rounded-full object-cover"
+              />
+            ) : (
+              option.label
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (loadingMessage || hairstyleOptions.length === 0) {
     return (
