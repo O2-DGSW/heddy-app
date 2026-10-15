@@ -3,17 +3,25 @@ import { useCallback, useState } from "react";
 import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 import type { ArModalType } from "./ar.types";
+import { DEFAULT_AR_HAIR_COLOR } from "./constants";
+
+const getDefaultArFitSettings = (): ArGroomFitSettings => ({
+  ...DEFAULT_GROOM_FIT_SETTINGS,
+  groom_color: DEFAULT_AR_HAIR_COLOR,
+});
 
 export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
-  const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(DEFAULT_GROOM_FIT_SETTINGS);
+  const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(getDefaultArFitSettings);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
   const [candidateMemo, setCandidateMemo] = useState("");
 
   const handleGroomColorReset = useCallback(() => {
     setFitSettings(current =>
-      current.groom_color === "" ? current : { ...current, groom_color: "" }
+      current.groom_color === DEFAULT_AR_HAIR_COLOR
+        ? current
+        : { ...current, groom_color: DEFAULT_AR_HAIR_COLOR }
     );
   }, []);
 
@@ -49,7 +57,7 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
 
   const handleStyleReset = () => {
     setActiveHairstylePosition(0);
-    setFitSettings(DEFAULT_GROOM_FIT_SETTINGS);
+    setFitSettings(getDefaultArFitSettings());
   };
 
   const handleFitSettingsChange = (patch: Partial<ArGroomFitSettings>) => {

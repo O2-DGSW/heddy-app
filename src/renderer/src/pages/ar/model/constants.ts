@@ -13,6 +13,8 @@ export const HAIR_COLOR_OPTIONS = [
   { id: "milk-brown", label: "밀크 브라운", color: "#B28B6C" },
 ] as const;
 
+export const DEFAULT_AR_HAIR_COLOR = HAIR_COLOR_OPTIONS[0].color;
+
 export const EXPANDED_AR_MENU_ITEMS = [
   { label: "홈", to: "/home" },
   { label: "기록", to: "/cuts" },
