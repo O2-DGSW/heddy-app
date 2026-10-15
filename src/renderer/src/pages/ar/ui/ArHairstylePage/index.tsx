@@ -247,7 +247,7 @@ const ArHairstylePage = () => {
               role="status"
               style={{ backgroundColor: lightTheme.background.normal }}
             >
-              <div className="flex flex-col items-center gap-4">
+              <div className="relative flex flex-col items-center gap-4">
                 <span
                   aria-hidden="true"
                   className="size-10 animate-spin rounded-full border-[3px] border-current border-t-transparent motion-reduce:animate-none"
@@ -256,15 +256,25 @@ const ArHairstylePage = () => {
                 <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
                   AR 연결 중...
                 </p>
-                {isConnectionSlow && (
+                <div className="pointer-events-none absolute left-1/2 top-full mt-3 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
                   <p
-                    className={cn(font.caption.medium, "max-w-[280px] text-center")}
+                    aria-hidden={!isConnectionSlow}
+                    className={cn(
+                      font.caption.medium,
+                      "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+                      isConnectionSlow ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+                    )}
                     style={{ color: lightTheme.label.assistive }}
                   >
-                    연결이 예상보다 오래 걸리고 있어요. 네트워크 연결을 확인하고 잠시만 더 기다려
-                    주세요.
+                    {isConnectionSlow && (
+                      <>
+                        <span className={font.caption.semiBold}>네트워크가 느려요</span>
+                        <br />
+                        잠시만 기다려 주세요
+                      </>
+                    )}
                   </p>
-                )}
+                </div>
               </div>
             </div>
           )}
