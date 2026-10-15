@@ -1,5 +1,3 @@
-import { lightTheme } from "@heddy/design-tokens";
-
 import type { ArHairstyleOption } from "@/entities/ar-groom";
 
 export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
@@ -9,11 +7,10 @@ export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
 
 export const HAIR_COLOR_OPTIONS = [
   { id: "auto", label: "원래 머리색 자동 맞춤", color: "" },
-  { id: "natural-black", label: "블랙", color: lightTheme.label.strong },
-  { id: "dark-brown", label: "다크 브라운", color: "#100604" },
-  { id: "brown", label: "브라운", color: "#3B150E" },
-  { id: "auburn", label: "오번", color: "#4A251F" },
-  { id: "ash-brown", label: "애쉬 브라운", color: "#342D2D" },
+  { id: "dark-brown", label: "다크 브라운", color: "#4A342C" },
+  { id: "choco-brown", label: "초코 브라운", color: "#6A4534" },
+  { id: "ash-brown", label: "애쉬 브라운", color: "#8A8178" },
+  { id: "milk-brown", label: "밀크 브라운", color: "#B28B6C" },
 ] as const;
 
 export const EXPANDED_AR_MENU_ITEMS = [
