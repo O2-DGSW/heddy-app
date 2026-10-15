@@ -1,4 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import { setupPage } from "@capgo/capacitor-transitions/react";
 import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
@@ -17,6 +18,7 @@ import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 
 const ArHairstylePage = () => {
+  const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
@@ -33,6 +35,7 @@ const ArHairstylePage = () => {
     activeModal,
     candidateMemo,
     handleExpandedToggle,
+    handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
     handleModalClose,
     handleModalOpen,
@@ -91,6 +94,15 @@ const ArHairstylePage = () => {
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
+    const pageElement = pageRef.current;
+    if (!pageElement) return;
+
+    return setupPage(pageElement, {
+      onWillEnter: () => handleGroomColorReset(),
+    });
+  }, [handleGroomColorReset]);
+
+  useEffect(() => {
     setIsBottomBarHidden(isExpanded || isConnectionPending);
 
     return () => {
@@ -99,7 +111,7 @@ const ArHairstylePage = () => {
   }, [isConnectionPending, isExpanded, setIsBottomBarHidden]);
 
   return (
-    <cap-page>
+    <cap-page ref={pageRef}>
       <section
         aria-labelledby="ar-hairstyle-title"
         aria-busy={isConnectionPending}

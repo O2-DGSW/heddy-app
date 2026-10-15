@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
@@ -10,6 +10,12 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
   const [candidateMemo, setCandidateMemo] = useState("");
+
+  const handleGroomColorReset = useCallback(() => {
+    setFitSettings(current =>
+      current.groom_color === "" ? current : { ...current, groom_color: "" }
+    );
+  }, []);
 
   const handleModalOpen = (modal: ArModalType) => {
     setActiveModal(modal);
@@ -62,6 +68,7 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     activeModal,
     candidateMemo,
     handleExpandedToggle,
+    handleGroomColorReset,
     handleHairstyleSelect,
     handleModalClose,
     handleModalOpen,
