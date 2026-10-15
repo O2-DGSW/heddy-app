@@ -8,17 +8,10 @@ import { usePostSavedStyle } from "@/entities/saved-style";
 import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
-import {
-  cn,
-  showErrorToast,
-  showInfoToast,
-  showSuccessToast,
-  useBottomBarVisibility,
-} from "@/shared";
+import { cn, showErrorToast, showInfoToast, showSuccessToast } from "@/shared";
 import ArCandidateSaveModal from "../ArCandidateSaveModal";
 import ArColorPicker from "../ArColorPicker";
 import ArControlBar from "../ArControlBar";
-import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
 import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
@@ -37,7 +30,6 @@ const ArHairstylePage = () => {
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
   const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
-  const { setIsBottomBarHidden } = useBottomBarVisibility();
   const saveStyleMutation = usePostSavedStyle();
   const {
     data: serverHairstyleOptions = [],
@@ -53,13 +45,11 @@ const ArHairstylePage = () => {
     activeHairstylePosition,
     activeModal,
     candidateMemo,
-    handleExpandedToggle,
     handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
     handleModalClose,
     handleModalOpen,
     handleStyleReset,
-    isExpanded,
     fitSettings,
     handleFitSettingsChange,
     setCandidateMemo,
@@ -142,14 +132,6 @@ const ArHairstylePage = () => {
     });
   }, [handleGroomColorReset]);
 
-  useEffect(() => {
-    setIsBottomBarHidden(isExpanded);
-
-    return () => {
-      setIsBottomBarHidden(false);
-    };
-  }, [isExpanded, setIsBottomBarHidden]);
-
   return (
     <cap-page ref={pageRef}>
       <section
@@ -158,35 +140,22 @@ const ArHairstylePage = () => {
         className="ar-motion-page-enter relative flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
-        {!isExpanded && (
-          <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
-            <h1
-              className={font.headline1.bold}
-              id="ar-hairstyle-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              AR 헤어스타일
-            </h1>
-          </header>
-        )}
+        <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
+          <h1
+            className={font.headline1.bold}
+            id="ar-hairstyle-title"
+            style={{ color: lightTheme.label.neutral }}
+          >
+            AR 헤어스타일
+          </h1>
+        </header>
 
         <main
           aria-label="AR 미리보기"
           aria-busy={isConnectionPending}
-          className={cn(
-            "min-h-0 flex-1 overflow-hidden",
-            isExpanded ? "fixed inset-x-0 z-[25]" : "relative"
-          )}
-          style={{
-            backgroundColor: lightTheme.label.normal,
-            ...(isExpanded && { bottom: "0px", top: "0px" }),
-          }}
+          className="relative min-h-0 flex-1 overflow-hidden"
+          style={{ backgroundColor: lightTheme.label.normal }}
         >
-          {isExpanded && (
-            <h1 className="sr-only" id="ar-hairstyle-title">
-              AR 헤어스타일
-            </h1>
-          )}
           <div
             aria-hidden={isConnectionPending}
             className="absolute inset-0"
@@ -208,23 +177,13 @@ const ArHairstylePage = () => {
               playsInline
               ref={faceTrackingVideoRef}
             />
-            <ArRecognitionBadge
-              connectionStatus={connectionStatus}
-              isFaceTracked={isFaceTracked}
-              isExpanded={isExpanded}
-            />
+            <ArRecognitionBadge connectionStatus={connectionStatus} isFaceTracked={isFaceTracked} />
             <ArColorPicker
-              isExpanded={isExpanded}
               disabled={!canAdjust}
               selectedColor={fitSettings.groom_color}
               onSelect={handleColorSelect}
             />
-            <div
-              className={cn(
-                "absolute inset-x-0 bottom-0 flex flex-col items-center gap-4",
-                isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
-              )}
-            >
+            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
               <ArStatusNotice
                 connectionErrorMessage={errorMessage}
                 connectionStatus={connectionStatus}
@@ -236,12 +195,10 @@ const ArHairstylePage = () => {
                 showForeheadStatus={false}
               />
               <ArControlBar
-                handleExpandedToggle={handleExpandedToggle}
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
                 handleModalOpen={() => handleModalOpen("candidate-save")}
                 handleStyleReset={handleReset}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
-                isExpanded={isExpanded}
                 selectedHairstyleLabel={selectedHairstyle.label}
               />
               <ArHairstyleCarousel
@@ -262,7 +219,6 @@ const ArHairstylePage = () => {
                   스타일 목록 다시 불러오기
                 </button>
               )}
-              {isExpanded && <ArExpandedBottomMenu />}
             </div>
           </div>
           {isConnectionPending && (

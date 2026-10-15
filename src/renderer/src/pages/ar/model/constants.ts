@@ -15,13 +15,6 @@ export const HAIR_COLOR_OPTIONS = [
 
 export const DEFAULT_AR_HAIR_COLOR = HAIR_COLOR_OPTIONS[0].color;
 
-export const EXPANDED_AR_MENU_ITEMS = [
-  { label: "홈", to: "/home" },
-  { label: "기록", to: "/cuts" },
-  { label: "추천", to: "/recommend" },
-  { label: "프로필", to: "/profile" },
-] as const;
-
 export const HAIRSTYLE_GAP = 25;
 export const HAIRSTYLE_CENTER_POSITION = 202;
 export const HAIRSTYLE_VISIBLE_RANGE = 4;

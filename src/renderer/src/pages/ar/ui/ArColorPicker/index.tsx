@@ -4,22 +4,18 @@ import { HAIR_COLOR_OPTIONS } from "../../model/constants";
 import { cn } from "@/shared";
 
 interface ArColorPickerProps {
-  isExpanded: boolean;
   disabled: boolean;
   selectedColor: string;
   onSelect: (color: string) => void;
 }
 
-const ArColorPicker = ({ isExpanded, disabled, selectedColor, onSelect }: ArColorPickerProps) => {
+const ArColorPicker = ({ disabled, selectedColor, onSelect }: ArColorPickerProps) => {
   const handleSelect = (color: string) => onSelect(color);
 
   return (
     <div
       aria-label="헤어 컬러 선택"
-      className={cn(
-        "absolute left-[clamp(16px,7vw,31px)] flex max-h-[calc(100%-240px)] flex-col gap-2 overflow-y-auto",
-        isExpanded ? "top-[clamp(64px,20%,185px)]" : "top-[clamp(40px,18%,172px)]"
-      )}
+      className="absolute left-[clamp(16px,7vw,31px)] top-[clamp(40px,18%,172px)] flex max-h-[calc(100%-240px)] flex-col gap-2 overflow-y-auto"
     >
       {HAIR_COLOR_OPTIONS.map(option => (
         <button

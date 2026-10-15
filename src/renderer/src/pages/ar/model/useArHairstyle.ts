@@ -13,7 +13,6 @@ const getDefaultArFitSettings = (): ArGroomFitSettings => ({
 export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
   const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(getDefaultArFitSettings);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
   const [candidateMemo, setCandidateMemo] = useState("");
 
@@ -67,21 +66,15 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     });
   };
 
-  const handleExpandedToggle = () => {
-    setIsExpanded(isCurrentExpanded => !isCurrentExpanded);
-  };
-
   return {
     activeHairstylePosition,
     activeModal,
     candidateMemo,
-    handleExpandedToggle,
     handleGroomColorReset,
     handleHairstyleSelect,
     handleModalClose,
     handleModalOpen,
     handleStyleReset,
-    isExpanded,
     fitSettings,
     handleFitSettingsChange,
     setCandidateMemo,
