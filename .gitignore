@@ -36,6 +36,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Environment files
+.cert/
 .env
 .env.*
 *.local
@@ -45,7 +46,11 @@ lerna-debug.log*
 # Local docs
 docs/
 
+# Local agent instructions
+AGENTS.md
+
 # Editor directories and files
+.claude/
 .vscode/*
 !.vscode/extensions.json
 .idea/
@@ -61,3 +66,6 @@ docs/
 ._*
 .Spotlight-V100
 .Trashes
+
+# Bundle analysis report (pnpm build:analyze)
+bundle-stats.html

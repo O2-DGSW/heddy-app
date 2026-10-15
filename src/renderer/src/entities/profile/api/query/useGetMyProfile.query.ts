@@ -1,0 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
+
+import { profileQueryKeys } from "./profileQueryKeys";
+import { getMyProfileApi } from "../profileApi";
+
+export const useGetMyProfile = () =>
+  useQuery({
+    queryKey: profileQueryKeys.mine(),
+    queryFn: getMyProfileApi,
+  });

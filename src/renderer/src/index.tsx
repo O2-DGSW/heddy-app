@@ -3,7 +3,10 @@ import { createRoot } from "react-dom/client";
 import "../../main/global.css";
 import App from "./app/App.tsx";
 import { QueryClientProvider } from "@tanstack/react-query";
-import {queryClient} from "./app/queryClient.ts";
+import { queryClient } from "./app/queryClient.ts";
+import { setupApiAuth } from "./app/setupApiAuth.ts";
+
+setupApiAuth();
 
 const rootElement = document.getElementById("root");
 

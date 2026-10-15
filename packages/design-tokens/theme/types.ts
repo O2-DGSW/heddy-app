@@ -28,9 +28,9 @@ export interface Theme {
     alternative: string;
   };
   status: {
-      error: string;
-      warning: string;
-      success: string;
-      info: string;
-  }
+    error: string;
+    warning: string;
+    success: string;
+    info: string;
+  };
 }

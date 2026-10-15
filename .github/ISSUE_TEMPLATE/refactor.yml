@@ -1,0 +1,30 @@
+name: Refactor
+description: 리팩토링
+title: "[Refactor] "
+labels: ["type: refactor"]
+assignees: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 작업 내용
+      description: 리팩토링할 내용을 명확하게 설명해주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: 리팩토링 이유
+      description: 왜 리팩토링이 필요한지 설명해주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: 체크리스트
+      placeholder: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true

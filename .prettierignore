@@ -1,0 +1,13 @@
+dist
+node_modules
+.idea
+.claude
+.pnpm-store
+android
+ios
+coverage
+pnpm-lock.yaml
+public/mediapipe
+# 팀 컨벤션 양식은 원본(heddy-landing)과 똑같이 유지한다
+.github
+bundle-stats.html
