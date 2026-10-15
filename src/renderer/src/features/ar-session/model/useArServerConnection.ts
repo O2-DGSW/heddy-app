@@ -1,9 +1,11 @@
+import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
 import { getArServerBaseUrl, requestArServerOffer } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArGroomState } from "@/entities/ar-groom";
 
+import { arLog, summarizeIceCandidates, summarizeRemoteAddressKinds } from "./arConnectionLog";
 import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
 import {
   configureVideoSender,
@@ -82,6 +84,7 @@ export const useArServerConnection = (
 
   const failConnection = useCallback(
     (message: string) => {
+      arLog.info("연결 종료", { message });
       stopConnection();
       setConnectionStatus("error");
       setErrorMessage(message);
@@ -93,9 +96,16 @@ export const useArServerConnection = (
     async (signal: AbortSignal) => {
       setConnectionStatus("connecting");
       setErrorMessage(null);
+      // 실패했을 때 어느 단계에서 멈췄는지 로그에 남기려고 진행 단계를 기록한다.
+      let step = "서버 주소 확인";
       try {
         const baseUrl = getArServerBaseUrl();
         if (!baseUrl) throw new Error("AR 서버 주소가 설정되지 않았습니다.");
+        arLog.info("연결 시작", {
+          platform: Capacitor.getPlatform(),
+          server: new URL(baseUrl, window.location.href).origin,
+        });
+        step = "카메라 열기";
         const localStream = await openFrontCamera();
         // 화면 이탈 중 카메라 권한 응답이 도착해도 스트림이 남지 않게 한다.
         if (signal.aborted) {
@@ -103,10 +113,17 @@ export const useArServerConnection = (
           return;
         }
         localStreamRef.current = localStream;
+        arLog.info("카메라 열림", {
+          video: localStream.getVideoTracks().map(track => {
+            const { width, height, frameRate } = track.getSettings();
+            return { width, height, frameRate };
+          }),
+        });
         for (const video of [previewVideoRef.current, faceTrackingVideoRef.current]) {
           if (video) attachStream(video, localStream);
         }
 
+        step = "WebRTC 준비";
         const peer = new RTCPeerConnection();
         peerConnectionRef.current = peer;
         const isCurrentPeer = () => !signal.aborted && peerConnectionRef.current === peer;
@@ -115,12 +132,14 @@ export const useArServerConnection = (
         statsChannelRef.current = channel;
         channel.binaryType = "arraybuffer";
         channel.addEventListener("open", () => {
+          arLog.info("제어 채널 열림");
           if (signal.aborted) return;
           setControlReady(true);
           syncGroomFit();
         });
         channel.addEventListener("close", () => {
           if (!isCurrentPeer()) return;
+          arLog.info("제어 채널 닫힘");
           failConnection("AR 연결이 끊어졌습니다. 다시 연결해 주세요.");
         });
         channel.addEventListener("message", event => {
@@ -140,10 +159,26 @@ export const useArServerConnection = (
 
         localStream.getVideoTracks().forEach(track => configureVideoSender(peer, track));
         peer.addEventListener("track", event => {
+          arLog.info("서버 트랙 수신", { kind: event.track.kind });
           if (signal.aborted || event.track.kind !== "video" || !previewVideoRef.current) return;
           attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));
         });
+        peer.addEventListener("iceconnectionstatechange", () => {
+          arLog.info("ICE 연결 상태", { state: peer.iceConnectionState });
+        });
+        peer.addEventListener("icegatheringstatechange", () => {
+          arLog.info("ICE 후보 수집 상태", { state: peer.iceGatheringState });
+        });
+        peer.addEventListener("icecandidateerror", event => {
+          // STUN·TURN 서버에 닿지 못한 경우. URL과 코드만 남긴다.
+          arLog.info("ICE 후보 오류", {
+            errorCode: event.errorCode,
+            errorText: event.errorText,
+            url: event.url,
+          });
+        });
         peer.addEventListener("connectionstatechange", () => {
+          arLog.info("연결 상태", { state: peer.connectionState });
           if (!isCurrentPeer()) return;
           if (peer.connectionState === "connected") setConnectionStatus("connected");
           else if (peer.connectionState === "failed" || peer.connectionState === "closed") {
@@ -151,18 +186,31 @@ export const useArServerConnection = (
           }
         });
 
+        step = "연결 요청 생성";
         const offer = await peer.createOffer();
         signal.throwIfAborted();
         await peer.setLocalDescription(offer);
+        step = "ICE 후보 수집";
         await waitForIceGatheringComplete(peer, signal);
         const localDescription = peer.localDescription;
         if (!localDescription)
           throw new Error("AR 연결을 준비하지 못했습니다. 다시 연결해 주세요.");
+        arLog.info("연결 요청 전송", {
+          localCandidates: summarizeIceCandidates(localDescription.sdp),
+        });
+        step = "서버 연결 요청(/offer)";
         const answer = await requestArServerOffer(baseUrl, localDescription, signal);
         signal.throwIfAborted();
+        // 서버 후보가 tailscale·private뿐이면, 같은 망이 아닌 기기는 미디어 연결에 실패한다.
+        arLog.info("서버 응답 받음", {
+          remoteCandidates: summarizeIceCandidates(answer.sdp),
+          remoteAddressKinds: summarizeRemoteAddressKinds(answer.sdp),
+        });
+        step = "서버 응답 적용";
         await peer.setRemoteDescription(answer);
       } catch (error: unknown) {
         if (signal.aborted) return;
+        arLog.error(`실패: ${step}`, error);
         failConnection(getArConnectionErrorMessage(error));
       }
     },

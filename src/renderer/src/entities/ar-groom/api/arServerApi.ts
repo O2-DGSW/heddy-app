@@ -3,7 +3,9 @@ import { ApiHttpError, get, post } from "@heddy/api";
 
 import type { ArHairstyleOption } from "../model/arGroom.types";
 import { env } from "@/shared/config";
-import { isRecord, publicUrl } from "@/shared/lib";
+import { createDebugLogger, isRecord, publicUrl } from "@/shared/lib";
+
+const arLog = createDebugLogger("AR");
 
 export const getArServerBaseUrl = (): string => {
   const configuredUrl = env.arServerUrl;
@@ -35,6 +37,7 @@ export const getArGrooms = async (signal?: AbortSignal): Promise<ArHairstyleOpti
     response = await get(`${baseUrl}/grooms`, { signal });
   } catch (error: unknown) {
     signal?.throwIfAborted();
+    arLog.error("실패: 헤어스타일 목록(/grooms)", error);
     throw new Error("헤어스타일 목록을 불러오지 못했습니다.", { cause: error });
   }
   return parseArGrooms(response);
