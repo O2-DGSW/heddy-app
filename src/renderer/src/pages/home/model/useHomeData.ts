@@ -9,23 +9,18 @@ import { HOME_RECENT_RECORD_PARAMS } from "./constants";
 import { mapRecommendationToHomeCards } from "./mapRecommendationToHomeCards";
 import { mapTreatmentRecordToRecentRecord } from "./mapTreatmentRecordToRecentRecord";
 
-const MAX_HOME_AR_STYLE_COUNT = 3;
-
-// AR로 체험하고 저장한 후보 스타일 중 이미지가 있는 것만 홈에 보여준다
+// 저장 순서를 유지하며 이미지가 없는 스타일도 빈 이미지 안내와 함께 표시한다.
 const mapSavedStylesToArStyles = (items: SavedStyleResponse[]): ArStyleType[] =>
-  items
-    .filter(item => Boolean(item.image_url))
-    .slice(0, MAX_HOME_AR_STYLE_COUNT)
-    .map(item => ({
-      id: item.saved_style_id,
-      name: item.style_name,
-      imageUrl: item.image_url ?? "",
-    }));
+  items.map(item => ({
+    id: item.saved_style_id,
+    name: item.style_name,
+    imageUrl: item.image_url ?? "",
+  }));
 
 /** 홈 화면 섹션별 데이터. 섹션마다 따로 불러와 하나가 실패해도 나머지는 보여준다 */
 export const useHomeData = () => {
   const profile = useGetMyProfile();
-  const records = useGetTreatmentRecords({ ...HOME_RECENT_RECORD_PARAMS, page: 0, size: 1 });
+  const records = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
   const recommendation = useGetLatestRecommendation();
   const savedStyles = useGetSavedStyles();
 
@@ -37,16 +32,19 @@ export const useHomeData = () => {
       data: recentItem ? mapTreatmentRecordToRecentRecord(recentItem) : null,
       isLoading: records.isPending,
       isError: records.isError,
+      refetch: records.refetch,
     },
     arStyles: {
       data: mapSavedStylesToArStyles(savedStyles.data?.items ?? []),
       isLoading: savedStyles.isPending,
       isError: savedStyles.isError,
+      refetch: savedStyles.refetch,
     },
     recommendations: {
       data: mapRecommendationToHomeCards(recommendation.data ?? null),
-      isLoading: recommendation.isPending,
+      isLoading: recommendation.isPending || (recommendation.isError && recommendation.isFetching),
       isError: recommendation.isError,
+      refetch: recommendation.refetch,
     },
   };
 };

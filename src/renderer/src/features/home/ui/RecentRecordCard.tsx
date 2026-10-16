@@ -95,7 +95,7 @@ const RecentRecordCard = ({
         isLoading={isLoading}
         isError={isError}
         emptyMessage="현재 시술 기록이 없습니다."
-        actionLabel={isError ? "기록 보기" : "첫 기록 추가하기"}
+        actionLabel={isError ? "다시 시도" : "첫 기록 추가하기"}
         onAction={isError ? onClick : onAddClick}
       />
     )}

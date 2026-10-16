@@ -39,7 +39,7 @@ const OVERLAY_ORDER: AnalysisOverlayType[] = ["HAIR_MASK", "COLOR_DIFFERENCE", "
 /** 처음부터 켜 두는 오버레이. 나머지는 사용자가 직접 켠다 */
 const DEFAULT_ACTIVE_OVERLAY_TYPES: AnalysisOverlayType[] = ["HAIR_MASK", "COLOR_DIFFERENCE"];
 
-/** summary가 비어 올 때 신뢰도 등급으로 대신 채우는 문구 */
+/** summary_comment가 비어 올 때 신뢰도 등급으로 대신 채우는 문구 */
 const CONFIDENCE_DESCRIPTION: Record<AnalysisGrade, string> = {
   HIGH: "사진 상태가 좋아 결과가 정확한 편이에요",
   MEDIUM: "사진 상태에 따라 결과가 달라질 수 있어요",
@@ -91,7 +91,7 @@ export const mapAnalysisToResult = (analysis: AnalysisApiData): CutsAnalysisResu
     overlays: toOverlays(),
     confidencePercent: Math.round(analysis.confidence?.score ?? 0),
     confidenceDescription:
-      analysis.summary?.trim() ||
+      analysis.summary_comment?.trim() ||
       (grade && CONFIDENCE_DESCRIPTION[grade]) ||
       "사진을 바탕으로 계산한 참고용 지표예요",
     indicators: analysis.metrics
@@ -101,20 +101,25 @@ export const mapAnalysisToResult = (analysis: AnalysisApiData): CutsAnalysisResu
   };
 };
 
+const pickPreferredPhoto = (photos: TreatmentRecordPhotoApiData[]) => {
+  const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
+
+  return sorted.find(photo => photo.image_type === "AFTER") ?? sorted[0];
+};
+
 /**
- * 분석 화면에 띄울 사진을 고른다.
- * 분석 대상은 시술 결과라 시술 후(AFTER) 사진을 먼저 쓰고, 없으면 남은 사진 중 첫 장을 쓴다.
+ * 분석할 사진을 고른다. 분석 대상은 시술 결과라 시술 후(AFTER) 사진을 먼저 쓰고, 없으면 첫 장을 쓴다.
+ * 업로드 직후 응답에는 표시 URL이 없을 수 있어, 분석 요청에 필요한 photo_id만 보고 고른다.
  */
+export const pickAnalysisPhoto = (
+  photos: TreatmentRecordPhotoApiData[] = []
+): TreatmentRecordPhotoApiData | undefined => pickPreferredPhoto(photos);
+
+/** 분석 화면에 띄울 사진 URL. 같은 기준으로 고르되 보여 줄 수 있는(URL이 있는) 사진만 본다 */
 export const pickAnalysisPhotoUrl = (photos: TreatmentRecordPhotoApiData[] = []): string => {
-  const usable = [...photos]
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .filter(photo => Boolean(getTreatmentRecordPhotoDisplayUrl(photo)));
+  const photo = pickPreferredPhoto(
+    photos.filter(item => Boolean(getTreatmentRecordPhotoDisplayUrl(item)))
+  );
 
-  const afterPhoto = usable.find(photo => photo.image_type === "AFTER");
-
-  return afterPhoto
-    ? getTreatmentRecordPhotoDisplayUrl(afterPhoto)
-    : usable[0]
-      ? getTreatmentRecordPhotoDisplayUrl(usable[0])
-      : "";
+  return photo ? getTreatmentRecordPhotoDisplayUrl(photo) : "";
 };

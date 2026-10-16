@@ -2,7 +2,8 @@
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import ArHairstyleCarousel from ".";
+import ArHairstyleCarousel from "./ArHairstyleCarousel";
+import { ORIGINAL_HAIRSTYLE_OPTION } from "../model/constants";
 
 const options = Array.from({ length: 7 }, (_, index) => ({
   name: `style-${index}`,
@@ -92,6 +93,53 @@ describe("AR 캐러셀 연속 스크롤", () => {
     const { carousel, onSelect, unmount } = setup();
     fireEvent.wheel(carousel, { deltaX: 850 });
     unmount();
+    advance(1000);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+});
+
+describe("공용 카메라 미리보기의 작은 캐러셀", () => {
+  test("원본 스타일과 서버 썸네일을 표시하고 선택한 위치를 전달한다", () => {
+    const onSelect = vi.fn();
+    const view = render(
+      <ArHairstyleCarousel
+        compact
+        activeHairstylePosition={0}
+        hairstyleOptions={[
+          ORIGINAL_HAIRSTYLE_OPTION,
+          { name: "hippie-perm", label: "히피펌", thumbUrl: "/grooms/hippie-perm.png" },
+        ]}
+        loadingMessage={null}
+        disabled={false}
+        onSelect={onSelect}
+      />
+    );
+
+    expect(
+      view.getByRole("button", { name: "헤어스타일 적용 안 함" }).getAttribute("aria-pressed")
+    ).toBe("true");
+    expect(view.getByRole("img", { name: "히피펌" }).getAttribute("src")).toBe(
+      "/grooms/hippie-perm.png"
+    );
+    fireEvent.click(view.getByRole("button", { name: "히피펌 선택" }));
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
+  test("카메라가 비활성 상태이면 원본 스타일을 선택해도 전달하지 않는다", () => {
+    const onSelect = vi.fn();
+    const view = render(
+      <ArHairstyleCarousel
+        compact
+        activeHairstylePosition={0}
+        hairstyleOptions={[ORIGINAL_HAIRSTYLE_OPTION]}
+        loadingMessage={null}
+        disabled
+        onSelect={onSelect}
+      />
+    );
+
+    fireEvent.click(view.getByRole("button", { name: "헤어스타일 적용 안 함" }));
     advance(1000);
     expect(onSelect).not.toHaveBeenCalled();
   });

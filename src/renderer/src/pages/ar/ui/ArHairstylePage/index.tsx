@@ -10,7 +10,7 @@ import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../mod
 import { cn, showInfoToast } from "@/shared";
 import ArControlBar from "../ArControlBar";
 import ArHairstyleBrowser from "../ArHairstyleBrowser";
-import ArHairstyleCarousel from "../ArHairstyleCarousel";
+import { ArCameraViewport, ArHairstyleCarousel } from "@/features/ar-preview";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 import ArConnectionLoader from "../ArConnectionLoader";
@@ -144,87 +144,84 @@ const ArHairstylePage = () => {
             className={cn("absolute inset-0", isConnectionPending && "invisible")}
             inert={isConnectionPending}
           >
-            <video
-              aria-hidden="true"
-              autoPlay
-              className="absolute inset-0 h-full w-full bg-black object-cover"
-              muted
-              playsInline
-              ref={cameraPreviewRef}
-            />
-            <video
-              aria-hidden="true"
-              autoPlay
-              className="pointer-events-none absolute h-px w-px opacity-0"
-              muted
-              playsInline
-              ref={faceTrackingVideoRef}
-            />
-            {isStyleLoading && (
-              <div
-                aria-live="polite"
-                className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
-                role="status"
-              >
-                <span className="sr-only">헤어스타일을 적용하고 있어요</span>
-                <svg
-                  aria-hidden="true"
-                  className="w-[min(18rem,64vw)] animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
-                  fill="currentColor"
-                  viewBox="0 0 360 360"
+            <ArCameraViewport videoRef={cameraPreviewRef}>
+              <video
+                aria-hidden="true"
+                autoPlay
+                className="pointer-events-none absolute h-px w-px opacity-0"
+                muted
+                playsInline
+                ref={faceTrackingVideoRef}
+              />
+              {isStyleLoading && (
+                <div
+                  aria-live="polite"
+                  className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+                  role="status"
                 >
-                  <circle cx="34.5" cy="96" opacity="0.28" r="3" />
-                  <circle cx="61.2" cy="61.2" opacity="0.36" r="4" />
-                  <circle cx="96" cy="34.5" opacity="0.46" r="5.5" />
-                  <circle cx="136.5" cy="17" opacity="0.58" r="7" />
-                  <circle cx="180" cy="12" opacity="0.7" r="8.5" />
-                  <circle cx="223.5" cy="17" opacity="0.8" r="10" />
-                  <circle cx="264" cy="34.5" opacity="0.88" r="11.5" />
-                  <circle cx="298.8" cy="61.2" opacity="0.95" r="13" />
-                  <circle cx="325.5" cy="96" r="14" />
-                </svg>
-              </div>
-            )}
-            <ArRecognitionBadge connectionStatus={connectionStatus} isFaceTracked={isFaceTracked} />
-            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
-              <ArStatusNotice
-                connectionErrorMessage={reconnectMessage}
-                connectionStatus={connectionStatus}
-                foreheadState={foreheadState}
-                groomState={groomState}
-                onForeheadRefresh={handleForeheadRefresh}
-                onGroomRetry={handleGroomRetry}
-                onReconnect={handleReconnect}
-                showForeheadStatus={false}
-              />
-              <ArControlBar
-                handleCameraSwitch={handleCameraSwitch}
-                handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
-                isHairstyleBrowserOpen={isHairstyleBrowserOpen}
-                canSelectColor={controlReady}
-                selectedColor={fitSettings.groom_color}
-                onColorSelect={handleColorSelect}
-                selectedHairstyleLabel={selectedHairstyle.label}
-              />
-              <ArHairstyleCarousel
-                activeHairstylePosition={activeHairstylePosition}
-                hairstyleOptions={hairstyleOptions}
-                loadingMessage={listMessage}
-                disabled={!canSelectHairstyle}
-                onDisabledSelect={handleDisabledHairstyleSelect}
-                onSelect={handleHairstylePositionSelect}
-              />
-              {groomsError && (
-                <button
-                  className={font.caption.medium}
-                  onClick={() => void refetchGrooms()}
-                  style={{ color: lightTheme.label.buttonText }}
-                  type="button"
-                >
-                  스타일 목록 다시 불러오기
-                </button>
+                  <span className="sr-only">헤어스타일을 적용하고 있어요</span>
+                  <svg
+                    aria-hidden="true"
+                    className="w-[min(18rem,64vw)] animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
+                    fill="currentColor"
+                    viewBox="0 0 360 360"
+                  >
+                    <circle cx="34.5" cy="96" opacity="0.28" r="3" />
+                    <circle cx="61.2" cy="61.2" opacity="0.36" r="4" />
+                    <circle cx="96" cy="34.5" opacity="0.46" r="5.5" />
+                    <circle cx="136.5" cy="17" opacity="0.58" r="7" />
+                    <circle cx="180" cy="12" opacity="0.7" r="8.5" />
+                    <circle cx="223.5" cy="17" opacity="0.8" r="10" />
+                    <circle cx="264" cy="34.5" opacity="0.88" r="11.5" />
+                    <circle cx="298.8" cy="61.2" opacity="0.95" r="13" />
+                    <circle cx="325.5" cy="96" r="14" />
+                  </svg>
+                </div>
               )}
-            </div>
+              <ArRecognitionBadge
+                connectionStatus={connectionStatus}
+                isFaceTracked={isFaceTracked}
+              />
+              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
+                <ArStatusNotice
+                  connectionErrorMessage={reconnectMessage}
+                  connectionStatus={connectionStatus}
+                  foreheadState={foreheadState}
+                  groomState={groomState}
+                  onForeheadRefresh={handleForeheadRefresh}
+                  onGroomRetry={handleGroomRetry}
+                  onReconnect={handleReconnect}
+                  showForeheadStatus={false}
+                />
+                <ArControlBar
+                  handleCameraSwitch={handleCameraSwitch}
+                  handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
+                  isHairstyleBrowserOpen={isHairstyleBrowserOpen}
+                  canSelectColor={controlReady}
+                  selectedColor={fitSettings.groom_color}
+                  onColorSelect={handleColorSelect}
+                  selectedHairstyleLabel={selectedHairstyle.label}
+                />
+                <ArHairstyleCarousel
+                  activeHairstylePosition={activeHairstylePosition}
+                  hairstyleOptions={hairstyleOptions}
+                  loadingMessage={listMessage}
+                  disabled={!canSelectHairstyle}
+                  onDisabledSelect={handleDisabledHairstyleSelect}
+                  onSelect={handleHairstylePositionSelect}
+                />
+                {groomsError && (
+                  <button
+                    className={font.caption.medium}
+                    onClick={() => void refetchGrooms()}
+                    style={{ color: lightTheme.label.buttonText }}
+                    type="button"
+                  >
+                    스타일 목록 다시 불러오기
+                  </button>
+                )}
+              </div>
+            </ArCameraViewport>
           </div>
           {isConnectionPending && (
             <ArConnectionLoader

@@ -4,13 +4,13 @@ import { lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
 
-import noStyleIcon from "../../assets/no-style.svg";
+import noStyleIcon from "../assets/no-style.svg";
 import {
   getCircularHairstyleOption,
   getHairstyleItemLeft,
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
-} from "../../model/constants";
+} from "../model/constants";
 import type { ArHairstyleOption } from "@/entities/ar-groom";
 
 interface ArHairstyleCarouselProps {
@@ -19,8 +19,9 @@ interface ArHairstyleCarouselProps {
   loadingMessage: string | null;
   disabled: boolean;
   onSelect: (position: number) => void;
+  compact?: boolean;
   /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
-  onDisabledSelect: () => void;
+  onDisabledSelect?: () => void;
 }
 
 // 가운데(가장 큰) 칸 크기. 모든 칸을 이 크기로 두고 scale로 줄여 레이아웃 없이 애니메이션한다.
@@ -55,6 +56,7 @@ const ArHairstyleCarousel = ({
   loadingMessage,
   disabled,
   onSelect,
+  compact = false,
   onDisabledSelect,
 }: ArHairstyleCarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -119,7 +121,7 @@ const ArHairstyleCarousel = ({
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || !event.isPrimary) return;
     if (disabled) {
-      onDisabledSelect();
+      onDisabledSelect?.();
       return;
     }
     stopAnimation();
@@ -173,7 +175,7 @@ const ArHairstyleCarousel = ({
       return;
     }
     if (disabled) {
-      onDisabledSelect();
+      onDisabledSelect?.();
       return;
     }
     animateTo(nextPosition);
@@ -198,7 +200,7 @@ const ArHairstyleCarousel = ({
       if (delta === 0) return;
       event.preventDefault();
       if (disabled) {
-        callbacksRef.current.onDisabledSelect();
+        callbacksRef.current.onDisabledSelect?.();
         return;
       }
       stopAnimation();
@@ -218,6 +220,42 @@ const ArHairstyleCarousel = ({
       stopAnimation();
     };
   }, [disabled, loadingMessage, hairstyleOptions.length, animateTo, paintPosition, stopAnimation]);
+
+  if (compact) {
+    return (
+      <div
+        aria-label="헤어스타일 선택"
+        className="flex w-full items-center justify-center gap-2 overflow-x-auto px-3"
+      >
+        {hairstyleOptions.map((option, index) => (
+          <button
+            key={option.name}
+            type="button"
+            aria-label={option.name === "" ? "헤어스타일 적용 안 함" : `${option.label} 선택`}
+            aria-pressed={
+              getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions).name ===
+              option.name
+            }
+            disabled={disabled}
+            onClick={() => handleSelect(index)}
+            className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/80 bg-white/20 p-1 disabled:opacity-45"
+          >
+            {option.name === "" ? (
+              <img src={noStyleIcon} alt="" className="size-full p-1" />
+            ) : option.thumbUrl ? (
+              <img
+                src={option.thumbUrl}
+                alt={option.label}
+                className="size-full rounded-full object-contain"
+              />
+            ) : (
+              option.label
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (loadingMessage || hairstyleOptions.length === 0) {
     return (
