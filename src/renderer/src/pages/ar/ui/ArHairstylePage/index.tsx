@@ -4,12 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
-import { useDeleteSavedStyle, useGetSavedStyles, usePostSavedStyle } from "@/entities/saved-style";
 import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
-import { cn, showErrorToast, showInfoToast, showSuccessToast } from "@/shared";
-import ArColorPicker from "../ArColorPicker";
+import { cn, showInfoToast } from "@/shared";
 import ArControlBar from "../ArControlBar";
 import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
@@ -32,13 +30,6 @@ const ArHairstylePage = () => {
   const handlePageEnterRef = useRef<() => void>(() => undefined);
   const handlePageLeaveRef = useRef<() => void>(() => undefined);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
-  const saveStyleMutation = usePostSavedStyle();
-  const deleteSavedStyleMutation = useDeleteSavedStyle();
-  const {
-    data: savedStylesData,
-    isFetching: isSavedStylesFetching,
-    isPending: isSavedStylesPending,
-  } = useGetSavedStyles();
   const {
     data: serverHairstyleOptions = [],
     error: groomsError,
@@ -59,10 +50,6 @@ const ArHairstylePage = () => {
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom = selectedHairstyle.name;
-  const savedStyleId = selectedHairstyle.hairstyleId
-    ? (savedStylesData?.items.find(style => style.hairstyle_id === selectedHairstyle.hairstyleId)
-        ?.saved_style_id ?? null)
-    : null;
   const {
     connectionStatus,
     connectionFeedback,
@@ -106,32 +93,6 @@ const ArHairstylePage = () => {
   };
 
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
-
-  const handleCandidateSave = async () => {
-    const hairstyleId = selectedHairstyle.hairstyleId;
-
-    if (!selectedHairstyle.name) {
-      showInfoToast("원본 스타일은 저장할 수 없어요. 헤어스타일을 선택해 주세요.");
-      return;
-    }
-
-    if (!hairstyleId) {
-      showInfoToast("이 스타일은 아직 저장할 수 없어요. 스타일 목록 정보 연결이 필요해요.");
-      return;
-    }
-
-    try {
-      if (savedStyleId) {
-        await deleteSavedStyleMutation.mutateAsync(savedStyleId);
-        showSuccessToast("후보 스타일 저장을 취소했어요.");
-      } else {
-        await saveStyleMutation.mutateAsync({ hairstyle_id: hairstyleId });
-        showSuccessToast("후보 스타일을 저장했어요.");
-      }
-    } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : "후보 스타일을 변경하지 못했습니다.");
-    }
-  };
 
   const handleHairstyleBrowserOpen = () => setIsHairstyleBrowserOpen(true);
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
@@ -228,11 +189,6 @@ const ArHairstylePage = () => {
               </div>
             )}
             <ArRecognitionBadge connectionStatus={connectionStatus} isFaceTracked={isFaceTracked} />
-            <ArColorPicker
-              disabled={!canAdjust}
-              selectedColor={fitSettings.groom_color}
-              onSelect={handleColorSelect}
-            />
             <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
               <ArStatusNotice
                 connectionErrorMessage={reconnectMessage}
@@ -245,17 +201,12 @@ const ArHairstylePage = () => {
                 showForeheadStatus={false}
               />
               <ArControlBar
-                handleCandidateSave={() => void handleCandidateSave()}
                 handleCameraSwitch={handleCameraSwitch}
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
-                isCandidateSaved={Boolean(savedStyleId)}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
-                isSavePending={
-                  saveStyleMutation.isPending ||
-                  deleteSavedStyleMutation.isPending ||
-                  isSavedStylesPending ||
-                  isSavedStylesFetching
-                }
+                canSelectColor={canAdjust}
+                selectedColor={fitSettings.groom_color}
+                onColorSelect={handleColorSelect}
                 selectedHairstyleLabel={selectedHairstyle.label}
               />
               <ArHairstyleCarousel
