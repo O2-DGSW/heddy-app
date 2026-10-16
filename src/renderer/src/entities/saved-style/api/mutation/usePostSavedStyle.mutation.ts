@@ -26,7 +26,7 @@ export const usePostSavedStyle = () => {
                 ...current.items.filter(item => item.saved_style_id !== savedStyle.saved_style_id),
               ],
             }
-          : current
+          : { items: [savedStyleWithHairstyleId] }
       );
       await queryClient.invalidateQueries({ queryKey: savedStyleQueryKeys.all });
     },

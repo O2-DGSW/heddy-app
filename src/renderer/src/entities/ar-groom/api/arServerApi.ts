@@ -43,6 +43,10 @@ export const getArGrooms = async (signal?: AbortSignal): Promise<ArHairstyleOpti
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every(item => typeof item === "string");
 
+const isUuid = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
 const isArGroomAssetPath = (value: unknown): value is string =>
   typeof value === "string" &&
   /^\/?grooms\/[A-Za-z0-9._-]+\.png$/.test(value) &&
@@ -72,6 +76,7 @@ export const parseArGrooms = (
 
     return {
       name: groom.name,
+      hairstyleId: isUuid(groom.hairstyle_id) ? groom.hairstyle_id : undefined,
       label: typeof groom.label === "string" && groom.label.trim() ? groom.label : groom.name,
       gender: typeof groom.gender === "string" ? groom.gender : undefined,
       type: typeof groom.type === "string" ? groom.type : undefined,

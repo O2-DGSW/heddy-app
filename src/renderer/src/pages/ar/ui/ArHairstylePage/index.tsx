@@ -35,7 +35,6 @@ const ArHairstylePage = () => {
   const deleteSavedStyleMutation = useDeleteSavedStyle();
   const {
     data: savedStylesData,
-    error: savedStylesError,
     isFetching: isSavedStylesFetching,
     isPending: isSavedStylesPending,
   } = useGetSavedStyles();
@@ -58,9 +57,10 @@ const ArHairstylePage = () => {
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom = selectedHairstyle.name;
-  const savedStyleId =
-    savedStylesData?.items.find(style => style.hairstyle_id === selectedHairstyle.name)
-      ?.saved_style_id ?? null;
+  const savedStyleId = selectedHairstyle.hairstyleId
+    ? (savedStylesData?.items.find(style => style.hairstyle_id === selectedHairstyle.hairstyleId)
+        ?.saved_style_id ?? null)
+    : null;
   const {
     connectionStatus,
     errorMessage,
@@ -105,15 +105,15 @@ const ArHairstylePage = () => {
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
 
   const handleCandidateSave = async () => {
-    const hairstyleId = selectedHairstyle.name;
+    const hairstyleId = selectedHairstyle.hairstyleId;
 
-    if (!hairstyleId) {
+    if (!selectedHairstyle.name) {
       showInfoToast("원본 스타일은 저장할 수 없어요. 헤어스타일을 선택해 주세요.");
       return;
     }
 
-    if (savedStylesError && !savedStylesData) {
-      showErrorToast(savedStylesError.message);
+    if (!hairstyleId) {
+      showInfoToast("이 스타일은 아직 저장할 수 없어요. 스타일 목록 정보 연결이 필요해요.");
       return;
     }
 
