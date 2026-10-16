@@ -63,7 +63,7 @@ const ArHairstylePage = () => {
     : null;
   const {
     connectionStatus,
-    errorMessage,
+    reconnectMessage,
     controlReady,
     groomState,
     foreheadState,
@@ -95,11 +95,7 @@ const ArHairstylePage = () => {
   };
 
   const handleDisabledHairstyleSelect = () => {
-    if (connectionStatus === "error") {
-      showInfoToast("AR 연결이 끊어졌습니다. 다시 연결한 뒤 스타일을 골라 주세요.");
-    } else {
-      showInfoToast("AR에 연결하는 중입니다. 연결되면 스타일을 고를 수 있습니다.");
-    }
+    showInfoToast("AR에 연결하는 중이에요. 연결되면 스타일을 고를 수 있어요.");
   };
 
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
@@ -233,7 +229,7 @@ const ArHairstylePage = () => {
             />
             <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
               <ArStatusNotice
-                connectionErrorMessage={errorMessage}
+                connectionErrorMessage={reconnectMessage}
                 connectionStatus={connectionStatus}
                 foreheadState={foreheadState}
                 groomState={groomState}
@@ -297,7 +293,7 @@ const ArHairstylePage = () => {
                     className={cn(font.caption.medium, "whitespace-nowrap")}
                     style={{ color: lightTheme.label.assistive }}
                   >
-                    AR 화면을 준비하고 있어요
+                    {reconnectMessage ?? "AR 화면을 준비하고 있어요"}
                   </p>
                 </div>
               </div>

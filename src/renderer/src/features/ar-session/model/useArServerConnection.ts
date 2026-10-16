@@ -5,12 +5,7 @@ import { getArServerBaseUrl, requestArServerOffer } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArGroomState } from "@/entities/ar-groom";
 
 import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
-import {
-  configureVideoSender,
-  getArConnectionErrorMessage,
-  openCamera,
-  waitForIceGatheringComplete,
-} from "./peerConnection";
+import { configureVideoSender, openCamera, waitForIceGatheringComplete } from "./peerConnection";
 import type { ArCameraFacingModeType } from "./peerConnection";
 import { useGroomFitControl } from "./useGroomFitControl";
 
@@ -18,7 +13,7 @@ export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idl
 
 interface UseArServerConnectionResult {
   connectionStatus: ArConnectionStatusType;
-  errorMessage: string | null;
+  reconnectMessage: string | null;
   controlReady: boolean;
   groomState: ArGroomState;
   foreheadState: ArGroomState;
@@ -48,12 +43,17 @@ export const useArServerConnection = (
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
   const cameraFacingModeRef = useRef<ArCameraFacingModeType>("user");
   const requireExactFacingModeRef = useRef(false);
+  const isPageActiveRef = useRef(true);
+  const hasConnectedRef = useRef(false);
+  const failedAttemptRef = useRef(false);
+  const retryCountRef = useRef(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 언마운트 때는 effect cleanup보다 ref 해제가 먼저라 video ref가 이미 null이다.
   // 스트림을 붙인 요소를 따로 기억해 두고 정리할 때 이 목록으로 해제한다.
   const attachedVideosRef = useRef(new Set<HTMLVideoElement>());
   const [hasServerYaw, setHasServerYaw] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [reconnectMessage, setReconnectMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
@@ -67,6 +67,25 @@ export const useArServerConnection = (
     handleControlEvent,
     reset: resetGroomFit,
   } = useGroomFitControl(statsChannelRef, groom, settings);
+
+  const clearReconnectTimer = useCallback(() => {
+    if (reconnectTimerRef.current !== null) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleReconnect = useCallback(() => {
+    if (!isPageActiveRef.current || reconnectTimerRef.current !== null) return;
+
+    // 계속 재시도하되 서버가 불안정할 때 요청 간격은 최대 8초로 제한한다.
+    const delay = Math.min(1000 * 2 ** retryCountRef.current, 8000);
+    retryCountRef.current += 1;
+    reconnectTimerRef.current = setTimeout(() => {
+      reconnectTimerRef.current = null;
+      if (isPageActiveRef.current) setConnectionAttempt(attempt => attempt + 1);
+    }, delay);
+  }, []);
 
   const stopConnection = useCallback(() => {
     const peer = peerConnectionRef.current;
@@ -90,19 +109,24 @@ export const useArServerConnection = (
     void video.play().catch(() => undefined);
   }, []);
 
-  const failConnection = useCallback(
-    (message: string) => {
-      stopConnection();
-      setConnectionStatus("error");
-      setErrorMessage(message);
-    },
-    [stopConnection]
-  );
+  const failConnection = useCallback(() => {
+    if (!isPageActiveRef.current || failedAttemptRef.current) return;
+
+    failedAttemptRef.current = true;
+    stopConnection();
+    setConnectionStatus("connecting");
+    setReconnectMessage(
+      hasConnectedRef.current
+        ? "연결이 끊어졌어요. 다시 연결 중이에요."
+        : "연결이 원활하지 않아요. 다시 연결 중이에요."
+    );
+    scheduleReconnect();
+  }, [scheduleReconnect, stopConnection]);
 
   const startConnection = useCallback(
     async (signal: AbortSignal) => {
+      failedAttemptRef.current = false;
       setConnectionStatus("connecting");
-      setErrorMessage(null);
       try {
         const baseUrl = getArServerBaseUrl();
         if (!baseUrl) throw new Error("AR 서버 주소가 설정되지 않았습니다.");
@@ -129,12 +153,14 @@ export const useArServerConnection = (
         channel.binaryType = "arraybuffer";
         channel.addEventListener("open", () => {
           if (signal.aborted) return;
+          hasConnectedRef.current = true;
+          setReconnectMessage(null);
           setControlReady(true);
           syncGroomFit();
         });
         channel.addEventListener("close", () => {
           if (!isCurrentPeer()) return;
-          failConnection("AR 연결이 끊어졌습니다. 다시 연결해 주세요.");
+          failConnection();
         });
         channel.addEventListener("message", event => {
           void (async () => {
@@ -156,11 +182,42 @@ export const useArServerConnection = (
           if (signal.aborted || event.track.kind !== "video" || !previewVideoRef.current) return;
           attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));
         });
+        let disconnectedTimer: ReturnType<typeof setTimeout> | null = null;
+        const clearDisconnectedTimer = () => {
+          if (disconnectedTimer === null) return;
+          clearTimeout(disconnectedTimer);
+          disconnectedTimer = null;
+        };
+        const schedulePeerRecovery = () => {
+          if (disconnectedTimer !== null) return;
+          if (hasConnectedRef.current) {
+            setConnectionStatus("connecting");
+            setReconnectMessage("연결이 끊어졌어요. 다시 연결 중이에요.");
+          }
+          disconnectedTimer = setTimeout(() => {
+            disconnectedTimer = null;
+            if (isCurrentPeer() && peer.connectionState !== "connected") failConnection();
+          }, 2000);
+        };
         peer.addEventListener("connectionstatechange", () => {
+          if (peer.connectionState !== "disconnected" && peer.connectionState !== "connecting") {
+            clearDisconnectedTimer();
+          }
           if (!isCurrentPeer()) return;
-          if (peer.connectionState === "connected") setConnectionStatus("connected");
-          else if (peer.connectionState === "failed" || peer.connectionState === "closed") {
-            failConnection("AR 연결이 끊어졌습니다. 다시 연결해 주세요.");
+          if (peer.connectionState === "connected") {
+            hasConnectedRef.current = true;
+            failedAttemptRef.current = false;
+            retryCountRef.current = 0;
+            setReconnectMessage(null);
+            setConnectionStatus("connected");
+          } else if (
+            peer.connectionState === "disconnected" ||
+            (hasConnectedRef.current && peer.connectionState === "connecting")
+          ) {
+            // 일시적인 네트워크 전환은 WebRTC가 복구할 수 있어 짧게 기다린 뒤 재연결한다.
+            schedulePeerRecovery();
+          } else if (peer.connectionState === "failed" || peer.connectionState === "closed") {
+            failConnection();
           }
         });
 
@@ -174,9 +231,9 @@ export const useArServerConnection = (
         const answer = await requestArServerOffer(baseUrl, localDescription, signal);
         signal.throwIfAborted();
         await peer.setRemoteDescription(answer);
-      } catch (error: unknown) {
+      } catch {
         if (signal.aborted) return;
-        failConnection(getArConnectionErrorMessage(error));
+        failConnection();
       }
     },
     [
@@ -197,15 +254,19 @@ export const useArServerConnection = (
     return () => {
       clearTimeout(timer);
       controller.abort();
+      clearReconnectTimer();
       stopConnection();
     };
-  }, [connectionAttempt, isPageActive, startConnection, stopConnection]);
+  }, [clearReconnectTimer, connectionAttempt, isPageActive, startConnection, stopConnection]);
 
   const handleReconnect = useCallback(() => {
+    clearReconnectTimer();
+    retryCountRef.current = 0;
+    failedAttemptRef.current = false;
     setConnectionStatus("connecting");
-    setErrorMessage(null);
+    setReconnectMessage(null);
     setConnectionAttempt(attempt => attempt + 1);
-  }, []);
+  }, [clearReconnectTimer]);
 
   const handleCameraSwitch = useCallback(() => {
     cameraFacingModeRef.current = cameraFacingModeRef.current === "user" ? "environment" : "user";
@@ -214,20 +275,29 @@ export const useArServerConnection = (
   }, [handleReconnect]);
 
   const handlePageEnter = useCallback(() => {
+    isPageActiveRef.current = true;
+    hasConnectedRef.current = false;
+    failedAttemptRef.current = false;
+    retryCountRef.current = 0;
+    clearReconnectTimer();
     setIsPageActive(true);
     setConnectionStatus("connecting");
-    setErrorMessage(null);
-  }, []);
+    setReconnectMessage(null);
+  }, [clearReconnectTimer]);
 
   const handlePageLeave = useCallback(() => {
+    isPageActiveRef.current = false;
+    failedAttemptRef.current = true;
+    retryCountRef.current = 0;
+    clearReconnectTimer();
     setIsPageActive(false);
     setConnectionStatus("idle");
-    setErrorMessage(null);
-  }, []);
+    setReconnectMessage(null);
+  }, [clearReconnectTimer]);
 
   return {
     connectionStatus,
-    errorMessage,
+    reconnectMessage,
     controlReady,
     groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
     foreheadState,
