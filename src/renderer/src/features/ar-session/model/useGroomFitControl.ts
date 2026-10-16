@@ -22,7 +22,7 @@ const SYNC_DEBOUNCE_MS = 80;
 
 /**
  * AR 서버 제어 채널로 스타일(groom)·맞춤값·이마 재생성 요청을 보내고 응답을 상태로 만든다.
- * 서버가 요청 ID를 주지 않아 스타일 요청은 하나씩 보내고, 그동안 바뀐 선택은 응답 뒤에 이어서 보낸다.
+ * 서버 요청 ID가 없어 스타일명으로 오래된 응답을 걸러내고, 뒤늦게 반영된 이전 스타일은 최신 선택으로 다시 맞춘다.
  */
 export const useGroomFitControl = (
   channelRef: RefObject<RTCDataChannel | null>,
@@ -35,6 +35,8 @@ export const useGroomFitControl = (
   // 타임아웃 뒤에 늦게 도착한 스타일 응답을 화면 상태에 반영하려고, 타임아웃된 요청을 기억한다
   const timedOutFitRef = useRef<DesiredGroomFit | null>(null);
   const groomTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const supersededGroomTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const hasSupersededGroomRequestRef = useRef(false);
   const foreheadTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const foreheadAutoRetryCountRef = useRef(0);
   const [groomState, setGroomState] = useState<ArGroomState>({ status: "idle" });
@@ -48,7 +50,7 @@ export const useGroomFitControl = (
   const syncGroomFit = useCallback(() => {
     const channel = channelRef.current;
     const desired = desiredFitRef.current;
-    if (channel?.readyState !== "open" || pendingGroomRef.current !== null) return;
+    if (channel?.readyState !== "open") return;
     if (!isValidGroomFitSettings(desired.settings)) {
       setGroomState({
         groom: desired.groom,
@@ -64,10 +66,22 @@ export const useGroomFitControl = (
       lastSentFitRef.current = desired;
       if (command.groom === undefined) return;
 
+      if (pendingGroomRef.current !== null && pendingGroomRef.current !== desired.groom) {
+        hasSupersededGroomRequestRef.current = true;
+        clearTimeout(supersededGroomTimerRef.current);
+        supersededGroomTimerRef.current = setTimeout(() => {
+          supersededGroomTimerRef.current = undefined;
+          hasSupersededGroomRequestRef.current = false;
+        }, GROOM_TIMEOUT_MS);
+      }
+
       clearForeheadTimer();
       setForeheadState({ status: "idle" });
-      // 서버는 groom 해제에 완료 알림을 보내지 않으므로 다음 스타일 요청을 막지 않는다.
       if (command.groom === "") {
+        clearTimeout(groomTimerRef.current);
+        groomTimerRef.current = undefined;
+        pendingGroomRef.current = null;
+        timedOutFitRef.current = null;
         setGroomState({ groom: "", status: "idle" });
         return;
       }
@@ -150,6 +164,23 @@ export const useGroomFitControl = (
           }
           return;
         }
+        if (
+          pending === null &&
+          event.groom !== undefined &&
+          event.groom !== desiredFitRef.current.groom
+        ) {
+          // 스타일명이 다른 응답이 늦게 도착하면 최신 선택을 다시 보내 서버 결과를 맞춘다.
+          lastSentFitRef.current = null;
+          syncGroomFit();
+          return;
+        }
+        if (
+          pending !== null &&
+          event.status === "error" &&
+          event.groom === undefined &&
+          hasSupersededGroomRequestRef.current
+        )
+          return;
         if (pending === null || (event.groom !== undefined && event.groom !== pending)) return;
         clearTimeout(groomTimerRef.current);
         pendingGroomRef.current = null;
@@ -189,6 +220,8 @@ export const useGroomFitControl = (
         });
         return;
       }
+      // 요청 ID 없는 이전 스타일 오류가 최신 스타일 요청의 오류로 오인되지 않게 기다린다.
+      if (hasSupersededGroomRequestRef.current) return;
       clearTimeout(groomTimerRef.current);
       pendingGroomRef.current = null;
       setGroomState({
@@ -203,10 +236,13 @@ export const useGroomFitControl = (
   /** 연결이 끊기면 보낸 요청·타이머·상태를 모두 비운다 */
   const reset = useCallback(() => {
     clearTimeout(groomTimerRef.current);
+    clearTimeout(supersededGroomTimerRef.current);
     clearForeheadTimer();
     pendingGroomRef.current = null;
     timedOutFitRef.current = null;
     lastSentFitRef.current = null;
+    supersededGroomTimerRef.current = undefined;
+    hasSupersededGroomRequestRef.current = false;
     setGroomState({ status: "idle" });
     setForeheadState({ status: "idle" });
   }, []);
