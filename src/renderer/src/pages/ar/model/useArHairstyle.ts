@@ -43,6 +43,12 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     });
   };
 
+  const handleHairstylePositionSelect = (position: number) => {
+    if (Number.isSafeInteger(position) && hairstyleOptions.length > 0) {
+      setActiveHairstylePosition(position);
+    }
+  };
+
   const handleFitSettingsChange = (patch: Partial<ArGroomFitSettings>) => {
     setFitSettings(current => {
       const next = { ...current, ...patch };
@@ -54,6 +60,7 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     activeHairstylePosition,
     handleGroomColorReset,
     handleHairstyleSelect,
+    handleHairstylePositionSelect,
     fitSettings,
     handleFitSettingsChange,
   };

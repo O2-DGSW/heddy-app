@@ -53,7 +53,7 @@ const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
         {isLongConnectionWait ? (
           <svg
             aria-hidden="true"
-            className="size-12"
+            className="size-10"
             fill="none"
             style={{ color: lightTheme.primary.normal }}
             viewBox="0 0 64 64"
@@ -81,7 +81,10 @@ const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
         </p>
         <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
           <p
-            className={cn(font.caption.medium, "whitespace-nowrap")}
+            className={cn(
+              font.caption.medium,
+              "animate-pulse whitespace-nowrap [animation-duration:3s] motion-reduce:animate-none"
+            )}
             style={{ color: lightTheme.label.assistive }}
           >
             {isLongConnectionWait
@@ -122,6 +125,7 @@ const ArHairstylePage = () => {
     activeHairstylePosition,
     handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
+    handleHairstylePositionSelect: selectHairstylePosition,
     fitSettings,
     handleFitSettingsChange,
   } = useArHairstyle(hairstyleOptions);
@@ -162,6 +166,10 @@ const ArHairstylePage = () => {
 
   const handleHairstyleSelect = (name: HairstyleOptionId) => {
     if (canSelectHairstyle) selectHairstyle(name);
+  };
+
+  const handleHairstylePositionSelect = (position: number) => {
+    if (canSelectHairstyle) selectHairstylePosition(position);
   };
 
   const handleDisabledHairstyleSelect = () => {
@@ -328,7 +336,7 @@ const ArHairstylePage = () => {
                 loadingMessage={listMessage}
                 disabled={!canSelectHairstyle}
                 onDisabledSelect={handleDisabledHairstyleSelect}
-                onSelect={handleHairstyleSelect}
+                onSelect={handleHairstylePositionSelect}
               />
               {groomsError && (
                 <button

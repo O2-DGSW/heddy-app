@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import type { TouchEvent, WheelEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { PointerEvent } from "react";
 import { lightTheme } from "@heddy/design-tokens";
 
 import { cn } from "@/shared";
@@ -11,14 +11,14 @@ import {
   getHairstyleSize,
   HAIRSTYLE_VISIBLE_OFFSETS,
 } from "../../model/constants";
-import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
+import type { ArHairstyleOption } from "@/entities/ar-groom";
 
 interface ArHairstyleCarouselProps {
   activeHairstylePosition: number;
   hairstyleOptions: ArHairstyleOption[];
   loadingMessage: string | null;
   disabled: boolean;
-  onSelect: (hairstyleName: HairstyleOptionId) => void;
+  onSelect: (position: number) => void;
   /** 고를 수 없는 상태에서 누르거나 넘겼을 때. 아무 반응이 없으면 고장 난 것처럼 보여 이유를 알린다 */
   onDisabledSelect: () => void;
 }
@@ -28,7 +28,6 @@ const HAIRSTYLE_BASE_SIZE = getHairstyleSize(0);
 const HAIRSTYLE_CENTER = getHairstyleItemLeft(0) + HAIRSTYLE_BASE_SIZE / 2;
 const HAIRSTYLE_STEP_DISTANCE =
   getHairstyleItemLeft(1) + getHairstyleSize(1) / 2 - HAIRSTYLE_CENTER;
-const SCROLL_COMMIT_THRESHOLD = 0.5;
 const CLICK_SUPPRESSION_DISTANCE = 8;
 const WHEEL_SETTLE_DELAY = 120;
 
@@ -50,8 +49,6 @@ const getHairstyleVisualLayout = (offset: number) => {
   };
 };
 
-const clampScrollProgress = (progress: number) => Math.max(-1, Math.min(1, progress));
-
 const ArHairstyleCarousel = ({
   activeHairstylePosition,
   hairstyleOptions,
@@ -60,169 +57,167 @@ const ArHairstyleCarousel = ({
   onSelect,
   onDisabledSelect,
 }: ArHairstyleCarouselProps) => {
-  const touchStartXRef = useRef<number | null>(null);
-  const didSwipeRef = useRef(false);
-  const wheelSettleTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-  const scrollFrameRef = useRef<number | null>(null);
-  const scrollProgressRef = useRef(0);
-  const pendingScrollProgressRef = useRef(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const positionRef = useRef(activeHairstylePosition);
+  const animationRef = useRef<number | null>(null);
+  const wheelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointerRef = useRef<{
+    id: number;
+    startX: number;
+    lastX: number;
+    lastTime: number;
+    velocity: number;
+  } | null>(null);
+  const suppressClickRef = useRef(false);
+  const callbacksRef = useRef({ onSelect, onDisabledSelect });
+  const [position, setPosition] = useState(activeHairstylePosition);
+  const centerPosition = Math.round(position);
 
-  const updateScrollProgress = (progress: number) => {
-    const clampedProgress = clampScrollProgress(progress);
-    scrollProgressRef.current = clampedProgress;
-    pendingScrollProgressRef.current = clampedProgress;
+  const stopAnimation = useCallback(() => {
+    if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+    animationRef.current = null;
+    if (wheelTimerRef.current !== null) clearTimeout(wheelTimerRef.current);
+    wheelTimerRef.current = null;
+  }, []);
 
-    if (scrollFrameRef.current !== null) return;
-
-    scrollFrameRef.current = window.requestAnimationFrame(() => {
-      scrollFrameRef.current = null;
-      setScrollProgress(pendingScrollProgressRef.current);
-    });
-  };
-
-  const flushScrollProgress = (progress: number) => {
-    const clampedProgress = clampScrollProgress(progress);
-    scrollProgressRef.current = clampedProgress;
-    pendingScrollProgressRef.current = clampedProgress;
-
-    if (scrollFrameRef.current !== null) {
-      window.cancelAnimationFrame(scrollFrameRef.current);
-      scrollFrameRef.current = null;
-    }
-
-    setScrollProgress(clampedProgress);
-  };
-
-  const clearWheelSettleTimeout = () => {
-    if (wheelSettleTimeoutRef.current === null) return;
-
-    window.clearTimeout(wheelSettleTimeoutRef.current);
-    wheelSettleTimeoutRef.current = null;
-  };
-
-  const handleMove = (offset: -1 | 1) => {
-    if (disabled) {
-      onDisabledSelect();
-      return;
-    }
-    onSelect(getCircularHairstyleOption(activeHairstylePosition + offset, hairstyleOptions).name);
-  };
-
-  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    clearWheelSettleTimeout();
-    touchStartXRef.current = event.touches[0]?.clientX ?? null;
-    didSwipeRef.current = false;
-    setIsDragging(true);
-    flushScrollProgress(0);
-  };
-
-  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
-    const touchStartX = touchStartXRef.current;
-    const touchX = event.touches[0]?.clientX;
-
-    if (touchStartX === null || touchX === undefined) return;
-
-    const distance = touchStartX - touchX;
-
-    if (Math.abs(distance) >= CLICK_SUPPRESSION_DISTANCE) {
-      didSwipeRef.current = true;
-    }
-
-    updateScrollProgress(distance / HAIRSTYLE_STEP_DISTANCE);
-  };
-
-  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
-    const touchStartX = touchStartXRef.current;
-    const touchEndX = event.changedTouches[0]?.clientX;
-
-    touchStartXRef.current = null;
-    setIsDragging(false);
-    flushScrollProgress(0);
-
-    if (touchStartX === null || touchEndX === undefined) {
-      return;
-    }
-
-    const progress = clampScrollProgress((touchStartX - touchEndX) / HAIRSTYLE_STEP_DISTANCE);
-    didSwipeRef.current = Math.abs(touchEndX - touchStartX) >= CLICK_SUPPRESSION_DISTANCE;
-
-    if (didSwipeRef.current) {
-      window.setTimeout(() => {
-        didSwipeRef.current = false;
-      }, 0);
-    }
-
-    if (Math.abs(progress) >= SCROLL_COMMIT_THRESHOLD) {
-      handleMove(progress > 0 ? 1 : -1);
-    }
-  };
-
-  const handleTouchCancel = () => {
-    touchStartXRef.current = null;
-    didSwipeRef.current = false;
-    setIsDragging(false);
-    flushScrollProgress(0);
-  };
-
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-
-    if (Math.abs(delta) < 1) return;
-
-    event.preventDefault();
-
-    if (disabled) {
-      onDisabledSelect();
-      return;
-    }
-
-    setIsDragging(true);
-    updateScrollProgress(scrollProgressRef.current + delta / HAIRSTYLE_STEP_DISTANCE);
-    clearWheelSettleTimeout();
-    wheelSettleTimeoutRef.current = window.setTimeout(() => {
-      const progress = scrollProgressRef.current;
-
-      wheelSettleTimeoutRef.current = null;
-      setIsDragging(false);
-      flushScrollProgress(0);
-
-      if (Math.abs(progress) >= SCROLL_COMMIT_THRESHOLD) {
-        handleMove(progress > 0 ? 1 : -1);
-      }
-    }, WHEEL_SETTLE_DELAY);
-  };
-
-  const handleSelect = (hairstyleName: HairstyleOptionId) => {
-    if (didSwipeRef.current) {
-      didSwipeRef.current = false;
-      return;
-    }
-
-    clearWheelSettleTimeout();
-    setIsDragging(false);
-    flushScrollProgress(0);
-
-    if (disabled) {
-      onDisabledSelect();
-      return;
-    }
-
-    onSelect(hairstyleName);
-  };
-
-  useEffect(
-    () => () => {
-      if (wheelSettleTimeoutRef.current !== null) {
-        window.clearTimeout(wheelSettleTimeoutRef.current);
-      }
-      if (scrollFrameRef.current !== null) {
-        window.cancelAnimationFrame(scrollFrameRef.current);
-      }
+  const animateTo = useCallback(
+    (target: number, commit = true) => {
+      stopAnimation();
+      let previousTime = performance.now();
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const tick = (time: number) => {
+        const elapsed = Math.min(64, time - previousTime);
+        previousTime = time;
+        const remaining = target - positionRef.current;
+        const finished = reducedMotion || Math.abs(remaining) < 0.002;
+        const next = finished
+          ? target
+          : positionRef.current + remaining * (1 - Math.exp(-elapsed / 65));
+        positionRef.current = next;
+        setPosition(next);
+        if (finished) {
+          animationRef.current = null;
+          if (commit) callbacksRef.current.onSelect(target);
+        } else {
+          animationRef.current = requestAnimationFrame(tick);
+        }
+      };
+      animationRef.current = requestAnimationFrame(tick);
     },
-    []
+    [stopAnimation]
   );
+
+  const paintPosition = useCallback((next: number) => {
+    positionRef.current = next;
+    if (animationRef.current !== null) return;
+    animationRef.current = requestAnimationFrame(() => {
+      animationRef.current = null;
+      setPosition(positionRef.current);
+    });
+  }, []);
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    if (disabled) {
+      onDisabledSelect();
+      return;
+    }
+    stopAnimation();
+    suppressClickRef.current = false;
+    pointerRef.current = {
+      id: event.pointerId,
+      startX: event.clientX,
+      lastX: event.clientX,
+      lastTime: event.timeStamp,
+      velocity: 0,
+    };
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const pointer = pointerRef.current;
+    if (!pointer || pointer.id !== event.pointerId) return;
+    const distance = pointer.lastX - event.clientX;
+    if (Math.abs(pointer.startX - event.clientX) >= CLICK_SUPPRESSION_DISTANCE) {
+      suppressClickRef.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    if (!suppressClickRef.current) return;
+    const elapsed = Math.max(1, event.timeStamp - pointer.lastTime);
+    const movement = distance / HAIRSTYLE_STEP_DISTANCE;
+    pointer.velocity = movement / elapsed;
+    pointer.lastX = event.clientX;
+    pointer.lastTime = event.timeStamp;
+    paintPosition(positionRef.current + movement);
+  };
+
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const pointer = pointerRef.current;
+    if (!pointer || pointer.id !== event.pointerId) return;
+    pointerRef.current = null;
+    if (!suppressClickRef.current) return;
+    const velocity = event.timeStamp - pointer.lastTime < 80 ? pointer.velocity : 0;
+    // 손을 뗀 속도만큼 더 이동한 뒤 가장 가까운 스타일에 정렬한다.
+    const momentum = Math.max(-4, Math.min(4, velocity * 180));
+    animateTo(Math.round(positionRef.current + momentum));
+  };
+
+  const handlePointerCancel = () => {
+    if (!pointerRef.current) return;
+    pointerRef.current = null;
+    animateTo(Math.round(positionRef.current));
+  };
+
+  const handleSelect = (nextPosition: number) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    if (disabled) {
+      onDisabledSelect();
+      return;
+    }
+    animateTo(nextPosition);
+  };
+
+  useEffect(() => {
+    callbacksRef.current = { onSelect, onDisabledSelect };
+  }, [onSelect, onDisabledSelect]);
+
+  useEffect(() => {
+    pointerRef.current = null;
+    animateTo(activeHairstylePosition, false);
+    return stopAnimation;
+  }, [activeHairstylePosition, disabled, animateTo, stopAnimation]);
+
+  useEffect(() => {
+    const element = carouselRef.current;
+    if (!element) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (delta === 0) return;
+      event.preventDefault();
+      if (disabled) {
+        callbacksRef.current.onDisabledSelect();
+        return;
+      }
+      stopAnimation();
+      pointerRef.current = null;
+      suppressClickRef.current = false;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientWidth : 1;
+      paintPosition(positionRef.current + (delta * unit) / HAIRSTYLE_STEP_DISTANCE);
+      wheelTimerRef.current = setTimeout(() => {
+        wheelTimerRef.current = null;
+        animateTo(Math.round(positionRef.current));
+      }, WHEEL_SETTLE_DELAY);
+    };
+    // React의 passive wheel 리스너 대신 캐러셀 안에서만 기본 스크롤을 막는다.
+    element.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      element.removeEventListener("wheel", handleWheel);
+      stopAnimation();
+    };
+  }, [disabled, loadingMessage, hairstyleOptions.length, animateTo, paintPosition, stopAnimation]);
 
   if (loadingMessage || hairstyleOptions.length === 0) {
     return (
@@ -239,30 +234,27 @@ const ArHairstyleCarousel = ({
     <div
       aria-label="헤어스타일 선택"
       className="relative h-[80px] w-[404px] shrink-0 touch-pan-y select-none overflow-hidden"
-      onTouchCancel={handleTouchCancel}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
-      onTouchStart={handleTouchStart}
-      onWheel={handleWheel}
+      ref={carouselRef}
+      onPointerCancel={handlePointerCancel}
+      onPointerUp={handlePointerUp}
+      onPointerMove={handlePointerMove}
+      onPointerDown={handlePointerDown}
+      onLostPointerCapture={handlePointerCancel}
     >
       {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {
-        const position = activeHairstylePosition + offset;
-        const option = getCircularHairstyleOption(position, hairstyleOptions);
+        const itemPosition = centerPosition + offset;
+        const option = getCircularHairstyleOption(itemPosition, hairstyleOptions);
         const isSelected = offset === 0;
         const isNoStyle = option.name === "";
-        const visualOffset = offset - scrollProgress;
+        const visualOffset = itemPosition - position;
         const { center, size } = getHairstyleVisualLayout(visualOffset);
         const isFocusable = Math.abs(offset) <= 2;
         const translateX = center - HAIRSTYLE_BASE_SIZE / 2;
 
         return (
           <div
-            className={cn(
-              "absolute left-0 top-1/2 will-change-transform",
-              !isDragging &&
-                "transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-            )}
-            key={position}
+            className="absolute left-0 top-1/2 will-change-transform"
+            key={itemPosition}
             style={{
               height: HAIRSTYLE_BASE_SIZE,
               width: HAIRSTYLE_BASE_SIZE,
@@ -278,18 +270,18 @@ const ArHairstyleCarousel = ({
                 "ar-motion-press h-full w-full overflow-hidden rounded-full shadow-[0_0_9px_rgba(0,0,0,0.1)] aria-disabled:opacity-45",
                 !isNoStyle && "bg-[rgba(103,103,103,0.5)]"
               )}
-              onClick={() => handleSelect(option.name)}
+              onClick={() => handleSelect(itemPosition)}
               tabIndex={isFocusable ? 0 : -1}
               type="button"
             >
               {isNoStyle ? (
                 <span className="flex h-full w-full items-center justify-center rounded-full bg-[rgba(103,103,103,0.5)]">
-                  <img alt="" className="h-[28px] w-[28px]" src={noStyleIcon} />
+                  <img alt="" draggable={false} className="h-[28px] w-[28px]" src={noStyleIcon} />
                 </span>
               ) : option.thumbUrl ? (
                 <img
                   decoding="async"
-                  loading="lazy"
+                  draggable={false}
                   alt={`${option.label} 헤어스타일 썸네일`}
                   className="h-full w-full rounded-full p-[3px] object-contain"
                   src={option.thumbUrl}
