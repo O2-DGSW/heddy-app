@@ -15,8 +15,7 @@ import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
-
-const LONG_CONNECTION_WAIT_MS = 10_000;
+import ArConnectionLoader from "../ArConnectionLoader";
 
 const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
   const firstOption = options.find(option => option.name === "hippie-perm");
@@ -24,127 +23,6 @@ const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
   if (!firstOption) return options;
 
   return [firstOption, ...options.filter(option => option.name !== firstOption.name)];
-};
-
-interface ArConnectionLoaderProps {
-  reconnectMessage: string | null;
-}
-
-const ArLoadingDots = () => {
-  const dotsRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const dots = dotsRef.current;
-    if (!dots) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let animations: Animation[] = [];
-    const updateMotion = () => {
-      animations.forEach(animation => animation.cancel());
-      animations = [];
-      if (reducedMotion.matches) return;
-
-      animations = Array.from(dots.children, (dot, index) => {
-        const start = (index + 1) / 4;
-        return dot.animate(
-          [
-            { opacity: 0, transform: "translateY(0)", offset: 0 },
-            { opacity: 0, transform: "translateY(2px)", offset: start - 0.02 },
-            { opacity: 1, transform: "translateY(-3px)", offset: start + 0.025 },
-            { opacity: 1, transform: "translateY(0)", offset: start + 0.1 },
-            { opacity: 1, transform: "translateY(0)", offset: 0.98 },
-            { opacity: 0, transform: "translateY(0)", offset: 1 },
-          ],
-          { duration: 2400, iterations: Infinity, easing: "ease-in-out" }
-        );
-      });
-    };
-
-    updateMotion();
-    reducedMotion.addEventListener("change", updateMotion);
-    return () => {
-      animations.forEach(animation => animation.cancel());
-      reducedMotion.removeEventListener("change", updateMotion);
-    };
-  }, []);
-
-  return (
-    <span aria-hidden="true" className="inline-flex w-[1em]" ref={dotsRef}>
-      {[0, 1, 2].map(dot => (
-        <span className="inline-block w-1/3 opacity-0 motion-reduce:opacity-100" key={dot}>
-          .
-        </span>
-      ))}
-    </span>
-  );
-};
-
-const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
-  const [isLongConnectionWait, setIsLongConnectionWait] = useState(false);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(
-      () => setIsLongConnectionWait(true),
-      LONG_CONNECTION_WAIT_MS
-    );
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  return (
-    <div
-      aria-live="polite"
-      className="absolute inset-0 z-[60] flex items-center justify-center"
-      role="status"
-      style={{ backgroundColor: lightTheme.background.normal }}
-    >
-      <div className="relative flex flex-col items-center gap-4">
-        {isLongConnectionWait ? (
-          <svg
-            aria-hidden="true"
-            className="size-10"
-            fill="none"
-            style={{ color: lightTheme.primary.normal }}
-            viewBox="0 0 64 64"
-          >
-            <g className="origin-center animate-pulse motion-reduce:animate-none">
-              <path
-                d="M6 19c7.4-7.2 16-11 25-12M33 7c9 1 17.6 4.8 25 12M12.5 29c5-4.7 11-7.5 18.5-8.5M33 20.5c7.5 1 13.5 3.8 18.5 8.5M20 39c3-2.5 6.6-4 11-4.5M33 34.5c4.4.5 8 2 11 4.5"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="4"
-              />
-            </g>
-            <path d="M32 8v35" stroke="currentColor" strokeLinecap="round" strokeWidth="5.5" />
-            <circle cx="32" cy="53" fill="currentColor" r="3.5" />
-          </svg>
-        ) : (
-          <span
-            aria-hidden="true"
-            className="size-10 animate-spin rounded-full border-[3px] border-current border-t-transparent motion-reduce:animate-none"
-            style={{ color: lightTheme.primary.normal }}
-          />
-        )}
-        <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
-          AR 연결 중...
-        </p>
-        <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
-          <p
-            className={cn(font.caption.medium, "whitespace-nowrap")}
-            style={{ color: lightTheme.label.assistive }}
-          >
-            {isLongConnectionWait ? (
-              "인터넷 연결이 불안정해요. 확인해 주세요."
-            ) : (
-              <>
-                {reconnectMessage?.replace(/\.$/, "") ?? "AR을 생성하고 있어요"}
-                <ArLoadingDots />
-              </>
-            )}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const ArHairstylePage = () => {
@@ -187,6 +65,7 @@ const ArHairstylePage = () => {
     : null;
   const {
     connectionStatus,
+    connectionFeedback,
     reconnectMessage,
     controlReady,
     groomState,
@@ -204,7 +83,7 @@ const ArHairstylePage = () => {
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
   const canSelectHairstyle = controlReady;
-  const isConnectionPending = connectionStatus === "idle" || connectionStatus === "connecting";
+  const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
     selectedGroom !== "" && groomState.groom === selectedGroom && groomState.status === "loading";
   const canAdjust =
@@ -279,7 +158,6 @@ const ArHairstylePage = () => {
     <cap-page ref={pageRef}>
       <section
         aria-labelledby="ar-hairstyle-title"
-        aria-busy={isConnectionPending}
         className="ar-motion-page-enter relative flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
@@ -295,7 +173,6 @@ const ArHairstylePage = () => {
 
         <main
           aria-label="AR 미리보기"
-          aria-busy={isConnectionPending || isStyleLoading}
           className="relative min-h-0 flex-1 overflow-hidden"
           style={{
             backgroundColor: isConnectionPending
@@ -305,7 +182,8 @@ const ArHairstylePage = () => {
         >
           <div
             aria-hidden={isConnectionPending}
-            className="absolute inset-0"
+            aria-busy={isStyleLoading}
+            className={cn("absolute inset-0", isConnectionPending && "invisible")}
             inert={isConnectionPending}
           >
             <video
@@ -401,7 +279,11 @@ const ArHairstylePage = () => {
             </div>
           </div>
           {isConnectionPending && (
-            <ArConnectionLoader key={connectionStatus} reconnectMessage={reconnectMessage} />
+            <ArConnectionLoader
+              key={connectionFeedback}
+              feedback={connectionFeedback}
+              onRetry={handleReconnect}
+            />
           )}
         </main>
 

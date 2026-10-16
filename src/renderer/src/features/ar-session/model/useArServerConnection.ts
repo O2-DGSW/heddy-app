@@ -9,10 +9,24 @@ import { configureVideoSender, openCamera, waitForIceGatheringComplete } from ".
 import type { ArCameraFacingModeType } from "./peerConnection";
 import { useGroomFitControl } from "./useGroomFitControl";
 
+export type ArConnectionFeedbackType =
+  | "camera"
+  | "connecting"
+  | "retrying"
+  | "reconnecting"
+  | "offline"
+  | "permission"
+  | "camera-missing"
+  | "camera-busy"
+  | "camera-error"
+  | "unsupported"
+  | "unavailable";
+
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
 
 interface UseArServerConnectionResult {
   connectionStatus: ArConnectionStatusType;
+  connectionFeedback: ArConnectionFeedbackType;
   reconnectMessage: string | null;
   controlReady: boolean;
   groomState: ArGroomState;
@@ -38,6 +52,9 @@ export const useArServerConnection = (
   groom: string,
   settings: ArGroomFitSettings
 ): UseArServerConnectionResult => {
+  const attemptControllerRef = useRef<AbortController | null>(null);
+  const connectionDeadlineRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [connectionFeedback, setConnectionFeedback] = useState<ArConnectionFeedbackType>("camera");
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const statsChannelRef = useRef<RTCDataChannel | null>(null);
@@ -76,7 +93,7 @@ export const useArServerConnection = (
   }, []);
 
   const scheduleReconnect = useCallback(() => {
-    if (!isPageActiveRef.current || reconnectTimerRef.current !== null) return;
+    if (!isPageActiveRef.current || !navigator.onLine || reconnectTimerRef.current !== null) return;
 
     // 계속 재시도하되 서버가 불안정할 때 요청 간격은 최대 8초로 제한한다.
     const delay = Math.min(1000 * 2 ** retryCountRef.current, 8000);
@@ -88,6 +105,11 @@ export const useArServerConnection = (
   }, []);
 
   const stopConnection = useCallback(() => {
+    attemptControllerRef.current?.abort();
+    if (connectionDeadlineRef.current !== null) {
+      clearTimeout(connectionDeadlineRef.current);
+      connectionDeadlineRef.current = null;
+    }
     const peer = peerConnectionRef.current;
     peerConnectionRef.current = null;
     statsChannelRef.current = null;
@@ -115,6 +137,9 @@ export const useArServerConnection = (
     failedAttemptRef.current = true;
     stopConnection();
     setConnectionStatus("connecting");
+    setConnectionFeedback(
+      navigator.onLine ? (hasConnectedRef.current ? "reconnecting" : "retrying") : "offline"
+    );
     setReconnectMessage(
       hasConnectedRef.current
         ? "연결이 끊어졌어요. 다시 연결 중이에요."
@@ -125,11 +150,23 @@ export const useArServerConnection = (
 
   const startConnection = useCallback(
     async (signal: AbortSignal) => {
+      if (signal.aborted || !isPageActiveRef.current) return;
       failedAttemptRef.current = false;
       setConnectionStatus("connecting");
+      if (!navigator.onLine) {
+        setConnectionFeedback("offline");
+        return;
+      }
+      let stage: "configuration" | "camera" | "server" = "configuration";
       try {
         const baseUrl = getArServerBaseUrl();
         if (!baseUrl) throw new Error("AR 서버 주소가 설정되지 않았습니다.");
+        stage = "camera";
+        if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined") {
+          throw new DOMException("Camera unavailable", "NotSupportedError");
+        }
+        if (retryCountRef.current === 0 && !hasConnectedRef.current)
+          setConnectionFeedback("camera");
         const localStream = await openCamera(
           cameraFacingModeRef.current,
           requireExactFacingModeRef.current
@@ -139,6 +176,16 @@ export const useArServerConnection = (
           localStream.getTracks().forEach(track => track.stop());
           return;
         }
+        stage = "server";
+        setConnectionFeedback(
+          hasConnectedRef.current
+            ? "reconnecting"
+            : retryCountRef.current > 0
+              ? "retrying"
+              : "connecting"
+        );
+        // 권한 응답을 기다리는 시간은 제한하지 않고, 실제 연결 시도만 만료시킨다.
+        connectionDeadlineRef.current = setTimeout(failConnection, 30_000);
         localStreamRef.current = localStream;
         for (const video of [previewVideoRef.current, faceTrackingVideoRef.current]) {
           if (video) attachStream(video, localStream);
@@ -152,7 +199,7 @@ export const useArServerConnection = (
         statsChannelRef.current = channel;
         channel.binaryType = "arraybuffer";
         channel.addEventListener("open", () => {
-          if (signal.aborted) return;
+          if (!isCurrentPeer()) return;
           hasConnectedRef.current = true;
           setReconnectMessage(null);
           setControlReady(true);
@@ -177,9 +224,18 @@ export const useArServerConnection = (
           })();
         });
 
-        localStream.getVideoTracks().forEach(track => configureVideoSender(peer, track));
+        localStream.getVideoTracks().forEach(track => {
+          configureVideoSender(peer, track);
+          track.addEventListener(
+            "ended",
+            () => {
+              if (isCurrentPeer()) failConnection();
+            },
+            { once: true }
+          );
+        });
         peer.addEventListener("track", event => {
-          if (signal.aborted || event.track.kind !== "video" || !previewVideoRef.current) return;
+          if (!isCurrentPeer() || event.track.kind !== "video" || !previewVideoRef.current) return;
           attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));
         });
         let disconnectedTimer: ReturnType<typeof setTimeout> | null = null;
@@ -188,10 +244,12 @@ export const useArServerConnection = (
           clearTimeout(disconnectedTimer);
           disconnectedTimer = null;
         };
+        signal.addEventListener("abort", clearDisconnectedTimer, { once: true });
         const schedulePeerRecovery = () => {
           if (disconnectedTimer !== null) return;
           if (hasConnectedRef.current) {
             setConnectionStatus("connecting");
+            setConnectionFeedback("reconnecting");
             setReconnectMessage("연결이 끊어졌어요. 다시 연결 중이에요.");
           }
           disconnectedTimer = setTimeout(() => {
@@ -205,6 +263,10 @@ export const useArServerConnection = (
           }
           if (!isCurrentPeer()) return;
           if (peer.connectionState === "connected") {
+            if (connectionDeadlineRef.current !== null) {
+              clearTimeout(connectionDeadlineRef.current);
+              connectionDeadlineRef.current = null;
+            }
             hasConnectedRef.current = true;
             failedAttemptRef.current = false;
             retryCountRef.current = 0;
@@ -231,9 +293,29 @@ export const useArServerConnection = (
         const answer = await requestArServerOffer(baseUrl, localDescription, signal);
         signal.throwIfAborted();
         await peer.setRemoteDescription(answer);
-      } catch {
+      } catch (error: unknown) {
         if (signal.aborted) return;
-        failConnection();
+        if (stage === "server") {
+          failConnection();
+          return;
+        }
+        // 기기·권한 오류는 재요청만 반복해도 해결되지 않아 사용자 조치 후 재시도한다.
+        stopConnection();
+        setConnectionStatus("error");
+        if (stage === "configuration") setConnectionFeedback("unavailable");
+        else {
+          const name = error instanceof DOMException ? error.name : "";
+          if (name === "NotAllowedError") setConnectionFeedback("permission");
+          else if (name === "NotFoundError" || name === "OverconstrainedError") {
+            setConnectionFeedback("camera-missing");
+            cameraFacingModeRef.current = "user";
+            requireExactFacingModeRef.current = false;
+          } else if (name === "NotReadableError" || name === "AbortError")
+            setConnectionFeedback("camera-busy");
+          else if (name === "SecurityError" || name === "NotSupportedError")
+            setConnectionFeedback("unsupported");
+          else setConnectionFeedback("camera-error");
+        }
       }
     },
     [
@@ -243,6 +325,7 @@ export const useArServerConnection = (
       handleControlEvent,
       previewVideoRef,
       syncGroomFit,
+      stopConnection,
     ]
   );
 
@@ -250,6 +333,7 @@ export const useArServerConnection = (
     if (!isPageActive) return;
 
     const controller = new AbortController();
+    attemptControllerRef.current = controller;
     const timer = setTimeout(() => void startConnection(controller.signal), 0);
     return () => {
       clearTimeout(timer);
@@ -265,8 +349,28 @@ export const useArServerConnection = (
     failedAttemptRef.current = false;
     setConnectionStatus("connecting");
     setReconnectMessage(null);
+    setConnectionFeedback(navigator.onLine ? "connecting" : "offline");
     setConnectionAttempt(attempt => attempt + 1);
   }, [clearReconnectTimer]);
+
+  useEffect(() => {
+    const handleOffline = () => {
+      if (!isPageActiveRef.current) return;
+      clearReconnectTimer();
+      stopConnection();
+      setConnectionStatus("connecting");
+      setConnectionFeedback("offline");
+    };
+    const handleOnline = () => {
+      if (isPageActiveRef.current) handleReconnect();
+    };
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [clearReconnectTimer, handleReconnect, stopConnection]);
 
   const handleCameraSwitch = useCallback(() => {
     cameraFacingModeRef.current = cameraFacingModeRef.current === "user" ? "environment" : "user";
@@ -281,6 +385,7 @@ export const useArServerConnection = (
     retryCountRef.current = 0;
     clearReconnectTimer();
     setIsPageActive(true);
+    setConnectionFeedback(navigator.onLine ? "camera" : "offline");
     setConnectionStatus("connecting");
     setReconnectMessage(null);
   }, [clearReconnectTimer]);
@@ -297,6 +402,7 @@ export const useArServerConnection = (
 
   return {
     connectionStatus,
+    connectionFeedback,
     reconnectMessage,
     controlReady,
     groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
