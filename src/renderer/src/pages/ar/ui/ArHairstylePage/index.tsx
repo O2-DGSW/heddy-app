@@ -173,7 +173,11 @@ const ArHairstylePage = () => {
           aria-label="AR 미리보기"
           aria-busy={isConnectionPending || isStyleLoading}
           className="relative min-h-0 flex-1 overflow-hidden"
-          style={{ backgroundColor: lightTheme.label.normal }}
+          style={{
+            backgroundColor: isConnectionPending
+              ? lightTheme.background.normal
+              : lightTheme.label.normal,
+          }}
         >
           <div
             aria-hidden={isConnectionPending}
