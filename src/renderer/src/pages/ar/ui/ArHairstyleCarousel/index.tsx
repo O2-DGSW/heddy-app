@@ -248,12 +248,15 @@ const ArHairstyleCarousel = ({
         const isNoStyle = option.name === "";
         const visualOffset = itemPosition - position;
         const { center, size } = getHairstyleVisualLayout(visualOffset);
-        const isFocusable = Math.abs(offset) <= 2;
+        const isVisible = size > 0;
+        const isFocusable = isVisible && Math.abs(offset) <= 2;
         const translateX = center - HAIRSTYLE_BASE_SIZE / 2;
 
         return (
           <div
+            aria-hidden={!isVisible}
             className="absolute left-0 top-1/2 will-change-transform"
+            inert={!isVisible}
             key={itemPosition}
             style={{
               height: HAIRSTYLE_BASE_SIZE,
