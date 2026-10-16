@@ -83,8 +83,8 @@ export const openCamera = async (
     video: {
       facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
       frameRate: { ideal: 30, max: 30 },
-      width: { ideal: 640, max: 640 },
-      height: { ideal: 480, max: 480 },
+      width: { ideal: 1280, max: 1280 },
+      height: { ideal: 720, max: 720 },
     },
   });
 };
