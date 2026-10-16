@@ -5,9 +5,11 @@ import { setDirection } from "@capgo/capacitor-transitions/react";
 
 import {
   TreatmentRecordPhotoUploadError,
+  usePostAnalysis,
   usePostTreatmentRecordPhotos,
   usePostTreatmentRecord,
 } from "@/entities/record";
+import { pickAnalysisPhoto } from "@/features/cuts";
 import {
   RecordAddForm,
   mapFormValuesToCreateRequest,
@@ -28,6 +30,7 @@ const RecordAddPage = () => {
   const [isDirty, setIsDirty] = useState(false);
   const createRecord = usePostTreatmentRecord();
   const addRecordPhotos = usePostTreatmentRecordPhotos();
+  const postAnalysis = usePostAnalysis();
   const [createdRecordId, setCreatedRecordId] = useState<string | null>(null);
   // 일부 사진만 올라간 뒤 다시 저장하면 이미 올라간 사진은 건너뛴다
   const [uploadedPhotoIds, setUploadedPhotoIds] = useState<string[]>([]);
@@ -70,10 +73,17 @@ const RecordAddPage = () => {
       setCreatedRecordId(recordId);
 
       if (uploadTargets.length > 0) {
-        await addRecordPhotos.mutateAsync({
+        const uploadedPhotos = await addRecordPhotos.mutateAsync({
           recordId,
           photos: uploadTargets.map(({ request }) => request),
         });
+        const analysisPhoto = pickAnalysisPhoto(uploadedPhotos);
+
+        // 사용자가 상세의 분석완료 탭을 열기 전에 분석을 미리 시작해 기다리는 시간을 줄인다.
+        // 실패해도 저장은 끝났으므로 막지 않는다. 분석완료 탭이 결과가 없으면 다시 요청한다.
+        if (analysisPhoto) {
+          postAnalysis.mutate({ recordId, photoId: analysisPhoto.photo_id });
+        }
       }
 
       handleClose();
