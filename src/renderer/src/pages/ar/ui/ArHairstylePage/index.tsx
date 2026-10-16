@@ -16,12 +16,82 @@ import ArHairstyleCarousel from "../ArHairstyleCarousel";
 import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 
+const LONG_CONNECTION_WAIT_MS = 10_000;
+
 const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
   const firstOption = options.find(option => option.name === "hippie-perm");
 
   if (!firstOption) return options;
 
   return [firstOption, ...options.filter(option => option.name !== firstOption.name)];
+};
+
+interface ArConnectionLoaderProps {
+  reconnectMessage: string | null;
+}
+
+const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
+  const [isLongConnectionWait, setIsLongConnectionWait] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(
+      () => setIsLongConnectionWait(true),
+      LONG_CONNECTION_WAIT_MS
+    );
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  return (
+    <div
+      aria-live="polite"
+      className="absolute inset-0 z-[60] flex items-center justify-center"
+      role="status"
+      style={{ backgroundColor: lightTheme.background.normal }}
+    >
+      <div className="relative flex flex-col items-center gap-4">
+        {isLongConnectionWait ? (
+          <svg
+            aria-hidden="true"
+            className="size-12"
+            fill="none"
+            style={{ color: lightTheme.primary.normal }}
+            viewBox="0 0 64 64"
+          >
+            <g className="origin-center animate-pulse motion-reduce:animate-none">
+              <path
+                d="M6 19c7.4-7.2 16-11 25-12M33 7c9 1 17.6 4.8 25 12M12.5 29c5-4.7 11-7.5 18.5-8.5M33 20.5c7.5 1 13.5 3.8 18.5 8.5M20 39c3-2.5 6.6-4 11-4.5M33 34.5c4.4.5 8 2 11 4.5"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="4"
+              />
+            </g>
+            <path d="M32 8v35" stroke="currentColor" strokeLinecap="round" strokeWidth="5.5" />
+            <circle cx="32" cy="53" fill="currentColor" r="3.5" />
+          </svg>
+        ) : (
+          <span
+            aria-hidden="true"
+            className="size-10 animate-spin rounded-full border-[3px] border-current border-t-transparent motion-reduce:animate-none"
+            style={{ color: lightTheme.primary.normal }}
+          />
+        )}
+        <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
+          AR 연결 중...
+        </p>
+        <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
+          <p
+            className={cn(font.caption.medium, "whitespace-nowrap")}
+            style={{ color: lightTheme.label.assistive }}
+          >
+            {isLongConnectionWait
+              ? "인터넷 연결이 불안정해요. 확인해 주세요."
+              : (reconnectMessage ?? "AR 화면을 준비하고 있어요")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const ArHairstylePage = () => {
@@ -273,31 +343,7 @@ const ArHairstylePage = () => {
             </div>
           </div>
           {isConnectionPending && (
-            <div
-              aria-live="polite"
-              className="absolute inset-0 z-[60] flex items-center justify-center"
-              role="status"
-              style={{ backgroundColor: lightTheme.background.normal }}
-            >
-              <div className="relative flex flex-col items-center gap-4">
-                <span
-                  aria-hidden="true"
-                  className="size-10 animate-spin rounded-full border-[3px] border-current border-t-transparent motion-reduce:animate-none"
-                  style={{ color: lightTheme.primary.normal }}
-                />
-                <p className={font.label.semiBold} style={{ color: lightTheme.label.neutral }}>
-                  AR 연결 중...
-                </p>
-                <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
-                  <p
-                    className={cn(font.caption.medium, "whitespace-nowrap")}
-                    style={{ color: lightTheme.label.assistive }}
-                  >
-                    {reconnectMessage ?? "AR 화면을 준비하고 있어요"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ArConnectionLoader key={connectionStatus} reconnectMessage={reconnectMessage} />
           )}
         </main>
 
