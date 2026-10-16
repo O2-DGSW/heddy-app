@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { ArConnectionFeedbackType } from "@/features/ar-session";
 import { cn } from "@/shared";
+import ArLoadingHairstyles from "../ArLoadingHairstyles";
 
 interface ArConnectionLoaderProps {
   feedback: ArConnectionFeedbackType;
@@ -52,7 +53,7 @@ const CONTENT: Record<ArConnectionFeedbackType, ConnectionContent> = {
     title: "카메라 권한이 필요해요",
     description: "설정에서 카메라를 허용한 뒤 눌러 주세요",
     icon: "camera",
-    action: "허용했어요 · 다시 시도",
+    action: "다시 시도",
   },
   "camera-missing": {
     title: "카메라를 찾지 못했어요",
@@ -143,18 +144,7 @@ const ConnectionIcon = ({ icon, animated }: Pick<ConnectionContent, "icon" | "an
       <>
         <span className="absolute inset-0 rounded-full border-2 border-current opacity-15" />
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-current motion-reduce:animate-none" />
-        <svg
-          className="size-8"
-          fill="none"
-          viewBox="0 0 32 32"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M10 5H7a2 2 0 0 0-2 2v3m17-5h3a2 2 0 0 1 2 2v3M5 22v3a2 2 0 0 0 2 2h3m17-5v3a2 2 0 0 1-2 2h-3" />
-          <path d="m16 9 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" />
-        </svg>
+        <ArLoadingHairstyles />
       </>
     ) : (
       <svg
