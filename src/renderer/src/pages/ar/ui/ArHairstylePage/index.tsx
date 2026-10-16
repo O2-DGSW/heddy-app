@@ -79,8 +79,10 @@ const ArHairstylePage = () => {
   const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
   const isForeheadLoading = foreheadState.status === "loading";
+  const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus === "idle" || connectionStatus === "connecting";
-  const isStyleLoading = selectedGroom !== "" && groomState.status === "loading";
+  const isStyleLoading =
+    selectedGroom !== "" && groomState.groom === selectedGroom && groomState.status === "loading";
   const canAdjust =
     controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
   const listMessage = isGroomsPending
@@ -89,14 +91,12 @@ const ArHairstylePage = () => {
       (serverHairstyleOptions.length === 0 ? "서버에 등록된 헤어스타일이 없습니다." : null));
 
   const handleHairstyleSelect = (name: HairstyleOptionId) => {
-    if (controlReady && !isForeheadLoading) selectHairstyle(name);
+    if (canSelectHairstyle) selectHairstyle(name);
   };
 
   const handleDisabledHairstyleSelect = () => {
     if (connectionStatus === "error") {
       showInfoToast("AR 연결이 끊어졌습니다. 다시 연결한 뒤 스타일을 골라 주세요.");
-    } else if (isForeheadLoading) {
-      showInfoToast("이마를 만드는 중입니다. 끝나면 스타일을 바꿀 수 있습니다.");
     } else {
       showInfoToast("AR에 연결하는 중입니다. 연결되면 스타일을 고를 수 있습니다.");
     }
@@ -260,7 +260,7 @@ const ArHairstylePage = () => {
                 activeHairstylePosition={activeHairstylePosition}
                 hairstyleOptions={hairstyleOptions}
                 loadingMessage={listMessage}
-                disabled={!controlReady || isForeheadLoading}
+                disabled={!canSelectHairstyle}
                 onDisabledSelect={handleDisabledHairstyleSelect}
                 onSelect={handleHairstyleSelect}
               />
@@ -308,7 +308,7 @@ const ArHairstylePage = () => {
         {!isConnectionPending && isHairstyleBrowserOpen && (
           <ArHairstyleBrowser
             activeHairstyleName={selectedHairstyle.name}
-            disabled={!controlReady || isForeheadLoading}
+            disabled={!controlReady}
             hairstyleOptions={hairstyleOptions}
             onClose={handleHairstyleBrowserClose}
             onDisabledSelect={handleDisabledHairstyleSelect}
