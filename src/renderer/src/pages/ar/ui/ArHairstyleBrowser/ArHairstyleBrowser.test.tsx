@@ -46,7 +46,6 @@ test("성별·유형·태그를 함께 적용하고 초기화하면 전체 스�
   fireEvent.click(
     within(screen.getByRole("group", { name: "유형 필터" })).getByRole("button", {
       name: "펌",
-      exact: true,
     })
   );
   fireEvent.click(
@@ -75,7 +74,6 @@ test("결과가 없는 필터 조합은 빈 상태를 표시한다", () => {
   fireEvent.click(
     within(screen.getByRole("group", { name: "유형 필터" })).getByRole("button", {
       name: "펌",
-      exact: true,
     })
   );
   expect(screen.getByRole("status").textContent).toBe("조건에 맞는 헤어스타일이 없습니다.");
