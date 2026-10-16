@@ -45,7 +45,7 @@ const ArControlBar = ({
       aria-haspopup="dialog"
       aria-label="헤어스타일 목록 열기"
       className={cn(
-        "ar-motion-press flex h-[37px] min-w-0 flex-1 items-center justify-center gap-1 truncate rounded-full bg-white/30 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)]",
+        "ar-motion-press flex h-[37px] min-w-0 flex-1 items-center justify-center truncate rounded-full bg-white/30 px-[clamp(24px,10vw,43px)] py-[9px] text-center shadow-[0_0_11.556px_rgba(0,0,0,0.07)]",
         font.label.medium
       )}
       onClick={handleHairstyleBrowserOpen}
@@ -53,9 +53,6 @@ const ArControlBar = ({
       type="button"
     >
       <span className="truncate">{selectedHairstyleLabel}</span>
-      <span aria-hidden="true" className="shrink-0">
-        ⌄
-      </span>
     </button>
     <button
       aria-label="전면·후면 카메라 전환"
