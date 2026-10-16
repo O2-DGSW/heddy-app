@@ -96,7 +96,7 @@ const ArControlBar = ({
             font.label.medium
           )}
           onClick={handleHairstyleBrowserOpen}
-          style={{ color: lightTheme.label.disable }}
+          style={{ color: lightTheme.background.normal }}
           type="button"
         >
           <span className="truncate">{selectedHairstyleLabel}</span>
