@@ -30,6 +30,54 @@ interface ArConnectionLoaderProps {
   reconnectMessage: string | null;
 }
 
+const ArLoadingDots = () => {
+  const dotsRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const dots = dotsRef.current;
+    if (!dots) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let animations: Animation[] = [];
+    const updateMotion = () => {
+      animations.forEach(animation => animation.cancel());
+      animations = [];
+      if (reducedMotion.matches) return;
+
+      animations = Array.from(dots.children, (dot, index) => {
+        const start = (index + 1) / 4;
+        return dot.animate(
+          [
+            { opacity: 0, transform: "translateY(0)", offset: 0 },
+            { opacity: 0, transform: "translateY(2px)", offset: start - 0.02 },
+            { opacity: 1, transform: "translateY(-3px)", offset: start + 0.025 },
+            { opacity: 1, transform: "translateY(0)", offset: start + 0.1 },
+            { opacity: 1, transform: "translateY(0)", offset: 0.98 },
+            { opacity: 0, transform: "translateY(0)", offset: 1 },
+          ],
+          { duration: 2400, iterations: Infinity, easing: "ease-in-out" }
+        );
+      });
+    };
+
+    updateMotion();
+    reducedMotion.addEventListener("change", updateMotion);
+    return () => {
+      animations.forEach(animation => animation.cancel());
+      reducedMotion.removeEventListener("change", updateMotion);
+    };
+  }, []);
+
+  return (
+    <span aria-hidden="true" className="inline-flex w-[1em]" ref={dotsRef}>
+      {[0, 1, 2].map(dot => (
+        <span className="inline-block w-1/3 opacity-0 motion-reduce:opacity-100" key={dot}>
+          .
+        </span>
+      ))}
+    </span>
+  );
+};
+
 const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
   const [isLongConnectionWait, setIsLongConnectionWait] = useState(false);
 
@@ -81,15 +129,17 @@ const ArConnectionLoader = ({ reconnectMessage }: ArConnectionLoaderProps) => {
         </p>
         <div className="pointer-events-none absolute left-1/2 top-full mt-8 w-[280px] max-w-[calc(100vw-48px)] -translate-x-1/2 text-center">
           <p
-            className={cn(
-              font.caption.medium,
-              "animate-pulse whitespace-nowrap [animation-duration:3s] motion-reduce:animate-none"
-            )}
+            className={cn(font.caption.medium, "whitespace-nowrap")}
             style={{ color: lightTheme.label.assistive }}
           >
-            {isLongConnectionWait
-              ? "인터넷 연결이 불안정해요. 확인해 주세요."
-              : (reconnectMessage ?? "AR 화면을 준비하고 있어요")}
+            {isLongConnectionWait ? (
+              "인터넷 연결이 불안정해요. 확인해 주세요."
+            ) : (
+              <>
+                {reconnectMessage?.replace(/\.$/, "") ?? "AR을 생성하고 있어요"}
+                <ArLoadingDots />
+              </>
+            )}
           </p>
         </div>
       </div>
