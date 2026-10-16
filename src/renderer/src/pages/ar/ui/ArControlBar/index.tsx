@@ -4,6 +4,7 @@ import type { KeyboardEvent } from "react";
 
 import refreshIcon from "../../assets/refresh.svg";
 import ArColorPicker from "../ArColorPicker";
+import ArCustomColorPicker from "../ArCustomColorPicker";
 import { cn } from "@/shared";
 
 interface ArControlBarProps {
@@ -26,13 +27,33 @@ const ArControlBar = ({
   onColorSelect,
 }: ArControlBarProps) => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
   const paletteRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const paletteId = useId();
 
-  const handlePaletteToggle = () => setIsPaletteOpen(open => !open);
+  const handlePaletteClick = () => {
+    if (!isPaletteOpen) {
+      setIsPaletteOpen(true);
+      return;
+    }
+    if (canSelectColor) setIsCustomColorOpen(open => !open);
+  };
+  const handleCustomColorClose = () => {
+    setIsCustomColorOpen(false);
+    toggleRef.current?.focus();
+  };
+  const handlePresetSelect = (color: string) => {
+    setIsCustomColorOpen(false);
+    onColorSelect(color);
+  };
   const handlePaletteKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Escape") return;
+    if (isCustomColorOpen) {
+      event.stopPropagation();
+      handleCustomColorClose();
+      return;
+    }
     setIsPaletteOpen(false);
     toggleRef.current?.focus();
   };
@@ -42,6 +63,7 @@ const ArControlBar = ({
     const handleOutsidePointer = (event: PointerEvent) => {
       if (event.target instanceof Node && !paletteRef.current?.contains(event.target)) {
         setIsPaletteOpen(false);
+        setIsCustomColorOpen(false);
       }
     };
     document.addEventListener("pointerdown", handleOutsidePointer);
@@ -50,7 +72,18 @@ const ArControlBar = ({
 
   return (
     <div className="flex w-[calc(100%-24px)] max-w-[332px] items-center gap-2">
-      <div className="relative h-[37px] min-w-0 flex-1">
+      <div
+        ref={paletteRef}
+        onKeyDown={handlePaletteKeyDown}
+        className="relative h-[37px] min-w-0 flex-1"
+      >
+        {isPaletteOpen && isCustomColorOpen && canSelectColor && (
+          <ArCustomColorPicker
+            selectedColor={selectedColor}
+            onSelect={onColorSelect}
+            onClose={handleCustomColorClose}
+          />
+        )}
         <button
           aria-expanded={isHairstyleBrowserOpen}
           aria-haspopup="dialog"
@@ -69,8 +102,6 @@ const ArControlBar = ({
           <span className="truncate">{selectedHairstyleLabel}</span>
         </button>
         <div
-          ref={paletteRef}
-          onKeyDown={handlePaletteKeyDown}
           className={cn(
             "absolute inset-y-0 left-0 z-10 flex items-center overflow-hidden rounded-full transition-[width,background-color] duration-300 ease-out motion-reduce:transition-none",
             isPaletteOpen ? "w-full bg-white/30 backdrop-blur-md" : "w-[37px] bg-white/20"
@@ -78,11 +109,12 @@ const ArControlBar = ({
         >
           <button
             ref={toggleRef}
-            aria-label={isPaletteOpen ? "헤어 색상 팔레트 닫기" : "헤어 색상 팔레트 열기"}
+            aria-label={isPaletteOpen ? "직접 헤어 색상 선택" : "헤어 색상 팔레트 열기"}
             aria-expanded={isPaletteOpen}
             aria-controls={paletteId}
+            aria-disabled={isPaletteOpen && !canSelectColor}
             className="ar-motion-press relative flex size-[37px] shrink-0 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
-            onClick={handlePaletteToggle}
+            onClick={handlePaletteClick}
             type="button"
           >
             <span
@@ -102,7 +134,7 @@ const ArControlBar = ({
             <ArColorPicker
               disabled={!canSelectColor}
               selectedColor={selectedColor}
-              onSelect={onColorSelect}
+              onSelect={handlePresetSelect}
             />
           </div>
         </div>
