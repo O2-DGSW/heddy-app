@@ -2,8 +2,8 @@
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import ArHairstyleCarousel from "./ArHairstyleCarousel";
-import { ORIGINAL_HAIRSTYLE_OPTION } from "../model/constants";
+import ArHairstyleCarousel from ".";
+import { ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 
 const options = Array.from({ length: 7 }, (_, index) => ({
   name: `style-${index}`,
