@@ -10,7 +10,16 @@ export {
   deleteTreatmentRecordPhotoApi,
   updateTreatmentRecordPhotoApi,
 } from "./treatmentRecordPhotoApi";
-export { getLatestAnalysisApi } from "./analysisApi";
+export {
+  getAnalysisApi,
+  getAnalysisJobApi,
+  getLatestAnalysisApi,
+  isAnalysisModelUnavailableError,
+  postAnalysisApi,
+  postAnalysisJobRetryApi,
+} from "./analysisApi";
+export { usePostAnalysis, usePostAnalysisJobRetry } from "./mutation/usePostAnalysis.mutation";
+export { useGetActiveAnalysisJob, useGetAnalysisJob } from "./query/useGetAnalysisJob.query";
 export {
   TreatmentRecordPhotoUploadError,
   usePostTreatmentRecordPhotos,
@@ -19,7 +28,12 @@ export { useDeleteTreatmentRecord } from "./mutation/useDeleteTreatmentRecord.mu
 export { usePostTreatmentRecord } from "./mutation/usePostTreatmentRecord.mutation";
 export { usePatchTreatmentRecord } from "./mutation/usePatchTreatmentRecord.mutation";
 export { recordQueryKeys } from "./query/recordQueryKeys";
-export { useGetLatestAnalysis } from "./query/useGetLatestAnalysis.query";
+export {
+  getAnalysisQueryOptions,
+  getLatestAnalysisQueryOptions,
+  useGetLatestAnalysis,
+  usePrefetchLatestAnalysis,
+} from "./query/useGetLatestAnalysis.query";
 export {
   useGetTreatmentRecord,
   usePrefetchTreatmentRecord,

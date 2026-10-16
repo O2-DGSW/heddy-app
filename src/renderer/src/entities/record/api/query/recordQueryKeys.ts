@@ -12,4 +12,9 @@ export const recordQueryKeys = {
   analyses: () => [...recordQueryKeys.all, "analysis"] as const,
   latestAnalysis: (recordId: string) =>
     [...recordQueryKeys.analyses(), recordId, "latest"] as const,
+  analysis: (analysisId: string) => [...recordQueryKeys.analyses(), "result", analysisId] as const,
+  // 기록마다 진행 중인 분석 작업. 화면을 나갔다 와도 같은 작업을 이어서 보려고 캐시에 둔다
+  activeAnalysisJob: (recordId: string) =>
+    [...recordQueryKeys.analyses(), recordId, "active-job"] as const,
+  analysisJob: (jobId: string) => [...recordQueryKeys.analyses(), "job", jobId] as const,
 };

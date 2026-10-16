@@ -2,7 +2,9 @@ export { CUTS_CATEGORIES, isCutsCategory } from "./constants/categories";
 export type { CutsCategoryFilterValue } from "./constants/categories";
 export { DEFAULT_CUTS_SHARE_FIELDS } from "./constants/shareItems";
 export { useCutsRecords } from "./model/hooks/useCutsRecords";
-export { mapAnalysisToResult, pickAnalysisPhotoUrl } from "./model/mapAnalysis";
+export { mapAnalysisToResult, pickAnalysisPhoto, pickAnalysisPhotoUrl } from "./model/mapAnalysis";
+export { useCutsAnalysis } from "./model/hooks/useCutsAnalysis";
+export type { CutsAnalysisViewType } from "./model/hooks/useCutsAnalysis";
 export { SERVICE_TYPE_BY_CATEGORY } from "./model/mapTreatmentRecord";
 export type { CutsRecord } from "./model/types/CutsRecord.types";
 export type { CutsViewMode } from "./model/types/CutsViewMode.types";
@@ -19,4 +21,7 @@ export { CutsAnalysisConfidenceCard } from "./ui/analysis/CutsAnalysisConfidence
 export { CutsAnalysisIndicatorList } from "./ui/analysis/CutsAnalysisIndicatorList";
 export { CutsAnalysisPhotoCard } from "./ui/analysis/CutsAnalysisPhotoCard";
 export { CutsAnalysisStaleNotice } from "./ui/analysis/CutsAnalysisStaleNotice";
+export { CutsAnalysisNotice } from "./ui/analysis/CutsAnalysisNotice";
+export { CutsAnalysisProgress } from "./ui/analysis/CutsAnalysisProgress";
+export { CutsAnalysisSkeleton } from "./ui/analysis/CutsAnalysisSkeleton";
 export { CutsShareItemList } from "./ui/share/CutsShareItemList";
