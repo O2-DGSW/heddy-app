@@ -68,13 +68,10 @@ const ArHairstylePage = () => {
   // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
   const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
   const isFaceTracked = hasServerYaw || isClientFaceTracked;
-  const isForeheadLoading = foreheadState.status === "loading";
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
     selectedGroom !== "" && groomState.groom === selectedGroom && groomState.status === "loading";
-  const canAdjust =
-    controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
   const listMessage = isGroomsPending
     ? "헤어스타일을 불러오는 중"
     : (groomsError?.message ??
@@ -204,7 +201,7 @@ const ArHairstylePage = () => {
                 handleCameraSwitch={handleCameraSwitch}
                 handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
                 isHairstyleBrowserOpen={isHairstyleBrowserOpen}
-                canSelectColor={canAdjust}
+                canSelectColor={controlReady}
                 selectedColor={fitSettings.groom_color}
                 onColorSelect={handleColorSelect}
                 selectedHairstyleLabel={selectedHairstyle.label}
