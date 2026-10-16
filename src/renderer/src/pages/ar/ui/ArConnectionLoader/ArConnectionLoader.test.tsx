@@ -42,7 +42,7 @@ test("권한 거부는 조치 안내와 실제 재시도 동작을 제공한다"
   render(<ArConnectionLoader feedback="permission" onRetry={retry} />);
   act(() => vi.advanceTimersByTime(60_000));
   expect(screen.getByText("카메라 권한이 필요해요")).toBeTruthy();
-  fireEvent.click(screen.getByRole("button", { name: "허용했어요 · 다시 시도" }));
+  fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
   expect(retry).toHaveBeenCalledTimes(1);
 });
 test("카메라 권한 대기는 네트워크 안내로 바뀌지 않는다", () => {
