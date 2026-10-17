@@ -1,13 +1,14 @@
 import type { ArHairstyleOption } from "./types";
 
 export const ORIGINAL_HAIRSTYLE_OPTION: ArHairstyleOption = {
-  id: "none",
+  name: "",
   label: "원본 스타일",
 };
 
-export const HAIRSTYLE_GAP = 25;
+export const HAIRSTYLE_GAP = 14;
 export const HAIRSTYLE_CENTER_POSITION = 202;
-export const HAIRSTYLE_VISIBLE_RANGE = 4;
+// 중앙과 좌우 2개를 표시하고, 양끝 한 칸은 스크롤 중 등장할 항목으로 둔다.
+export const HAIRSTYLE_VISIBLE_RANGE = 3;
 export const HAIRSTYLE_VISIBLE_OFFSETS = Array.from(
   { length: HAIRSTYLE_VISIBLE_RANGE * 2 + 1 },
   (_, index) => index - HAIRSTYLE_VISIBLE_RANGE
@@ -34,7 +35,11 @@ export const getHairstyleSize = (offset: number) => {
     return 62;
   }
 
-  return 50;
+  if (distance === 2) {
+    return 46;
+  }
+
+  return 0;
 };
 
 export const getHairstyleItemLeft = (offset: number) => {

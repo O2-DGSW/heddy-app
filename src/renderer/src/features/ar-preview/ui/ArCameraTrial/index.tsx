@@ -2,10 +2,10 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/shared";
-import { useLocalCamera } from "../model/useLocalCamera";
-import { ORIGINAL_HAIRSTYLE_OPTION } from "../model/constants";
-import ArCameraViewport from "./ArCameraViewport";
-import ArHairstyleCarousel from "./ArHairstyleCarousel";
+import { useLocalCamera } from "../../model/useLocalCamera";
+import { ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
+import ArCameraViewport from "../ArCameraViewport";
+import ArHairstyleCarousel from "../ArHairstyleCarousel";
 
 const ORIGINAL_OPTIONS = [ORIGINAL_HAIRSTYLE_OPTION];
 

@@ -50,18 +50,62 @@ describe("useGroomFitControl", () => {
     expect(hook.result.current.groomState).toMatchObject({ groom: "short-swept", status: "ok" });
   });
 
-  test("응답을 기다리는 동안 바꾼 선택은 응답이 온 뒤에 이어서 보낸다", () => {
+  test("스타일 응답을 기다리는 중 바꾼 최신 선택을 바로 보낸다", () => {
     const { channel, hook } = setup();
 
     hook.rerender({ groom: "long-wave" });
     act(() => {
       vi.advanceTimersByTime(80);
     });
-    expect(channel.send).toHaveBeenCalledTimes(1);
-
-    act(() => hook.result.current.handleControlEvent({ type: "groom", status: "ok" }));
-
+    expect(sentMessages(channel)).toHaveLength(2);
     expect(sentMessages(channel)[1]).toMatchObject({ groom: "long-wave" });
+    expect(hook.result.current.groomState).toEqual({ groom: "long-wave", status: "loading" });
+
+    act(() =>
+      hook.result.current.handleControlEvent({
+        type: "groom",
+        status: "ok",
+        groom: "short-swept",
+      })
+    );
+
+    expect(sentMessages(channel)).toHaveLength(2);
+    expect(hook.result.current.groomState).toEqual({ groom: "long-wave", status: "loading" });
+  });
+
+  test("최신 적용 뒤 오래된 스타일 응답이 오면 최신 스타일을 다시 보낸다", () => {
+    const { channel, hook } = setup();
+
+    hook.rerender({ groom: "long-wave" });
+    act(() => {
+      vi.advanceTimersByTime(80);
+    });
+    act(() =>
+      hook.result.current.handleControlEvent({ type: "groom", status: "ok", groom: "long-wave" })
+    );
+    act(() =>
+      hook.result.current.handleControlEvent({
+        type: "groom",
+        status: "ok",
+        groom: "short-swept",
+      })
+    );
+
+    expect(sentMessages(channel)).toHaveLength(3);
+    expect(sentMessages(channel)[2]).toMatchObject({ groom: "long-wave" });
+    expect(hook.result.current.groomState).toEqual({ groom: "long-wave", status: "loading" });
+  });
+
+  test("이전 요청일 수 있는 이름 없는 오류는 최신 요청의 실패로 처리하지 않는다", () => {
+    const { hook } = setup();
+
+    hook.rerender({ groom: "long-wave" });
+    act(() => {
+      vi.advanceTimersByTime(80);
+    });
+    act(() => hook.result.current.handleControlEvent({ type: "error", message: "old error" }));
+
+    expect(hook.result.current.groomState).toEqual({ groom: "long-wave", status: "loading" });
   });
 
   test("15초 동안 응답이 없으면 오류가 되고, 늦게 온 성공 응답은 반영한다", () => {

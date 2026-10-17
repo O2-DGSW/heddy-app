@@ -2,6 +2,7 @@
 import { requestNativeCameraPermission } from "./cameraPermission";
 
 const ICE_GATHERING_TIMEOUT_MS = 10000;
+export type ArCameraFacingModeType = "user" | "environment";
 
 export const waitForIceGatheringComplete = async (
   peerConnection: RTCPeerConnection,
@@ -66,8 +67,11 @@ export const configureVideoSender = (
   void transceiver.sender.setParameters(parameters).catch(() => undefined);
 };
 
-/** 전면 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
-export const openFrontCamera = async (): Promise<MediaStream> => {
+/** 요청한 방향의 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
+export const openCamera = async (
+  facingMode: ArCameraFacingModeType = "user",
+  requireExactFacingMode = false
+): Promise<MediaStream> => {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error("이 환경에서는 카메라를 사용할 수 없습니다.");
   }
@@ -77,10 +81,10 @@ export const openFrontCamera = async (): Promise<MediaStream> => {
   return navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {
-      facingMode: { ideal: "user" },
+      facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
       frameRate: { ideal: 30, max: 30 },
-      width: { ideal: 640, max: 640 },
-      height: { ideal: 480, max: 480 },
+      width: { ideal: 1280, max: 1280 },
+      height: { ideal: 720, max: 720 },
     },
   });
 };
@@ -93,6 +97,10 @@ export const getArConnectionErrorMessage = (error: unknown): string => {
 
     if (error.name === "NotFoundError") {
       return "사용 가능한 카메라를 찾지 못했습니다. 연결 상태를 확인해 주세요.";
+    }
+
+    if (error.name === "OverconstrainedError") {
+      return "전환할 카메라를 사용할 수 없습니다. 현재 기기에서 사용 가능한 카메라를 확인해 주세요.";
     }
 
     if (error.name === "NotReadableError") {

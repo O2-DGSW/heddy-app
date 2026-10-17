@@ -1,9 +1,9 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import bookmarkIcon from "../assets/bookmark.svg";
-import minimizeIcon from "../assets/minimize.svg";
-import refreshIcon from "../assets/refresh.svg";
-import resizeIcon from "../assets/resize.svg";
+import bookmarkIcon from "../../assets/bookmark.svg";
+import minimizeIcon from "../../assets/minimize.svg";
+import refreshIcon from "../../assets/refresh.svg";
+import resizeIcon from "../../assets/resize.svg";
 import { cn } from "@/shared";
 
 interface ArControlBarProps {

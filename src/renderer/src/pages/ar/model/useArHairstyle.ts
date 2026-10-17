@@ -1,26 +1,28 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { DEFAULT_GROOM_FIT_SETTINGS, isValidGroomFitSettings } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
-import type { ArModalType } from "./ar.types";
+import { DEFAULT_AR_HAIR_COLOR } from "./constants";
+
+const getDefaultArFitSettings = (): ArGroomFitSettings => ({
+  ...DEFAULT_GROOM_FIT_SETTINGS,
+  groom_color: DEFAULT_AR_HAIR_COLOR,
+});
 
 export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
-  const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(DEFAULT_GROOM_FIT_SETTINGS);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [activeModal, setActiveModal] = useState<ArModalType | null>(null);
-  const [candidateMemo, setCandidateMemo] = useState("");
+  const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(getDefaultArFitSettings);
 
-  const handleModalOpen = (modal: ArModalType) => {
-    setActiveModal(modal);
-  };
+  const handleGroomColorReset = useCallback(() => {
+    setFitSettings(current =>
+      current.groom_color === DEFAULT_AR_HAIR_COLOR
+        ? current
+        : { ...current, groom_color: DEFAULT_AR_HAIR_COLOR }
+    );
+  }, []);
 
-  const handleModalClose = () => {
-    setActiveModal(null);
-  };
-
-  const handleHairstyleSelect = (selectedId: HairstyleOptionId) => {
-    const selectedIndex = hairstyleOptions.findIndex(option => option.id === selectedId);
+  const handleHairstyleSelect = (selectedName: HairstyleOptionId) => {
+    const selectedIndex = hairstyleOptions.findIndex(option => option.name === selectedName);
 
     if (selectedIndex < 0 || hairstyleOptions.length === 0) {
       return;
@@ -41,9 +43,10 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     });
   };
 
-  const handleStyleReset = () => {
-    setActiveHairstylePosition(0);
-    setFitSettings(DEFAULT_GROOM_FIT_SETTINGS);
+  const handleHairstylePositionSelect = (position: number) => {
+    if (Number.isSafeInteger(position) && hairstyleOptions.length > 0) {
+      setActiveHairstylePosition(position);
+    }
   };
 
   const handleFitSettingsChange = (patch: Partial<ArGroomFitSettings>) => {
@@ -53,22 +56,12 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
     });
   };
 
-  const handleExpandedToggle = () => {
-    setIsExpanded(isCurrentExpanded => !isCurrentExpanded);
-  };
-
   return {
     activeHairstylePosition,
-    activeModal,
-    candidateMemo,
-    handleExpandedToggle,
+    handleGroomColorReset,
     handleHairstyleSelect,
-    handleModalClose,
-    handleModalOpen,
-    handleStyleReset,
-    isExpanded,
+    handleHairstylePositionSelect,
     fitSettings,
     handleFitSettingsChange,
-    setCandidateMemo,
   };
 };
