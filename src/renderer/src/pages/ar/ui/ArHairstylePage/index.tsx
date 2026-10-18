@@ -11,7 +11,6 @@ import { cn, showInfoToast } from "@/shared";
 import ArControlBar from "../ArControlBar";
 import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import { ArCameraViewport, ArHairstyleCarousel } from "@/features/ar-preview";
-import ArRecognitionBadge from "../ArRecognitionBadge";
 import ArStatusNotice from "../ArStatusNotice";
 import ArConnectionLoader from "../ArConnectionLoader";
 
@@ -66,8 +65,7 @@ const ArHairstylePage = () => {
     handleCameraSwitch,
   } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
   // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
-  const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
-  const isFaceTracked = hasServerYaw || isClientFaceTracked;
+  useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
@@ -178,10 +176,6 @@ const ArHairstylePage = () => {
                   </svg>
                 </div>
               )}
-              <ArRecognitionBadge
-                connectionStatus={connectionStatus}
-                isFaceTracked={isFaceTracked}
-              />
               <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
                 <ArStatusNotice
                   connectionErrorMessage={reconnectMessage}
