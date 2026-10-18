@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { configureVideoSender } from "./peerConnection";
+import { configureVideoSender, openCamera, resolveCameraFacingMode } from "./peerConnection";
 
 vi.mock("./cameraPermission", () => ({ requestNativeCameraPermission: vi.fn() }));
 
@@ -78,3 +78,54 @@ test("VP8이 없는 기기에서는 브라우저 기본 코덱 협상을 유지�
   ]);
   expect(setCodecPreferences).not.toHaveBeenCalled();
 });
+
+test.each([
+  ["user", "iPhone Camera", "environment", "user"],
+  ["environment", "FaceTime HD Camera", "user", "environment"],
+  [undefined, "FaceTime HD Camera (Built-in)", undefined, "user"],
+  [undefined, "MacBook Pro Camera", undefined, "user"],
+  [undefined, "iPhone Camera", "user", "environment"],
+  [undefined, "연속성 카메라", undefined, "environment"],
+  [undefined, "후면 카메라", undefined, "environment"],
+  [undefined, "전면 카메라", undefined, "user"],
+  [undefined, "USB camera", "user", "user"],
+  [undefined, "USB camera", "environment", "environment"],
+  [undefined, "USB camera", undefined, null],
+] as const)(
+  "방향=%s 장치=%s 명시 요청=%s인 로컬 카메라를 판별한다",
+  (facingMode, label, exactMode, expected) => {
+    vi.stubGlobal(
+      "MediaStreamTrack",
+      class {
+        label = label;
+        getSettings = () => ({ facingMode });
+      }
+    );
+    expect(resolveCameraFacingMode(new MediaStreamTrack(), exactMode)).toBe(expected);
+  }
+);
+
+test("카메라 트랙이 없으면 전면으로 추정하지 않는다", () => {
+  expect(resolveCameraFacingMode(undefined, "user")).toBeNull();
+});
+
+test.each([false, true])(
+  "고해상도를 선호값으로 요청하고 방향의 exact 여부(%s)를 보존한다",
+  async exact => {
+    const stream = {};
+    const getUserMedia = vi.fn().mockResolvedValue(stream);
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });
+    expect(await openCamera("environment", exact)).toBe(stream);
+    expect(getUserMedia).toHaveBeenCalledWith({
+      audio: false,
+      video: {
+        facingMode: exact ? { exact: "environment" } : { ideal: "environment" },
+        width: { ideal: 800 },
+        height: { ideal: 1298 },
+        aspectRatio: { ideal: 800 / 1298 },
+        frameRate: { ideal: 30, max: 30 },
+        zoom: { ideal: 0.5 },
+      },
+    });
+  }
+);
