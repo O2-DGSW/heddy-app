@@ -107,14 +107,14 @@ export const openCamera = async (
 
   await requestNativeCameraPermission();
 
-  // 약 400px 너비 미리보기에 맞춰 입력 픽셀 수를 줄이고 코덱 호환을 위해 짝수 높이를 쓴다.
+  // 고밀도 화면에서 확대 표시되지 않도록 서버의 800×1298 출력에 입력을 맞춘다.
   // 선호 크기를 지원하지 않는 카메라는 브라우저가 가능한 크기로 조절한다.
   const video: MediaTrackConstraints & { zoom: ConstrainDouble } = {
     facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
     frameRate: { ideal: 30, max: 30 },
-    width: { ideal: 400 },
-    height: { ideal: 648 },
-    aspectRatio: { ideal: 400 / 648 },
+    width: { ideal: 800 },
+    height: { ideal: 1298 },
+    aspectRatio: { ideal: 800 / 1298 },
     zoom: { ideal: 0.5 },
   };
   return navigator.mediaDevices.getUserMedia({ audio: false, video });

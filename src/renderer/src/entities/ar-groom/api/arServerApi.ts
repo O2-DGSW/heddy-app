@@ -8,7 +8,7 @@ import { isRecord, publicUrl } from "@/shared/lib";
 interface PostArServerOfferRequest {
   sdp: string;
   type: "offer";
-  out_size: "400x648";
+  out_size: "800x1298";
 }
 
 export const getArServerBaseUrl = (): string => {
@@ -102,11 +102,11 @@ export const requestArServerOffer = async (
     throw new Error("AR 연결 정보를 준비하지 못했습니다. 다시 연결해 주세요.");
   }
   // RTCSessionDescription의 toJSON에 의존하면 추가 필드가 빠질 수 있어 일반 객체로 보낸다.
-  // 서버의 x1 출력은 소문자 x를 사용한 문자열만 인식한다.
+  // 서버는 지원 해상도를 소문자 x를 사용한 문자열로 받는다.
   const request: PostArServerOfferRequest = {
     sdp: offer.sdp,
     type: offer.type,
-    out_size: "400x648",
+    out_size: "800x1298",
   };
   let answer: unknown;
   try {
