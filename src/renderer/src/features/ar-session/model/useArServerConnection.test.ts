@@ -20,7 +20,8 @@ vi.mock("@/entities/ar-groom", async importOriginal => ({
   getArServerBaseUrl: mocks.baseUrl,
   requestArServerOffer: mocks.offer,
 }));
-vi.mock("./peerConnection", () => ({
+vi.mock("./peerConnection", async importOriginal => ({
+  ...(await importOriginal<typeof import("./peerConnection")>()),
   openCamera: mocks.openCamera,
   configureVideoSender: vi.fn(),
   waitForIceGatheringComplete: vi.fn().mockResolvedValue(undefined),
@@ -57,6 +58,7 @@ class Peer extends EventTarget {
   }
 }
 const track = {
+  label: "",
   stop: vi.fn(),
   addEventListener: vi.fn(),
   getSettings: vi.fn<() => MediaTrackSettings>(),
@@ -87,6 +89,7 @@ beforeEach(() => {
   });
   Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
   mocks.baseUrl.mockReturnValue("/ar-server");
+  track.label = "";
   track.getSettings.mockReturnValue({});
   mocks.openCamera.mockResolvedValue(stream);
   mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer" });
@@ -122,19 +125,56 @@ describe("AR 연결 상태와 복구", () => {
     }
   );
   test.each([
-    ["user", true],
-    ["environment", false],
-    [undefined, true],
-  ])("실제 카메라 방향 %s에 따라 미리보기 반전을 결정한다", async (facingMode, mirrored) => {
+    ["user", "", true],
+    ["environment", "", false],
+    [undefined, "FaceTime HD Camera (Built-in)", true],
+    [undefined, "MacBook Pro Camera", true],
+    [undefined, "iPhone Camera", false],
+    [undefined, "알 수 없는 카메라", false],
+  ])("로컬 방향 %s / 장치 %s의 반전 여부를 결정한다", async (facingMode, label, mirrored) => {
+    track.label = label;
     track.getSettings.mockReturnValue({ facingMode });
     const hook = setup();
     await advance();
     expect(hook.result.current.isPreviewMirrored).toBe(mirrored);
   });
-  test("방향 정보가 없어도 전후면 전환과 복귀에 맞춰 미리보기 반전을 변경한다", async () => {
+  test("최초에 후면이 열렸으면 다음 전환은 전면을 요청한다", async () => {
+    track.getSettings.mockReturnValue({ facingMode: "environment" });
     const hook = setup();
     await advance();
+    expect(hook.result.current.isPreviewMirrored).toBe(false);
+    track.getSettings.mockReturnValue({ facingMode: "user" });
+    act(() => hook.result.current.handleCameraSwitch());
+    await advance();
+    expect(mocks.openCamera).toHaveBeenLastCalledWith("user", true);
     expect(hook.result.current.isPreviewMirrored).toBe(true);
+  });
+  test.each(["user", "environment"])(
+    "서버 영상으로 교체되어도 로컬 %s 방향을 유지한다",
+    async facingMode => {
+      track.getSettings.mockReturnValue({ facingMode });
+      const preview = document.createElement("video");
+      vi.spyOn(preview, "play").mockResolvedValue(undefined);
+      const previewRef = { current: preview };
+      const hook = renderHook(() =>
+        useArServerConnection(previewRef, "", DEFAULT_GROOM_FIT_SETTINGS)
+      );
+      await advance();
+      const remoteStream = { getVideoTracks: () => [{ getSettings: () => ({}) }] };
+      const event = new Event("track");
+      Object.defineProperties(event, {
+        track: { value: { kind: "video" } },
+        streams: { value: [remoteStream] },
+      });
+      act(() => Peer.instances[0].dispatchEvent(event));
+      expect(preview.srcObject).toBe(remoteStream);
+      expect(hook.result.current.isPreviewMirrored).toBe(facingMode === "user");
+    }
+  );
+  test("방향 정보가 없는 카메라는 기본적으로 반전하지 않고 수동 전환 방향을 적용한다", async () => {
+    const hook = setup();
+    await advance();
+    expect(hook.result.current.isPreviewMirrored).toBe(false);
     act(() => hook.result.current.handleCameraSwitch());
     await advance();
     expect(mocks.openCamera).toHaveBeenLastCalledWith("environment", true);
@@ -149,6 +189,7 @@ describe("AR 연결 상태와 복구", () => {
     mocks.openCamera.mockRejectedValueOnce(new DOMException("camera", "OverconstrainedError"));
     act(() => hook.result.current.handleCameraSwitch());
     await advance();
+    track.getSettings.mockReturnValue({ facingMode: "user" });
     act(() => hook.result.current.handleReconnect());
     await advance();
     expect(mocks.openCamera).toHaveBeenLastCalledWith("user", false);
