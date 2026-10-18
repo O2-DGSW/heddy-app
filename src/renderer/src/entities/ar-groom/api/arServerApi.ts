@@ -5,6 +5,12 @@ import type { ArHairstyleOption } from "../model/arGroom.types";
 import { env } from "@/shared/config";
 import { isRecord, publicUrl } from "@/shared/lib";
 
+interface PostArServerOfferRequest {
+  sdp: string;
+  type: "offer";
+  out_size: "400x648";
+}
+
 export const getArServerBaseUrl = (): string => {
   const configuredUrl = env.arServerUrl;
   if (!configuredUrl) return "";
@@ -92,9 +98,19 @@ export const requestArServerOffer = async (
   offer: RTCSessionDescriptionInit,
   signal?: AbortSignal
 ): Promise<RTCSessionDescriptionInit> => {
+  if (offer.type !== "offer" || typeof offer.sdp !== "string" || !offer.sdp.trim()) {
+    throw new Error("AR 연결 정보를 준비하지 못했습니다. 다시 연결해 주세요.");
+  }
+  // RTCSessionDescription의 toJSON에 의존하면 추가 필드가 빠질 수 있어 일반 객체로 보낸다.
+  // 서버의 x1 출력은 소문자 x를 사용한 문자열만 인식한다.
+  const request: PostArServerOfferRequest = {
+    sdp: offer.sdp,
+    type: offer.type,
+    out_size: "400x648",
+  };
   let answer: unknown;
   try {
-    answer = await post(`${serverBaseUrl}/offer`, offer, { signal });
+    answer = await post(`${serverBaseUrl}/offer`, request, { signal });
   } catch (error: unknown) {
     signal?.throwIfAborted();
     const message =
