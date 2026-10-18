@@ -83,8 +83,9 @@ export const openCamera = async (
     video: {
       facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
       frameRate: { ideal: 30, max: 30 },
-      width: { ideal: 1280, max: 1280 },
-      height: { ideal: 720, max: 720 },
+      // 세로 미리보기에 맞는 해상도를 우선하되 가로형 웹캠도 선택할 수 있게 한다.
+      width: { ideal: 720, max: 1280 },
+      height: { ideal: 1280, max: 1280 },
     },
   });
 };
