@@ -22,7 +22,11 @@ const ArHairstyleFilterGroup = ({
     >
       {label}
     </legend>
-    <div aria-label={`${label} 필터`} className="flex gap-2 overflow-x-auto pb-1" role="group">
+    <div
+      aria-label={`${label} 필터`}
+      className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      role="group"
+    >
       {[null, ...options].map(value => {
         const isSelected = selectedValue === value;
 
