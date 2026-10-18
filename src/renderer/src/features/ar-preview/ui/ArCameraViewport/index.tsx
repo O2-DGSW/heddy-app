@@ -6,6 +6,7 @@ interface ArCameraViewportProps {
   videoRef: Ref<HTMLVideoElement>;
   children?: ReactNode;
   mirrored?: boolean;
+  fit?: "cover" | "contain";
   className?: string;
 }
 
@@ -13,6 +14,7 @@ const ArCameraViewport = ({
   videoRef,
   children,
   mirrored = false,
+  fit = "cover",
   className = "h-full",
 }: ArCameraViewportProps) => (
   <div
@@ -22,7 +24,12 @@ const ArCameraViewport = ({
     <video
       aria-label="카메라 미리보기"
       autoPlay
-      className={cn("absolute inset-0 h-full w-full object-cover", mirrored && "-scale-x-100")}
+      className={cn(
+        "absolute inset-0 h-full w-full",
+        fit === "contain" && "object-contain",
+        fit === "cover" && "object-cover",
+        mirrored && "-scale-x-100"
+      )}
       muted
       playsInline
       ref={videoRef}

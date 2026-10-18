@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
+import { getHttpStatus } from "@heddy/api";
 
 import { getArServerBaseUrl, requestArServerOffer } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArGroomState } from "@/entities/ar-groom";
@@ -29,10 +30,9 @@ interface UseArServerConnectionResult {
   connectionFeedback: ArConnectionFeedbackType;
   reconnectMessage: string | null;
   controlReady: boolean;
+  isPreviewMirrored: boolean;
   groomState: ArGroomState;
   foreheadState: ArGroomState;
-  /** 서버가 얼굴 yaw를 보내 주고 있는지. 매 stats마다 바뀌지 않도록 boolean만 state로 둔다 */
-  hasServerYaw: boolean;
   handleGroomRetry: () => void;
   handleForeheadRefresh: () => void;
   /** 캐시된 AR 페이지로 돌아왔을 때 새 연결을 시작한다 */
@@ -48,7 +48,6 @@ interface UseArServerConnectionResult {
 /** AR 서버와 WebRTC로 연결해 카메라 영상을 보내고 합성 영상·진단 정보를 받는다 */
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
-  faceTrackingVideoRef: RefObject<HTMLVideoElement | null>,
   groom: string,
   settings: ArGroomFitSettings
 ): UseArServerConnectionResult => {
@@ -68,10 +67,10 @@ export const useArServerConnection = (
   // 언마운트 때는 effect cleanup보다 ref 해제가 먼저라 video ref가 이미 null이다.
   // 스트림을 붙인 요소를 따로 기억해 두고 정리할 때 이 목록으로 해제한다.
   const attachedVideosRef = useRef(new Set<HTMLVideoElement>());
-  const [hasServerYaw, setHasServerYaw] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [reconnectMessage, setReconnectMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
+  const [isPreviewMirrored, setIsPreviewMirrored] = useState(true);
   const [isPageActive, setIsPageActive] = useState(true);
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
@@ -122,7 +121,6 @@ export const useArServerConnection = (
     attachedVideosRef.current.clear();
     resetGroomFit();
     setControlReady(false);
-    setHasServerYaw(false);
   }, [resetGroomFit]);
 
   const attachStream = useCallback((video: HTMLVideoElement, stream: MediaStream) => {
@@ -176,6 +174,11 @@ export const useArServerConnection = (
           localStream.getTracks().forEach(track => track.stop());
           return;
         }
+        // 방향을 제공하지 않는 연속성 카메라는 요청한 방향을 기준으로 표시한다.
+        // 서버로 보내는 원본은 유지하고 미리보기에서만 거울 효과를 적용한다.
+        const facingMode =
+          localStream.getVideoTracks()[0]?.getSettings().facingMode || cameraFacingModeRef.current;
+        setIsPreviewMirrored(facingMode === "user");
         stage = "server";
         setConnectionFeedback(
           hasConnectedRef.current
@@ -187,9 +190,7 @@ export const useArServerConnection = (
         // 권한 응답을 기다리는 시간은 제한하지 않고, 실제 연결 시도만 만료시킨다.
         connectionDeadlineRef.current = setTimeout(failConnection, 30_000);
         localStreamRef.current = localStream;
-        for (const video of [previewVideoRef.current, faceTrackingVideoRef.current]) {
-          if (video) attachStream(video, localStream);
-        }
+        if (previewVideoRef.current) attachStream(previewVideoRef.current, localStream);
 
         const peer = new RTCPeerConnection();
         peerConnectionRef.current = peer;
@@ -214,10 +215,7 @@ export const useArServerConnection = (
             try {
               const serverEvent = parseArServerEvent(await parseDataChannelPayload(event.data));
               if (!isCurrentPeer() || !serverEvent) return;
-              if (serverEvent.type === "stats") {
-                const { yaw, yaw_ema: yawEma } = serverEvent.data;
-                setHasServerYaw(typeof (yawEma ?? yaw) === "number");
-              } else handleControlEvent(serverEvent);
+              if (serverEvent.type !== "stats") handleControlEvent(serverEvent);
             } catch {
               // 잘못된 진단 메시지가 합성 영상 재생을 중단하지 않도록 무시한다.
             }
@@ -247,11 +245,8 @@ export const useArServerConnection = (
         signal.addEventListener("abort", clearDisconnectedTimer, { once: true });
         const schedulePeerRecovery = () => {
           if (disconnectedTimer !== null) return;
-          if (hasConnectedRef.current) {
-            setConnectionStatus("connecting");
-            setConnectionFeedback("reconnecting");
-            setReconnectMessage("연결이 끊어졌어요. 다시 연결 중이에요.");
-          }
+          // 일시적인 연결 흔들림 동안에는 재생 중인 미리보기를 숨기지 않는다.
+          // 복구 기한이 지나면 failConnection에서 재연결 화면으로 전환한다.
           disconnectedTimer = setTimeout(() => {
             disconnectedTimer = null;
             if (isCurrentPeer() && peer.connectionState !== "connected") failConnection();
@@ -296,6 +291,17 @@ export const useArServerConnection = (
       } catch (error: unknown) {
         if (signal.aborted) return;
         if (stage === "server") {
+          const status = getHttpStatus(error);
+          if (status === 502 || status === 503) {
+            // 서버 장애·사용 중 응답에는 카메라를 반복해서 열어도 연결이 빨라지지 않는다.
+            failedAttemptRef.current = true;
+            clearReconnectTimer();
+            stopConnection();
+            setConnectionStatus("error");
+            setConnectionFeedback("unavailable");
+            setReconnectMessage(null);
+            return;
+          }
           failConnection();
           return;
         }
@@ -320,8 +326,8 @@ export const useArServerConnection = (
     },
     [
       attachStream,
+      clearReconnectTimer,
       failConnection,
-      faceTrackingVideoRef,
       handleControlEvent,
       previewVideoRef,
       syncGroomFit,
@@ -405,9 +411,9 @@ export const useArServerConnection = (
     connectionFeedback,
     reconnectMessage,
     controlReady,
+    isPreviewMirrored,
     groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
     foreheadState,
-    hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
     handlePageEnter,

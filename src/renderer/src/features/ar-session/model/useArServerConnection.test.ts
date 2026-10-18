@@ -2,6 +2,7 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_GROOM_FIT_SETTINGS } from "@/entities/ar-groom";
+import { ApiHttpError } from "@heddy/api";
 import { useArServerConnection } from "./useArServerConnection";
 
 const mocks = vi.hoisted(() => ({
@@ -55,12 +56,15 @@ class Peer extends EventTarget {
     this.dispatchEvent(new Event("connectionstatechange"));
   }
 }
-const track = { stop: vi.fn(), addEventListener: vi.fn() };
+const track = {
+  stop: vi.fn(),
+  addEventListener: vi.fn(),
+  getSettings: vi.fn<() => MediaTrackSettings>(),
+};
 const stream = { getTracks: () => [track], getVideoTracks: () => [track] };
 const setup = () => {
   const preview = { current: null };
-  const tracking = { current: null };
-  return renderHook(() => useArServerConnection(preview, tracking, "", DEFAULT_GROOM_FIT_SETTINGS));
+  return renderHook(() => useArServerConnection(preview, "", DEFAULT_GROOM_FIT_SETTINGS));
 };
 const advance = async (ms = 1) => {
   await act(async () => {
@@ -83,6 +87,7 @@ beforeEach(() => {
   });
   Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
   mocks.baseUrl.mockReturnValue("/ar-server");
+  track.getSettings.mockReturnValue({});
   mocks.openCamera.mockResolvedValue(stream);
   mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer" });
 });
@@ -93,6 +98,62 @@ afterEach(() => {
 });
 
 describe("AR 연결 상태와 복구", () => {
+  test.each([502, 503])(
+    "서버 %s 응답은 카메라 재시도를 멈추고 수동 재시도로 복구한다",
+    async status => {
+      mocks.offer.mockRejectedValueOnce(
+        new Error("server", { cause: new ApiHttpError(status, null) })
+      );
+      const hook = setup();
+      await advance();
+      expect(hook.result.current.connectionStatus).toBe("error");
+      expect(hook.result.current.connectionFeedback).toBe("unavailable");
+      expect(track.stop).toHaveBeenCalledTimes(1);
+      act(() => Peer.instances[0].changeState("connected"));
+      await advance(60_000);
+      expect(hook.result.current.connectionStatus).toBe("error");
+      expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+      expect(mocks.offer).toHaveBeenCalledTimes(1);
+      act(() => hook.result.current.handleReconnect());
+      await advance();
+      act(() => Peer.instances[1].changeState("connected"));
+      expect(hook.result.current.connectionStatus).toBe("connected");
+      expect(mocks.openCamera).toHaveBeenCalledTimes(2);
+    }
+  );
+  test.each([
+    ["user", true],
+    ["environment", false],
+    [undefined, true],
+  ])("실제 카메라 방향 %s에 따라 미리보기 반전을 결정한다", async (facingMode, mirrored) => {
+    track.getSettings.mockReturnValue({ facingMode });
+    const hook = setup();
+    await advance();
+    expect(hook.result.current.isPreviewMirrored).toBe(mirrored);
+  });
+  test("방향 정보가 없어도 전후면 전환과 복귀에 맞춰 미리보기 반전을 변경한다", async () => {
+    const hook = setup();
+    await advance();
+    expect(hook.result.current.isPreviewMirrored).toBe(true);
+    act(() => hook.result.current.handleCameraSwitch());
+    await advance();
+    expect(mocks.openCamera).toHaveBeenLastCalledWith("environment", true);
+    expect(hook.result.current.isPreviewMirrored).toBe(false);
+    act(() => hook.result.current.handleCameraSwitch());
+    await advance();
+    expect(hook.result.current.isPreviewMirrored).toBe(true);
+  });
+  test("후면 카메라 전환에 실패하면 재시도한 전면 카메라를 반전한다", async () => {
+    const hook = setup();
+    await advance();
+    mocks.openCamera.mockRejectedValueOnce(new DOMException("camera", "OverconstrainedError"));
+    act(() => hook.result.current.handleCameraSwitch());
+    await advance();
+    act(() => hook.result.current.handleReconnect());
+    await advance();
+    expect(mocks.openCamera).toHaveBeenLastCalledWith("user", false);
+    expect(hook.result.current.isPreviewMirrored).toBe(true);
+  });
   test.each([
     ["NotAllowedError", "permission"],
     ["NotFoundError", "camera-missing"],
@@ -191,6 +252,33 @@ describe("AR 연결 상태와 복구", () => {
     expect(Peer.instances).toHaveLength(2);
     act(() => Peer.instances[1].changeState("connected"));
     expect(hook.result.current.connectionStatus).toBe("connected");
+  });
+  test("일시적인 연결 흔들림이 복구되면 미리보기를 숨기거나 카메라를 다시 열지 않는다", async () => {
+    const hook = setup();
+    await advance();
+    const peer = Peer.instances[0];
+    act(() => peer.changeState("connected"));
+    act(() => peer.changeState("disconnected"));
+    expect(hook.result.current.connectionStatus).toBe("connected");
+    await advance(1500);
+    act(() => peer.changeState("connected"));
+    await advance(3000);
+    expect(hook.result.current.connectionStatus).toBe("connected");
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+    expect(track.stop).not.toHaveBeenCalled();
+  });
+  test("연결 흔들림이 2초 넘게 지속되면 카메라를 정리하고 재연결한다", async () => {
+    const hook = setup();
+    await advance();
+    act(() => Peer.instances[0].changeState("connected"));
+    act(() => Peer.instances[0].changeState("disconnected"));
+    await advance(2001);
+    expect(hook.result.current.connectionStatus).toBe("connecting");
+    expect(hook.result.current.connectionFeedback).toBe("reconnecting");
+    expect(track.stop).toHaveBeenCalledTimes(1);
+    await advance(1001);
+    await advance();
+    expect(mocks.openCamera).toHaveBeenCalledTimes(2);
   });
   test("서버 설정 오류는 인터넷 장애로 표시하지 않는다", async () => {
     mocks.baseUrl.mockReturnValue("");

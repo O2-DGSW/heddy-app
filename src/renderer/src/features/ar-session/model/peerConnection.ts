@@ -49,21 +49,26 @@ export const configureVideoSender = (
   track: MediaStreamTrack
 ): void => {
   // 합성 영상 수신과 카메라 송출을 같은 transceiver에서 협상한다.
-  const transceiver = peerConnection.addTransceiver(track, { direction: "sendrecv" });
-  const vp8Codecs = RTCRtpSender.getCapabilities("video")?.codecs.filter(codec =>
-    codec.mimeType.toLowerCase().includes("video/vp8")
-  );
+  track.contentHint = "motion";
+  const transceiver = peerConnection.addTransceiver(track, {
+    direction: "sendrecv",
+    sendEncodings: [{ maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 }],
+  });
+  const codecs = RTCRtpSender.getCapabilities("video")?.codecs ?? [];
+  const vp8Codecs = codecs.filter(codec => codec.mimeType.toLowerCase() === "video/vp8");
 
-  if (vp8Codecs?.length) {
-    transceiver.setCodecPreferences(vp8Codecs);
+  if (vp8Codecs.length && typeof transceiver.setCodecPreferences === "function") {
+    // VP8을 우선하되 재전송·오류 복구 코덱과 다른 지원 코덱을 협상에서 제외하지 않는다.
+    transceiver.setCodecPreferences([
+      ...vp8Codecs,
+      ...codecs.filter(codec => codec.mimeType.toLowerCase() !== "video/vp8"),
+    ]);
   }
 
   const parameters = transceiver.sender.getParameters();
-  const encoding = parameters.encodings?.[0] ?? {};
-  parameters.degradationPreference = "maintain-resolution";
-  parameters.encodings = [
-    { ...encoding, maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 },
-  ];
+  // 부하가 높을 때 해상도를 조절해 움직임을 유지한다. 인코딩 제한은 생성 시 설정해
+  // 선택적인 degradationPreference 적용이 거부돼도 유지되도록 한다.
+  parameters.degradationPreference = "maintain-framerate";
   void transceiver.sender.setParameters(parameters).catch(() => undefined);
 };
 
@@ -78,15 +83,17 @@ export const openCamera = async (
 
   await requestNativeCameraPermission();
 
-  return navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: {
-      facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
-      frameRate: { ideal: 30, max: 30 },
-      width: { ideal: 1280, max: 1280 },
-      height: { ideal: 720, max: 720 },
-    },
-  });
+  // 약 400px 너비 미리보기에 맞춰 입력 픽셀 수를 줄이고 코덱 호환을 위해 짝수 높이를 쓴다.
+  // 선호 크기를 지원하지 않는 카메라는 브라우저가 가능한 크기로 조절한다.
+  const video: MediaTrackConstraints & { zoom: ConstrainDouble } = {
+    facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
+    frameRate: { ideal: 30, max: 30 },
+    width: { ideal: 400 },
+    height: { ideal: 648 },
+    aspectRatio: { ideal: 400 / 648 },
+    zoom: { ideal: 0.5 },
+  };
+  return navigator.mediaDevices.getUserMedia({ audio: false, video });
 };
 
 export const getArConnectionErrorMessage = (error: unknown): string => {
