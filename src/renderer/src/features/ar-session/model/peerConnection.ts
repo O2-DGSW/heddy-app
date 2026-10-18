@@ -4,6 +4,30 @@ import { requestNativeCameraPermission } from "./cameraPermission";
 const ICE_GATHERING_TIMEOUT_MS = 10000;
 export type ArCameraFacingModeType = "user" | "environment";
 
+export const resolveCameraFacingMode = (
+  track: MediaStreamTrack | undefined,
+  exactFacingMode?: ArCameraFacingModeType
+): ArCameraFacingModeType | null => {
+  if (!track) return null;
+  const facingMode = track.getSettings().facingMode;
+  if (facingMode === "user" || facingMode === "environment") return facingMode;
+
+  // 데스크톱 카메라는 facingMode를 생략할 수 있다. 장치 이름은 표준이 아니므로
+  // 알려진 내장/연속성 카메라만 보완하고, 식별 불가능한 장치는 전면으로 추정하지 않는다.
+  const label = track.label ?? "";
+  if (
+    /\b(back|rear|environment|iphone|continuity|desk view)\b|후면|후방|아이폰|연속성|데스크뷰/i.test(
+      label
+    )
+  ) {
+    return "environment";
+  }
+  if (/\b(facetime|front|built[ -]?in|macbook)\b|전면|내장 카메라|맥북/i.test(label)) {
+    return "user";
+  }
+  return exactFacingMode ?? null;
+};
+
 export const waitForIceGatheringComplete = async (
   peerConnection: RTCPeerConnection,
   signal: AbortSignal

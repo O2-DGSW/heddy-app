@@ -6,7 +6,12 @@ import { getArServerBaseUrl, requestArServerOffer } from "@/entities/ar-groom";
 import type { ArGroomFitSettings, ArGroomState } from "@/entities/ar-groom";
 
 import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
-import { configureVideoSender, openCamera, waitForIceGatheringComplete } from "./peerConnection";
+import {
+  configureVideoSender,
+  openCamera,
+  resolveCameraFacingMode,
+  waitForIceGatheringComplete,
+} from "./peerConnection";
 import type { ArCameraFacingModeType } from "./peerConnection";
 import { useGroomFitControl } from "./useGroomFitControl";
 
@@ -70,7 +75,7 @@ export const useArServerConnection = (
   const [connectionStatus, setConnectionStatus] = useState<ArConnectionStatusType>("idle");
   const [reconnectMessage, setReconnectMessage] = useState<string | null>(null);
   const [controlReady, setControlReady] = useState(false);
-  const [isPreviewMirrored, setIsPreviewMirrored] = useState(true);
+  const [isPreviewMirrored, setIsPreviewMirrored] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
@@ -174,11 +179,14 @@ export const useArServerConnection = (
           localStream.getTracks().forEach(track => track.stop());
           return;
         }
-        // 방향을 제공하지 않는 연속성 카메라는 요청한 방향을 기준으로 표시한다.
-        // 서버로 보내는 원본은 유지하고 미리보기에서만 거울 효과를 적용한다.
-        const facingMode =
-          localStream.getVideoTracks()[0]?.getSettings().facingMode || cameraFacingModeRef.current;
-        setIsPreviewMirrored(facingMode === "user");
+        // 수신하는 서버 트랙에는 방향 정보가 없으므로 로컬 카메라에서 한 번 판별한다.
+        const previewFacingMode = resolveCameraFacingMode(
+          localStream.getVideoTracks()[0],
+          requireExactFacingModeRef.current ? cameraFacingModeRef.current : undefined
+        );
+        // 최초 ideal 요청과 다른 카메라가 열려도 다음 전환은 실제 방향을 기준으로 한다.
+        if (previewFacingMode) cameraFacingModeRef.current = previewFacingMode;
+        setIsPreviewMirrored(previewFacingMode === "user");
         stage = "server";
         setConnectionFeedback(
           hasConnectedRef.current
