@@ -13,7 +13,7 @@ beforeEach(() => {
   mocks.post.mockResolvedValue({ sdp: "server-sdp", type: "answer" });
 });
 
-test("SDP 객체의 toJSON과 별개로 x1 출력 크기를 일반 JSON 요청에 포함한다", async () => {
+test("SDP 객체의 toJSON과 별개로 고해상도 출력 크기를 일반 JSON 요청에 포함한다", async () => {
   const offer = {
     sdp: "camera-sdp",
     type: "offer" as const,
@@ -23,14 +23,14 @@ test("SDP 객체의 toJSON과 별개로 x1 출력 크기를 일반 JSON 요청�
   const answer = await requestArServerOffer("/ar-server", offer, signal);
   expect(mocks.post).toHaveBeenCalledExactlyOnceWith(
     "/ar-server/offer",
-    { sdp: "camera-sdp", type: "offer", out_size: "400x648" },
+    { sdp: "camera-sdp", type: "offer", out_size: "800x1298" },
     { signal }
   );
   const body: unknown = mocks.post.mock.calls[0][1];
   expect(JSON.parse(JSON.stringify(body))).toEqual({
     sdp: "camera-sdp",
     type: "offer",
-    out_size: "400x648",
+    out_size: "800x1298",
   });
   expect(answer).toEqual({ sdp: "server-sdp", type: "answer" });
 });
