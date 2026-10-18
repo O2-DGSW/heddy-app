@@ -142,7 +142,7 @@ const ArHairstylePage = () => {
             className={cn("absolute inset-0", isConnectionPending && "invisible")}
             inert={isConnectionPending}
           >
-            <ArCameraViewport videoRef={cameraPreviewRef}>
+            <ArCameraViewport videoRef={cameraPreviewRef} fit="contain">
               <video
                 aria-hidden="true"
                 autoPlay

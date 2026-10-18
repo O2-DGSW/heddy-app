@@ -78,16 +78,16 @@ export const openCamera = async (
 
   await requestNativeCameraPermission();
 
-  return navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: {
-      facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
-      frameRate: { ideal: 30, max: 30 },
-      // 세로 미리보기에 맞는 해상도를 우선하되 가로형 웹캠도 선택할 수 있게 한다.
-      width: { ideal: 720, max: 1280 },
-      height: { ideal: 1280, max: 1280 },
-    },
-  });
+  // 연결된 폰 카메라를 세로 비율로 잘라 확대하지 않도록 원본 캡처 모드를 요청한다.
+  // 해상도는 선호값으로만 지정해 기기의 원본 모드를 선택할 수 있게 한다.
+  const video: MediaTrackConstraints & { resizeMode: ConstrainDOMString } = {
+    facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
+    frameRate: { ideal: 30, max: 30 },
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    resizeMode: { exact: "none" },
+  };
+  return navigator.mediaDevices.getUserMedia({ audio: false, video });
 };
 
 export const getArConnectionErrorMessage = (error: unknown): string => {
