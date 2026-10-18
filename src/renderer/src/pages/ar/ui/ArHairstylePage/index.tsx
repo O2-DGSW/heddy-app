@@ -139,11 +139,7 @@ const ArHairstylePage = () => {
             className={cn("absolute inset-0", isConnectionPending && "invisible")}
             inert={isConnectionPending}
           >
-            <ArCameraViewport
-              videoRef={cameraPreviewRef}
-              fit="contain"
-              mirrored={isPreviewMirrored}
-            >
+            <ArCameraViewport videoRef={cameraPreviewRef} fit="cover" mirrored={isPreviewMirrored}>
               {isStyleLoading && (
                 <div
                   aria-live="polite"
