@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
-import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
+import { useArServerConnection } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, showInfoToast } from "@/shared";
@@ -25,7 +25,6 @@ const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
 const ArHairstylePage = () => {
   const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
-  const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
   const handlePageEnterRef = useRef<() => void>(() => undefined);
   const handlePageLeaveRef = useRef<() => void>(() => undefined);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
@@ -54,18 +53,16 @@ const ArHairstylePage = () => {
     connectionFeedback,
     reconnectMessage,
     controlReady,
+    isPreviewMirrored,
     groomState,
     foreheadState,
-    hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
     handlePageEnter,
     handlePageLeave,
     handleReconnect,
     handleCameraSwitch,
-  } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
-  // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
-  useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
+  } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings);
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
@@ -142,15 +139,11 @@ const ArHairstylePage = () => {
             className={cn("absolute inset-0", isConnectionPending && "invisible")}
             inert={isConnectionPending}
           >
-            <ArCameraViewport videoRef={cameraPreviewRef} fit="contain">
-              <video
-                aria-hidden="true"
-                autoPlay
-                className="pointer-events-none absolute h-px w-px opacity-0"
-                muted
-                playsInline
-                ref={faceTrackingVideoRef}
-              />
+            <ArCameraViewport
+              videoRef={cameraPreviewRef}
+              fit="contain"
+              mirrored={isPreviewMirrored}
+            >
               {isStyleLoading && (
                 <div
                   aria-live="polite"
