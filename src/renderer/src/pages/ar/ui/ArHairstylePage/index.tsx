@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 import { useArServerConnection } from "@/features/ar-session";
+import { CameraPermissionNotice, useCameraConsent } from "@/features/permission-notice";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, showInfoToast } from "@/shared";
@@ -28,6 +29,8 @@ const ArHairstylePage = () => {
   const handlePageEnterRef = useRef<() => void>(() => undefined);
   const handlePageLeaveRef = useRef<() => void>(() => undefined);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
+  // 카메라 사용 목적을 알리고 동의를 받기 전에는 카메라(권한 창)를 켜지 않는다
+  const { hasCameraConsent, handleCameraConsent } = useCameraConsent();
   const {
     data: serverHairstyleOptions = [],
     error: groomsError,
@@ -62,7 +65,9 @@ const ArHairstylePage = () => {
     handlePageLeave,
     handleReconnect,
     handleCameraSwitch,
-  } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings);
+  } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings, {
+    enabled: hasCameraConsent,
+  });
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
@@ -206,7 +211,8 @@ const ArHairstylePage = () => {
               </div>
             </ArCameraViewport>
           </div>
-          {isConnectionPending && (
+          {!hasCameraConsent && <CameraPermissionNotice onAgree={handleCameraConsent} />}
+          {hasCameraConsent && isConnectionPending && (
             <ArConnectionLoader
               key={connectionFeedback}
               feedback={connectionFeedback}

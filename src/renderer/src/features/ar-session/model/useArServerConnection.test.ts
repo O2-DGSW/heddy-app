@@ -329,3 +329,24 @@ describe("AR 연결 상태와 복구", () => {
     expect(mocks.openCamera).not.toHaveBeenCalled();
   });
 });
+
+describe("카메라 사용 동의", () => {
+  test("동의하기 전(enabled false)에는 카메라를 열지 않고, 동의하면 연결을 시작한다", async () => {
+    const preview = { current: null };
+    const hook = renderHook(
+      ({ enabled }) => useArServerConnection(preview, "", DEFAULT_GROOM_FIT_SETTINGS, { enabled }),
+      { initialProps: { enabled: false } }
+    );
+
+    await advance(10_000);
+    setOnline(false);
+    setOnline(true);
+    await advance(10_000);
+    expect(mocks.openCamera).not.toHaveBeenCalled();
+    expect(hook.result.current.connectionStatus).not.toBe("connected");
+
+    hook.rerender({ enabled: true });
+    await advance();
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+  });
+});

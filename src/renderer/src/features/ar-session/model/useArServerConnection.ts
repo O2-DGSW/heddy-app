@@ -51,10 +51,16 @@ interface UseArServerConnectionResult {
 }
 
 /** AR 서버와 WebRTC로 연결해 카메라 영상을 보내고 합성 영상·진단 정보를 받는다 */
+interface UseArServerConnectionOptions {
+  /** false면 카메라를 켜지 않는다. 사용 목적을 알리고 동의를 받기 전에는 권한 창을 띄우지 않기 위해 쓴다 */
+  enabled?: boolean;
+}
+
 export const useArServerConnection = (
   previewVideoRef: RefObject<HTMLVideoElement | null>,
   groom: string,
-  settings: ArGroomFitSettings
+  settings: ArGroomFitSettings,
+  { enabled = true }: UseArServerConnectionOptions = {}
 ): UseArServerConnectionResult => {
   const attemptControllerRef = useRef<AbortController | null>(null);
   const connectionDeadlineRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -344,7 +350,7 @@ export const useArServerConnection = (
   );
 
   useEffect(() => {
-    if (!isPageActive) return;
+    if (!isPageActive || !enabled) return;
 
     const controller = new AbortController();
     attemptControllerRef.current = controller;
@@ -355,7 +361,14 @@ export const useArServerConnection = (
       clearReconnectTimer();
       stopConnection();
     };
-  }, [clearReconnectTimer, connectionAttempt, isPageActive, startConnection, stopConnection]);
+  }, [
+    clearReconnectTimer,
+    connectionAttempt,
+    enabled,
+    isPageActive,
+    startConnection,
+    stopConnection,
+  ]);
 
   const handleReconnect = useCallback(() => {
     clearReconnectTimer();
