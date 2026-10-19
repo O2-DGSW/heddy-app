@@ -64,7 +64,7 @@ const HomePage = () => {
               isLoading={arStyles.isLoading}
               isError={arStyles.isError}
               onRetry={() => void arStyles.refetch()}
-              onMoreClick={() => navigate("/profile/saved-styles")}
+              onArClick={() => navigate("/ar")}
             />
             <RecommendationSection
               recommendations={recommendations.data}
