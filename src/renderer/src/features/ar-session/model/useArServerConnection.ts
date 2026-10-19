@@ -200,7 +200,9 @@ export const useArServerConnection = (
         localStreamRef.current = localStream;
         if (previewVideoRef.current) attachStream(previewVideoRef.current, localStream);
 
-        const peer = new RTCPeerConnection();
+        const peer = new RTCPeerConnection({
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        });
         peerConnectionRef.current = peer;
         const isCurrentPeer = () => !signal.aborted && peerConnectionRef.current === peer;
 
