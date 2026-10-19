@@ -1,209 +1,228 @@
 import { font, lightTheme } from "@heddy/design-tokens";
-import { useEffect, useRef } from "react";
+import { setupPage } from "@capgo/capacitor-transitions/react";
+import { useEffect, useRef, useState } from "react";
 
 import { useGetArGrooms } from "@/entities/ar-groom";
-import type { HairstyleOptionId } from "@/entities/ar-groom";
-import { useArServerConnection, useFaceYaw } from "@/features/ar-session";
+import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
+import { useArServerConnection } from "@/features/ar-session";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
-import { cn, showInfoToast, useBottomBarVisibility } from "@/shared";
-import ArCandidateSaveModal from "../ArCandidateSaveModal";
-import ArColorPicker from "../ArColorPicker";
+import { cn, showInfoToast } from "@/shared";
 import ArControlBar from "../ArControlBar";
-import ArExpandedBottomMenu from "../ArExpandedBottomMenu";
-import ArHairstyleCarousel from "../ArHairstyleCarousel";
-import ArRecognitionBadge from "../ArRecognitionBadge";
+import ArHairstyleBrowser from "../ArHairstyleBrowser";
+import { ArCameraViewport, ArHairstyleCarousel } from "@/features/ar-preview";
 import ArStatusNotice from "../ArStatusNotice";
+import ArConnectionLoader from "../ArConnectionLoader";
+
+const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
+  const firstOption = options.find(option => option.name === "hippie-perm");
+
+  if (!firstOption) return options;
+
+  return [firstOption, ...options.filter(option => option.name !== firstOption.name)];
+};
 
 const ArHairstylePage = () => {
+  const pageRef = useRef<HTMLElement>(null);
   const cameraPreviewRef = useRef<HTMLVideoElement>(null);
-  const faceTrackingVideoRef = useRef<HTMLVideoElement>(null);
-  const { setIsBottomBarHidden } = useBottomBarVisibility();
+  const handlePageEnterRef = useRef<() => void>(() => undefined);
+  const handlePageLeaveRef = useRef<() => void>(() => undefined);
+  const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
   const {
     data: serverHairstyleOptions = [],
     error: groomsError,
     isPending: isGroomsPending,
     refetch: refetchGrooms,
   } = useGetArGrooms();
-  const hairstyleOptions = [ORIGINAL_HAIRSTYLE_OPTION, ...serverHairstyleOptions];
+  const hairstyleOptions = [
+    ORIGINAL_HAIRSTYLE_OPTION,
+    ...prioritizeHippiePerm(serverHairstyleOptions),
+  ];
   const {
     activeHairstylePosition,
-    activeModal,
-    candidateMemo,
-    handleExpandedToggle,
+    handleGroomColorReset,
     handleHairstyleSelect: selectHairstyle,
-    handleModalClose,
-    handleModalOpen,
-    handleStyleReset,
-    isExpanded,
+    handleHairstylePositionSelect: selectHairstylePosition,
     fitSettings,
     handleFitSettingsChange,
-    setCandidateMemo,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
-  const selectedGroom =
-    selectedHairstyle.id === ORIGINAL_HAIRSTYLE_OPTION.id ? "" : selectedHairstyle.id;
+  const selectedGroom = selectedHairstyle.name;
   const {
     connectionStatus,
-    errorMessage,
+    connectionFeedback,
+    reconnectMessage,
     controlReady,
+    isPreviewMirrored,
     groomState,
     foreheadState,
-    hasServerYaw,
     handleGroomRetry,
     handleForeheadRefresh,
+    handlePageEnter,
+    handlePageLeave,
     handleReconnect,
-  } = useArServerConnection(cameraPreviewRef, faceTrackingVideoRef, selectedGroom, fitSettings);
-  // 서버가 yaw를 주는 동안에는 기기 감지가 필요 없어 멈춘다.
-  const { isFaceTracked: isClientFaceTracked } = useFaceYaw(faceTrackingVideoRef, !hasServerYaw);
-  const isFaceTracked = hasServerYaw || isClientFaceTracked;
-  const isForeheadLoading = foreheadState.status === "loading";
-  const canAdjust =
-    controlReady && selectedGroom !== "" && groomState.status === "ok" && !isForeheadLoading;
+    handleCameraSwitch,
+  } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings);
+  const canSelectHairstyle = controlReady;
+  const isConnectionPending = connectionStatus !== "connected";
+  const isStyleLoading =
+    selectedGroom !== "" && groomState.groom === selectedGroom && groomState.status === "loading";
   const listMessage = isGroomsPending
     ? "헤어스타일을 불러오는 중"
     : (groomsError?.message ??
       (serverHairstyleOptions.length === 0 ? "서버에 등록된 헤어스타일이 없습니다." : null));
 
-  const handleHairstyleSelect = (id: HairstyleOptionId) => {
-    if (controlReady && !isForeheadLoading) selectHairstyle(id);
+  const handleHairstyleSelect = (name: HairstyleOptionId) => {
+    if (canSelectHairstyle) selectHairstyle(name);
+  };
+
+  const handleHairstylePositionSelect = (position: number) => {
+    if (canSelectHairstyle) selectHairstylePosition(position);
   };
 
   const handleDisabledHairstyleSelect = () => {
-    if (connectionStatus === "error") {
-      showInfoToast("AR 연결이 끊어졌습니다. 다시 연결한 뒤 스타일을 골라 주세요.");
-    } else if (isForeheadLoading) {
-      showInfoToast("이마를 만드는 중입니다. 끝나면 스타일을 바꿀 수 있습니다.");
-    } else {
-      showInfoToast("AR에 연결하는 중입니다. 연결되면 스타일을 고를 수 있습니다.");
-    }
+    showInfoToast("AR에 연결하는 중이에요. 연결되면 스타일을 고를 수 있어요.");
   };
 
   const handleColorSelect = (color: string) => handleFitSettingsChange({ groom_color: color });
 
-  const handleReset = () => {
-    if (!isForeheadLoading) handleStyleReset();
-  };
+  const handleHairstyleBrowserOpen = () => setIsHairstyleBrowserOpen(true);
+  const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
-    setIsBottomBarHidden(isExpanded);
+    handlePageEnterRef.current = handlePageEnter;
+    handlePageLeaveRef.current = handlePageLeave;
+  }, [handlePageEnter, handlePageLeave]);
 
-    return () => {
-      setIsBottomBarHidden(false);
-    };
-  }, [isExpanded, setIsBottomBarHidden]);
+  useEffect(() => {
+    const pageElement = pageRef.current;
+    if (!pageElement) return;
+
+    return setupPage(pageElement, {
+      onWillEnter: () => {
+        handleGroomColorReset();
+        handlePageEnterRef.current();
+      },
+      onDidLeave: () => handlePageLeaveRef.current(),
+    });
+  }, [handleGroomColorReset]);
 
   return (
-    <cap-page>
+    <cap-page ref={pageRef}>
       <section
         aria-labelledby="ar-hairstyle-title"
-        className="ar-motion-page-enter flex h-full min-h-0 flex-col overflow-hidden"
+        className="ar-motion-page-enter relative flex h-full min-h-0 flex-col overflow-hidden"
         style={{ backgroundColor: lightTheme.background.normal }}
       >
-        {!isExpanded && (
-          <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
-            <h1
-              className={font.headline1.bold}
-              id="ar-hairstyle-title"
-              style={{ color: lightTheme.label.neutral }}
-            >
-              AR 헤어스타일
-            </h1>
-          </header>
-        )}
+        <header className="flex h-[58px] shrink-0 items-center justify-center px-[20px]">
+          <h1
+            className={font.headline1.bold}
+            id="ar-hairstyle-title"
+            style={{ color: lightTheme.label.neutral }}
+          >
+            AR 헤어스타일
+          </h1>
+        </header>
 
         <main
           aria-label="AR 미리보기"
-          className={cn(
-            "min-h-0 flex-1 overflow-hidden",
-            isExpanded ? "fixed inset-x-0 z-[25]" : "relative"
-          )}
+          className="relative min-h-0 flex-1 overflow-hidden"
           style={{
-            backgroundColor: lightTheme.label.normal,
-            ...(isExpanded && { bottom: "0px", top: "0px" }),
+            backgroundColor: isConnectionPending
+              ? lightTheme.background.normal
+              : lightTheme.label.normal,
           }}
         >
-          {isExpanded && (
-            <h1 className="sr-only" id="ar-hairstyle-title">
-              AR 헤어스타일
-            </h1>
-          )}
-          <video
-            aria-hidden="true"
-            autoPlay
-            className="absolute inset-0 h-full w-full bg-black object-cover"
-            muted
-            playsInline
-            ref={cameraPreviewRef}
-          />
-          <video
-            aria-hidden="true"
-            autoPlay
-            className="pointer-events-none absolute h-px w-px opacity-0"
-            muted
-            playsInline
-            ref={faceTrackingVideoRef}
-          />
-          <ArRecognitionBadge
-            connectionStatus={connectionStatus}
-            isFaceTracked={isFaceTracked}
-            isExpanded={isExpanded}
-          />
-          <ArColorPicker
-            isExpanded={isExpanded}
-            disabled={!canAdjust}
-            selectedColor={fitSettings.groom_color}
-            onSelect={handleColorSelect}
-          />
           <div
-            className={cn(
-              "absolute inset-x-0 bottom-0 flex flex-col items-center gap-4",
-              isExpanded ? "pb-[max(24px,calc(env(safe-area-inset-bottom)+16px))]" : "pb-3"
-            )}
+            aria-hidden={isConnectionPending}
+            aria-busy={isStyleLoading}
+            className={cn("absolute inset-0", isConnectionPending && "invisible")}
+            inert={isConnectionPending}
           >
-            <ArStatusNotice
-              connectionErrorMessage={errorMessage}
-              connectionStatus={connectionStatus}
-              foreheadState={foreheadState}
-              groomState={groomState}
-              onForeheadRefresh={handleForeheadRefresh}
-              onGroomRetry={handleGroomRetry}
-              onReconnect={handleReconnect}
-            />
-            <ArControlBar
-              handleExpandedToggle={handleExpandedToggle}
-              handleModalOpen={() => handleModalOpen("candidate-save")}
-              handleStyleReset={handleReset}
-              isExpanded={isExpanded}
-              selectedHairstyleLabel={selectedHairstyle.label}
-            />
-            <ArHairstyleCarousel
-              activeHairstylePosition={activeHairstylePosition}
-              hairstyleOptions={hairstyleOptions}
-              loadingMessage={listMessage}
-              disabled={!controlReady || isForeheadLoading}
-              onDisabledSelect={handleDisabledHairstyleSelect}
-              onSelect={handleHairstyleSelect}
-            />
-            {groomsError && (
-              <button
-                className={font.caption.medium}
-                onClick={() => void refetchGrooms()}
-                style={{ color: lightTheme.label.buttonText }}
-                type="button"
-              >
-                스타일 목록 다시 불러오기
-              </button>
-            )}
-            {isExpanded && <ArExpandedBottomMenu />}
+            <ArCameraViewport videoRef={cameraPreviewRef} fit="cover" mirrored={isPreviewMirrored}>
+              {isStyleLoading && (
+                <div
+                  aria-live="polite"
+                  className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+                  role="status"
+                >
+                  <span className="sr-only">헤어스타일을 적용하고 있어요</span>
+                  <svg
+                    aria-hidden="true"
+                    className="w-[min(18rem,64vw)] animate-spin text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)] motion-reduce:animate-none"
+                    fill="currentColor"
+                    viewBox="0 0 360 360"
+                  >
+                    <circle cx="34.5" cy="96" opacity="0.28" r="3" />
+                    <circle cx="61.2" cy="61.2" opacity="0.36" r="4" />
+                    <circle cx="96" cy="34.5" opacity="0.46" r="5.5" />
+                    <circle cx="136.5" cy="17" opacity="0.58" r="7" />
+                    <circle cx="180" cy="12" opacity="0.7" r="8.5" />
+                    <circle cx="223.5" cy="17" opacity="0.8" r="10" />
+                    <circle cx="264" cy="34.5" opacity="0.88" r="11.5" />
+                    <circle cx="298.8" cy="61.2" opacity="0.95" r="13" />
+                    <circle cx="325.5" cy="96" r="14" />
+                  </svg>
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 pb-3">
+                <ArStatusNotice
+                  connectionErrorMessage={reconnectMessage}
+                  connectionStatus={connectionStatus}
+                  foreheadState={foreheadState}
+                  groomState={groomState}
+                  onForeheadRefresh={handleForeheadRefresh}
+                  onGroomRetry={handleGroomRetry}
+                  onReconnect={handleReconnect}
+                  showForeheadStatus={false}
+                />
+                <ArControlBar
+                  handleCameraSwitch={handleCameraSwitch}
+                  handleHairstyleBrowserOpen={handleHairstyleBrowserOpen}
+                  isHairstyleBrowserOpen={isHairstyleBrowserOpen}
+                  canSelectColor={controlReady}
+                  selectedColor={fitSettings.groom_color}
+                  onColorSelect={handleColorSelect}
+                  selectedHairstyleLabel={selectedHairstyle.label}
+                />
+                <ArHairstyleCarousel
+                  activeHairstylePosition={activeHairstylePosition}
+                  hairstyleOptions={hairstyleOptions}
+                  loadingMessage={listMessage}
+                  disabled={!canSelectHairstyle}
+                  onDisabledSelect={handleDisabledHairstyleSelect}
+                  onSelect={handleHairstylePositionSelect}
+                />
+                {groomsError && (
+                  <button
+                    className={font.caption.medium}
+                    onClick={() => void refetchGrooms()}
+                    style={{ color: lightTheme.label.buttonText }}
+                    type="button"
+                  >
+                    스타일 목록 다시 불러오기
+                  </button>
+                )}
+              </div>
+            </ArCameraViewport>
           </div>
+          {isConnectionPending && (
+            <ArConnectionLoader
+              key={connectionFeedback}
+              feedback={connectionFeedback}
+              onRetry={handleReconnect}
+            />
+          )}
         </main>
 
-        {activeModal === "candidate-save" && (
-          <ArCandidateSaveModal
-            memo={candidateMemo}
-            onClose={handleModalClose}
-            setMemo={setCandidateMemo}
+        {!isConnectionPending && isHairstyleBrowserOpen && (
+          <ArHairstyleBrowser
+            activeHairstyleName={selectedHairstyle.name}
+            disabled={!controlReady}
+            hairstyleOptions={hairstyleOptions}
+            onClose={handleHairstyleBrowserClose}
+            onDisabledSelect={handleDisabledHairstyleSelect}
+            onSelect={handleHairstyleSelect}
           />
         )}
       </section>

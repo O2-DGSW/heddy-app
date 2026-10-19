@@ -34,7 +34,7 @@ const RecommendationSection = ({
         aria-label="스타일 추천 더보기"
         className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
       >
-        더보기
+        전체보기
         <ArrowIcon className="h-[8px] w-[8px] rotate-180" color={lightTheme.primary.normal} />
       </button>
     </div>

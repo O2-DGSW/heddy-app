@@ -15,6 +15,7 @@ interface ModalShellProps {
   backdropLabel?: string;
   /** 등장 애니메이션 등 바깥 컨테이너에 더할 클래스 */
   className?: string;
+  contentClassName?: string;
   children: ReactNode;
 }
 
@@ -25,6 +26,7 @@ export const ModalShell = ({
   onBackdropClick,
   backdropLabel = "닫기",
   className,
+  contentClassName,
   children,
 }: ModalShellProps) => (
   <div
@@ -50,7 +52,7 @@ export const ModalShell = ({
         <div className="pointer-events-auto flex w-full justify-center">{children}</div>
       </div>
     ) : (
-      <div className="absolute inset-x-0 bottom-0">{children}</div>
+      <div className={cn("absolute inset-x-0 bottom-0", contentClassName)}>{children}</div>
     )}
   </div>
 );

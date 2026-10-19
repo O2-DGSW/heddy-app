@@ -2,6 +2,31 @@
 import { requestNativeCameraPermission } from "./cameraPermission";
 
 const ICE_GATHERING_TIMEOUT_MS = 10000;
+export type ArCameraFacingModeType = "user" | "environment";
+
+export const resolveCameraFacingMode = (
+  track: MediaStreamTrack | undefined,
+  exactFacingMode?: ArCameraFacingModeType
+): ArCameraFacingModeType | null => {
+  if (!track) return null;
+  const facingMode = track.getSettings().facingMode;
+  if (facingMode === "user" || facingMode === "environment") return facingMode;
+
+  // 데스크톱 카메라는 facingMode를 생략할 수 있다. 장치 이름은 표준이 아니므로
+  // 알려진 내장/연속성 카메라만 보완하고, 식별 불가능한 장치는 전면으로 추정하지 않는다.
+  const label = track.label ?? "";
+  if (
+    /\b(back|rear|environment|iphone|continuity|desk view)\b|후면|후방|아이폰|연속성|데스크뷰/i.test(
+      label
+    )
+  ) {
+    return "environment";
+  }
+  if (/\b(facetime|front|built[ -]?in|macbook)\b|전면|내장 카메라|맥북/i.test(label)) {
+    return "user";
+  }
+  return exactFacingMode ?? null;
+};
 
 export const waitForIceGatheringComplete = async (
   peerConnection: RTCPeerConnection,
@@ -48,41 +73,51 @@ export const configureVideoSender = (
   track: MediaStreamTrack
 ): void => {
   // 합성 영상 수신과 카메라 송출을 같은 transceiver에서 협상한다.
-  const transceiver = peerConnection.addTransceiver(track, { direction: "sendrecv" });
-  const vp8Codecs = RTCRtpSender.getCapabilities("video")?.codecs.filter(codec =>
-    codec.mimeType.toLowerCase().includes("video/vp8")
-  );
+  track.contentHint = "motion";
+  const transceiver = peerConnection.addTransceiver(track, {
+    direction: "sendrecv",
+    sendEncodings: [{ maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 }],
+  });
+  const codecs = RTCRtpSender.getCapabilities("video")?.codecs ?? [];
+  const vp8Codecs = codecs.filter(codec => codec.mimeType.toLowerCase() === "video/vp8");
 
-  if (vp8Codecs?.length) {
-    transceiver.setCodecPreferences(vp8Codecs);
+  if (vp8Codecs.length && typeof transceiver.setCodecPreferences === "function") {
+    // VP8을 우선하되 재전송·오류 복구 코덱과 다른 지원 코덱을 협상에서 제외하지 않는다.
+    transceiver.setCodecPreferences([
+      ...vp8Codecs,
+      ...codecs.filter(codec => codec.mimeType.toLowerCase() !== "video/vp8"),
+    ]);
   }
 
   const parameters = transceiver.sender.getParameters();
-  const encoding = parameters.encodings?.[0] ?? {};
-  parameters.degradationPreference = "maintain-resolution";
-  parameters.encodings = [
-    { ...encoding, maxBitrate: 8_000_000, maxFramerate: 30, scaleResolutionDownBy: 1 },
-  ];
+  // 부하가 높을 때 해상도를 조절해 움직임을 유지한다. 인코딩 제한은 생성 시 설정해
+  // 선택적인 degradationPreference 적용이 거부돼도 유지되도록 한다.
+  parameters.degradationPreference = "maintain-framerate";
   void transceiver.sender.setParameters(parameters).catch(() => undefined);
 };
 
-/** 전면 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
-export const openFrontCamera = async (): Promise<MediaStream> => {
+/** 요청한 방향의 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
+export const openCamera = async (
+  facingMode: ArCameraFacingModeType = "user",
+  requireExactFacingMode = false
+): Promise<MediaStream> => {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error("이 환경에서는 카메라를 사용할 수 없습니다.");
   }
 
   await requestNativeCameraPermission();
 
-  return navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: {
-      facingMode: { ideal: "user" },
-      frameRate: { ideal: 30, max: 30 },
-      width: { ideal: 640, max: 640 },
-      height: { ideal: 480, max: 480 },
-    },
-  });
+  // 고밀도 화면에서 확대 표시되지 않도록 서버의 800×1298 출력에 입력을 맞춘다.
+  // 선호 크기를 지원하지 않는 카메라는 브라우저가 가능한 크기로 조절한다.
+  const video: MediaTrackConstraints & { zoom: ConstrainDouble } = {
+    facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
+    frameRate: { ideal: 30, max: 30 },
+    width: { ideal: 800 },
+    height: { ideal: 1298 },
+    aspectRatio: { ideal: 800 / 1298 },
+    zoom: { ideal: 0.5 },
+  };
+  return navigator.mediaDevices.getUserMedia({ audio: false, video });
 };
 
 export const getArConnectionErrorMessage = (error: unknown): string => {
@@ -93,6 +128,10 @@ export const getArConnectionErrorMessage = (error: unknown): string => {
 
     if (error.name === "NotFoundError") {
       return "사용 가능한 카메라를 찾지 못했습니다. 연결 상태를 확인해 주세요.";
+    }
+
+    if (error.name === "OverconstrainedError") {
+      return "전환할 카메라를 사용할 수 없습니다. 현재 기기에서 사용 가능한 카메라를 확인해 주세요.";
     }
 
     if (error.name === "NotReadableError") {

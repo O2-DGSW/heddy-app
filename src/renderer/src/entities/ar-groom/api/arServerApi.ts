@@ -5,6 +5,12 @@ import type { ArHairstyleOption } from "../model/arGroom.types";
 import { env } from "@/shared/config";
 import { isRecord, publicUrl } from "@/shared/lib";
 
+interface PostArServerOfferRequest {
+  sdp: string;
+  type: "offer";
+  out_size: "800x1298";
+}
+
 export const getArServerBaseUrl = (): string => {
   const configuredUrl = env.arServerUrl;
   if (!configuredUrl) return "";
@@ -37,10 +43,28 @@ export const getArGrooms = async (signal?: AbortSignal): Promise<ArHairstyleOpti
     signal?.throwIfAborted();
     throw new Error("헤어스타일 목록을 불러오지 못했습니다.", { cause: error });
   }
-  return parseArGrooms(response);
+  return parseArGrooms(response, baseUrl);
 };
 
-export const parseArGrooms = (response: unknown): ArHairstyleOption[] => {
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every(item => typeof item === "string");
+
+const isUuid = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
+const isArGroomAssetPath = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^\/?grooms\/[A-Za-z0-9._-]+\.png$/.test(value) &&
+  !value.includes("..");
+
+const resolveArGroomAssetUrl = (path: string, baseUrl: string): string =>
+  `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+
+export const parseArGrooms = (
+  response: unknown,
+  serverBaseUrl = getArServerBaseUrl()
+): ArHairstyleOption[] => {
   if (!isRecord(response) || !Array.isArray(response.grooms)) {
     throw new Error("헤어스타일 목록을 불러오지 못했습니다.");
   }
@@ -48,8 +72,24 @@ export const parseArGrooms = (response: unknown): ArHairstyleOption[] => {
     if (!isRecord(groom) || typeof groom.name !== "string" || !groom.name.trim()) {
       throw new Error("헤어스타일 목록을 불러오지 못했습니다.");
     }
-    // GLB 파일은 서버에서 렌더링하므로 목록 이름만 사용한다.
-    return { id: groom.name, label: groom.name };
+
+    const thumbUrl = isArGroomAssetPath(groom.thumb)
+      ? resolveArGroomAssetUrl(groom.thumb, serverBaseUrl)
+      : undefined;
+    const viewsUrl = isArGroomAssetPath(groom.views)
+      ? resolveArGroomAssetUrl(groom.views, serverBaseUrl)
+      : undefined;
+
+    return {
+      name: groom.name,
+      hairstyleId: isUuid(groom.hairstyle_id) ? groom.hairstyle_id : undefined,
+      label: typeof groom.label === "string" && groom.label.trim() ? groom.label : groom.name,
+      gender: typeof groom.gender === "string" ? groom.gender : undefined,
+      type: typeof groom.type === "string" ? groom.type : undefined,
+      tags: isStringArray(groom.tags) ? groom.tags.filter(tag => tag.trim()) : [],
+      thumbUrl,
+      viewsUrl,
+    };
   });
 };
 
@@ -58,9 +98,19 @@ export const requestArServerOffer = async (
   offer: RTCSessionDescriptionInit,
   signal?: AbortSignal
 ): Promise<RTCSessionDescriptionInit> => {
+  if (offer.type !== "offer" || typeof offer.sdp !== "string" || !offer.sdp.trim()) {
+    throw new Error("AR 연결 정보를 준비하지 못했습니다. 다시 연결해 주세요.");
+  }
+  // RTCSessionDescription의 toJSON에 의존하면 추가 필드가 빠질 수 있어 일반 객체로 보낸다.
+  // 서버는 지원 해상도를 소문자 x를 사용한 문자열로 받는다.
+  const request: PostArServerOfferRequest = {
+    sdp: offer.sdp,
+    type: offer.type,
+    out_size: "800x1298",
+  };
   let answer: unknown;
   try {
-    answer = await post(`${serverBaseUrl}/offer`, offer, { signal });
+    answer = await post(`${serverBaseUrl}/offer`, request, { signal });
   } catch (error: unknown) {
     signal?.throwIfAborted();
     const message =

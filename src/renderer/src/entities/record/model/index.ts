@@ -28,6 +28,13 @@ export {
   parseDurationValue,
 } from "./duration";
 export { getTreatmentRecordPhotoDisplayUrl, getTreatmentRecordThumbnailUrl } from "./photo";
+export {
+  MAX_ANALYSIS_JOB_POLL_COUNT,
+  getAnalysisJobPhase,
+  getAnalysisJobPollInterval,
+  getAnalysisJobProgress,
+} from "./analysisJob";
+export type { AnalysisJobPhaseType } from "./analysisJob";
 export type {
   CalendarDay,
   PhotoItem,
@@ -37,6 +44,13 @@ export type {
 } from "./recordForm.types";
 export type { ProcedureType } from "./constants";
 export type {
+  AnalysisJobAcceptedApiData,
+  AnalysisJobAcceptedApiResponse,
+  AnalysisJobApiData,
+  AnalysisJobApiResponse,
+  AnalysisJobFailureApiData,
+  AnalysisJobStatusType,
+  PostAnalysisRequest,
   AnalysisApiData,
   AnalysisApiResponse,
   AnalysisGrade,

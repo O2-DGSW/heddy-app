@@ -9,6 +9,7 @@ interface ArStatusNoticeProps {
   connectionErrorMessage: string | null;
   groomState: ArGroomState;
   foreheadState: ArGroomState;
+  showForeheadStatus?: boolean;
   onReconnect: () => void;
   onGroomRetry: () => void;
   onForeheadRefresh: () => void;
@@ -25,6 +26,7 @@ const getNoticeContent = ({
   connectionErrorMessage,
   groomState,
   foreheadState,
+  showForeheadStatus = true,
   onReconnect,
   onGroomRetry,
   onForeheadRefresh,
@@ -46,7 +48,7 @@ const getNoticeContent = ({
     };
   }
 
-  if (foreheadState.status === "error") {
+  if (showForeheadStatus && foreheadState.status === "error") {
     return {
       message: foreheadState.message ?? "이마를 만들지 못했습니다. 정면을 보고 다시 시도해 주세요.",
       actionLabel: "이마 다시 만들기",
@@ -54,7 +56,7 @@ const getNoticeContent = ({
     };
   }
 
-  if (foreheadState.status === "loading") {
+  if (showForeheadStatus && foreheadState.status === "loading") {
     return { message: "이마를 만드는 중입니다. 정면을 보고 잠시만 기다려 주세요." };
   }
 
