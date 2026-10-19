@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- public/ 파일이라 웹 배포(base /mobile/)에서는 Vite가 /mobile/을 붙인다 -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- CSS를 다 읽은 뒤에야 폰트 요청이 시작되지 않도록 미리 받는다 -->
     <link
       rel="preload"
