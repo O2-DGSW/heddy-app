@@ -77,10 +77,6 @@ const RecommendPage = lazyPage(
   () => import("@/pages/recommend"),
   m => m.RecommendPage
 );
-const SavedStylesPage = lazyPage(
-  () => import("@/pages/saved-styles"),
-  m => m.SavedStylesPage
-);
 const SharePermissionsPage = lazyPage(
   () => import("@/pages/share-permissions"),
   m => m.SharePermissionsPage
@@ -160,7 +156,6 @@ export const AppRoutes = () => {
           </Route>
           <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
           <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
-          <Route path="/profile/saved-styles" element={<SavedStylesPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
         <Route element={<RequireGuest />}>

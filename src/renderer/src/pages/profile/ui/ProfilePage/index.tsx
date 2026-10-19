@@ -6,11 +6,9 @@ import { AccountDeletionModal } from "@/features/auth/delete-account";
 import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetMyProfile } from "@/entities/profile";
-import { useGetSavedStyles } from "@/entities/saved-style";
 import { useGetShares } from "@/entities/share";
 import { chevronRightIcon, profileAvatar } from "@/shared";
 
-import bookmarkIcon from "../../assets/bookmark.svg";
 import heartIcon from "../../assets/heart.svg";
 import settingsIcon from "../../assets/settings.svg";
 import sharePermissionsIcon from "../../assets/share-permissions.svg";
@@ -39,12 +37,6 @@ const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     icon: sharePermissionsIcon,
     label: "공유 권한 관리",
     to: "/profile/share-permissions",
-    isAvailable: true,
-  },
-  {
-    icon: bookmarkIcon,
-    label: "저장한 후보 스타일",
-    to: "/profile/saved-styles",
     isAvailable: true,
   },
 ];
@@ -105,14 +97,11 @@ const ProfilePage = () => {
   const { data: profile, isLoading } = useGetMyProfile();
   const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
   const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
-  // 후보 목록 API는 페이지 없이 전부 내려 주므로 개수만 센다.
-  const { data: savedStyles } = useGetSavedStyles();
   const { handleLogout, isPending: isLogoutPending } = useLogout();
   const profileName = getProfileName(profile?.nickname, isLoading);
   const profileStats: ProfileStat[] = [
     { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
     // AI 분석 개수는 분석 기능이 서버에 연결되면 다시 넣는다(지금은 셀 값이 없다).
-    { label: "AR 후보", value: getProfileStatCount(savedStyles?.items.length) },
     { label: "공유 중", value: getProfileStatCount(shares?.page?.total_elements) },
   ];
 
@@ -157,7 +146,7 @@ const ProfilePage = () => {
               </div>
 
               <dl
-                className="grid h-[87px] grid-cols-3 place-items-center rounded-[15px]"
+                className="grid h-[87px] grid-cols-2 place-items-center rounded-[15px]"
                 style={{ backgroundColor: "#F4FBF8" }}
               >
                 {profileStats.map(stat => (

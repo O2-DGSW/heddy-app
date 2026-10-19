@@ -11,7 +11,8 @@ interface ArStyleSectionProps {
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
-  onMoreClick: () => void;
+  /** 저장한 스타일이 없을 때 AR 화면으로 보내 스타일을 저장하게 한다 */
+  onArClick: () => void;
 }
 
 const ArStyleSection = ({
@@ -19,7 +20,7 @@ const ArStyleSection = ({
   isLoading,
   isError,
   onRetry,
-  onMoreClick,
+  onArClick,
 }: ArStyleSectionProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const swipe = useHorizontalSwipe({
@@ -40,19 +41,10 @@ const ArStyleSection = ({
       aria-labelledby="home-ar-title"
       className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-3 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
     >
-      <div className="mb-3 flex shrink-0 items-center justify-between gap-1 px-3">
+      <div className="mb-3 flex min-h-9 shrink-0 items-center px-3">
         <h2 id="home-ar-title" className={cn(font.label.semiBold, "whitespace-nowrap")}>
           AR 저장 스타일
         </h2>
-        <button
-          type="button"
-          onClick={onMoreClick}
-          aria-label="저장한 AR 스타일 전체보기"
-          className="-my-2 flex min-h-9 items-center gap-0.5 whitespace-nowrap text-[10px] text-[var(--home-primary)]"
-        >
-          전체보기
-          <ArrowIcon className="h-2 w-2 rotate-180" color={lightTheme.primary.normal} />
-        </button>
       </div>
       {activeStyle && !isLoading && !isError ? (
         <div className="relative h-[190px] min-[375px]:h-auto min-[375px]:min-h-0 min-[375px]:flex-1">
@@ -98,8 +90,8 @@ const ArStyleSection = ({
           isLoading={isLoading}
           isError={isError}
           emptyMessage="현재 저장한 AR 스타일이 없습니다."
-          actionLabel={isError ? "다시 시도" : "저장한 스타일 보기"}
-          onAction={isError ? onRetry : onMoreClick}
+          actionLabel={isError ? "다시 시도" : "AR로 스타일 저장하기"}
+          onAction={isError ? onRetry : onArClick}
         />
       )}
     </section>
