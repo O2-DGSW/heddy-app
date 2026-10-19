@@ -1,7 +1,7 @@
 /** AR 서버와의 WebRTC 연결에 쓰는 헬퍼. React 상태와 무관하다 */
 import { requestNativeCameraPermission } from "./cameraPermission";
 
-const ICE_GATHERING_TIMEOUT_MS = 10000;
+const ICE_GATHERING_TIMEOUT_MS = 3000;
 export type ArCameraFacingModeType = "user" | "environment";
 
 export const resolveCameraFacingMode = (
@@ -40,7 +40,8 @@ export const waitForIceGatheringComplete = async (
   await new Promise<void>((resolve, reject) => {
     const timeout = window.setTimeout(() => {
       cleanup();
-      reject(new Error("ICE candidate 수집 시간이 초과되었습니다."));
+      // 늦은 후보 때문에 연결을 다시 시작하지 않고, 지금까지 모인 localDescription을 전송한다.
+      resolve();
     }, ICE_GATHERING_TIMEOUT_MS);
 
     const handleIceGatheringStateChange = () => {
