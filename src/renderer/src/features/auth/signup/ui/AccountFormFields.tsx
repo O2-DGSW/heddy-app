@@ -1,6 +1,12 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import type { RefObject } from "react";
 import { PasswordFields } from "@/features/auth/signup/ui/PasswordFields";
 import { PhoneVerificationField } from "@/features/auth/signup/ui/PhoneVerificationField";
+import { NICKNAME_MAX_LENGTH } from "@/features/auth/signup/model/validation";
+import type {
+  SignupFieldErrorsType,
+  SignupFieldKeyType,
+} from "@/features/auth/signup/model/useAccountForm";
 
 import type {
   CustomerAccountForm,
@@ -9,10 +15,15 @@ import type {
 
 interface AccountFormFieldsProps {
   form: CustomerAccountForm;
-  showEmailError?: boolean;
-  showPasswordError: boolean;
+  fieldErrors: SignupFieldErrorsType;
+  /* 제출에 실패하면 첫 번째 오류 칸으로 포커스를 옮기려고 칸마다 ref를 받는다 */
+  emailRef: RefObject<HTMLInputElement | null>;
+  passwordRef: RefObject<HTMLInputElement | null>;
+  passwordConfirmRef: RefObject<HTMLInputElement | null>;
+  nicknameRef: RefObject<HTMLInputElement | null>;
+  phoneRef: RefObject<HTMLInputElement | null>;
+  onFieldBlur: (field: SignupFieldKeyType) => void;
   showPhoneError: boolean;
-  showNameError?: boolean;
   showVerificationError?: boolean;
   canRequestVerification: boolean;
   nameLabel?: string;
@@ -22,10 +33,14 @@ interface AccountFormFieldsProps {
 
 export const AccountFormFields = ({
   form,
-  showEmailError = false,
-  showPasswordError,
+  fieldErrors,
+  emailRef,
+  passwordRef,
+  passwordConfirmRef,
+  nicknameRef,
+  phoneRef,
+  onFieldBlur,
   showPhoneError,
-  showNameError,
   showVerificationError,
   canRequestVerification,
   nameLabel = "닉네임",
@@ -57,18 +72,20 @@ export const AccountFormFields = ({
           style={inputStyle}
           placeholder="이메일"
           value={form.id}
-          aria-invalid={showEmailError || undefined}
-          aria-describedby={showEmailError ? "signup-email-error" : undefined}
+          ref={emailRef}
+          aria-invalid={Boolean(fieldErrors.email) || undefined}
+          aria-describedby={fieldErrors.email ? "signup-email-error" : undefined}
+          onBlur={() => onFieldBlur("email")}
           onChange={e => onChange({ ...form, id: e.target.value })}
         />
 
-        {showEmailError && (
+        {fieldErrors.email && (
           <p
             id="signup-email-error"
             className={`${font.caption.regular} pl-2`}
             style={{ color: lightTheme.status.error }}
           >
-            올바른 이메일을 입력해주세요.
+            {fieldErrors.email}
           </p>
         )}
       </div>
@@ -76,27 +93,46 @@ export const AccountFormFields = ({
       <PasswordFields
         password={form.password}
         passwordConfirm={form.passwordConfirm}
-        showError={showPasswordError}
+        passwordError={fieldErrors.password}
+        passwordConfirmError={fieldErrors.passwordConfirm}
+        passwordRef={passwordRef}
+        passwordConfirmRef={passwordConfirmRef}
         onPasswordChange={v => onChange({ ...form, password: v })}
         onPasswordConfirmChange={v => onChange({ ...form, passwordConfirm: v })}
+        onPasswordBlur={() => onFieldBlur("password")}
+        onPasswordConfirmBlur={() => onFieldBlur("passwordConfirm")}
       />
 
       <div className="flex flex-col gap-1">
-        <p className={`${font.label.medium} pl-2`} style={{ color: lightTheme.label.assistive }}>
+        <label
+          htmlFor="signup-nickname"
+          className={`${font.label.medium} pl-2`}
+          style={{ color: lightTheme.label.assistive }}
+        >
           {nameLabel}
-        </p>
+        </label>
 
         <input
+          id="signup-nickname"
+          ref={nicknameRef}
           className={`w-full rounded-xl px-4 py-4 focus:outline-none ${font.body.regular}`}
           style={inputStyle}
-          placeholder={nameLabel}
+          placeholder={`${nameLabel} (${NICKNAME_MAX_LENGTH}자 이하)`}
           value={form.name}
+          maxLength={NICKNAME_MAX_LENGTH}
+          aria-invalid={Boolean(fieldErrors.nickname) || undefined}
+          aria-describedby={fieldErrors.nickname ? "signup-nickname-error" : undefined}
+          onBlur={() => onFieldBlur("nickname")}
           onChange={e => onChange({ ...form, name: e.target.value })}
         />
 
-        {showNameError && (
-          <p className={`${font.caption.regular} pl-2`} style={{ color: lightTheme.status.error }}>
-            {nameLabel}을 입력해주세요.
+        {fieldErrors.nickname && (
+          <p
+            id="signup-nickname-error"
+            className={`${font.caption.regular} pl-2`}
+            style={{ color: lightTheme.status.error }}
+          >
+            {fieldErrors.nickname}
           </p>
         )}
       </div>
@@ -106,6 +142,7 @@ export const AccountFormFields = ({
         phone={form.phone}
         verificationCode={form.verificationCode}
         canRequestVerification={canRequestVerification}
+        phoneInputRef={phoneRef}
         showPhoneError={showPhoneError}
         showVerificationError={showVerificationError}
         smsVerification={smsVerification}

@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, RefObject } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { MAIN_CARRIERS, MVNO_CARRIERS, isMvnoCarrier } from "@/entities/auth";
 import type { Carrier } from "@/entities/auth";
@@ -12,6 +12,8 @@ interface PhoneVerificationFieldProps {
   phone: string;
   verificationCode: string;
   canRequestVerification: boolean;
+  /** 제출에 실패했을 때 휴대폰 칸으로 포커스를 옮기려고 받는다 */
+  phoneInputRef?: RefObject<HTMLInputElement | null>;
   showPhoneError?: boolean;
   showVerificationError?: boolean;
   smsVerification: SmsVerificationState;
@@ -25,6 +27,7 @@ export const PhoneVerificationField = ({
   phone,
   verificationCode,
   canRequestVerification,
+  phoneInputRef,
   showPhoneError = false,
   showVerificationError = false,
   smsVerification,
@@ -85,6 +88,9 @@ export const PhoneVerificationField = ({
           className={`min-w-0 flex-1 px-4 py-4 rounded-xl focus:outline-none ${font.body.regular}`}
           style={inputStyle}
           placeholder="휴대폰 번호"
+          ref={phoneInputRef}
+          inputMode="tel"
+          aria-label="휴대폰 번호"
           value={phone}
           onChange={e => onPhoneChange(formatPhone(e.target.value))}
         />

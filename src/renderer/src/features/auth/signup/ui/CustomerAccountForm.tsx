@@ -1,8 +1,13 @@
+import { useEffect, useRef } from "react";
 import type { FormEvent } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { Link } from "react-router-dom";
 import type { CustomerAccountForm as CustomerAccountFormType } from "@/features/auth/signup/model/signup.types";
-import { useAccountForm } from "@/features/auth/signup/model/useAccountForm";
+import { SIGNUP_FIELD_ORDER, useAccountForm } from "@/features/auth/signup/model/useAccountForm";
+import type {
+  SignupFieldKeyType,
+  SignupServerFieldErrorsType,
+} from "@/features/auth/signup/model/useAccountForm";
 import { useSmsVerification } from "@/entities/auth";
 import { AccountFormFields } from "@/features/auth/signup/ui/AccountFormFields";
 import HairProfileField from "@/features/auth/signup/ui/HairProfileField";
@@ -14,6 +19,8 @@ interface CustomerAccountFormProps {
   onSubmit: () => void;
   isLoading: boolean;
   error?: string | null;
+  /** 서버가 칸별로 거부한 오류. 해당 칸 아래에 보여 주고 첫 칸으로 포커스를 옮긴다 */
+  serverFieldErrors?: SignupServerFieldErrorsType;
 }
 
 export const CustomerAccountForm = ({
@@ -22,38 +29,85 @@ export const CustomerAccountForm = ({
   onSubmit,
   isLoading,
   error,
+  serverFieldErrors = {},
 }: CustomerAccountFormProps) => {
   const sms = useSmsVerification("SIGNUP", form.phone);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const passwordConfirmRef = useRef<HTMLInputElement>(null);
+  const nicknameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const fieldRefs = {
+    email: emailRef,
+    password: passwordRef,
+    passwordConfirm: passwordConfirmRef,
+    nickname: nicknameRef,
+    phone: phoneRef,
+  };
 
   const {
     isValid,
     canRequestVerification,
-    showEmailError,
-    showPasswordError,
+    fieldErrors,
     showPhoneError,
-    showNameError,
     showAgreementError,
     showVerificationError,
     setSubmitted,
-  } = useAccountForm(form, sms.isVerified);
+    getFirstInvalidField,
+    handleFieldBlur,
+  } = useAccountForm(form, sms.isVerified, serverFieldErrors);
+
+  /** 오류 칸을 화면 가운데로 올리고 포커스를 줘 바로 고칠 수 있게 한다 */
+  const focusField = (field: SignupFieldKeyType) => {
+    const input = fieldRefs[field].current;
+
+    input?.scrollIntoView({ behavior: "smooth", block: "center" });
+    input?.focus({ preventScroll: true });
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
 
-    if (!isValid || isLoading) return;
+    if (isLoading) return;
+
+    const firstInvalidField = getFirstInvalidField();
+
+    if (firstInvalidField) {
+      focusField(firstInvalidField);
+      return;
+    }
+
+    if (!isValid) return;
 
     onSubmit();
   };
+
+  // 서버가 칸별 오류를 돌려주면 그중 첫 칸으로 데려간다
+  useEffect(() => {
+    const firstServerField = SIGNUP_FIELD_ORDER.find(
+      field => field !== "passwordConfirm" && field !== "phone" && serverFieldErrors[field]
+    );
+
+    if (firstServerField) {
+      focusField(firstServerField);
+    }
+    // 서버 응답이 바뀔 때만 옮긴다. focusField는 ref만 읽어 의존성에서 뺀다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverFieldErrors]);
 
   return (
     <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
       <AccountFormFields
         form={form}
-        showEmailError={showEmailError}
-        showPasswordError={showPasswordError}
+        fieldErrors={fieldErrors}
+        emailRef={emailRef}
+        passwordRef={passwordRef}
+        passwordConfirmRef={passwordConfirmRef}
+        nicknameRef={nicknameRef}
+        phoneRef={phoneRef}
+        onFieldBlur={handleFieldBlur}
         showPhoneError={showPhoneError}
-        showNameError={showNameError}
         showVerificationError={showVerificationError}
         canRequestVerification={canRequestVerification}
         smsVerification={{
