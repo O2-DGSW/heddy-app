@@ -137,6 +137,7 @@ export const AppRoutes = () => {
   const location = useLocation();
   const reloadHandledRef = useRef(false);
   const { mutateAsync: generateRecommendation } = useMutation({
+    mutationKey: recommendationQueryKeys.all,
     mutationFn: generateRecommendationApi,
     retry: false,
   });
