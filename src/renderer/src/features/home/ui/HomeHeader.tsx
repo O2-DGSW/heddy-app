@@ -99,7 +99,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
       </div>
       <section
         aria-labelledby="home-discover-title"
-        className="relative isolate rounded-[26px] bg-[var(--home-soft)] p-5"
+        className="relative isolate overflow-hidden rounded-[26px] bg-[var(--home-soft)] p-5"
       >
         <div
           aria-hidden="true"
