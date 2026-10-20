@@ -1,3 +1,5 @@
+import { font } from "@heddy/design-tokens";
+import { cn } from "@/shared";
 import HomeImage from "./HomeImage";
 import colorDot from "../assets/recommend-color-dot.svg";
 
@@ -52,5 +54,3 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
   </button>
 );
 export default RecommendationCard;
-import { font } from "@heddy/design-tokens";
-import { cn } from "@/shared";
