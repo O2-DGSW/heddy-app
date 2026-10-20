@@ -5,6 +5,7 @@ import { ArrowIcon, cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
+import HomeSectionSkeleton from "./HomeSectionSkeleton";
 
 interface ArStyleSectionProps {
   styles: ArStyleType[];
@@ -54,7 +55,7 @@ const ArStyleSection = ({
           <ArrowIcon className="size-2.5 rotate-180" color={lightTheme.label.alternative} />
         </button>
       </div>
-      {activeStyle && !isLoading && !isError ? (
+      {activeStyle ? (
         <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-3">
           <figure {...swipe} className="flex min-w-0 flex-col gap-3">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
@@ -93,9 +94,12 @@ const ArStyleSection = ({
             </figcaption>
           </figure>
         </div>
+      ) : isLoading ? (
+        <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)]">
+          <HomeSectionSkeleton variant="saved-style" />
+        </div>
       ) : (
         <SectionFeedback
-          isLoading={isLoading}
           isError={isError}
           emptyMessage="현재 저장한 AR 스타일이 없습니다."
           actionLabel={isError ? "다시 시도" : "AR로 미리보기"}
