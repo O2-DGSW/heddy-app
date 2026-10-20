@@ -99,7 +99,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
       </div>
       <section
         aria-labelledby="home-discover-title"
-        className="relative isolate overflow-hidden rounded-[26px] bg-[var(--home-soft)] p-5"
+        className="@container relative isolate overflow-hidden rounded-[26px] bg-[var(--home-soft)] p-5"
       >
         <div
           aria-hidden="true"
@@ -107,7 +107,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
         >
           <span className="absolute -right-5 top-3 size-36 rounded-full bg-[var(--home-surface)]/50" />
         </div>
-        <div className="relative z-10 pr-24 min-[375px]:pr-28">
+        <div className="relative z-10 pr-20 @min-[280px]:pr-28">
           <span
             className={cn(
               "inline-flex rounded-full bg-[var(--home-surface)]/80 px-2.5 py-1 text-[var(--home-share-text)]",
