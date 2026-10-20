@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
+import { Fragment, StrictMode } from "react";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { recommendationQueryKeys, useGetLatestRecommendation } from "@/entities/recommendation";
@@ -14,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   generate: vi.fn(),
   latest: vi.fn(),
   records: vi.fn(),
+  navigation: vi.fn(),
 }));
 
 vi.mock("@/entities/auth", () => ({
@@ -42,31 +44,47 @@ vi.mock("@/pages/public-share", () => ({ PublicSharePage: () => <p>공유 화면
 const oldRecommendation: RecommendationApiData = { recommendation_run_id: "old", items: [] };
 const newRecommendation: RecommendationApiData = { recommendation_run_id: "new", items: [] };
 const clients: QueryClient[] = [];
+const navigationDescriptor = Object.getOwnPropertyDescriptor(performance, "getEntriesByType");
 
 const HomeQueries = () => {
   const recommendation = useGetLatestRecommendation();
+  const navigate = useNavigate();
   useQuery({ queryKey: ["test-records"], queryFn: mocks.records });
   return (
     <main>
       <p>본문</p>
       <p>{recommendation.data?.recommendation_run_id}</p>
+      <button type="button" onClick={() => navigate("/recommend")}>
+        추천 화면으로
+      </button>
+      <button type="button" onClick={() => navigate("/home")}>
+        홈 화면으로
+      </button>
     </main>
   );
 };
 
-const setup = async (path = "/home") => {
+interface SetupOptions {
+  strict?: boolean;
+  cached?: boolean;
+}
+
+const setup = async (path = "/home", { strict = false, cached = true }: SetupOptions = {}) => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: 60_000 } },
   });
   clients.push(client);
-  client.setQueryData(recommendationQueryKeys.latest(), oldRecommendation);
+  if (cached) client.setQueryData(recommendationQueryKeys.latest(), oldRecommendation);
   client.setQueryData(["test-records"], []);
+  const Root = strict ? StrictMode : Fragment;
   render(
-    <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[path]}>
-        <AppRoutes />
-      </MemoryRouter>
-    </QueryClientProvider>
+    <Root>
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[path]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </QueryClientProvider>
+    </Root>
   );
   await screen.findByText(
     path.startsWith("/s/") ? "공유 화면" : path === "/welcome" ? "환영 화면" : "본문"
@@ -96,11 +114,21 @@ beforeEach(() => {
   mocks.generate.mockResolvedValue(newRecommendation);
   mocks.latest.mockResolvedValue(oldRecommendation);
   mocks.records.mockResolvedValue([]);
+  mocks.navigation.mockReturnValue([]);
+  Object.defineProperty(performance, "getEntriesByType", {
+    configurable: true,
+    value: mocks.navigation,
+  });
 });
 
 afterEach(() => {
   cleanup();
   clients.splice(0).forEach(client => client.clear());
+  if (navigationDescriptor) {
+    Object.defineProperty(performance, "getEntriesByType", navigationDescriptor);
+  } else {
+    Reflect.deleteProperty(performance, "getEntriesByType");
+  }
 });
 
 test.each(["/home", "/recommend"])(
@@ -235,3 +263,72 @@ test.each(["/s/shared-record", "/welcome"])(
     expect(mocks.generate).not.toHaveBeenCalled();
   }
 );
+
+test.each(["/home", "/recommend"])(
+  "%s 브라우저 새로고침은 StrictMode에서도 한 번 생성하고 이후 탭 이동에는 재생성하지 않는다",
+  async path => {
+    mocks.navigation.mockReturnValue([{ entryType: "navigation", type: "reload" }]);
+    const complete = vi.fn<(value: RecommendationApiData) => void>();
+    mocks.generate.mockReturnValue(
+      new Promise<RecommendationApiData>(resolve => complete.mockImplementation(resolve))
+    );
+    const client = await setup(path, { strict: true, cached: false });
+    await waitFor(() => expect(mocks.generate).toHaveBeenCalledTimes(1));
+    expect(mocks.generate.mock.calls[0]?.[0]).toEqual({ force_refresh: true });
+    expect(mocks.latest).not.toHaveBeenCalled();
+    expect(client.getQueryState(recommendationQueryKeys.latest())?.fetchStatus).toBe("fetching");
+
+    await act(async () => complete(newRecommendation));
+    await screen.findByText("new");
+    fireEvent.click(screen.getByRole("button", { name: "추천 화면으로" }));
+    await screen.findByText("new");
+    fireEvent.click(screen.getByRole("button", { name: "홈 화면으로" }));
+    await screen.findByText("new");
+    expect(client.getQueryData(recommendationQueryKeys.latest())).toEqual(newRecommendation);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+    expect(mocks.latest).not.toHaveBeenCalled();
+  }
+);
+
+test.each(["navigate", "back_forward"])("%s 진입은 새 추천을 생성하지 않는다", async type => {
+  mocks.navigation.mockReturnValue([{ entryType: "navigation", type }]);
+  await setup("/home", { strict: true, cached: false });
+  await screen.findByText("old");
+  expect(mocks.generate).not.toHaveBeenCalled();
+  expect(mocks.latest).toHaveBeenCalledTimes(1);
+});
+
+test.each(["/s/shared-record", "/welcome"])(
+  "%s 브라우저 새로고침에서는 개인 추천을 생성하지 않는다",
+  async path => {
+    mocks.navigation.mockReturnValue([{ entryType: "navigation", type: "reload" }]);
+    if (path === "/welcome") {
+      mocks.restore.mockResolvedValue(false);
+      mocks.token.mockResolvedValue(null);
+    }
+    await setup(path, { strict: true, cached: false });
+    expect(mocks.generate).not.toHaveBeenCalled();
+  }
+);
+
+test("브라우저 새로고침의 생성 실패는 자동 재시도하지 않는다", async () => {
+  mocks.navigation.mockReturnValue([{ entryType: "navigation", type: "reload" }]);
+  mocks.generate.mockRejectedValue(new Error("생성 실패"));
+  await setup("/home", { strict: true });
+  await screen.findByText("old");
+  expect(mocks.generate).toHaveBeenCalledTimes(1);
+});
+
+test("브라우저 재추천 중 로그아웃으로 캐시를 비우면 늦은 결과를 넣지 않는다", async () => {
+  mocks.navigation.mockReturnValue([{ entryType: "navigation", type: "reload" }]);
+  const complete = vi.fn<(value: RecommendationApiData) => void>();
+  mocks.generate.mockReturnValue(
+    new Promise<RecommendationApiData>(resolve => complete.mockImplementation(resolve))
+  );
+  const client = await setup("/home", { strict: true, cached: false });
+  await waitFor(() => expect(mocks.generate).toHaveBeenCalledTimes(1));
+  cleanup();
+  client.clear();
+  await act(async () => complete(newRecommendation));
+  expect(client.getQueryData(recommendationQueryKeys.latest())).toBeUndefined();
+});
