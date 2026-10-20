@@ -51,6 +51,10 @@ const ArHairstylePage = () => {
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const requestedHairstyleId = new URLSearchParams(location.search).get("hairstyleId");
+  // 외부 ID를 groom으로 전송하지 않고 서버 목록에서 확인한 항목만 선택한다.
+  const requestedHairstylePosition = hairstyleOptions.findIndex(
+    option => option.hairstyleId === requestedHairstyleId && option.name !== ""
+  );
   const selectedGroom = selectedHairstyle.name;
   const {
     connectionStatus,
@@ -103,23 +107,19 @@ const ArHairstylePage = () => {
     )
       return;
 
-    // 외부 ID를 groom으로 전송하지 않고 서버 목록에서 확인한 항목만 선택한다.
-    const selectedIndex = hairstyleOptions.findIndex(
-      option => option.hairstyleId === requestedHairstyleId && option.name !== ""
-    );
     appliedRecommendationRef.current = requestKey;
-    if (selectedIndex < 0) {
+    if (requestedHairstylePosition < 0) {
       showInfoToast("추천한 스타일은 현재 AR에서 사용할 수 없어요. 다른 스타일을 골라 주세요.");
       return;
     }
     // 연결 전에도 원하는 선택을 보관한다. 연결이 준비되면 기존 fit 흐름에서 적용한다.
-    selectHairstylePosition(selectedIndex);
+    selectHairstylePosition(requestedHairstylePosition);
   }, [
     groomsError,
-    hairstyleOptions,
     isGroomsPending,
     location.key,
     requestedHairstyleId,
+    requestedHairstylePosition,
     selectHairstylePosition,
   ]);
 
