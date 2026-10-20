@@ -19,6 +19,7 @@ export const MainTransitionOutlet = () => {
       setupRouterOutlet(outletRef.current, {
         platform: "auto",
         maxCached: MAX_CACHED_PAGES,
+        keepInDom: false,
         swipeGesture: "auto",
       });
     }
