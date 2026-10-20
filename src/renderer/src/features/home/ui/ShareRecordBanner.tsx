@@ -22,7 +22,11 @@ const ShareRecordBanner = ({ onClick, hasRecord = true }: ShareRecordBannerProps
     <button
       type="button"
       onClick={onClick}
-      className="min-h-8 shrink-0 max-[374px]:ml-auto rounded bg-[var(--home-share)] px-4 text-[10px] font-semibold text-[var(--home-share-text)]"
+      className={cn(
+        "min-h-8 shrink-0 max-[374px]:ml-auto rounded px-4 text-[10px] font-semibold",
+        hasRecord && "bg-[var(--home-share)] text-[var(--home-share-text)]",
+        !hasRecord && "bg-[var(--home-line)] text-[var(--home-secondary)]"
+      )}
     >
       {hasRecord ? "기록 공유하기" : "기록 추가하기"}
     </button>
