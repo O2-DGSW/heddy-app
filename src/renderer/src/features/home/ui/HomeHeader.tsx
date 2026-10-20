@@ -129,7 +129,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           type="button"
           onClick={onArClick}
           className={cn(
-            "relative z-20 mt-5 flex min-h-12 w-full items-center justify-between rounded-2xl bg-[var(--home-primary)] px-4 text-[var(--home-surface)] transition-opacity active:opacity-80",
+            "relative z-20 mt-5 flex min-h-12 w-fit max-w-full items-center gap-3 rounded-2xl bg-[var(--home-primary)] px-4 text-[var(--home-surface)] transition-opacity active:opacity-80",
             font.label.semiBold
           )}
         >
