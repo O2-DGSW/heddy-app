@@ -7,7 +7,13 @@ import { useLogout } from "@/features/auth/logout";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetMyProfile } from "@/entities/profile";
 import { useGetShares } from "@/entities/share";
-import { chevronRightIcon, profileAvatar } from "@/shared";
+import {
+  chevronRightIcon,
+  profileAvatar,
+  ProfileSummarySkeleton,
+  PageSkeleton,
+  PROFILE_SUMMARY_BACKGROUND,
+} from "@/shared";
 
 import heartIcon from "../../assets/heart.svg";
 import settingsIcon from "../../assets/settings.svg";
@@ -95,14 +101,27 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isAccountDeletionModalOpen, setIsAccountDeletionModalOpen] = useState(false);
   const { data: profile, isLoading } = useGetMyProfile();
-  const { data: treatmentRecords } = useGetTreatmentRecords({ page: 0, size: 1 });
-  const { data: shares } = useGetShares({ status: "ACTIVE", page: 0, size: 1 });
+  const { data: treatmentRecords, isPending: areRecordsPending } = useGetTreatmentRecords({
+    page: 0,
+    size: 1,
+  });
+  const { data: shares, isPending: areSharesPending } = useGetShares({
+    status: "ACTIVE",
+    page: 0,
+    size: 1,
+  });
   const { handleLogout, isPending: isLogoutPending } = useLogout();
   const profileName = getProfileName(profile?.nickname, isLoading);
   const profileStats: ProfileStat[] = [
-    { label: "시술 기록", value: getProfileStatCount(treatmentRecords?.page?.total_elements) },
+    {
+      label: "시술 기록",
+      value: getProfileStatCount(treatmentRecords?.page?.total_elements),
+    },
     // AI 분석 개수는 분석 기능이 서버에 연결되면 다시 넣는다(지금은 셀 값이 없다).
-    { label: "공유 중", value: getProfileStatCount(shares?.page?.total_elements) },
+    {
+      label: "공유 중",
+      value: getProfileStatCount(shares?.page?.total_elements),
+    },
   ];
 
   const handleMenuClick = (to?: string) => {
@@ -118,6 +137,14 @@ const ProfilePage = () => {
   const handleAccountDeletionModalOpen = () => {
     setIsAccountDeletionModalOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <cap-page>
+        <PageSkeleton variant="profile" label="프로필을 불러오는 중" />
+      </cap-page>
+    );
+  }
 
   return (
     <cap-page>
@@ -145,25 +172,36 @@ const ProfilePage = () => {
                 </h1>
               </div>
 
-              <dl
-                className="grid h-[87px] grid-cols-2 place-items-center rounded-[15px]"
-                style={{ backgroundColor: "#F4FBF8" }}
-              >
-                {profileStats.map(stat => (
-                  <div className="flex min-w-0 flex-col items-center gap-[4px]" key={stat.label}>
-                    <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
-                      <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
-                      <span style={{ color: lightTheme.label.alternative }}>건</span>
-                    </dd>
-                    <dt
-                      className={`${font.label.medium} whitespace-nowrap text-center`}
-                      style={{ color: lightTheme.label.assistive }}
-                    >
-                      {stat.label}
-                    </dt>
-                  </div>
-                ))}
-              </dl>
+              {areRecordsPending || areSharesPending ? (
+                <div
+                  role="status"
+                  aria-busy="true"
+                  aria-label="시술 기록과 공유 현황을 불러오는 중"
+                >
+                  <span className="sr-only">시술 기록과 공유 현황을 불러오는 중</span>
+                  <ProfileSummarySkeleton />
+                </div>
+              ) : (
+                <dl
+                  className="grid h-[87px] grid-cols-2 place-items-center rounded-[15px]"
+                  style={{ backgroundColor: PROFILE_SUMMARY_BACKGROUND }}
+                >
+                  {profileStats.map(stat => (
+                    <div className="flex min-w-0 flex-col items-center gap-[4px]" key={stat.label}>
+                      <dd className={`${font.headline1.medium} flex items-center gap-[2px]`}>
+                        <span style={{ color: lightTheme.primary.normal }}>{stat.value}</span>
+                        <span style={{ color: lightTheme.label.alternative }}>건</span>
+                      </dd>
+                      <dt
+                        className={`${font.label.medium} whitespace-nowrap text-center`}
+                        style={{ color: lightTheme.label.assistive }}
+                      >
+                        {stat.label}
+                      </dt>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </header>
           </div>
         </div>

@@ -82,7 +82,7 @@ describe("하단 탭과 화면 전환 연동", () => {
       );
     }
 
-    expect(animate).not.toHaveBeenCalled();
+    expect(animate).toHaveBeenCalled();
   });
 
   test("현재 탭 연속 클릭은 이력과 다음 화면의 전환 의도를 변경하지 않는다", async () => {
@@ -109,7 +109,7 @@ describe("하단 탭과 화면 전환 연동", () => {
     fireEvent.click(screen.getByRole("button", { name: "프로필" }));
 
     await expectCurrentPage("/profile", 1);
-    expect(animate).not.toHaveBeenCalled();
+    expect(animate).toHaveBeenCalled();
   });
 
   test("탭 이동 이후 상세 화면 진입과 뒤로가기는 유지한다", async () => {

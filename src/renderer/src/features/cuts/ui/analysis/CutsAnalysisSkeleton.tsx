@@ -1,6 +1,4 @@
-import { lightTheme } from "@heddy/design-tokens";
-
-const blockStyle = { backgroundColor: lightTheme.fill.normal };
+import { Skeleton } from "@/shared";
 
 /**
  * 결과를 불러오는 동안 같은 자리에 같은 크기의 블록을 깔아 둔다.
@@ -13,20 +11,10 @@ export const CutsAnalysisSkeleton = () => (
     className="flex flex-col gap-4 px-4 pb-6 pt-6"
     role="status"
   >
-    <div
-      className="mx-auto aspect-square w-4/5 animate-pulse rounded-4xl motion-reduce:animate-none"
-      style={blockStyle}
-    />
-    <div
-      className="h-[96px] animate-pulse rounded-2xl motion-reduce:animate-none"
-      style={blockStyle}
-    />
+    <Skeleton className="mx-auto aspect-square w-4/5 rounded-4xl" />
+    <Skeleton className="h-[96px] rounded-2xl" />
     {[0, 1, 2, 3].map(index => (
-      <div
-        className="h-[44px] animate-pulse rounded-xl motion-reduce:animate-none"
-        key={index}
-        style={blockStyle}
-      />
+      <Skeleton className="h-[44px] rounded-xl" key={index} />
     ))}
   </div>
 );

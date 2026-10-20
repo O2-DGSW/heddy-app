@@ -14,7 +14,11 @@ const NavBar = () => {
     if (location.pathname === to) return;
 
     // 하단 탭은 서로 독립된 시작점이므로 이전 탭을 뒤로가기 대상으로 쌓지 않는다.
-    setNavigation("root", "none");
+    const currentIndex = NAV_ITEMS.findIndex(
+      item => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+    );
+    const nextIndex = NAV_ITEMS.findIndex(item => item.to === to);
+    setNavigation("root", nextIndex < currentIndex ? "back" : "forward");
     navigate(to);
   };
 
