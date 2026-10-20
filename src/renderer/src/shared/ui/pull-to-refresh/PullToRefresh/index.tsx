@@ -76,11 +76,14 @@ const PullToRefresh = ({ children, onRefresh, resetKey }: PullToRefreshProps) =>
     };
 
     const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        resetGesture();
+        return;
+      }
       const touch = event.touches[0];
       const target = event.target;
       if (
         refreshing ||
-        event.touches.length !== 1 ||
         !touch ||
         !(target instanceof Element) ||
         target.closest(IGNORED_TARGETS) ||
@@ -119,7 +122,11 @@ const PullToRefresh = ({ children, onRefresh, resetKey }: PullToRefreshProps) =>
       setState(current => ({ ...current, distance }));
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        resetGesture();
+        return;
+      }
       if (!start || refreshing) return;
       const shouldRefresh = distance >= REFRESH_DISTANCE;
       resetGesture();
