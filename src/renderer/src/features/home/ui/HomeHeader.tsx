@@ -105,7 +105,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           aria-hidden="true"
           className="pointer-events-none absolute -right-5 top-3 -z-10 size-36 rounded-full bg-[var(--home-surface)]/50"
         />
-        <div className="relative min-h-36 pr-28 min-[375px]:pr-32">
+        <div className="relative z-10 min-h-36 pr-28 min-[375px]:pr-32">
           <span
             className={cn(
               "inline-flex rounded-full bg-[var(--home-surface)]/80 px-2.5 py-1 text-[var(--home-share-text)]",
@@ -127,7 +127,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           type="button"
           onClick={onArClick}
           className={cn(
-            "mt-5 flex min-h-12 w-full items-center justify-between rounded-2xl bg-[var(--home-primary)] pl-4 pr-28 text-[var(--home-surface)] transition-opacity active:opacity-80",
+            "relative z-20 mt-5 flex min-h-12 w-full items-center justify-between rounded-2xl bg-[var(--home-primary)] px-4 text-[var(--home-surface)] transition-opacity active:opacity-80",
             font.label.semiBold
           )}
         >
@@ -140,7 +140,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           width={1323}
           height={1189}
           decoding="async"
-          className="pointer-events-none absolute bottom-2 right-1 z-10 h-36 w-36 object-contain min-[375px]:w-40"
+          className="pointer-events-none absolute -right-8 bottom-2 z-0 h-52 w-56 object-contain min-[375px]:h-56 min-[375px]:w-60"
         />
       </section>
     </header>
