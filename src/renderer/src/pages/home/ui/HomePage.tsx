@@ -89,6 +89,8 @@ const HomePage = () => {
               <RecommendationSection
                 recommendations={recommendations.data}
                 isLoading={recommendations.isLoading}
+                isRefreshing={recommendations.isRefreshing}
+                isGenerating={recommendations.isGenerating}
                 isError={recommendations.isError}
                 onMoreClick={handleRecommendationClick}
                 onRecommendationClick={handleRecommendationClick}
