@@ -50,10 +50,10 @@ const ArHairstylePage = () => {
     handleFitSettingsChange,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
-  const requestedHairstyleId = new URLSearchParams(location.search).get("hairstyleId");
-  // 외부 ID를 groom으로 전송하지 않고 서버 목록에서 확인한 항목만 선택한다.
+  const requestedGroom = new URLSearchParams(location.search).get("groom");
+  // URL의 값을 바로 전송하지 않고 GPU 목록에 존재하는 groom만 선택한다.
   const requestedHairstylePosition = hairstyleOptions.findIndex(
-    option => option.hairstyleId === requestedHairstyleId && option.name !== ""
+    option => option.name === requestedGroom && option.name !== ""
   );
   const selectedGroom = selectedHairstyle.name;
   const {
@@ -98,9 +98,9 @@ const ArHairstylePage = () => {
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
-    const requestKey = `${location.key}:${requestedHairstyleId}`;
+    const requestKey = `${location.key}:${requestedGroom}`;
     if (
-      !requestedHairstyleId ||
+      !requestedGroom ||
       isGroomsPending ||
       groomsError ||
       appliedRecommendationRef.current === requestKey
@@ -118,7 +118,7 @@ const ArHairstylePage = () => {
     groomsError,
     isGroomsPending,
     location.key,
-    requestedHairstyleId,
+    requestedGroom,
     requestedHairstylePosition,
     selectHairstylePosition,
   ]);
