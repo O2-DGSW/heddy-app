@@ -30,7 +30,8 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
             className="flex size-11 items-center justify-center rounded-full"
             onClick={handleToggleNotifications}
           >
-            <img src={alarmIcon} alt="" width={28} height={28} />
+            {/* 로고 본문·프로필 그림과 시각적 중심을 맞추고 클릭 영역은 유지한다. */}
+            <img src={alarmIcon} alt="" width={28} height={28} className="-translate-y-[3px]" />
           </button>
           <button
             type="button"
