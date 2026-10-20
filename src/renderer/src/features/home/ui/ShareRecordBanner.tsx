@@ -1,6 +1,6 @@
 import { font } from "@heddy/design-tokens";
 import { cn } from "@/shared";
-import hairstylePhoto from "../assets/home-hairstyle.png";
+import mascot from "../assets/share-mascot.webp";
 interface ShareRecordBannerProps {
   hasRecord?: boolean;
   onClick: () => void;
@@ -11,13 +11,13 @@ const ShareRecordBanner = ({ onClick, hasRecord = true }: ShareRecordBannerProps
     className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-3xl bg-[var(--home-soft)]/60 p-4"
   >
     <img
-      src={hairstylePhoto}
+      src={mascot}
       alt=""
       width={44}
-      height={44}
+      height={43}
       loading="lazy"
       decoding="async"
-      className="size-11 shrink-0 rounded-xl object-cover object-top"
+      className="w-11 shrink-0 object-contain"
     />
     <div className="flex min-w-0 flex-col gap-1.5">
       <h2
