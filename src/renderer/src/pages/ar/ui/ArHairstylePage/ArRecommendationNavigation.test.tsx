@@ -74,9 +74,14 @@ const connection = {
 const NavigationControls = () => {
   const navigate = useNavigate();
   return (
-    <button type="button" onClick={() => navigate("/ar?groom=leaf-cut")}>
-      같은 추천 다시 열기
-    </button>
+    <>
+      <button type="button" onClick={() => navigate("/ar?groom=leaf-cut")}>
+        같은 추천 다시 열기
+      </button>
+      <button type="button" onClick={() => navigate("/ar?groom=removed-style")}>
+        사라진 추천 열기
+      </button>
+    </>
   );
 };
 
@@ -158,6 +163,15 @@ test("등록되지 않은 groom은 원본을 유지하고 한 번만 안내한�
   expect(mocks.toast).toHaveBeenCalledTimes(1);
 
   view.rerender(<TestApp initialEntry={entry} />);
+  expect(mocks.toast).toHaveBeenCalledTimes(1);
+});
+
+test("다른 헤어를 보던 중 사라진 추천으로 진입하면 원본으로 복귀한다", () => {
+  render(<TestApp initialEntry="/ar?groom=leaf-cut" />);
+  expect(screen.getByLabelText("선택한 헤어").textContent).toBe("리프컷");
+  fireEvent.click(screen.getByRole("button", { name: "사라진 추천 열기" }));
+  expect(screen.getByLabelText("선택한 헤어").textContent).toBe("원본 스타일");
+  expect(mocks.connect.mock.lastCall?.[1]).toBe("");
   expect(mocks.toast).toHaveBeenCalledTimes(1);
 });
 
