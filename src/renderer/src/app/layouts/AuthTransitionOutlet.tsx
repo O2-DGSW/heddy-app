@@ -1,26 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Outlet } from "react-router-dom";
-import { setupRouterOutlet } from "@capgo/capacitor-transitions/react";
-
-import { MAX_CACHED_PAGES, initCapgoTransitions } from "./initCapgoTransitions";
-
-const AUTH_TRANSITION_DURATION = 380;
-
-initCapgoTransitions();
+import { usePageMotion } from "./usePageMotion";
 
 export const AuthTransitionOutlet = () => {
   const outletRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (outletRef.current) {
-      setupRouterOutlet(outletRef.current, {
-        platform: "auto",
-        duration: AUTH_TRANSITION_DURATION,
-        maxCached: MAX_CACHED_PAGES,
-        swipeGesture: "auto",
-      });
-    }
-  }, []);
+  usePageMotion(outletRef, true);
 
   return (
     <cap-router-outlet ref={outletRef} class="block h-full min-h-full">
