@@ -47,7 +47,7 @@ export const useHomeData = () => {
       data: mapRecommendationToHomeCards(recommendation.data ?? null),
       isLoading:
         recommendation.isPending ||
-        (!recommendation.data?.items.length &&
+        (!recommendation.data?.items?.length &&
           (recommendation.isFetching || isGeneratingRecommendation)),
       isRefreshing: recommendation.isFetching || isGeneratingRecommendation,
       isGenerating: isGeneratingRecommendation,
