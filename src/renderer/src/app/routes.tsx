@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { matchQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import type { ComponentType } from "react";
 
@@ -135,6 +135,7 @@ const EntryRedirect = () => {
 export const AppRoutes = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
+  const reloadHandledRef = useRef(false);
   const { mutateAsync: generateRecommendation } = useMutation({
     mutationFn: generateRecommendationApi,
     retry: false,
@@ -176,6 +177,29 @@ export const AppRoutes = () => {
       throw failed.reason;
     }
   };
+
+  useEffect(() => {
+    if (reloadHandledRef.current) return;
+    reloadHandledRef.current = true;
+    const isBrowserReload =
+      typeof performance.getEntriesByType === "function" &&
+      performance
+        .getEntriesByType("navigation")
+        .some(entry => "type" in entry && entry.type === "reload");
+    if (!isBrowserReload || location.pathname.startsWith("/s/")) return;
+
+    // 홈 조회가 시작되기 전에 같은 key로 등록해 새 추천 생성 요청을 공유한다.
+    // 일반 탭 이동과 StrictMode의 effect 재실행에서는 다시 생성하지 않는다.
+    void queryClient.prefetchQuery({
+      queryKey: recommendationQueryKeys.latest(),
+      queryFn: async () => {
+        if (!(await restoreAuthSession())) return null;
+        return generateRecommendationApi({ force_refresh: true });
+      },
+      staleTime: 0,
+      retry: false,
+    });
+  }, [location.pathname, queryClient]);
 
   return (
     <PullToRefresh onRefresh={handleRefresh} resetKey={location.key}>
