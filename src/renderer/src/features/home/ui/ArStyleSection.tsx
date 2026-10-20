@@ -5,7 +5,6 @@ import { ArrowIcon, cn } from "@/shared";
 import { useHorizontalSwipe } from "@/shared/lib";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
-import HomeSectionSkeleton from "./HomeSectionSkeleton";
 
 interface ArStyleSectionProps {
   styles: ArStyleType[];
@@ -38,27 +37,19 @@ const ArStyleSection = ({
   const handleNext = () => setSelectedIndex(index => (index + 1) % Math.max(styles.length, 1));
 
   return (
-    <section aria-labelledby="home-ar-title" className="min-w-0">
-      <div className="mb-3 flex min-h-11 items-center justify-between gap-3">
-        <h2 id="home-ar-title" className={font.headline2.bold}>
-          눈여겨본 AR 스타일
+    <section
+      aria-labelledby="home-ar-title"
+      className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[10px] bg-[var(--home-surface)] pt-3 pb-3 shadow-[0_0_4px_rgb(0_0_0/0.08)]"
+    >
+      <div className="mb-3 flex min-h-9 shrink-0 items-center px-3">
+        <h2 id="home-ar-title" className={cn(font.label.semiBold, "whitespace-nowrap")}>
+          AR 저장 스타일
         </h2>
-        <button
-          type="button"
-          onClick={onArClick}
-          className={cn(
-            font.caption.medium,
-            "flex min-h-11 shrink-0 items-center gap-1 text-[var(--home-secondary)]"
-          )}
-        >
-          AR 체험
-          <ArrowIcon className="size-2.5 rotate-180" color={lightTheme.label.alternative} />
-        </button>
       </div>
-      {activeStyle ? (
-        <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-3">
-          <figure {...swipe} className="flex min-w-0 flex-col gap-3">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+      {activeStyle && !isLoading && !isError ? (
+        <div className="relative h-[190px] min-[375px]:h-auto min-[375px]:min-h-0 min-[375px]:flex-1">
+          <figure {...swipe} className="absolute inset-0 flex min-h-0 flex-col gap-2 px-2">
+            <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg">
               <HomeImage
                 src={activeStyle.imageUrl ?? undefined}
                 alt={styleName}
@@ -70,7 +61,7 @@ const ArStyleSection = ({
                     type="button"
                     aria-label="이전 저장 스타일"
                     onClick={handlePrevious}
-                    className="absolute left-2 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
+                    className="absolute left-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
                   >
                     <ArrowIcon className="size-3" color={lightTheme.primary.normal} />
                   </button>
@@ -78,7 +69,7 @@ const ArStyleSection = ({
                     type="button"
                     aria-label="다음 저장 스타일"
                     onClick={handleNext}
-                    className="absolute right-2 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
+                    className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--home-surface)]/90"
                   >
                     <ArrowIcon className="size-3 rotate-180" color={lightTheme.primary.normal} />
                   </button>
@@ -88,21 +79,18 @@ const ArStyleSection = ({
             <figcaption
               aria-live="polite"
               title={styleName}
-              className={cn("truncate px-1 pb-1 text-center", font.label.semiBold)}
+              className={cn("shrink-0 truncate text-center", font.caption.semiBold)}
             >
               {styleName}
             </figcaption>
           </figure>
         </div>
-      ) : isLoading ? (
-        <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)]">
-          <HomeSectionSkeleton variant="saved-style" />
-        </div>
       ) : (
         <SectionFeedback
+          isLoading={isLoading}
           isError={isError}
           emptyMessage="현재 저장한 AR 스타일이 없습니다."
-          actionLabel={isError ? "다시 시도" : "AR로 미리보기"}
+          actionLabel={isError ? "다시 시도" : "AR로 스타일 저장하기"}
           onAction={isError ? onRetry : onArClick}
         />
       )}

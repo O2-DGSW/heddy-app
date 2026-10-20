@@ -1,6 +1,5 @@
-import { useIsMutating } from "@tanstack/react-query";
 import { useGetMyProfile } from "@/entities/profile";
-import { recommendationQueryKeys, useGetLatestRecommendation } from "@/entities/recommendation";
+import { useGetLatestRecommendation } from "@/entities/recommendation";
 import { useGetTreatmentRecords } from "@/entities/record";
 import { useGetSavedStyles } from "@/entities/saved-style";
 import type { SavedStyleResponse } from "@/entities/saved-style";
@@ -24,8 +23,6 @@ export const useHomeData = () => {
   const records = useGetTreatmentRecords(HOME_RECENT_RECORD_PARAMS);
   const recommendation = useGetLatestRecommendation();
   const savedStyles = useGetSavedStyles();
-  const isGeneratingRecommendation =
-    useIsMutating({ mutationKey: recommendationQueryKeys.all }) > 0;
 
   const recentItem = records.data?.items[0];
 
@@ -45,12 +42,7 @@ export const useHomeData = () => {
     },
     recommendations: {
       data: mapRecommendationToHomeCards(recommendation.data ?? null),
-      isLoading:
-        recommendation.isPending ||
-        (!recommendation.data?.items?.length &&
-          (recommendation.isFetching || isGeneratingRecommendation)),
-      isRefreshing: recommendation.isFetching || isGeneratingRecommendation,
-      isGenerating: isGeneratingRecommendation,
+      isLoading: recommendation.isPending || (recommendation.isError && recommendation.isFetching),
       isError: recommendation.isError,
       refetch: recommendation.refetch,
     },

@@ -1,19 +1,17 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { matchQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import type { ComponentType } from "react";
 
 import { AuthTransitionOutlet, MobileLayout, MainTransitionOutlet } from "./layouts";
 import { RequireAuth, RequireGuest } from "./routes/AuthRouteGuard";
-import { getAccessToken, restoreAuthSession } from "@/entities/auth";
-import { generateRecommendationApi, recommendationQueryKeys } from "@/entities/recommendation";
+import { restoreAuthSession } from "@/entities/auth";
 // 앱을 열면 바로 보이는 화면은 첫 번들에 둔다. 나머지는 처음 들어갈 때 불러온다.
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { HomePage } from "@/pages/home";
 import { NotFoundPage } from "@/pages/not-found";
-import { PageLoading, PullToRefresh } from "@/shared";
+import { PageLoading } from "@/shared";
 
 /** 화면 단위로 나눠 불러온다. 불러오는 동안 레이아웃·하단 바는 그대로 두고 그 화면 자리만 비운다 */
 const lazyPage = <TModule,>(
@@ -133,114 +131,43 @@ const EntryRedirect = () => {
 };
 
 export const AppRoutes = () => {
-  const queryClient = useQueryClient();
-  const location = useLocation();
-  const reloadHandledRef = useRef(false);
-  const { mutateAsync: generateRecommendation } = useMutation({
-    mutationKey: recommendationQueryKeys.all,
-    mutationFn: generateRecommendationApi,
-    retry: false,
-  });
-
-  const handleRefresh = async (): Promise<void> => {
-    const accessToken = location.pathname.startsWith("/s/") ? null : await getAccessToken();
-    const latestRecommendation = { queryKey: recommendationQueryKeys.latest(), exact: true };
-    const recommendationQuery = queryClient.getQueryCache().find(latestRecommendation);
-
-    if (accessToken) {
-      // 이전 추천 조회가 새로 생성한 결과를 덮어쓰지 않도록 먼저 취소한다.
-      await queryClient.cancelQueries(latestRecommendation);
-    }
-
-    const results = await Promise.allSettled([
-      queryClient.refetchQueries(
-        {
-          type: "active",
-          predicate: query => !accessToken || !matchQuery(latestRecommendation, query),
-        },
-        { cancelRefetch: false, throwOnError: true }
-      ),
-      accessToken
-        ? generateRecommendation({ force_refresh: true }).then(recommendation => {
-            // 로그인·로그아웃으로 캐시가 초기화되면 이전 계정의 결과를 넣지 않는다.
-            // 자동 토큰 갱신만으로는 현재 화면의 추천 반영을 막지 않는다.
-            if (
-              recommendationQuery &&
-              queryClient.getQueryCache().find(latestRecommendation) === recommendationQuery
-            ) {
-              queryClient.setQueryData(recommendationQueryKeys.latest(), recommendation);
-            }
-          })
-        : Promise.resolve(),
-    ]);
-    const failed = results.find(result => result.status === "rejected");
-    if (failed?.status === "rejected") {
-      throw failed.reason;
-    }
-  };
-
-  useEffect(() => {
-    if (reloadHandledRef.current) return;
-    reloadHandledRef.current = true;
-    const isBrowserReload =
-      typeof performance.getEntriesByType === "function" &&
-      performance
-        .getEntriesByType("navigation")
-        .some(entry => "type" in entry && entry.type === "reload");
-    if (!isBrowserReload || location.pathname.startsWith("/s/")) return;
-
-    // 홈 조회가 시작되기 전에 같은 key로 등록해 새 추천 생성 요청을 공유한다.
-    // 일반 탭 이동과 StrictMode의 effect 재실행에서는 다시 생성하지 않는다.
-    void queryClient.prefetchQuery({
-      queryKey: recommendationQueryKeys.latest(),
-      queryFn: async () => {
-        if (!(await restoreAuthSession())) return null;
-        return generateRecommendationApi({ force_refresh: true });
-      },
-      staleTime: 0,
-      retry: false,
-    });
-  }, [location.pathname, queryClient]);
-
   return (
-    <PullToRefresh onRefresh={handleRefresh} resetKey={location.key}>
-      <Routes>
-        {/* 공유 링크로 들어온 사람이 로그인 없이 보는 웹 화면이라 앱 셸 밖에 둔다 */}
-        <Route path="/s/:shareToken" element={<PublicSharePage />} />
-        <Route element={<MobileLayout />}>
-          <Route path="/" element={<EntryRedirect />} />
-          <Route element={<RequireAuth />}>
-            <Route element={<MainTransitionOutlet />}>
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/ar" element={<ArHairstylePage />} />
-              <Route path="/recommend" element={<RecommendPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/edit" element={<ProfileEditPage />} />
-              <Route path="/cuts" element={<CutsListPage />} />
-              <Route path="/cuts/add" element={<RecordAddPage />} />
-              <Route path="/cuts/:id" element={<CutsDetailPage />}>
-                <Route index element={<Navigate replace to="info" />} />
-                <Route path="info" element={<CutsDetailInfoPage />} />
-                <Route path="analysis" element={<CutsDetailAnalysisPage />} />
-              </Route>
-              <Route path="/cuts/:id/edit" element={<RecordEditPage />} />
-              <Route path="/cuts/:id/share" element={<CutsSharePage />} />
+    <Routes>
+      {/* 공유 링크로 들어온 사람이 로그인 없이 보는 웹 화면이라 앱 셸 밖에 둔다 */}
+      <Route path="/s/:shareToken" element={<PublicSharePage />} />
+      <Route element={<MobileLayout />}>
+        <Route path="/" element={<EntryRedirect />} />
+        <Route element={<RequireAuth />}>
+          <Route element={<MainTransitionOutlet />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/ar" element={<ArHairstylePage />} />
+            <Route path="/recommend" element={<RecommendPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<ProfileEditPage />} />
+            <Route path="/cuts" element={<CutsListPage />} />
+            <Route path="/cuts/add" element={<RecordAddPage />} />
+            <Route path="/cuts/:id" element={<CutsDetailPage />}>
+              <Route index element={<Navigate replace to="info" />} />
+              <Route path="info" element={<CutsDetailInfoPage />} />
+              <Route path="analysis" element={<CutsDetailAnalysisPage />} />
             </Route>
-            <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
-            <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/cuts/:id/edit" element={<RecordEditPage />} />
+            <Route path="/cuts/:id/share" element={<CutsSharePage />} />
           </Route>
-          <Route element={<RequireGuest />}>
-            <Route element={<AuthTransitionOutlet />}>
-              <Route path="/welcome" element={<WelcomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/find-id" element={<FindPage />} />
-              <Route path="/find-password" element={<FindPage />} />
-            </Route>
+          <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
+          <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+        <Route element={<RequireGuest />}>
+          <Route element={<AuthTransitionOutlet />}>
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/find-id" element={<FindPage />} />
+            <Route path="/find-password" element={<FindPage />} />
           </Route>
         </Route>
-      </Routes>
-    </PullToRefresh>
+      </Route>
+    </Routes>
   );
 };

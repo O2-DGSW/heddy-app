@@ -8,39 +8,27 @@ interface ShareRecordBannerProps {
 const ShareRecordBanner = ({ onClick, hasRecord = true }: ShareRecordBannerProps) => (
   <section
     aria-label="기록 공유"
-    className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-3xl bg-[var(--home-soft)]/60 p-4"
+    className="flex min-h-[67px] flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] bg-[var(--home-banner)] px-[15px] py-3"
   >
-    <img
-      src={mascot}
-      alt=""
-      width={44}
-      height={43}
-      loading="lazy"
-      decoding="async"
-      className="w-11 shrink-0 object-contain"
-    />
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <h2
-        className={cn(font.label.semiBold, "truncate text-[var(--home-secondary)]")}
-        title="다음 미용실 방문이 더 쉬워지도록"
-      >
-        다음 미용실 방문이 더 쉬워지도록
+    <img src={mascot} alt="" className="h-[37px] w-[39px] shrink-0 object-cover" />
+    <div className="flex min-w-[140px] flex-1 flex-col gap-1">
+      <h2 className={cn(font.label.semiBold, "text-[var(--home-secondary)]")}>
+        {hasRecord ? "기록을 선택하고 공유해보세요" : "공유할 시술 기록이 없습니다"}
       </h2>
-      <p className={cn(font.caption.medium, "truncate text-[var(--home-secondary)]")}>
-        {hasRecord
-          ? "내 헤어 기록을 디자이너에게 공유해요."
-          : "좋았던 스타일을 기록으로 남겨두세요."}
+      <p className="text-[11px] font-medium text-[var(--home-muted)]">
+        {hasRecord ? "미용실 상담이 더 쉬워져요!" : "첫 시술 기록을 추가해보세요."}
       </p>
     </div>
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "col-span-2 min-h-11 rounded-xl bg-[var(--home-surface)] px-4 text-[var(--home-share-text)]",
-        font.caption.semiBold
+        "min-h-8 shrink-0 max-[374px]:ml-auto rounded px-4 text-[10px] font-semibold",
+        hasRecord && "bg-[var(--home-share)] text-[var(--home-share-text)]",
+        !hasRecord && "bg-[var(--home-line)] text-[var(--home-secondary)]"
       )}
     >
-      {hasRecord ? "기록 공유하기" : "기록 시작하기"}
+      {hasRecord ? "기록 공유하기" : "기록 추가하기"}
     </button>
   </section>
 );
