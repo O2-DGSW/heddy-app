@@ -51,21 +51,20 @@ const RecentRecordCard = ({
               alt={`${record.procedureName} 시술 사진`}
               className="absolute inset-0 size-full object-cover"
             />
-            {record.daysAgo && (
-              <span
-                className={cn(
-                  font.caption.medium,
-                  "absolute bottom-1 right-1 rounded-lg bg-[color-mix(in_srgb,var(--home-text)_70%,transparent)] px-2 py-0.5 text-[var(--home-note)]"
-                )}
-              >
-                {record.daysAgo}
-              </span>
-            )}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-1.5 text-[var(--home-secondary)]">
-            <time className={font.caption.medium} dateTime={record.date}>
-              {record.date}
-            </time>
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+              <time className={font.caption.medium} dateTime={record.date}>
+                {record.date}
+              </time>
+              {record.daysAgo && (
+                <span
+                  className={cn(font.caption.medium, "ml-auto shrink-0 text-[var(--home-muted)]")}
+                >
+                  {record.daysAgo}
+                </span>
+              )}
+            </div>
             <div className="flex flex-col items-start gap-1.5">
               <p className={cn(font.body.semiBold, "text-[var(--home-text)]")}>
                 {record.procedureName}
