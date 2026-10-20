@@ -119,9 +119,6 @@ const RecentRecordCard = ({
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={font.body.semiBold}>오늘의 스타일을 남겨보세요</span>
-          <span className={cn(font.caption.medium, "break-keep text-[var(--home-secondary)]")}>
-            사진 한 장부터, 나만의 헤어 기록
-          </span>
           <span
             className={cn(
               font.caption.semiBold,
