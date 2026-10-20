@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { Capacitor } from "@capacitor/core";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_GROOM_FIT_SETTINGS } from "@/entities/ar-groom";
@@ -48,8 +49,10 @@ class Peer extends EventTarget {
   createDataChannel() {
     return this.channel;
   }
-  createOffer = vi.fn().mockResolvedValue(this.localDescription);
-  setLocalDescription = vi.fn().mockResolvedValue(undefined);
+  createOffer = vi.fn(async () => this.localDescription);
+  setLocalDescription = vi.fn(async (description: RTCSessionDescriptionInit) => {
+    this.localDescription = { type: description.type, sdp: description.sdp ?? "" };
+  });
   setRemoteDescription = vi.fn().mockResolvedValue(undefined);
   close() {
     this.changeState("closed");
@@ -83,6 +86,7 @@ const setOnline = (online: boolean) => {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  vi.spyOn(Capacitor, "getPlatform").mockReturnValue("web");
   Peer.instances = [];
   vi.stubGlobal("RTCPeerConnection", Peer);
   Object.defineProperty(navigator, "mediaDevices", {
@@ -99,8 +103,35 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+
+test.each(["ios", "android", "web"])(
+  "%s에서 준비한 SDP를 localDescription과 서버 offer 요청에 동일하게 사용한다",
+  async platform => {
+    const originalSdp = "v=0\r\na=extmap:4 urn:3gpp:video-orientation\r\na=ice-ufrag:camera\r\n";
+    const expectedSdp = platform === "ios" ? "v=0\r\na=ice-ufrag:camera\r\n" : originalSdp;
+    class OrientationPeer extends Peer {
+      localDescription = { type: "offer", sdp: originalSdp };
+    }
+    vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+    vi.stubGlobal("RTCPeerConnection", OrientationPeer);
+
+    setup();
+    await advance(0);
+
+    expect(Peer.instances[0].setLocalDescription).toHaveBeenCalledWith({
+      type: "offer",
+      sdp: expectedSdp,
+    });
+    expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
+      "/ar-server",
+      { type: "offer", sdp: expectedSdp },
+      expect.any(AbortSignal)
+    );
+  }
+);
 
 describe("ICE 후보 수집과 offer 전송", () => {
   beforeEach(async () => {
