@@ -142,7 +142,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           width={1323}
           height={1189}
           decoding="async"
-          className="pointer-events-none absolute -right-8 bottom-6 z-30 h-52 w-56 object-contain min-[375px]:h-56 min-[375px]:w-60"
+          className="pointer-events-none absolute right-[calc(-18%_+_2px)] top-4 z-30 h-52 w-56 object-contain min-[375px]:h-56 min-[375px]:w-60"
         />
       </section>
     </header>
