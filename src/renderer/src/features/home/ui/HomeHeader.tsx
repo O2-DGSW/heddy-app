@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import profileIcon from "../assets/profile-head.svg";
 import alarmIcon from "../assets/alarm.svg";
-import hairstylePhoto from "../assets/home-hairstyle.png";
+import arPhonePreview from "../assets/ar-phone-preview.png";
 import HeddyLogo from "./HeddyLogo";
 
 interface HomeHeaderProps {
@@ -105,7 +105,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           aria-hidden="true"
           className="pointer-events-none absolute -right-5 top-3 -z-10 size-36 rounded-full bg-[var(--home-surface)]/50"
         />
-        <div className="relative pr-24 min-[375px]:pr-28">
+        <div className="relative min-h-36 pr-28 min-[375px]:pr-32">
           <span
             className={cn(
               "inline-flex rounded-full bg-[var(--home-surface)]/80 px-2.5 py-1 text-[var(--home-share-text)]",
@@ -123,12 +123,12 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
             자르기 전, 나에게 어울리는지 확인해요.
           </p>
           <img
-            src={hairstylePhoto}
+            src={arPhonePreview}
             alt=""
-            width={120}
-            height={120}
+            width={1323}
+            height={1189}
             decoding="async"
-            className="pointer-events-none absolute right-0 top-3 size-24 rounded-2xl object-cover object-top min-[375px]:size-28"
+            className="pointer-events-none absolute -right-4 top-0 h-36 w-36 object-contain min-[375px]:w-40"
           />
         </div>
         <button
