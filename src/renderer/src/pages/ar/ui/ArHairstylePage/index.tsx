@@ -13,7 +13,6 @@ import ArHairstyleBrowser from "../ArHairstyleBrowser";
 import { ArCameraViewport, ArHairstyleCarousel } from "@/features/ar-preview";
 import ArStatusNotice from "../ArStatusNotice";
 import ArConnectionLoader from "../ArConnectionLoader";
-import ArCaptureGuide from "../ArCaptureGuide";
 
 const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
   const firstOption = options.find(option => option.name === "hippie-perm");
@@ -141,9 +140,6 @@ const ArHairstylePage = () => {
             inert={isConnectionPending}
           >
             <ArCameraViewport videoRef={cameraPreviewRef} fit="cover" mirrored={isPreviewMirrored}>
-              <ArCaptureGuide
-                visible={!isConnectionPending && !isStyleLoading && !isHairstyleBrowserOpen}
-              />
               {isStyleLoading && (
                 <div
                   aria-live="polite"
