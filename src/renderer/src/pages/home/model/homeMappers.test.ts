@@ -14,7 +14,7 @@ describe("mapRecommendationToHomeCards", () => {
       recommendation_run_id: "run",
       items: [
         { rank: 4, hairstyle: { hairstyle_id: "d", style_name: "D" } },
-        { rank: 3, hairstyle: { hairstyle_id: "c", style_name: "C" } },
+        { rank: 3, recommended_color: "  ", hairstyle: { hairstyle_id: "c", style_name: "C" } },
         {
           rank: 1,
           score: 0.82,
@@ -26,7 +26,11 @@ describe("mapRecommendationToHomeCards", () => {
           management_difficulty: "low",
           estimated_daily_care_minutes: 10,
         },
-        { rank: 2, hairstyle: { hairstyle_id: "b", style_name: null } },
+        {
+          rank: 2,
+          recommended_color: "애쉬 브라운",
+          hairstyle: { hairstyle_id: "b", style_name: null },
+        },
       ],
     });
 
@@ -36,12 +40,18 @@ describe("mapRecommendationToHomeCards", () => {
         rank: 1,
         title: "A",
         imageUrl: "https://example.test/a",
-        colorName: "컬러 정보 없음",
+        colorName: "",
         tags: ["관리 쉬움", "10분 케어"],
         matchRate: 82,
       },
-      expect.objectContaining({ id: "b", rank: 2, title: "추천 스타일", imageUrl: "" }),
-      expect.objectContaining({ id: "c", rank: 3, title: "C", imageUrl: "" }),
+      expect.objectContaining({
+        id: "b",
+        rank: 2,
+        title: "추천 스타일",
+        imageUrl: "",
+        colorName: "애쉬 브라운",
+      }),
+      expect.objectContaining({ id: "c", rank: 3, title: "C", imageUrl: "", colorName: "" }),
     ]);
   });
 });
