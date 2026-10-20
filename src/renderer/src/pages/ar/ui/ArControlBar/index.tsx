@@ -46,6 +46,8 @@ const ArControlBar = ({
   const handlePresetSelect = (color: string) => {
     setIsCustomColorOpen(false);
     onColorSelect(color);
+    setIsPaletteOpen(false);
+    toggleRef.current?.focus();
   };
   const handlePaletteKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Escape") return;

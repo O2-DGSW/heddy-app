@@ -3,6 +3,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_GROOM_FIT_SETTINGS } from "@/entities/ar-groom";
 import { ApiHttpError } from "@heddy/api";
+import { waitForIceGatheringComplete } from "./peerConnection";
 import { useArServerConnection } from "./useArServerConnection";
 
 const mocks = vi.hoisted(() => ({
@@ -37,6 +38,7 @@ vi.mock("./useGroomFitControl", () => ({
 class Peer extends EventTarget {
   static instances: Peer[] = [];
   connectionState = "new";
+  iceGatheringState: RTCIceGatheringState = "gathering";
   localDescription = { type: "offer", sdp: "offer" };
   channel = new EventTarget();
   constructor() {
@@ -98,6 +100,67 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.unstubAllGlobals();
+});
+
+describe("ICE 후보 수집과 offer 전송", () => {
+  beforeEach(async () => {
+    const actual = await vi.importActual<typeof import("./peerConnection")>("./peerConnection");
+    vi.mocked(waitForIceGatheringComplete).mockImplementationOnce(
+      actual.waitForIceGatheringComplete
+    );
+  });
+
+  test("3초가 지나면 재시도 없이 그때까지 수집한 localDescription을 전송한다", async () => {
+    const hook = setup();
+    await advance(0);
+    const peer = Peer.instances[0];
+    await advance(2999);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    peer.localDescription = { type: "offer", sdp: "offer-with-collected-candidates" };
+
+    await advance(1);
+    expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
+      "/ar-server",
+      peer.localDescription,
+      expect.any(AbortSignal)
+    );
+    expect(peer.setRemoteDescription).toHaveBeenCalledWith({ type: "answer", sdp: "answer" });
+    expect(hook.result.current.connectionFeedback).toBe("connecting");
+
+    await advance(10_000);
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+    expect(Peer.instances).toHaveLength(1);
+    expect(track.stop).not.toHaveBeenCalled();
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+  });
+
+  test("ICE 수집이 먼저 완료되면 3초를 기다리지 않고 한 번만 전송한다", async () => {
+    setup();
+    await advance(1000);
+    const peer = Peer.instances[0];
+    expect(mocks.offer).not.toHaveBeenCalled();
+
+    peer.iceGatheringState = "complete";
+    act(() => peer.dispatchEvent(new Event("icegatheringstatechange")));
+    await advance(0);
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+
+    await advance(3000);
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+  });
+
+  test("ICE 수집 중 페이지를 나가면 제한 시간이 지나도 offer를 전송하지 않는다", async () => {
+    const hook = setup();
+    await advance(1000);
+    act(() => hook.result.current.handlePageLeave());
+
+    await advance(3000);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(track.stop).toHaveBeenCalledTimes(1);
+    expect(hook.result.current.connectionStatus).toBe("idle");
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("AR 연결 상태와 복구", () => {
