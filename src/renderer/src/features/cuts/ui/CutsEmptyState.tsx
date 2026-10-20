@@ -10,28 +10,36 @@ interface CutsEmptyStateProps {
 
 export const CutsEmptyState = ({ isFiltered = false, onAddRecord }: CutsEmptyStateProps) => {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4">
-      <img src={sadMascot} alt="" className="h-28 w-28" />
-      <p
-        className={cn("text-center", font.body.regular)}
-        style={{ color: lightTheme.label.assistive }}
-      >
-        {isFiltered ? (
-          <>
-            이 카테고리의
-            <br />
-            시술기록이 없어요
-          </>
-        ) : (
-          <>
-            아직 시술기록이 없어요
-            <br />첫 시술을 기록해 보세요
-          </>
-        )}
-      </p>
-      {!isFiltered && onAddRecord && (
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
+      <img
+        src={sadMascot}
+        alt=""
+        width={88}
+        height={88}
+        className="mb-4 size-22 shrink-0 object-contain"
+      />
+      <div className="flex w-full max-w-72 flex-col items-center gap-2">
+        <h2
+          className={cn("text-balance", font.body.semiBold)}
+          style={{ color: lightTheme.label.neutral }}
+        >
+          {isFiltered ? "이 카테고리는 아직 비어 있어요" : "나만의 헤어 기록을 시작해요"}
+        </h2>
+        <p
+          className={cn("text-pretty", font.caption.regular)}
+          style={{ color: lightTheme.label.assistive }}
+        >
+          {isFiltered ? "새로 받은 시술이 있다면" : "사진 한 장으로 시작하는 스타일 히스토리,"}
+          <br />
+          {isFiltered ? "사진과 함께 기록을 남겨보세요." : "좋았던 변화를 차곡차곡 모아보세요."}
+        </p>
+      </div>
+      {onAddRecord && (
         <button
-          className={cn("mt-1 h-[42px] rounded-[10px] px-[20px]", font.label.semiBold)}
+          className={cn(
+            "mt-5 min-h-11 max-w-full rounded-xl px-5 transition-opacity hover:opacity-90 active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4",
+            font.label.semiBold
+          )}
           onClick={onAddRecord}
           style={{
             backgroundColor: lightTheme.primary.normal,
@@ -39,7 +47,7 @@ export const CutsEmptyState = ({ isFiltered = false, onAddRecord }: CutsEmptySta
           }}
           type="button"
         >
-          첫 기록 추가
+          {isFiltered ? "시술 기록 남기기" : "첫 기록 남기기"}
         </button>
       )}
     </div>
