@@ -48,6 +48,7 @@ const RecentRecordCard = ({
           <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl">
             <HomeImage
               src={record.thumbnailUrl}
+              loading="eager"
               alt={`${record.procedureName} 시술 사진`}
               className="absolute inset-0 size-full object-cover"
             />
