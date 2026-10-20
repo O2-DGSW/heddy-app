@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import profileIcon from "../assets/profile-head.svg";
 import alarmIcon from "../assets/alarm.svg";
-import arPhonePreview from "../assets/ar-phone-preview.png";
+import arPhonePreview from "../assets/ar-phone-preview.webp";
 import HeddyLogo from "./HeddyLogo";
 
 interface HomeHeaderProps {
