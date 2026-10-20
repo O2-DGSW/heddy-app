@@ -1,12 +1,13 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { matchQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useState } from "react";
 
 import type { ComponentType } from "react";
 
 import { AuthTransitionOutlet, MobileLayout, MainTransitionOutlet } from "./layouts";
 import { RequireAuth, RequireGuest } from "./routes/AuthRouteGuard";
-import { restoreAuthSession } from "@/entities/auth";
+import { getAccessToken, restoreAuthSession } from "@/entities/auth";
+import { generateRecommendationApi, recommendationQueryKeys } from "@/entities/recommendation";
 // 앱을 열면 바로 보이는 화면은 첫 번들에 둔다. 나머지는 처음 들어갈 때 불러온다.
 import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
@@ -134,13 +135,41 @@ const EntryRedirect = () => {
 export const AppRoutes = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
+  const { mutateAsync: generateRecommendation } = useMutation({
+    mutationFn: generateRecommendationApi,
+    retry: false,
+  });
 
   const handleRefresh = async (): Promise<void> => {
-    // 진행 중인 조회는 공유하고, 저장·분석 생성 같은 mutation은 재실행하지 않는다.
-    await queryClient.refetchQueries(
-      { type: "active" },
-      { cancelRefetch: false, throwOnError: true }
-    );
+    const accessToken = location.pathname.startsWith("/s/") ? null : await getAccessToken();
+    const latestRecommendation = { queryKey: recommendationQueryKeys.latest(), exact: true };
+
+    if (accessToken) {
+      // 이전 추천 조회가 새로 생성한 결과를 덮어쓰지 않도록 먼저 취소한다.
+      await queryClient.cancelQueries(latestRecommendation);
+    }
+
+    const results = await Promise.allSettled([
+      queryClient.refetchQueries(
+        {
+          type: "active",
+          predicate: query => !accessToken || !matchQuery(latestRecommendation, query),
+        },
+        { cancelRefetch: false, throwOnError: true }
+      ),
+      accessToken
+        ? generateRecommendation({ force_refresh: true }).then(async recommendation => {
+            // 생성 도중 로그아웃하거나 계정이 바뀌었다면 이전 계정의 결과를 넣지 않는다.
+            if ((await getAccessToken()) === accessToken) {
+              queryClient.setQueryData(recommendationQueryKeys.latest(), recommendation);
+            }
+          })
+        : Promise.resolve(),
+    ]);
+    const failed = results.find(result => result.status === "rejected");
+    if (failed?.status === "rejected") {
+      throw failed.reason;
+    }
   };
 
   return (
