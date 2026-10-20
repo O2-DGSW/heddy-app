@@ -105,7 +105,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           aria-hidden="true"
           className="pointer-events-none absolute -right-5 top-3 -z-10 size-36 rounded-full bg-[var(--home-surface)]/50"
         />
-        <div className="relative z-10 min-h-36 pr-28 min-[375px]:pr-32">
+        <div className="relative z-10 pr-24 min-[375px]:pr-28">
           <span
             className={cn(
               "inline-flex rounded-full bg-[var(--home-surface)]/80 px-2.5 py-1 text-[var(--home-share-text)]",
