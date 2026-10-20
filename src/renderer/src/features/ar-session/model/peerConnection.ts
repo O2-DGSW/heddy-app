@@ -97,6 +97,27 @@ export const configureVideoSender = (
   void transceiver.sender.setParameters(parameters).catch(() => undefined);
 };
 
+export const prepareArServerOffer = (
+  offer: RTCSessionDescriptionInit,
+  platform: string
+): RTCSessionDescriptionInit => {
+  if (platform !== "ios" || offer.type !== "offer" || !offer.sdp) return offer;
+
+  // AR 서버가 회전 메타데이터 대신 픽셀을 처리하므로 iOS가 전송 전에 방향을 적용하게 한다.
+  // WebKit: https://bugs.webkit.org/show_bug.cgi?id=85851#c90
+  const sdp = offer.sdp
+    .split("\n")
+    .filter(
+      line =>
+        !/^a=extmap:\d+(?:\/\S+)?[ \t]+(?:urn:ietf:params:rtp-hdrext:encrypt[ \t]+)?urn:3gpp:video-orientation(?::6)?(?:[ \t\r]|$)/i.test(
+          line
+        )
+    )
+    .join("\n");
+
+  return { ...offer, sdp };
+};
+
 /** 요청한 방향의 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
 export const openCamera = async (
   facingMode: ArCameraFacingModeType = "user",

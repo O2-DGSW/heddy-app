@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { getHttpStatus } from "@heddy/api";
@@ -9,6 +10,7 @@ import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
 import {
   configureVideoSender,
   openCamera,
+  prepareArServerOffer,
   resolveCameraFacingMode,
   waitForIceGatheringComplete,
 } from "./peerConnection";
@@ -288,7 +290,7 @@ export const useArServerConnection = (
           }
         });
 
-        const offer = await peer.createOffer();
+        const offer = prepareArServerOffer(await peer.createOffer(), Capacitor.getPlatform());
         signal.throwIfAborted();
         await peer.setLocalDescription(offer);
         await waitForIceGatheringComplete(peer, signal);
