@@ -109,6 +109,7 @@ const ArHairstylePage = () => {
 
     appliedRecommendationRef.current = requestKey;
     if (requestedHairstylePosition < 0) {
+      selectHairstylePosition(0);
       showInfoToast("추천한 스타일은 현재 AR에서 사용할 수 없어요. 다른 스타일을 골라 주세요.");
       return;
     }
