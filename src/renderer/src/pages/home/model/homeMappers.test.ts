@@ -59,6 +59,43 @@ describe("mapRecommendationToHomeCards", () => {
 describe("mapTreatmentRecordToRecentRecord", () => {
   afterEach(() => vi.useRealTimers());
 
+  test.each([
+    [0, "0초 전"],
+    [59, "59초 전"],
+    [60, "1분 전"],
+    [3599, "59분 전"],
+    [3600, "1시간 전"],
+    [86399, "23시간 전"],
+    [86400, "1일 전"],
+    [7 * 86400 - 1, "6일 전"],
+    [7 * 86400, "1주 전"],
+    [30 * 86400 - 1, "4주 전"],
+    [30 * 86400, "1개월 전"],
+    [365 * 86400 - 1, "12개월 전"],
+    [365 * 86400, "1년 전"],
+    [2 * 365 * 86400, "2년 전"],
+  ])("%i초가 지났으면 %s로 표시한다", (seconds, expected) => {
+    vi.useFakeTimers();
+    const now = new Date("2026-10-21T12:00:00Z");
+    vi.setSystemTime(now);
+    const record = mapTreatmentRecordToRecentRecord({
+      record_id: "r1",
+      performed_at: new Date(now.getTime() - seconds * 1000).toISOString(),
+    });
+    expect(record.daysAgo).toBe(expected);
+  });
+
+  test.each(["not-a-date", "2026-10-21T12:00:01Z"])(
+    "잘못된 날짜나 미래 날짜(%s)의 경과 시간은 숨긴다",
+    performedAt => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-10-21T12:00:00Z"));
+      expect(
+        mapTreatmentRecordToRecentRecord({ record_id: "r1", performed_at: performedAt }).daysAgo
+      ).toBeUndefined();
+    }
+  );
+
   test("시술 종류를 한글로 잇고 비어 있는 정보는 안내 문구로 채운다", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-03-07T12:00:00"));
