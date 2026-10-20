@@ -5,10 +5,9 @@ import { cn, sadMascot } from "@/shared";
 interface CutsEmptyStateProps {
   /** 카테고리로 걸러서 비었는지. 기록이 아예 없을 때와 안내를 다르게 한다 */
   isFiltered?: boolean;
-  onAddRecord?: () => void;
 }
 
-export const CutsEmptyState = ({ isFiltered = false, onAddRecord }: CutsEmptyStateProps) => {
+export const CutsEmptyState = ({ isFiltered = false }: CutsEmptyStateProps) => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
       <img
@@ -34,22 +33,6 @@ export const CutsEmptyState = ({ isFiltered = false, onAddRecord }: CutsEmptySta
           {isFiltered ? "사진과 함께 기록을 남겨보세요." : "좋았던 변화를 차곡차곡 모아보세요."}
         </p>
       </div>
-      {onAddRecord && (
-        <button
-          className={cn(
-            "mt-5 min-h-11 max-w-full rounded-xl px-5 transition-opacity hover:opacity-90 active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4",
-            font.label.semiBold
-          )}
-          onClick={onAddRecord}
-          style={{
-            backgroundColor: lightTheme.primary.normal,
-            color: lightTheme.label.buttonText,
-          }}
-          type="button"
-        >
-          {isFiltered ? "시술 기록 남기기" : "첫 기록 남기기"}
-        </button>
-      )}
     </div>
   );
 };
