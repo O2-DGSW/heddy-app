@@ -99,12 +99,14 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
       </div>
       <section
         aria-labelledby="home-discover-title"
-        className="relative isolate overflow-hidden rounded-[26px] bg-[var(--home-soft)] p-5"
+        className="relative isolate rounded-[26px] bg-[var(--home-soft)] p-5"
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-5 top-3 -z-10 size-36 rounded-full bg-[var(--home-surface)]/50"
-        />
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]"
+        >
+          <span className="absolute -right-5 top-3 size-36 rounded-full bg-[var(--home-surface)]/50" />
+        </div>
         <div className="relative z-10 pr-24 min-[375px]:pr-28">
           <span
             className={cn(
@@ -140,7 +142,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           width={1323}
           height={1189}
           decoding="async"
-          className="pointer-events-none absolute -right-8 bottom-2 z-0 h-52 w-56 object-contain min-[375px]:h-56 min-[375px]:w-60"
+          className="pointer-events-none absolute -right-8 bottom-6 z-0 h-52 w-56 object-contain min-[375px]:h-56 min-[375px]:w-60"
         />
       </section>
     </header>
