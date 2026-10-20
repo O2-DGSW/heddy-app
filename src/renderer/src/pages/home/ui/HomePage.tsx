@@ -69,7 +69,7 @@ const HomePage = () => {
         >
           <div
             ref={contentRef}
-            className="mx-auto w-full max-w-[532px] px-[clamp(16px,5vw,24px)] pb-8 pt-2"
+            className="mx-auto w-full max-w-[532px] px-[clamp(16px,5%,24px)] pb-8 pt-2"
           >
             <HomeHeader
               profileName={profileName}
