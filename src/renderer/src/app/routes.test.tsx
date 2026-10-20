@@ -182,7 +182,7 @@ test("다른 조회가 실패해도 추천 생성이 끝날 때까지 새로고�
 });
 
 test.each([null, "different-account-token"])(
-  "생성 중 인증 토큰이 %s로 바뀌면 이전 계정의 추천을 캐시에 넣지 않는다",
+  "생성 중 로그아웃·계정 변경(%s)으로 캐시를 비우면 이전 추천을 다시 넣지 않는다",
   async nextToken => {
     const complete = vi.fn<(value: RecommendationApiData) => void>();
     mocks.generate.mockReturnValue(
@@ -192,11 +192,35 @@ test.each([null, "different-account-token"])(
     pull();
     await waitFor(() => expect(mocks.generate).toHaveBeenCalledTimes(1));
     mocks.token.mockResolvedValue(nextToken);
+    client.clear();
+    const nextRecommendation = nextToken
+      ? { recommendation_run_id: "other", items: [] }
+      : undefined;
+    if (nextRecommendation) {
+      client.setQueryData(recommendationQueryKeys.latest(), nextRecommendation);
+    } else {
+      // 실제 로그아웃처럼 기존 계정 화면의 조회 observer도 해제한다.
+      cleanup();
+    }
     await act(async () => complete(newRecommendation));
     await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
-    expect(client.getQueryData(recommendationQueryKeys.latest())).toEqual(oldRecommendation);
+    expect(client.getQueryData(recommendationQueryKeys.latest())).toEqual(nextRecommendation);
   }
 );
+
+test("요청 도중 같은 계정의 토큰이 자동 갱신되어도 새 추천을 반영한다", async () => {
+  const complete = vi.fn<(value: RecommendationApiData) => void>();
+  mocks.generate.mockReturnValue(
+    new Promise<RecommendationApiData>(resolve => complete.mockImplementation(resolve))
+  );
+  const client = await setup();
+  pull();
+  await waitFor(() => expect(mocks.generate).toHaveBeenCalledTimes(1));
+  mocks.token.mockResolvedValue("renewed-access-token");
+  await act(async () => complete(newRecommendation));
+  await screen.findByText("new");
+  expect(client.getQueryData(recommendationQueryKeys.latest())).toEqual(newRecommendation);
+});
 
 test.each(["/s/shared-record", "/welcome"])(
   "%s에서는 새로고침해도 개인 추천을 생성하지 않는다",
