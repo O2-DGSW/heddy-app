@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useState } from "react";
 
 import type { ComponentType } from "react";
@@ -11,7 +12,7 @@ import { WelcomePage } from "@/pages/auth/welcome";
 import { LoginPage } from "@/pages/auth/login";
 import { HomePage } from "@/pages/home";
 import { NotFoundPage } from "@/pages/not-found";
-import { PageLoading } from "@/shared";
+import { PageLoading, PullToRefresh } from "@/shared";
 
 /** 화면 단위로 나눠 불러온다. 불러오는 동안 레이아웃·하단 바는 그대로 두고 그 화면 자리만 비운다 */
 const lazyPage = <TModule,>(
@@ -131,43 +132,56 @@ const EntryRedirect = () => {
 };
 
 export const AppRoutes = () => {
+  const queryClient = useQueryClient();
+  const location = useLocation();
+
+  const handleRefresh = async (): Promise<void> => {
+    // 진행 중인 조회는 공유하고, 저장·분석 생성 같은 mutation은 재실행하지 않는다.
+    await queryClient.refetchQueries(
+      { type: "active" },
+      { cancelRefetch: false, throwOnError: true }
+    );
+  };
+
   return (
-    <Routes>
-      {/* 공유 링크로 들어온 사람이 로그인 없이 보는 웹 화면이라 앱 셸 밖에 둔다 */}
-      <Route path="/s/:shareToken" element={<PublicSharePage />} />
-      <Route element={<MobileLayout />}>
-        <Route path="/" element={<EntryRedirect />} />
-        <Route element={<RequireAuth />}>
-          <Route element={<MainTransitionOutlet />}>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/ar" element={<ArHairstylePage />} />
-            <Route path="/recommend" element={<RecommendPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<ProfileEditPage />} />
-            <Route path="/cuts" element={<CutsListPage />} />
-            <Route path="/cuts/add" element={<RecordAddPage />} />
-            <Route path="/cuts/:id" element={<CutsDetailPage />}>
-              <Route index element={<Navigate replace to="info" />} />
-              <Route path="info" element={<CutsDetailInfoPage />} />
-              <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+    <PullToRefresh onRefresh={handleRefresh} resetKey={location.key}>
+      <Routes>
+        {/* 공유 링크로 들어온 사람이 로그인 없이 보는 웹 화면이라 앱 셸 밖에 둔다 */}
+        <Route path="/s/:shareToken" element={<PublicSharePage />} />
+        <Route element={<MobileLayout />}>
+          <Route path="/" element={<EntryRedirect />} />
+          <Route element={<RequireAuth />}>
+            <Route element={<MainTransitionOutlet />}>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/ar" element={<ArHairstylePage />} />
+              <Route path="/recommend" element={<RecommendPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<ProfileEditPage />} />
+              <Route path="/cuts" element={<CutsListPage />} />
+              <Route path="/cuts/add" element={<RecordAddPage />} />
+              <Route path="/cuts/:id" element={<CutsDetailPage />}>
+                <Route index element={<Navigate replace to="info" />} />
+                <Route path="info" element={<CutsDetailInfoPage />} />
+                <Route path="analysis" element={<CutsDetailAnalysisPage />} />
+              </Route>
+              <Route path="/cuts/:id/edit" element={<RecordEditPage />} />
+              <Route path="/cuts/:id/share" element={<CutsSharePage />} />
             </Route>
-            <Route path="/cuts/:id/edit" element={<RecordEditPage />} />
-            <Route path="/cuts/:id/share" element={<CutsSharePage />} />
+            <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
+            <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
-          <Route path="/profile/share-permissions" element={<SharePermissionsPage />} />
-          <Route path="/profile/preferred-style" element={<PreferredStyleRegistrationPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-        <Route element={<RequireGuest />}>
-          <Route element={<AuthTransitionOutlet />}>
-            <Route path="/welcome" element={<WelcomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/find-id" element={<FindPage />} />
-            <Route path="/find-password" element={<FindPage />} />
+          <Route element={<RequireGuest />}>
+            <Route element={<AuthTransitionOutlet />}>
+              <Route path="/welcome" element={<WelcomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/find-id" element={<FindPage />} />
+              <Route path="/find-password" element={<FindPage />} />
+            </Route>
           </Route>
         </Route>
-      </Route>
-    </Routes>
+      </Routes>
+    </PullToRefresh>
   );
 };
