@@ -65,7 +65,7 @@ const HomePage = () => {
           ref={scrollRef}
           onScroll={handleScroll}
           aria-labelledby="home-greeting"
-          className="h-full [overflow-wrap:anywhere] overflow-y-auto overscroll-contain no-scrollbar bg-[var(--home-surface)] text-[var(--home-text)]"
+          className="h-full [overflow-wrap:anywhere] overflow-x-hidden overflow-y-auto overscroll-contain no-scrollbar bg-[var(--home-surface)] text-[var(--home-text)]"
         >
           <div
             ref={contentRef}
