@@ -112,12 +112,12 @@ const RecentRecordCard = ({
       <button
         type="button"
         onClick={onAddClick}
-        className="flex w-full items-center gap-4 rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-5 text-left transition-colors active:bg-[var(--home-soft)]"
+        className="flex w-full items-center gap-3 rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] px-4 py-3 text-left transition-colors active:bg-[var(--home-soft)]"
       >
         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--home-soft)]">
           <img src={edit} alt="" width={22} height={22} />
         </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={font.body.semiBold}>오늘의 스타일을 남겨보세요</span>
           <span className={cn(font.caption.medium, "break-keep text-[var(--home-secondary)]")}>
             사진 한 장부터, 나만의 헤어 기록
@@ -125,7 +125,7 @@ const RecentRecordCard = ({
           <span
             className={cn(
               font.caption.semiBold,
-              "mt-1 inline-flex items-center gap-1 text-[var(--home-primary)]"
+              "inline-flex items-center gap-1 text-[var(--home-primary)]"
             )}
           >
             첫 기록 남기기
