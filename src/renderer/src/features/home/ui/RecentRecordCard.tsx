@@ -4,6 +4,7 @@ import colorDot from "../assets/color-dot.svg";
 import edit from "../assets/edit.svg";
 import HomeImage from "./HomeImage";
 import SectionFeedback from "./SectionFeedback";
+import HomeSectionSkeleton from "./HomeSectionSkeleton";
 import RatingStars from "./RatingStars";
 
 import type { RecentRecordType } from "../model/home.types";
@@ -41,7 +42,7 @@ const RecentRecordCard = ({
         <ArrowIcon className="size-2.5 rotate-180" color={lightTheme.label.alternative} />
       </button>
     </div>
-    {record && !isLoading && !isError ? (
+    {record ? (
       <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-4">
         <div className="flex items-center gap-[14px]">
           <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl">
@@ -100,13 +101,16 @@ const RecentRecordCard = ({
       </div>
     ) : isLoading || isError ? (
       <div className="rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)]">
-        <SectionFeedback
-          isLoading={isLoading}
-          isError={isError}
-          emptyMessage="현재 시술 기록이 없습니다."
-          actionLabel={isError ? "다시 시도" : "첫 기록 추가하기"}
-          onAction={isError ? onClick : onAddClick}
-        />
+        {isLoading ? (
+          <HomeSectionSkeleton variant="record" />
+        ) : (
+          <SectionFeedback
+            isError={isError}
+            emptyMessage="현재 시술 기록이 없습니다."
+            actionLabel={isError ? "다시 시도" : "첫 기록 추가하기"}
+            onAction={isError ? onClick : onAddClick}
+          />
+        )}
       </div>
     ) : (
       <button
