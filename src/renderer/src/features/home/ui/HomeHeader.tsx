@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import profileIcon from "../assets/profile-head.svg";
@@ -13,9 +13,40 @@ interface HomeHeaderProps {
 }
 const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
   const displayName = profileName.trim();
 
   const handleToggleNotifications = () => setNotificationsOpen(open => !open);
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        !(target instanceof Node) ||
+        notificationButtonRef.current?.contains(target) ||
+        notificationsRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setNotificationsOpen(false);
+    };
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setNotificationsOpen(false);
+      notificationButtonRef.current?.focus();
+    };
+
+    // 다른 버튼의 동작을 막지 않고, 터치·마우스 입력을 모두 처리한다.
+    document.addEventListener("pointerdown", handleOutsidePointerDown, true);
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [notificationsOpen]);
 
   return (
     <header>
@@ -23,6 +54,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
         <HeddyLogo />
         <div className="flex items-center gap-1">
           <button
+            ref={notificationButtonRef}
             type="button"
             aria-label="알림"
             aria-expanded={notificationsOpen}
@@ -44,6 +76,7 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
         </div>
         {notificationsOpen && (
           <div
+            ref={notificationsRef}
             id="home-notifications"
             role="status"
             className={cn(
