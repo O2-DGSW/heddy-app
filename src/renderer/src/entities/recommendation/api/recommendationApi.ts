@@ -25,7 +25,7 @@ export const getLatestRecommendationApi = async (): Promise<RecommendationApiDat
 
 /**
  * 추천 생성
- * - 새 추천 결과를 만드는 요청이라 화면 진입만으로 부르지 않고 사용자가 눌렀을 때만 부른다.
+ * - 로그인 성공 직후 또는 사용자가 새 추천을 요청할 때 호출한다.
  */
 export const generateRecommendationApi = async (
   body: GenerateRecommendationRequest = {}
