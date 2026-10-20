@@ -3,7 +3,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import profileIcon from "../assets/profile-head.svg";
 import alarmIcon from "../assets/alarm.svg";
-import mascot from "../assets/share-mascot.webp";
+import hairstylePhoto from "../assets/home-hairstyle.png";
 import HeddyLogo from "./HeddyLogo";
 
 interface HomeHeaderProps {
@@ -90,12 +90,12 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
             자르기 전, 나에게 어울리는지 확인해요.
           </p>
           <img
-            src={mascot}
+            src={hairstylePhoto}
             alt=""
             width={120}
-            height={117}
+            height={120}
             decoding="async"
-            className="pointer-events-none absolute -right-1 top-7 w-24 -rotate-6 object-contain min-[375px]:w-28"
+            className="pointer-events-none absolute right-0 top-3 size-24 rounded-2xl object-cover object-top min-[375px]:size-28"
           />
         </div>
         <button
