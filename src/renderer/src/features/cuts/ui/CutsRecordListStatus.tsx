@@ -1,4 +1,5 @@
 import { font, lightTheme } from "@heddy/design-tokens";
+import { PageSkeleton } from "@/shared";
 
 interface CutsRecordListStatusProps {
   isError: boolean;
@@ -12,6 +13,10 @@ export const CutsRecordListStatus = ({
   errorMessage,
   onRetry,
 }: CutsRecordListStatusProps) => {
+  if (!isError) {
+    return <PageSkeleton variant="records" compact label="시술기록을 불러오는 중" />;
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4">
       <p

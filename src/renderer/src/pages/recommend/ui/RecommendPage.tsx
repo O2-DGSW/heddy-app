@@ -1,4 +1,5 @@
 import { lightTheme } from "@heddy/design-tokens";
+import { PageSkeleton } from "@/shared";
 
 import { RecommendHeader } from "@/features/recommend";
 import { RecommendBasisSection } from "@/features/recommend";
@@ -30,7 +31,7 @@ export const RecommendPage = () => {
       >
         <RecommendHeader />
         <div className="flex flex-1 flex-col overflow-y-auto overscroll-none no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {isPending && <RecommendStatus message="추천을 불러오는 중" />}
+          {isPending && <PageSkeleton variant="recommend" compact label="추천을 불러오는 중" />}
 
           {isError && (
             <RecommendStatus

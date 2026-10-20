@@ -1,5 +1,5 @@
 import { font } from "@heddy/design-tokens";
-import { cn } from "@/shared";
+import { cn, PageSkeleton } from "@/shared";
 
 interface SectionFeedbackProps {
   isLoading?: boolean;
@@ -14,20 +14,18 @@ const SectionFeedback = ({
   emptyMessage,
   actionLabel,
   onAction,
-}: SectionFeedbackProps) => (
-  <div
-    role="status"
-    aria-live="polite"
-    className="flex min-h-[172px] flex-col items-center justify-center gap-3 px-3 py-5 text-center"
-  >
-    <p className={cn(font.caption.medium, "break-keep text-[var(--home-muted)]")}>
-      {isLoading
-        ? "정보를 불러오는 중입니다."
-        : isError
-          ? "정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."
-          : emptyMessage}
-    </p>
-    {!isLoading && (
+}: SectionFeedbackProps) =>
+  isLoading ? (
+    <PageSkeleton variant="recommend" compact label="정보를 불러오는 중입니다." />
+  ) : (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[172px] flex-col items-center justify-center gap-3 px-3 py-5 text-center"
+    >
+      <p className={cn(font.caption.medium, "break-keep text-[var(--home-muted)]")}>
+        {isError ? "정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요." : emptyMessage}
+      </p>
       <button
         type="button"
         onClick={onAction}
@@ -40,7 +38,6 @@ const SectionFeedback = ({
       >
         {actionLabel}
       </button>
-    )}
-  </div>
-);
+    </div>
+  );
 export default SectionFeedback;
