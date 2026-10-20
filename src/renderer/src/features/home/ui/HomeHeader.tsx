@@ -122,26 +122,26 @@ const HomeHeader = ({ profileName, onProfileClick, onArClick }: HomeHeaderProps)
           <p className={cn(font.caption.medium, "mt-2 break-keep text-[var(--home-secondary)]")}>
             자르기 전, 나에게 어울리는지 확인해요.
           </p>
-          <img
-            src={arPhonePreview}
-            alt=""
-            width={1323}
-            height={1189}
-            decoding="async"
-            className="pointer-events-none absolute -right-4 top-0 h-36 w-36 object-contain min-[375px]:w-40"
-          />
         </div>
         <button
           type="button"
           onClick={onArClick}
           className={cn(
-            "mt-5 flex min-h-12 w-full items-center justify-between rounded-2xl bg-[var(--home-primary)] px-4 text-[var(--home-surface)] transition-opacity active:opacity-80",
+            "mt-5 flex min-h-12 w-full items-center justify-between rounded-2xl bg-[var(--home-primary)] pl-4 pr-28 text-[var(--home-surface)] transition-opacity active:opacity-80",
             font.label.semiBold
           )}
         >
           AR로 미리보기
           <ArrowIcon className="size-3 rotate-180" color={lightTheme.label.buttonText} />
         </button>
+        <img
+          src={arPhonePreview}
+          alt=""
+          width={1323}
+          height={1189}
+          decoding="async"
+          className="pointer-events-none absolute bottom-2 right-1 z-10 h-36 w-36 object-contain min-[375px]:w-40"
+        />
       </section>
     </header>
   );
