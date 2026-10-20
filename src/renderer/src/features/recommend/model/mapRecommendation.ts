@@ -56,6 +56,7 @@ const mapRecommendationItem = (
     id: item.hairstyle?.hairstyle_id ?? `recommend-${index}`,
     thumbnailUrl: item.hairstyle?.thumbnail_url ?? "",
     styleName: item.hairstyle?.style_name ?? "",
+    arGroomName: item.hairstyle?.ar_mode === "THREE_D" ? item.hairstyle.ar_groom_name : null,
     // 추천 방식·난이도는 값이 확정되지 않아 모르면 배지를 숨긴다.
     reasonType: strategy ? (REASON_TYPE_BY_STRATEGY[strategy.toUpperCase()] ?? null) : null,
     riskLevel: difficulty ? (RISK_LEVEL_BY_API_VALUE[difficulty] ?? null) : null,

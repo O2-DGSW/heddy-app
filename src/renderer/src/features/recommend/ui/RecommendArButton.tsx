@@ -3,22 +3,30 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { RecommendChevronRightIcon } from "@/features/recommend/ui/icons/RecommendChevronRightIcon";
 
-/** AR 헤어스타일 체험 탭(/ar)으로 이동한다 */
-export const RecommendArButton = () => {
+interface RecommendArButtonProps {
+  groomName?: string | null;
+}
+
+/** 선택한 추천 스타일을 AR 화면에 전달한다. */
+export const RecommendArButton = ({ groomName }: RecommendArButtonProps) => {
   const navigate = useNavigate();
 
+  const canTryOn = Boolean(groomName && /^[a-z0-9][a-z0-9-]{0,79}$/.test(groomName));
+
   const handleClick = () => {
-    navigate("/ar");
+    if (!canTryOn || !groomName) return;
+    navigate(`/ar?${new URLSearchParams({ groom: groomName })}`);
   };
 
   return (
     <button
       type="button"
       onClick={handleClick}
+      disabled={!canTryOn}
       className={`flex w-full items-center justify-center gap-0.5 rounded-full py-1.5 max-[400px]:py-1 ${font.label.semiBold} text-[0.8125rem] max-[400px]:text-[0.75rem]`}
       style={{ backgroundColor: lightTheme.fill.neutral, color: lightTheme.label.neutral }}
     >
-      AR로 체험
+      {canTryOn ? "AR로 체험" : "AR 준비 중"}
       <RecommendChevronRightIcon />
     </button>
   );

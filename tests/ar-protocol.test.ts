@@ -19,7 +19,18 @@ test("groom 이름만 목록에 사용하고 GLB를 이미지로 노출하지 �
     parseArGrooms({
       grooms: [{ name: "short-swept", url: "/grooms/style.glb", n_strands: 12855 }],
     }),
-    [{ id: "short-swept", label: "short-swept" }]
+    [
+      {
+        name: "short-swept",
+        label: "short-swept",
+        hairstyleId: undefined,
+        gender: undefined,
+        type: undefined,
+        tags: [],
+        thumbUrl: undefined,
+        viewsUrl: undefined,
+      },
+    ]
   );
   assert.deepEqual(parseArGrooms({ grooms: [] }), []);
 });

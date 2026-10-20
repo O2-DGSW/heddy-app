@@ -5,6 +5,8 @@ export type RecommendationHairstyleApiData = {
   thumbnail_url?: string | null;
   /** AR 체험 방식. 스펙에 값이 정의돼 있지 않다 */
   ar_mode?: string | null;
+  /** AR 서버 /grooms의 정확한 name. 표시명으로 추측하지 않는다. */
+  ar_groom_name?: string | null;
   asset_version?: string | null;
 };
 

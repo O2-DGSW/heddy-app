@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGetArGrooms } from "@/entities/ar-groom";
 import type { ArHairstyleOption, HairstyleOptionId } from "@/entities/ar-groom";
 import { useArServerConnection } from "@/features/ar-session";
+import { useRequestedArGroom } from "../../model/useRequestedArGroom";
 import { useArHairstyle } from "../../model/useArHairstyle";
 import { getCircularHairstyleOption, ORIGINAL_HAIRSTYLE_OPTION } from "../../model/constants";
 import { cn, showInfoToast } from "@/shared";
@@ -46,6 +47,11 @@ const ArHairstylePage = () => {
     fitSettings,
     handleFitSettingsChange,
   } = useArHairstyle(hairstyleOptions);
+  useRequestedArGroom(
+    serverHairstyleOptions,
+    isGroomsPending || Boolean(groomsError),
+    selectHairstyle
+  );
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
   const selectedGroom = selectedHairstyle.name;
   const {
