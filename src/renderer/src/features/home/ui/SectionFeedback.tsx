@@ -32,7 +32,9 @@ const SectionFeedback = ({
         type="button"
         onClick={onAction}
         className={cn(
-          "min-h-9 rounded-md bg-[var(--home-soft)] px-3 py-2 text-[var(--home-share-text)]",
+          "min-h-9 rounded-md px-3 py-2",
+          isError && "bg-[var(--home-soft)] text-[var(--home-share-text)]",
+          !isError && "bg-[var(--home-line)] text-[var(--home-secondary)]",
           font.caption.semiBold
         )}
       >
