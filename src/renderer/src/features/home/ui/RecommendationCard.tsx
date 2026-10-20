@@ -1,3 +1,5 @@
+import { font } from "@heddy/design-tokens";
+import { cn } from "@/shared";
 import HomeImage from "./HomeImage";
 import colorDot from "../assets/recommend-color-dot.svg";
 
@@ -8,39 +10,58 @@ interface RecommendationCardProps {
   onClick: () => void;
 }
 
-const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => (
-  <button
-    type="button"
-    onClick={onClick}
-    aria-label={`${card.rank}위 ${card.title}, ${typeof card.matchRate === "number" && Number.isFinite(card.matchRate) ? `일치도 ${card.matchRate}%` : "일치도 정보 없음"}, 추천 보기`}
-    className="flex min-h-[58px] w-full items-center gap-[7px] border-b border-[var(--home-line)] py-[5px] text-left last:border-0 [&_span]:leading-[1.3]"
-  >
-    <span className="relative block size-11 shrink-0 overflow-hidden rounded-md">
-      <HomeImage
-        src={card.imageUrl}
-        alt={`${card.title} 추천 사진`}
-        className="absolute inset-0 size-full object-cover"
-      />
-    </span>
-    <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
-      <span className="flex w-full min-w-0 items-start gap-1">
-        <span className="flex size-[10px] shrink-0 items-center justify-center rounded-full bg-[var(--home-primary)] text-[8px] font-semibold text-[var(--home-note)]">
-          {card.rank}
+const getRecommendationLabel = (matchRate: number | undefined): string | undefined => {
+  if (typeof matchRate !== "number" || !Number.isFinite(matchRate)) return undefined;
+  if (matchRate >= 80) return "매우 추천";
+  if (matchRate >= 50) return "추천";
+  return "도전해볼 스타일";
+};
+
+const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
+  const recommendationLabel = getRecommendationLabel(card.matchRate);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${card.rank}위 ${card.title}, ${recommendationLabel ?? "추천 정도 정보 없음"}, 추천 보기`}
+      className="flex min-h-24 w-full items-center gap-3 border-b border-[var(--home-line)] py-3 text-left last:border-0"
+    >
+      <span className="relative block size-16 shrink-0 overflow-hidden rounded-2xl">
+        <HomeImage
+          src={card.imageUrl}
+          alt={`${card.title} 추천 사진`}
+          className="absolute inset-0 size-full object-cover"
+        />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+        <span className={cn(font.caption.semiBold, "text-[var(--home-primary)]")}>
+          추천 {card.rank}
         </span>
-        <span className="line-clamp-2 min-w-0 text-ellipsis text-[10px] font-semibold">
-          {card.title}
+        <span className={cn(font.body.semiBold, "line-clamp-2 min-w-0")}>{card.title}</span>
+        {card.colorName && (
+          <span
+            className={cn(
+              font.caption.medium,
+              "inline-flex items-center gap-1 text-[var(--home-secondary)]"
+            )}
+          >
+            <img src={colorDot} alt="" width={10} height={10} />
+            {card.colorName}
+          </span>
+        )}
+      </span>
+      {recommendationLabel && (
+        <span
+          className={cn(
+            font.caption.semiBold,
+            "shrink-0 whitespace-nowrap rounded-full bg-[var(--home-soft)] px-2.5 py-1.5 text-[var(--home-share-text)]"
+          )}
+        >
+          {recommendationLabel}
         </span>
-      </span>
-      <span className="inline-flex items-center gap-0.5 rounded-full border-[0.5px] border-[var(--home-banner)] bg-[var(--home-background)] px-0.5 py-px text-[7px] text-[var(--home-secondary)]">
-        {card.colorName && <img src={colorDot} alt="" />}
-        {card.colorName || "컬러 정보 없음"}
-      </span>
-      <span className="rounded-full bg-[var(--home-soft)] px-[3px] py-px text-[7px] font-medium text-[var(--home-primary)]">
-        {typeof card.matchRate === "number" && Number.isFinite(card.matchRate)
-          ? `일치도 ${card.matchRate}%`
-          : "일치도 정보 없음"}
-      </span>
-    </span>
-  </button>
-);
+      )}
+    </button>
+  );
+};
 export default RecommendationCard;

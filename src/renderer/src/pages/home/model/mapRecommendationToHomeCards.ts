@@ -65,7 +65,7 @@ export const mapRecommendationToHomeCards = (
       rank: item.rank ?? index + 1,
       title: item.hairstyle?.style_name || "추천 스타일",
       imageUrl: item.hairstyle?.thumbnail_url ?? "",
-      colorName: item.recommended_color || "컬러 정보 없음",
+      colorName: item.recommended_color?.trim() ?? "",
       tags: buildRecommendationTags(item),
       matchRate: normalizeMatchRate(item.score),
     }));
