@@ -3,12 +3,17 @@ import { font, lightTheme } from "@heddy/design-tokens";
 
 import { RecommendChevronRightIcon } from "@/features/recommend/ui/icons/RecommendChevronRightIcon";
 
-/** AR 헤어스타일 체험 탭(/ar)으로 이동한다 */
-export const RecommendArButton = () => {
+interface RecommendArButtonProps {
+  hairstyleId?: string;
+}
+
+/** 카탈로그 ID를 전달하고, 실제 groom 선택은 AR 서버 목록과 대조한다. */
+export const RecommendArButton = ({ hairstyleId }: RecommendArButtonProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/ar");
+    const search = hairstyleId ? `?${new URLSearchParams({ hairstyleId })}` : "";
+    navigate(`/ar${search}`);
   };
 
   return (
