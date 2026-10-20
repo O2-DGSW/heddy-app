@@ -2,6 +2,7 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { ArrowIcon, cn } from "@/shared";
 import SectionFeedback from "./SectionFeedback";
 import RecommendationCard from "./RecommendationCard";
+import HomeSectionSkeleton from "./HomeSectionSkeleton";
 
 import type { RecommendationCardType } from "../model/home.types";
 
@@ -9,6 +10,8 @@ interface RecommendationSectionProps {
   recommendations: RecommendationCardType[];
   isLoading?: boolean;
   isError?: boolean;
+  isRefreshing?: boolean;
+  isGenerating?: boolean;
   onMoreClick: () => void;
   onRecommendationClick: () => void;
 }
@@ -17,6 +20,8 @@ const RecommendationSection = ({
   recommendations,
   isLoading = false,
   isError = false,
+  isRefreshing = false,
+  isGenerating = false,
   onMoreClick,
   onRecommendationClick,
 }: RecommendationSectionProps) => (
@@ -38,16 +43,32 @@ const RecommendationSection = ({
         <ArrowIcon className="size-2.5 rotate-180" color={lightTheme.label.alternative} />
       </button>
     </div>
+    {isRefreshing && recommendations.length > 0 && (
+      <div
+        role="status"
+        className={cn(
+          font.caption.medium,
+          "mb-3 flex items-center gap-2 text-[var(--home-primary)]"
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className="size-3 shrink-0 rounded-full border-2 border-current border-t-transparent motion-safe:animate-spin"
+        />
+        {isGenerating ? "새 추천을 만들고 있어요" : "추천을 불러오고 있어요"}
+      </div>
+    )}
     <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)]">
-      {recommendations.length > 0 && !isLoading && !isError ? (
+      {recommendations.length > 0 ? (
         <div className="px-4 py-1">
           {recommendations.slice(0, 3).map(card => (
             <RecommendationCard key={card.id} card={card} onClick={onRecommendationClick} />
           ))}
         </div>
-      ) : isLoading || isError ? (
+      ) : isLoading ? (
+        <HomeSectionSkeleton variant="recommendation" />
+      ) : isError ? (
         <SectionFeedback
-          isLoading={isLoading}
           isError={isError}
           emptyMessage="현재 추천 정보가 없습니다."
           actionLabel={isError ? "다시 시도" : "스타일 추천받기"}
