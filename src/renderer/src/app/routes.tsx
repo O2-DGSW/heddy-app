@@ -143,6 +143,7 @@ export const AppRoutes = () => {
   const handleRefresh = async (): Promise<void> => {
     const accessToken = location.pathname.startsWith("/s/") ? null : await getAccessToken();
     const latestRecommendation = { queryKey: recommendationQueryKeys.latest(), exact: true };
+    const recommendationQuery = queryClient.getQueryCache().find(latestRecommendation);
 
     if (accessToken) {
       // 이전 추천 조회가 새로 생성한 결과를 덮어쓰지 않도록 먼저 취소한다.
@@ -158,9 +159,13 @@ export const AppRoutes = () => {
         { cancelRefetch: false, throwOnError: true }
       ),
       accessToken
-        ? generateRecommendation({ force_refresh: true }).then(async recommendation => {
-            // 생성 도중 로그아웃하거나 계정이 바뀌었다면 이전 계정의 결과를 넣지 않는다.
-            if ((await getAccessToken()) === accessToken) {
+        ? generateRecommendation({ force_refresh: true }).then(recommendation => {
+            // 로그인·로그아웃으로 캐시가 초기화되면 이전 계정의 결과를 넣지 않는다.
+            // 자동 토큰 갱신만으로는 현재 화면의 추천 반영을 막지 않는다.
+            if (
+              recommendationQuery &&
+              queryClient.getQueryCache().find(latestRecommendation) === recommendationQuery
+            ) {
               queryClient.setQueryData(recommendationQueryKeys.latest(), recommendation);
             }
           })
