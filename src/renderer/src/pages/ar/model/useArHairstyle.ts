@@ -13,11 +13,12 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const [activeHairstylePosition, setActiveHairstylePosition] = useState(0);
   const [fitSettings, setFitSettings] = useState<ArGroomFitSettings>(getDefaultArFitSettings);
 
-  const handleGroomColorReset = useCallback(() => {
+  const handleGroomColorReset = useCallback((color = DEFAULT_AR_HAIR_COLOR) => {
+    const nextColor = /^#[0-9a-f]{6}$/i.test(color) ? color : DEFAULT_AR_HAIR_COLOR;
     setFitSettings(current =>
-      current.groom_color === DEFAULT_AR_HAIR_COLOR
+      current.groom_color === nextColor
         ? current
-        : { ...current, groom_color: DEFAULT_AR_HAIR_COLOR }
+        : { ...current, groom_color: nextColor }
     );
   }, []);
 
