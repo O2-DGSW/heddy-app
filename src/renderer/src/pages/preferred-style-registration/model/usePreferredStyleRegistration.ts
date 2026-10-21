@@ -220,6 +220,8 @@ export const usePreferredStyleRegistration = () => {
     handleTagClick,
     isExcludedSummaryExpanded,
     isFetching,
+    isInitialLoading:
+      (isStyleTagsFetching && !styleTagData) || (isStylePreferencesFetching && !stylePreferences),
     isPreferredSummaryExpanded,
     isSaveDisabled,
     isSaving,
