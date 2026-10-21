@@ -147,13 +147,13 @@ const ArHairstylePage = () => {
 
   useEffect(() => {
     if (!offerGroom || appliedOfferRef.current === offerGroom || isGroomsPending) return;
-    appliedOfferRef.current = offerGroom;
     // 응답을 기다리는 사이 사용자가 고른 다른 스타일은 덮어쓰지 않는다.
     if (
       normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedGroom) &&
       normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedHairstyle.label)
     )
       return;
+    appliedOfferRef.current = offerGroom;
     selectHairstylePosition(offerHairstylePosition >= 0 ? offerHairstylePosition : 0);
   }, [
     offerGroom,
