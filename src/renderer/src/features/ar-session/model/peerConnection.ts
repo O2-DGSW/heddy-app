@@ -103,10 +103,12 @@ export const prepareArServerOffer = (
   offer: RTCSessionDescriptionInit,
   platform: string
 ): RTCSessionDescriptionInit => {
-  if (platform !== "ios" || offer.type !== "offer" || !offer.sdp) return offer;
+  if ((platform !== "ios" && platform !== "android") || offer.type !== "offer" || !offer.sdp)
+    return offer;
 
-  // AR 서버가 회전 메타데이터 대신 픽셀을 처리하므로 iOS가 전송 전에 방향을 적용하게 한다.
+  // AR 서버는 회전 메타데이터를 해석하지 않으므로 두 네이티브 플랫폼 모두 픽셀에 방향을 적용한다.
   // WebKit: https://bugs.webkit.org/show_bug.cgi?id=85851#c90
+  // libwebrtc: VideoSendStreamTest.RequestSourceRotateIfVideoOrientationExtensionNotSupported
   const sdp = offer.sdp
     .split("\n")
     .filter(
