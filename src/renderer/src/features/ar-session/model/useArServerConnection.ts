@@ -82,6 +82,8 @@ export const useArServerConnection = (
   const [isPageActive, setIsPageActive] = useState(true);
   const [offerGroom, setOfferGroom] = useState<UseArServerConnectionResult["offerGroom"]>(null);
   const initialStyleRef = useRef({ groom, groom_color: settings.groom_color });
+  // 목록 조회가 늦거나 실패해도 서버가 원본(null)으로 정한 결과를 fit으로 다시 덮어쓰지 않는다.
+  const effectiveGroom = offerGroom?.requested === groom ? (offerGroom.applied ?? "") : groom;
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const {
@@ -92,7 +94,7 @@ export const useArServerConnection = (
     handleForeheadRefresh,
     handleControlEvent,
     reset: resetGroomFit,
-  } = useGroomFitControl(statsChannelRef, groom, settings);
+  } = useGroomFitControl(statsChannelRef, effectiveGroom, settings);
 
   const clearReconnectTimer = useCallback(() => {
     if (reconnectTimerRef.current !== null) {
@@ -438,7 +440,8 @@ export const useArServerConnection = (
     reconnectMessage,
     controlReady,
     isPreviewMirrored,
-    groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
+    groomState:
+      controlReady && groomState.groom !== effectiveGroom ? { status: "loading" } : groomState,
     foreheadState,
     handleGroomRetry,
     handleForeheadRefresh,
