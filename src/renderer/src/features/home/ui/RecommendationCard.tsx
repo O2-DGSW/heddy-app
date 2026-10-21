@@ -30,6 +30,7 @@ const RecommendationCard = ({ card, onClick }: RecommendationCardProps) => {
       <span className="relative block size-16 shrink-0 overflow-hidden rounded-2xl">
         <HomeImage
           src={card.imageUrl}
+          loading="eager"
           alt={`${card.title} 추천 사진`}
           className="absolute inset-0 size-full object-cover"
         />
