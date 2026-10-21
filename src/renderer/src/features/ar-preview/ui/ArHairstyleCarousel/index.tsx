@@ -74,6 +74,7 @@ const ArHairstyleCarousel = ({
       aria-label="헤어스타일 선택"
       className="relative h-[80px] w-[404px] shrink-0 touch-none select-none overflow-hidden"
       data-pull-to-refresh="ignore"
+      data-swipe-gesture-ignore
       ref={carouselRef}
       onPointerCancel={handlePointerCancel}
       onPointerUp={handlePointerUp}
