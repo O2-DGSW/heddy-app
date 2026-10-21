@@ -27,7 +27,9 @@ export const useHairstyleCarousel = ({
   const positionRef = useRef(activeHairstylePosition);
   const animationRef = useRef<number | null>(null);
   const wheelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchCleanupRef = useRef<(() => void) | null>(null);
   const pointerRef = useRef<{
+    input: "pointer" | "touch";
     id: number;
     startX: number;
     lastX: number;
@@ -82,8 +84,47 @@ export const useHairstyleCarousel = ({
     });
   }, []);
 
+  const moveGesture = useCallback(
+    (clientX: number, timeStamp: number) => {
+      const pointer = pointerRef.current;
+      if (!pointer) return;
+      const distance = pointer.lastX - clientX;
+      if (Math.abs(pointer.startX - clientX) >= CLICK_SUPPRESSION_DISTANCE) {
+        suppressClickRef.current = true;
+      }
+      if (!suppressClickRef.current) return;
+      const elapsed = Math.max(1, timeStamp - pointer.lastTime);
+      pointer.velocity = distance / HAIRSTYLE_STEP_DISTANCE / elapsed;
+      pointer.lastX = clientX;
+      pointer.lastTime = timeStamp;
+      paintPosition(positionRef.current + distance / HAIRSTYLE_STEP_DISTANCE);
+    },
+    [paintPosition]
+  );
+
+  const finishGesture = useCallback(
+    (timeStamp: number) => {
+      const pointer = pointerRef.current;
+      if (!pointer) return;
+      pointerRef.current = null;
+      if (!suppressClickRef.current) return;
+      const velocity = timeStamp - pointer.lastTime < 80 ? pointer.velocity : 0;
+      // 손을 뗀 속도만큼 더 이동한 뒤 가장 가까운 스타일에 정렬한다.
+      const momentum = Math.max(-4, Math.min(4, velocity * 180));
+      animateTo(Math.round(positionRef.current + momentum));
+    },
+    [animateTo]
+  );
+
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || !event.isPrimary || pointerRef.current) return;
+    // 손가락 입력은 아래 native Touch Events 경로 하나로만 처리한다.
+    if (
+      event.pointerType === "touch" ||
+      event.button !== 0 ||
+      !event.isPrimary ||
+      pointerRef.current
+    )
+      return;
     if (disabled) {
       onDisabledSelect?.();
       return;
@@ -91,6 +132,7 @@ export const useHairstyleCarousel = ({
     stopAnimation();
     suppressClickRef.current = false;
     pointerRef.current = {
+      input: "pointer",
       id: event.pointerId,
       startX: event.clientX,
       lastX: event.clientX,
@@ -101,37 +143,25 @@ export const useHairstyleCarousel = ({
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const pointer = pointerRef.current;
-    if (!pointer || pointer.id !== event.pointerId) return;
-    const distance = pointer.lastX - event.clientX;
+    if (pointer?.input !== "pointer" || pointer.id !== event.pointerId) return;
     if (
       !suppressClickRef.current &&
       Math.abs(pointer.startX - event.clientX) >= CLICK_SUPPRESSION_DISTANCE
     ) {
-      suppressClickRef.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
     }
-    if (!suppressClickRef.current) return;
-    const elapsed = Math.max(1, event.timeStamp - pointer.lastTime);
-    const movement = distance / HAIRSTYLE_STEP_DISTANCE;
-    pointer.velocity = movement / elapsed;
-    pointer.lastX = event.clientX;
-    pointer.lastTime = event.timeStamp;
-    paintPosition(positionRef.current + movement);
+    moveGesture(event.clientX, event.timeStamp);
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const pointer = pointerRef.current;
-    if (!pointer || pointer.id !== event.pointerId) return;
-    pointerRef.current = null;
-    if (!suppressClickRef.current) return;
-    const velocity = event.timeStamp - pointer.lastTime < 80 ? pointer.velocity : 0;
-    // 손을 뗀 속도만큼 더 이동한 뒤 가장 가까운 스타일에 정렬한다.
-    const momentum = Math.max(-4, Math.min(4, velocity * 180));
-    animateTo(Math.round(positionRef.current + momentum));
+    if (pointer?.input !== "pointer" || pointer.id !== event.pointerId) return;
+    finishGesture(event.timeStamp);
   };
 
   const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current?.id !== event.pointerId) return;
+    if (pointerRef.current?.input !== "pointer" || pointerRef.current.id !== event.pointerId)
+      return;
     pointerRef.current = null;
     animateTo(Math.round(positionRef.current));
   };
@@ -177,6 +207,7 @@ export const useHairstyleCarousel = ({
         return;
       }
       stopAnimation();
+      touchCleanupRef.current?.();
       pointerRef.current = null;
       suppressClickRef.current = false;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientWidth : 1;
@@ -186,13 +217,95 @@ export const useHairstyleCarousel = ({
         animateTo(Math.round(positionRef.current));
       }, WHEEL_SETTLE_DELAY);
     };
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        touchCleanupRef.current?.();
+        if (pointerRef.current?.input === "touch") {
+          pointerRef.current = null;
+          animateTo(activeHairstylePosition, false);
+        }
+        return;
+      }
+      if (pointerRef.current) return;
+      if (disabled) {
+        callbacksRef.current.onDisabledSelect?.();
+        return;
+      }
+      const touch = event.touches[0];
+      if (!touch) return;
+      stopAnimation();
+      suppressClickRef.current = false;
+      pointerRef.current = {
+        input: "touch",
+        id: touch.identifier,
+        startX: touch.clientX,
+        lastX: touch.clientX,
+        lastTime: event.timeStamp,
+        velocity: 0,
+      };
+      // 이동 중 원래 썸네일이 DOM에서 제거되어도 touch의 대상은 바뀌지 않는다.
+      // 원래 대상에 직접 연결해 캡처 이전·버블링·썸네일 교체에 의존하지 않는다.
+      const target = event.target instanceof HTMLElement ? event.target : element;
+      const cleanupTouch = () => {
+        target.removeEventListener("touchmove", handleTouchMove);
+        target.removeEventListener("touchend", handleTouchEnd);
+        target.removeEventListener("touchcancel", handleTouchCancel);
+        touchCleanupRef.current = null;
+      };
+      const handleTouchCancel = () => {
+        cleanupTouch();
+        pointerRef.current = null;
+        animateTo(activeHairstylePosition, false);
+      };
+      const handleTouchMove = (move: TouchEvent) => {
+        const pointer = pointerRef.current;
+        if (pointer?.input !== "touch") return;
+        const current = Array.from(move.touches).find(item => item.identifier === pointer.id);
+        if (move.touches.length !== 1 || !current) {
+          handleTouchCancel();
+          return;
+        }
+        moveGesture(current.clientX, move.timeStamp);
+        // React의 touchmove는 passive이므로 native 리스너에서 스크롤·호환 클릭을 막는다.
+        if (suppressClickRef.current && move.cancelable) move.preventDefault();
+      };
+      const handleTouchEnd = (end: TouchEvent) => {
+        const pointer = pointerRef.current;
+        if (pointer?.input !== "touch") return;
+        if (!Array.from(end.changedTouches).some(item => item.identifier === pointer.id)) return;
+        if (end.touches.length !== 0) {
+          handleTouchCancel();
+          return;
+        }
+        cleanupTouch();
+        finishGesture(end.timeStamp);
+      };
+      touchCleanupRef.current = cleanupTouch;
+      target.addEventListener("touchmove", handleTouchMove, { passive: false });
+      target.addEventListener("touchend", handleTouchEnd);
+      target.addEventListener("touchcancel", handleTouchCancel);
+    };
+    element.addEventListener("touchstart", handleTouchStart, { passive: true });
     // React의 passive wheel 리스너 대신 캐러셀 안에서만 기본 스크롤을 막는다.
     element.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       element.removeEventListener("wheel", handleWheel);
+      element.removeEventListener("touchstart", handleTouchStart);
+      touchCleanupRef.current?.();
+      if (pointerRef.current?.input === "touch") pointerRef.current = null;
       stopAnimation();
     };
-  }, [disabled, loadingMessage, itemCount, animateTo, paintPosition, stopAnimation]);
+  }, [
+    disabled,
+    loadingMessage,
+    itemCount,
+    activeHairstylePosition,
+    animateTo,
+    paintPosition,
+    stopAnimation,
+    moveGesture,
+    finishGesture,
+  ]);
 
   return {
     carouselRef,
