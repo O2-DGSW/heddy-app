@@ -129,7 +129,7 @@ test("서버 목록이 늦게 도착해도 연결 준비 전에 추천 헤어를
   mocks.connect.mockReturnValue({ ...connection, controlReady: false });
   const entry = "/ar?groom=leaf-cut";
   const view = render(<TestApp initialEntry={entry} />);
-  expect(mocks.connect.mock.lastCall?.[1]).toBe("");
+  expect(mocks.connect.mock.lastCall?.[1]).toBe("leaf-cut");
   expect(mocks.toast).not.toHaveBeenCalled();
 
   mocks.getGrooms.mockReturnValue(loadedGrooms);
@@ -210,3 +210,39 @@ test.each([undefined, "../../unknown"])(
     expect(mocks.connect).not.toHaveBeenCalled();
   }
 );
+
+test.each(["리 프 컷", " LEAF-CUT ", "Leaf-Cut"])("쿼리 %s는 같은 실제 헤어를 선택한다", groom => {
+  render(<TestApp initialEntry={`/ar?${new URLSearchParams({ groom })}`} />);
+  expect(screen.getByLabelText("선택한 헤어").textContent).toBe("리프컷");
+  expect(mocks.connect.mock.lastCall?.[1]).toBe("leaf-cut");
+});
+
+test("서버가 실제 적용한 canonical groom을 선택에 반영한다", () => {
+  mocks.connect.mockReturnValue({
+    ...connection,
+    offerGroom: { requested: "leaf-cut", applied: "hippie-perm" },
+  });
+  render(<TestApp initialEntry="/ar?groom=leaf-cut" />);
+  expect(screen.getByLabelText("선택한 헤어").textContent).toBe("히피펌");
+  expect(mocks.connect.mock.lastCall?.[1]).toBe("hippie-perm");
+});
+
+test("서버 groom이 null이면 정상 연결을 유지하며 원본을 선택한다", () => {
+  mocks.connect.mockReturnValue({
+    ...connection,
+    offerGroom: { requested: "leaf-cut", applied: null },
+  });
+  render(<TestApp initialEntry="/ar?groom=leaf-cut" />);
+  expect(screen.getByLabelText("선택한 헤어").textContent).toBe("원본 스타일");
+  expect(mocks.connect.mock.lastCall?.[1]).toBe("");
+});
+
+test("색상 미지정은 자동 맞춤으로 연결한다", () => {
+  render(<TestApp initialEntry="/ar?groom=leaf-cut" />);
+  expect(mocks.connect.mock.lastCall?.[2].groom_color).toBe("");
+});
+
+test("쿼리의 유효한 색상을 초기 선택에 적용한다", () => {
+  render(<TestApp initialEntry="/ar?groom=leaf-cut&groom_color=%23123456" />);
+  expect(mocks.connect.mock.lastCall?.[2].groom_color).toBe("#123456");
+});
