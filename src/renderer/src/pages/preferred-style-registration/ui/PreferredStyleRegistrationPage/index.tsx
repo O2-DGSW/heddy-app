@@ -141,7 +141,7 @@ const PreferredStyleRegistrationPage = () => {
                             key={index}
                             className={cn(
                               "h-[26px] rounded-[15px]",
-                              ["w-16", "w-20", "w-24"][index % 3]
+                              ["w-12", "w-16", "w-20"][index % 3]
                             )}
                           />
                         ))}
