@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { profileAvatar, ArrowIcon } from "@/shared";
+import { cn, Skeleton, profileAvatar, ArrowIcon } from "@/shared";
 
 import { useProfileEdit } from "../../model/useProfileEdit";
 
@@ -55,6 +55,45 @@ const ProfileEditInput = ({
   );
 };
 
+const ProfileEditSkeleton = () => (
+  <div
+    role="status"
+    aria-busy="true"
+    aria-label="회원정보를 불러오는 중"
+    className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain no-scrollbar"
+  >
+    <span className="sr-only">회원정보를 불러오는 중</span>
+    <div
+      aria-hidden="true"
+      className="mx-auto flex w-full max-w-[402px] flex-1 flex-col px-[clamp(20px,6.47vw,26px)] pb-[28px] pt-[35px]"
+    >
+      <div className="flex flex-col items-center">
+        <div
+          className="flex size-[86px] items-center justify-center rounded-full p-[14px]"
+          style={{ backgroundColor: lightTheme.background.neutral }}
+        >
+          <img alt="" className="h-full w-full object-contain" src={profileAvatar} />
+        </div>
+        <Skeleton className={cn("mt-[12px] h-[1lh] w-28 rounded", font.headline1.semiBold)} />
+      </div>
+      <div className="mt-[35px] flex flex-col gap-[22px]">
+        {["이름 또는 닉네임", "비밀번호", "연락처", "이메일", "머리 스타일"].map(label => (
+          <div key={label} className="flex flex-col gap-[8px]">
+            <span className={font.label.medium} style={{ color: lightTheme.label.alternative }}>
+              {label}
+            </span>
+            <Skeleton className="h-[42px] w-full rounded-[10px]" />
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto grid grid-cols-2 gap-[7px] pt-[36px]">
+        <Skeleton className="h-[42px] rounded-[10px]" />
+        <Skeleton className="h-[42px] rounded-[10px]" />
+      </div>
+    </div>
+  </div>
+);
+
 const ProfileEditPage = () => {
   const {
     formValues,
@@ -63,6 +102,8 @@ const ProfileEditPage = () => {
     handleSave,
     handleStyleSelect,
     isLoading,
+    hasLoadError,
+    handleRetry,
     isSaving,
     profileName,
   } = useProfileEdit();
@@ -96,126 +137,147 @@ const ProfileEditPage = () => {
           </h1>
         </header>
 
-        <form
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
-          onSubmit={event => {
-            event.preventDefault();
-            handleSave();
-          }}
-        >
-          <div className="mx-auto flex w-full max-w-[402px] flex-1 flex-col px-[clamp(20px,6.47vw,26px)] pb-[28px] pt-[35px]">
-            <div className="flex flex-col items-center">
-              <div
-                className="flex h-[86px] w-[86px] items-center justify-center rounded-full p-[14px]"
-                style={{ backgroundColor: lightTheme.background.neutral }}
-              >
-                <img
-                  alt="현재 프로필 이미지"
-                  className="h-full w-full object-contain"
-                  src={profileAvatar}
-                />
-              </div>
-              <p
-                className={`mt-[12px] ${font.headline1.semiBold}`}
-                style={{ color: lightTheme.label.neutral }}
-              >
-                {profileName}
-              </p>
-            </div>
-
-            <div className="mt-[35px] flex flex-col gap-[22px]">
-              <ProfileEditInput
-                autoComplete="nickname"
-                label="이름 또는 닉네임"
-                name="nickname"
-                onChange={value => handleChange("nickname", value)}
-                placeholder="이름 또는 닉네임을 입력하세요"
-                value={formValues.nickname}
-              />
-              <ProfileEditInput
-                autoComplete="new-password"
-                disabled
-                label="비밀번호"
-                name="password"
-                onChange={value => handleChange("password", value)}
-                // 여기서는 바꿀 수 없어, 입력을 요구하지 않고 바꾸는 곳을 알려 준다.
-                placeholder="비밀번호 찾기에서 변경할 수 있어요"
-                type="password"
-                value={formValues.password}
-              />
-              <ProfileEditInput
-                autoComplete="tel"
-                label="연락처"
-                name="phone"
-                onChange={value => handleChange("phone", value)}
-                placeholder="010-0000-0000"
-                type="tel"
-                value={formValues.phone}
-              />
-              <ProfileEditInput
-                autoComplete="email"
-                disabled
-                label="이메일"
-                name="email"
-                onChange={value => handleChange("email", value)}
-                placeholder="example@heddy.com"
-                type="email"
-                value={formValues.email}
-              />
-
-              <div className="flex flex-col gap-[8px]">
-                <span className={font.label.medium} style={{ color: lightTheme.label.alternative }}>
-                  머리 스타일
-                </span>
-                <button
-                  className={`flex h-[42px] w-full items-center justify-between rounded-[10px] border-0 px-[15px] text-left ${font.caption.regular}`}
-                  disabled={isSaving}
-                  onClick={handleStyleSelect}
-                  style={{
-                    backgroundColor: lightTheme.background.neutral,
-                    color: lightTheme.label.assistive,
-                  }}
-                  type="button"
-                >
-                  <span>선호하는 머리 스타일을 선택하세요</span>
-                  <ArrowIcon
-                    className="h-[16px] w-[16px] -rotate-90"
-                    color={lightTheme.label.neutral}
-                  />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-auto pt-[36px]">
-              <div className="grid grid-cols-2 gap-[7px]">
-                <button
-                  className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
-                  disabled={isSaving}
-                  onClick={handleBack}
-                  style={{
-                    backgroundColor: lightTheme.background.alternative,
-                    borderColor: lightTheme.fill.neutral,
-                    color: lightTheme.label.alternative,
-                  }}
-                  type="button"
-                >
-                  취소
-                </button>
-                <button
-                  className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
-                  disabled={isSaving}
-                  style={{
-                    backgroundColor: lightTheme.primary.normal,
-                    color: lightTheme.label.buttonText,
-                  }}
-                  type="submit"
-                >
-                  {isSaving ? "저장 중" : "저장"}
-                </button>
-              </div>
-            </div>
+        {isLoading ? (
+          <ProfileEditSkeleton />
+        ) : hasLoadError ? (
+          <div role="alert" className="flex flex-1 flex-col items-center justify-center gap-3 px-5">
+            <p className={font.body.medium} style={{ color: lightTheme.label.assistive }}>
+              회원정보를 불러오지 못했습니다.
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className={cn("rounded-full px-4 py-2", font.label.semiBold)}
+              style={{ backgroundColor: lightTheme.fill.neutral, color: lightTheme.label.neutral }}
+            >
+              다시 시도
+            </button>
           </div>
-        </form>
+        ) : (
+          <form
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
+            onSubmit={event => {
+              event.preventDefault();
+              handleSave();
+            }}
+          >
+            <div className="mx-auto flex w-full max-w-[402px] flex-1 flex-col px-[clamp(20px,6.47vw,26px)] pb-[28px] pt-[35px]">
+              <div className="flex flex-col items-center">
+                <div
+                  className="flex h-[86px] w-[86px] items-center justify-center rounded-full p-[14px]"
+                  style={{ backgroundColor: lightTheme.background.neutral }}
+                >
+                  <img
+                    alt="현재 프로필 이미지"
+                    className="h-full w-full object-contain"
+                    src={profileAvatar}
+                  />
+                </div>
+                <p
+                  className={`mt-[12px] ${font.headline1.semiBold}`}
+                  style={{ color: lightTheme.label.neutral }}
+                >
+                  {profileName}
+                </p>
+              </div>
+
+              <div className="mt-[35px] flex flex-col gap-[22px]">
+                <ProfileEditInput
+                  autoComplete="nickname"
+                  label="이름 또는 닉네임"
+                  name="nickname"
+                  onChange={value => handleChange("nickname", value)}
+                  placeholder="이름 또는 닉네임을 입력하세요"
+                  value={formValues.nickname}
+                />
+                <ProfileEditInput
+                  autoComplete="new-password"
+                  disabled
+                  label="비밀번호"
+                  name="password"
+                  onChange={value => handleChange("password", value)}
+                  // 여기서는 바꿀 수 없어, 입력을 요구하지 않고 바꾸는 곳을 알려 준다.
+                  placeholder="비밀번호 찾기에서 변경할 수 있어요"
+                  type="password"
+                  value={formValues.password}
+                />
+                <ProfileEditInput
+                  autoComplete="tel"
+                  label="연락처"
+                  name="phone"
+                  onChange={value => handleChange("phone", value)}
+                  placeholder="010-0000-0000"
+                  type="tel"
+                  value={formValues.phone}
+                />
+                <ProfileEditInput
+                  autoComplete="email"
+                  disabled
+                  label="이메일"
+                  name="email"
+                  onChange={value => handleChange("email", value)}
+                  placeholder="example@heddy.com"
+                  type="email"
+                  value={formValues.email}
+                />
+
+                <div className="flex flex-col gap-[8px]">
+                  <span
+                    className={font.label.medium}
+                    style={{ color: lightTheme.label.alternative }}
+                  >
+                    머리 스타일
+                  </span>
+                  <button
+                    className={`flex h-[42px] w-full items-center justify-between rounded-[10px] border-0 px-[15px] text-left ${font.caption.regular}`}
+                    disabled={isSaving}
+                    onClick={handleStyleSelect}
+                    style={{
+                      backgroundColor: lightTheme.background.neutral,
+                      color: lightTheme.label.assistive,
+                    }}
+                    type="button"
+                  >
+                    <span>선호하는 머리 스타일을 선택하세요</span>
+                    <ArrowIcon
+                      className="h-[16px] w-[16px] -rotate-90"
+                      color={lightTheme.label.neutral}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-auto pt-[36px]">
+                <div className="grid grid-cols-2 gap-[7px]">
+                  <button
+                    className={`h-[42px] rounded-[10px] border ${font.headline2.semiBold}`}
+                    disabled={isSaving}
+                    onClick={handleBack}
+                    style={{
+                      backgroundColor: lightTheme.background.alternative,
+                      borderColor: lightTheme.fill.neutral,
+                      color: lightTheme.label.alternative,
+                    }}
+                    type="button"
+                  >
+                    취소
+                  </button>
+                  <button
+                    className={`h-[42px] rounded-[10px] border border-transparent ${font.headline2.semiBold}`}
+                    disabled={isSaving}
+                    style={{
+                      backgroundColor: lightTheme.primary.normal,
+                      color: lightTheme.label.buttonText,
+                    }}
+                    type="submit"
+                  >
+                    {isSaving ? "저장 중" : "저장"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        )}
       </section>
     </cap-page>
   );
