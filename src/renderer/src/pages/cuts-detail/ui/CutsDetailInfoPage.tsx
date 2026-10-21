@@ -9,7 +9,7 @@ import {
   formatServiceTypes,
 } from "@/entities/record";
 import { CutsRecordActions } from "@/features/cuts";
-import { cn, StarIcon } from "@/shared";
+import { cn, Skeleton, StarIcon } from "@/shared";
 
 /** 만족도는 5점 만점이라 채운 별과 빈 별을 합쳐 늘 5개를 그린다 */
 const SATISFACTION_SCORES = [1, 2, 3, 4, 5];
@@ -24,19 +24,76 @@ const formatPrice = (price: { amount: number; currency: string } | null | undefi
     : `${price.amount.toLocaleString("ko-KR")} ${price.currency}`;
 };
 
+const CutsDetailInfoSkeleton = () => (
+  <div
+    role="status"
+    aria-busy="true"
+    aria-label="시술 기록을 불러오는 중"
+    className="flex flex-col gap-[52px] px-[19px] pb-[30px] pt-[29px]"
+  >
+    <span className="sr-only">시술 기록을 불러오는 중</span>
+    <div aria-hidden="true" className="flex flex-col gap-[6px]">
+      <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
+        사진
+      </h2>
+      <div className="flex gap-[11px] overflow-hidden pl-[6px]">
+        <Skeleton className="size-[110px] shrink-0 rounded-[10px]" />
+        <Skeleton className="size-[110px] shrink-0 rounded-[10px]" />
+      </div>
+    </div>
+    <div aria-hidden="true" className="flex flex-col gap-[28px]">
+      <div className="flex flex-col gap-[10px]">
+        <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
+          시술 정보
+        </h2>
+        <div
+          className="overflow-hidden rounded-[15px]"
+          style={{ backgroundColor: lightTheme.background.normal }}
+        >
+          {[
+            "시술 날짜",
+            "미용실",
+            "담당 디자이너",
+            "시술 종류",
+            "시술 내용",
+            "소요 시간",
+            "금액",
+            "만족도",
+          ].map(label => (
+            <div
+              key={label}
+              className="flex h-[53px] items-center justify-between gap-4 border-b px-[14px] last:border-b-0"
+              style={{ borderColor: lightTheme.label.buttonText }}
+            >
+              <span className={font.body.medium} style={{ color: lightTheme.label.assistive }}>
+                {label}
+              </span>
+              <Skeleton className={cn("h-[1lh] w-28 rounded", font.body.medium)} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-[10px]">
+        <h2 className={font.headline2.semiBold} style={{ color: lightTheme.label.neutral }}>
+          메모
+        </h2>
+        <Skeleton className="h-[92px] rounded-[15px]" />
+      </div>
+    </div>
+    <div aria-hidden="true" className="grid grid-cols-3 gap-2">
+      {[0, 1, 2].map(index => (
+        <Skeleton key={index} className="h-12 rounded-xl" />
+      ))}
+    </div>
+  </div>
+);
+
 const CutsDetailInfoPage = () => {
   const { id } = useParams();
   const { data: record, isError, isLoading } = useGetTreatmentRecord(id);
 
   if (isLoading) {
-    return (
-      <p
-        className={`flex flex-1 items-center justify-center ${font.body.regular}`}
-        style={{ color: lightTheme.label.assistive }}
-      >
-        시술 기록을 불러오는 중이에요
-      </p>
-    );
+    return <CutsDetailInfoSkeleton />;
   }
 
   if (isError || !record) {
