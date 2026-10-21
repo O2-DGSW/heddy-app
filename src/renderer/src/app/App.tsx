@@ -9,12 +9,12 @@ import MaintenanceGate from "./MaintenanceGate";
 const ROUTER_BASENAME = env.baseUrl.replace(/\/$/, "") || undefined;
 
 const App = () => (
-  <MaintenanceGate>
-    <BrowserRouter basename={ROUTER_BASENAME}>
+  <BrowserRouter basename={ROUTER_BASENAME}>
+    <MaintenanceGate>
       <SessionExpiryListener />
       <AppRoutes />
-    </BrowserRouter>
-  </MaintenanceGate>
+    </MaintenanceGate>
+  </BrowserRouter>
 );
 
 export default App;

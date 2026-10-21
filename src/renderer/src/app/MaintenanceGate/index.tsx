@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { MaintenancePage } from "@/pages/maintenance";
+import { MobileLayout } from "../layouts/MobileLayout";
 
 import {
   isMaintenanceActive,
@@ -20,14 +21,28 @@ interface MaintenanceGateProps {
 const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
   const [isActive, setIsActive] = useState(() => isMaintenanceActive(Date.now()));
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isAccessEnded, setIsAccessEnded] = useState(false);
   const isNative = Capacitor.isNativePlatform();
 
-  const handleUnlock = async (code: string): Promise<boolean> => {
-    if (!isNative) return false;
-
+  const handleUnlock = async (code: string): Promise<void> => {
     const isValid = await verifyMaintenanceCode(code);
-    if (isValid) setIsUnlocked(true);
-    return isValid;
+    if (isValid) {
+      setIsUnlocked(true);
+      return;
+    }
+
+    // iOS는 exitApp을 지원하지 않고 브라우저는 탭 닫기를 거부할 수 있다.
+    // 실제 종료 여부와 관계없이 재실행 전까지 앱 진입과 재입력을 막는다.
+    setIsAccessEnded(true);
+    try {
+      if (Capacitor.getPlatform() === "android") {
+        await CapacitorApp.exitApp();
+      } else if (!isNative) {
+        window.close();
+      }
+    } catch {
+      // 종료 API가 실패해도 종료 안내 화면을 유지한다.
+    }
   };
 
   useEffect(() => {
@@ -59,14 +74,16 @@ const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
     };
   }, [isNative]);
 
-  if (!isActive || isUnlocked) return children;
+  if (!isAccessEnded && (!isActive || isUnlocked)) return children;
 
   return (
-    <MaintenancePage
-      allowUnlock={isNative}
-      onUnlock={handleUnlock}
-      scheduleLabel={MAINTENANCE_SCHEDULE_LABEL}
-    />
+    <MobileLayout hideNavigation>
+      <MaintenancePage
+        isAccessEnded={isAccessEnded}
+        onUnlock={handleUnlock}
+        scheduleLabel={MAINTENANCE_SCHEDULE_LABEL}
+      />
+    </MobileLayout>
   );
 };
 
