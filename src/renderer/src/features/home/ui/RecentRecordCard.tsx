@@ -11,6 +11,7 @@ import type { RecentRecordType } from "../model/home.types";
 
 interface RecentRecordCardProps {
   onAddClick: () => void;
+  onRecordClick: (recordId: string) => void;
   record?: RecentRecordType | null;
   isLoading?: boolean;
   isError?: boolean;
@@ -21,6 +22,7 @@ const RecentRecordCard = ({
   record,
   onClick,
   onAddClick,
+  onRecordClick,
   isLoading = false,
   isError = false,
 }: RecentRecordCardProps) => (
@@ -43,7 +45,12 @@ const RecentRecordCard = ({
       </button>
     </div>
     {record ? (
-      <div className="overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-4">
+      <button
+        type="button"
+        onClick={() => onRecordClick(record.id)}
+        aria-label={`${record.date} ${record.procedureName} 기록 상세보기`}
+        className="w-full overflow-hidden rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)] p-4 text-left transition-colors active:bg-[var(--home-soft)]"
+      >
         <div className="flex items-center gap-[14px]">
           <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl">
             <HomeImage
@@ -98,7 +105,7 @@ const RecentRecordCard = ({
             {record.memo}
           </p>
         )}
-      </div>
+      </button>
     ) : isLoading || isError ? (
       <div className="rounded-3xl border border-[var(--home-line)] bg-[var(--home-surface)]">
         {isLoading ? (

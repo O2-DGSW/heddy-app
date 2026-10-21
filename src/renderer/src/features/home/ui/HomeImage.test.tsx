@@ -86,6 +86,7 @@ test("최근 기록과 추천 썸네일은 지연 로딩 없이 요청한다", (
       <RecentRecordCard
         onClick={vi.fn()}
         onAddClick={vi.fn()}
+        onRecordClick={vi.fn()}
         record={{
           id: "record-1",
           date: "2026-10-21",

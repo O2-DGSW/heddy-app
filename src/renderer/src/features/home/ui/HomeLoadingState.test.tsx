@@ -59,7 +59,7 @@ test("추천 갱신에 실패해도 기존 카드를 오류 화면으로 바꾸�
 });
 
 test("기록의 첫 조회는 스켈레톤을 표시하며 저장된 기록은 갱신 중에도 유지한다", () => {
-  const handlers = { onClick: vi.fn(), onAddClick: vi.fn() };
+  const handlers = { onClick: vi.fn(), onAddClick: vi.fn(), onRecordClick: vi.fn() };
   const { rerender } = render(<RecentRecordCard {...handlers} isLoading />);
   expect(screen.getByRole("status").textContent).toContain("헤어 기록을 불러오고 있어요");
   rerender(
