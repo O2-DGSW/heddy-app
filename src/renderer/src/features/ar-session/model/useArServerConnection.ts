@@ -15,6 +15,7 @@ import {
   waitForIceGatheringComplete,
 } from "./peerConnection";
 import type { ArCameraFacingModeType } from "./peerConnection";
+import { createPortraitCameraStream } from "./portraitCameraStream";
 import { useGroomFitControl } from "./useGroomFitControl";
 
 export type ArConnectionFeedbackType =
@@ -187,6 +188,7 @@ export const useArServerConnection = (
           localStream.getTracks().forEach(track => track.stop());
           return;
         }
+        localStreamRef.current = localStream;
         // 수신하는 서버 트랙에는 방향 정보가 없으므로 로컬 카메라에서 한 번 판별한다.
         const previewFacingMode = resolveCameraFacingMode(
           localStream.getVideoTracks()[0],
@@ -195,6 +197,12 @@ export const useArServerConnection = (
         // 최초 ideal 요청과 다른 카메라가 열려도 다음 전환은 실제 방향을 기준으로 한다.
         if (previewFacingMode) cameraFacingModeRef.current = previewFacingMode;
         setIsPreviewMirrored(previewFacingMode === "user");
+        const platform = Capacitor.getPlatform();
+        const outgoingStream =
+          platform === "ios" || platform === "android"
+            ? await createPortraitCameraStream(localStream, signal, failConnection)
+            : localStream;
+        signal.throwIfAborted();
         stage = "server";
         setConnectionFeedback(
           hasConnectedRef.current
@@ -205,8 +213,7 @@ export const useArServerConnection = (
         );
         // 권한 응답을 기다리는 시간은 제한하지 않고, 실제 연결 시도만 만료시킨다.
         connectionDeadlineRef.current = setTimeout(failConnection, 30_000);
-        localStreamRef.current = localStream;
-        if (previewVideoRef.current) attachStream(previewVideoRef.current, localStream);
+        if (previewVideoRef.current) attachStream(previewVideoRef.current, outgoingStream);
 
         const peer = new RTCPeerConnection({
           iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -240,16 +247,19 @@ export const useArServerConnection = (
           })();
         });
 
-        localStream.getVideoTracks().forEach(track => {
-          configureVideoSender(peer, track);
-          track.addEventListener(
-            "ended",
-            () => {
-              if (isCurrentPeer()) failConnection();
-            },
-            { once: true }
-          );
-        });
+        outgoingStream.getVideoTracks().forEach(track => configureVideoSender(peer, track));
+        // 원본 카메라 종료와 가공 트랙 종료 모두 기존 재연결 경로로 복구한다.
+        new Set([...localStream.getVideoTracks(), ...outgoingStream.getVideoTracks()]).forEach(
+          track => {
+            track.addEventListener(
+              "ended",
+              () => {
+                if (isCurrentPeer()) failConnection();
+              },
+              { once: true }
+            );
+          }
+        );
         peer.addEventListener("track", event => {
           if (!isCurrentPeer() || event.track.kind !== "video" || !previewVideoRef.current) return;
           attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));

@@ -83,7 +83,7 @@ export const useHairstyleCarousel = ({
   }, []);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || !event.isPrimary) return;
+    if (event.button !== 0 || !event.isPrimary || pointerRef.current) return;
     if (disabled) {
       onDisabledSelect?.();
       return;
@@ -103,7 +103,10 @@ export const useHairstyleCarousel = ({
     const pointer = pointerRef.current;
     if (!pointer || pointer.id !== event.pointerId) return;
     const distance = pointer.lastX - event.clientX;
-    if (Math.abs(pointer.startX - event.clientX) >= CLICK_SUPPRESSION_DISTANCE) {
+    if (
+      !suppressClickRef.current &&
+      Math.abs(pointer.startX - event.clientX) >= CLICK_SUPPRESSION_DISTANCE
+    ) {
       suppressClickRef.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
     }
@@ -127,10 +130,16 @@ export const useHairstyleCarousel = ({
     animateTo(Math.round(positionRef.current + momentum));
   };
 
-  const handlePointerCancel = () => {
-    if (!pointerRef.current) return;
+  const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+    if (pointerRef.current?.id !== event.pointerId) return;
     pointerRef.current = null;
     animateTo(Math.round(positionRef.current));
+  };
+
+  const handleLostPointerCapture = (event: PointerEvent<HTMLDivElement>) => {
+    // 터치 캡처가 자식 버튼에서 캐러셀로 이동할 때 버블링되는 해제 이벤트는 무시한다.
+    if (event.target !== event.currentTarget) return;
+    handlePointerCancel(event);
   };
 
   const handleSelect = (nextPosition: number) => {
@@ -194,5 +203,6 @@ export const useHairstyleCarousel = ({
     handlePointerMove,
     handlePointerUp,
     handlePointerCancel,
+    handleLostPointerCapture,
   };
 };

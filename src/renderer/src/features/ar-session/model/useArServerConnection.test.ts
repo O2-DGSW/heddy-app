@@ -4,11 +4,12 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_GROOM_FIT_SETTINGS } from "@/entities/ar-groom";
 import { ApiHttpError } from "@heddy/api";
-import { waitForIceGatheringComplete } from "./peerConnection";
+import { configureVideoSender, waitForIceGatheringComplete } from "./peerConnection";
 import { useArServerConnection } from "./useArServerConnection";
 
 const mocks = vi.hoisted(() => ({
   openCamera: vi.fn(),
+  portrait: vi.fn(),
   offer: vi.fn(),
   baseUrl: vi.fn(),
   syncGroomFit: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock("./peerConnection", async importOriginal => ({
   configureVideoSender: vi.fn(),
   waitForIceGatheringComplete: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("./portraitCameraStream", () => ({ createPortraitCameraStream: mocks.portrait }));
 vi.mock("./useGroomFitControl", () => ({
   useGroomFitControl: (_channel: unknown, groom: string) => {
     mocks.fitGroom(groom);
@@ -73,6 +75,8 @@ const track = {
   getSettings: vi.fn<() => MediaTrackSettings>(),
 };
 const stream = { getTracks: () => [track], getVideoTracks: () => [track] };
+const portraitTrack = { stop: vi.fn(), addEventListener: vi.fn() };
+const portraitStream = { getTracks: () => [portraitTrack], getVideoTracks: () => [portraitTrack] };
 const setup = () => {
   const preview = { current: null };
   return renderHook(() => useArServerConnection(preview, "", DEFAULT_GROOM_FIT_SETTINGS));
@@ -102,6 +106,7 @@ beforeEach(() => {
   track.label = "";
   track.getSettings.mockReturnValue({});
   mocks.openCamera.mockResolvedValue(stream);
+  mocks.portrait.mockResolvedValue(portraitStream);
   mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer" });
 });
 afterEach(() => {
@@ -427,6 +432,85 @@ describe("AR 연결 상태와 복구", () => {
     await advance(60_000);
     expect(hook.result.current.connectionFeedback).toBe("unavailable");
     expect(mocks.openCamera).not.toHaveBeenCalled();
+  });
+});
+
+describe("네이티브 세로 송신 연결", () => {
+  test.each(["ios", "android", "web"])(
+    "%s에서 네이티브만 가공된 트랙을 전송하고 원본 방향 판별을 유지한다",
+    async platform => {
+      vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+      track.getSettings.mockReturnValue({ facingMode: "user" });
+      const preview = document.createElement("video");
+      vi.spyOn(preview, "play").mockResolvedValue(undefined);
+      const previewRef = { current: preview };
+      const hook = renderHook(() =>
+        useArServerConnection(previewRef, "", DEFAULT_GROOM_FIT_SETTINGS)
+      );
+      await advance();
+      const native = platform !== "web";
+      expect(configureVideoSender).toHaveBeenCalledExactlyOnceWith(
+        Peer.instances[0],
+        native ? portraitTrack : track
+      );
+      expect(preview.srcObject).toBe(native ? portraitStream : stream);
+      expect(hook.result.current.isPreviewMirrored).toBe(true);
+      expect(mocks.portrait).toHaveBeenCalledTimes(native ? 1 : 0);
+      if (native) {
+        expect(mocks.portrait).toHaveBeenCalledWith(
+          stream,
+          expect.any(AbortSignal),
+          expect.any(Function)
+        );
+      }
+      hook.unmount();
+      expect(track.stop).toHaveBeenCalledOnce();
+      if (native) expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    }
+  );
+
+  test("가공 중 화면을 나가면 원본 카메라를 닫고 늦은 결과로 연결하지 않는다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("ios");
+    let complete: (value: typeof portraitStream) => void = () => undefined;
+    mocks.portrait.mockReturnValueOnce(
+      new Promise(resolve => {
+        complete = resolve;
+      })
+    );
+    const hook = setup();
+    await advance(0);
+    act(() => hook.result.current.handlePageLeave());
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    await act(async () => complete(portraitStream));
+    expect(Peer.instances).toHaveLength(0);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(hook.result.current.connectionStatus).toBe("idle");
+  });
+
+  test("세로 출력이 지원되지 않으면 원본을 송신하지 않고 카메라를 정리한다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("android");
+    mocks.portrait.mockRejectedValueOnce(new DOMException("Unsupported", "NotSupportedError"));
+    const hook = setup();
+    await advance();
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(configureVideoSender).not.toHaveBeenCalled();
+    expect(hook.result.current.connectionStatus).toBe("error");
+  });
+
+  test("송신 중 프레임 처리가 실패하면 기존 재연결 경로로 복구한다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("ios");
+    const hook = setup();
+    await advance();
+    act(() => Peer.instances[0].changeState("connected"));
+    act(() => mocks.portrait.mock.calls[0][2]());
+    expect(hook.result.current.connectionFeedback).toBe("reconnecting");
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    await advance(1001);
+    await advance();
+    expect(mocks.portrait).toHaveBeenCalledTimes(2);
   });
 });
 
