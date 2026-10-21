@@ -120,7 +120,7 @@ test.each(["ios", "android", "web"])(
   "%s에서 준비한 SDP를 localDescription과 서버 offer 요청에 동일하게 사용한다",
   async platform => {
     const originalSdp = "v=0\r\na=extmap:4 urn:3gpp:video-orientation\r\na=ice-ufrag:camera\r\n";
-    const expectedSdp = platform === "ios" ? "v=0\r\na=ice-ufrag:camera\r\n" : originalSdp;
+    const expectedSdp = platform === "web" ? originalSdp : "v=0\r\na=ice-ufrag:camera\r\n";
     class OrientationPeer extends Peer {
       localDescription = { type: "offer", sdp: originalSdp };
     }
