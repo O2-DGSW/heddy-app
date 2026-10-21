@@ -9,6 +9,12 @@ interface PostArServerOfferRequest {
   sdp: string;
   type: "offer";
   out_size: "800x1298";
+  groom?: string;
+  groom_color?: string;
+}
+
+interface ArServerAnswer extends RTCSessionDescriptionInit {
+  groom?: string | null;
 }
 
 export const getArServerBaseUrl = (): string => {
@@ -96,8 +102,9 @@ export const parseArGrooms = (
 export const requestArServerOffer = async (
   serverBaseUrl: string,
   offer: RTCSessionDescriptionInit,
-  signal?: AbortSignal
-): Promise<RTCSessionDescriptionInit> => {
+  signal?: AbortSignal,
+  initialStyle: { groom?: string; groom_color?: string } = {}
+): Promise<ArServerAnswer> => {
   if (offer.type !== "offer" || typeof offer.sdp !== "string" || !offer.sdp.trim()) {
     throw new Error("AR 연결 정보를 준비하지 못했습니다. 다시 연결해 주세요.");
   }
@@ -107,6 +114,10 @@ export const requestArServerOffer = async (
     sdp: offer.sdp,
     type: offer.type,
     out_size: "800x1298",
+    ...(initialStyle.groom?.trim() ? { groom: initialStyle.groom.trim() } : {}),
+    ...(/^#[0-9a-f]{6}$/i.test(initialStyle.groom_color ?? "")
+      ? { groom_color: initialStyle.groom_color }
+      : {}),
   };
   let answer: unknown;
   try {
@@ -122,5 +133,12 @@ export const requestArServerOffer = async (
   if (!isRecord(answer) || typeof answer.sdp !== "string" || answer.type !== "answer") {
     throw new Error("AR 서버에 연결하지 못했습니다. 다시 연결해 주세요.");
   }
-  return { sdp: answer.sdp, type: answer.type };
+  if (answer.groom !== undefined && answer.groom !== null && typeof answer.groom !== "string") {
+    throw new Error("AR 서버의 스타일 응답을 확인하지 못했습니다. 다시 연결해 주세요.");
+  }
+  return {
+    sdp: answer.sdp,
+    type: answer.type,
+    ...(answer.groom !== undefined ? { groom: answer.groom } : {}),
+  };
 };
