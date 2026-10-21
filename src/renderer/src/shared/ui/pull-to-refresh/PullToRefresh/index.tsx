@@ -22,7 +22,7 @@ interface PullState {
 const REFRESH_DISTANCE = 64;
 const MAX_PULL_DISTANCE = 96;
 const IGNORED_TARGETS =
-  'input, textarea, select, [contenteditable="true"], [role="slider"], [role="dialog"], nav';
+  'input, textarea, select, [contenteditable="true"], [role="slider"], [role="dialog"], nav, [data-pull-to-refresh="ignore"]';
 
 const isAtScrollTop = (target: Element, boundary: HTMLElement): boolean => {
   let element: Element | null = target;
