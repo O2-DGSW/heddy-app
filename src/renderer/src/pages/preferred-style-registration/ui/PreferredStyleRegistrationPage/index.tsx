@@ -136,21 +136,14 @@ const PreferredStyleRegistrationPage = () => {
                     >
                       <span className="sr-only">스타일 태그를 불러오는 중</span>
                       <div aria-hidden="true" className="flex flex-wrap gap-[4px]">
-                        {[
-                          "w-20",
-                          "w-16",
-                          "w-24",
-                          "w-20",
-                          "w-16",
-                          "w-20",
-                          "w-24",
-                          "w-16",
-                          "w-20",
-                          "w-24",
-                          "w-16",
-                          "w-20",
-                        ].map((width, index) => (
-                          <Skeleton key={index} className={cn("h-[26px] rounded-[15px]", width)} />
+                        {Array.from({ length: 44 }, (_, index) => (
+                          <Skeleton
+                            key={index}
+                            className={cn(
+                              "h-[26px] rounded-[15px]",
+                              ["w-16", "w-20", "w-24"][index % 3]
+                            )}
+                          />
                         ))}
                       </div>
                     </div>
