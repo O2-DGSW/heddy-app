@@ -169,3 +169,23 @@ test("두 손가락으로 바뀐 당김은 새로고침하지 않는다", async 
   await act(async () => undefined);
   expect(refresh).not.toHaveBeenCalled();
 });
+
+test("캐러셀로 표시한 영역은 당김을 가로채지 않고 일반 본문의 새로고침은 유지한다", async () => {
+  const refresh = vi.fn().mockResolvedValue(undefined);
+  render(
+    <PullToRefresh onRefresh={refresh} resetKey="ar">
+      <div data-pull-to-refresh="ignore">
+        <button type="button">
+          <span>스타일</span>
+        </button>
+      </div>
+      <p>일반 본문</p>
+    </PullToRefresh>
+  );
+  expect(pull(screen.getByText("스타일")).defaultPrevented).toBe(false);
+  await act(async () => undefined);
+  expect(refresh).not.toHaveBeenCalled();
+  expect(screen.queryByRole("status")).toBeNull();
+  expect(pull(screen.getByText("일반 본문")).defaultPrevented).toBe(true);
+  await waitFor(() => expect(refresh).toHaveBeenCalledOnce());
+});
