@@ -9,7 +9,6 @@ interface CutsRecordListProps {
   viewMode?: CutsViewMode;
   /** 카테고리로 걸러서 비었는지. 빈 화면 안내 문구가 달라진다 */
   isFiltered?: boolean;
-  onAddRecord?: () => void;
 }
 
 /**
@@ -29,10 +28,9 @@ export const CutsRecordList = ({
   onRecordClick,
   viewMode = "list",
   isFiltered = false,
-  onAddRecord,
 }: CutsRecordListProps) => {
   if (records.length === 0) {
-    return <CutsEmptyState isFiltered={isFiltered} onAddRecord={onAddRecord} />;
+    return <CutsEmptyState isFiltered={isFiltered} />;
   }
 
   return (
