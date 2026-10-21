@@ -67,9 +67,7 @@ const ArHairstylePage = () => {
   );
   // 목록보다 offer 준비가 빠른 경우에도 서버가 초기 선택을 해석할 수 있게 원래 요청을 보낸다.
   const selectedGroom =
-    requestedGroom && appliedRecommendationRef.current !== requestKey
-      ? (hairstyleOptions[requestedHairstylePosition]?.name ?? requestedGroom)
-      : selectedHairstyle.name;
+    requestedGroom && (isGroomsPending || groomsError) ? requestedGroom : selectedHairstyle.name;
   const {
     offerGroom,
     connectionStatus,
@@ -86,6 +84,9 @@ const ArHairstylePage = () => {
     handleReconnect,
     handleCameraSwitch,
   } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings);
+  const offerHairstylePosition = hairstyleOptions.findIndex(
+    option => option.name === offerGroom?.applied
+  );
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
@@ -148,10 +149,20 @@ const ArHairstylePage = () => {
     if (!offerGroom || appliedOfferRef.current === offerGroom || isGroomsPending) return;
     appliedOfferRef.current = offerGroom;
     // 응답을 기다리는 사이 사용자가 고른 다른 스타일은 덮어쓰지 않는다.
-    if (offerGroom.requested !== selectedGroom) return;
-    const index = hairstyleOptions.findIndex(option => option.name === offerGroom.applied);
-    selectHairstylePosition(index >= 0 ? index : 0);
-  }, [offerGroom, isGroomsPending, selectedGroom, hairstyleOptions, selectHairstylePosition]);
+    if (
+      normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedGroom) &&
+      normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedHairstyle.label)
+    )
+      return;
+    selectHairstylePosition(offerHairstylePosition >= 0 ? offerHairstylePosition : 0);
+  }, [
+    offerGroom,
+    isGroomsPending,
+    selectedGroom,
+    selectedHairstyle.label,
+    offerHairstylePosition,
+    selectHairstylePosition,
+  ]);
 
   useEffect(() => {
     handlePageEnterRef.current = handlePageEnter;
