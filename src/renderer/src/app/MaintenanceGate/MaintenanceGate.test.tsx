@@ -3,13 +3,15 @@ import { Capacitor } from "@capacitor/core";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import type { AppState } from "@capacitor/app";
+import { MemoryRouter } from "react-router-dom";
 
-const { removeListener, addListener } = vi.hoisted(() => ({
+const { removeListener, addListener, exitApp } = vi.hoisted(() => ({
   removeListener: vi.fn().mockResolvedValue(undefined),
   addListener: vi.fn(),
+  exitApp: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@capacitor/app", () => ({ App: { addListener } }));
+vi.mock("@capacitor/app", () => ({ App: { addListener, exitApp } }));
 
 vi.mock("./maintenance", async importOriginal => ({
   ...(await importOriginal<typeof import("./maintenance")>()),
@@ -21,18 +23,20 @@ import MaintenanceGate from ".";
 import { verifyMaintenanceCode } from "./maintenance";
 
 let handleAppStateChange: (state: AppState) => void;
-const renderGate = () =>
+const renderGate = (path = "/login") =>
   render(
-    <MaintenanceGate>
-      <p>정상 앱</p>
-    </MaintenanceGate>
+    <MemoryRouter initialEntries={[path]}>
+      <MaintenanceGate>
+        <p>정상 앱</p>
+      </MaintenanceGate>
+    </MemoryRouter>
   );
 const tapWarning = (count = 7) => {
   const warning = screen.getByRole("button", { name: "점검 안내" });
   for (let index = 0; index < count; index += 1) fireEvent.click(warning);
 };
 const submitCode = async (code: string) => {
-  fireEvent.change(screen.getByLabelText("6자리 비밀번호를 입력해 주세요."), {
+  fireEvent.change(screen.getByLabelText("비밀번호를 입력해 주세요."), {
     target: { value: code },
   });
   await act(async () => {
@@ -45,6 +49,8 @@ beforeEach(() => {
   vi.setSystemTime(new Date("2026-10-21T12:00:00+09:00"));
   vi.mocked(verifyMaintenanceCode).mockImplementation(async code => code === "020202");
   vi.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+  vi.spyOn(Capacitor, "getPlatform").mockReturnValue("ios");
+  vi.spyOn(window, "close").mockImplementation(() => undefined);
   addListener.mockImplementation((_event: string, listener: typeof handleAppStateChange) => {
     handleAppStateChange = listener;
     return Promise.resolve({ remove: removeListener });
@@ -70,7 +76,7 @@ describe("점검 진입 차단", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     tapWarning(1);
     expect(screen.getByRole("dialog")).toBeTruthy();
-    expect(document.activeElement).toBe(screen.getByLabelText("6자리 비밀번호를 입력해 주세요."));
+    expect(document.activeElement).toBe(screen.getByLabelText("비밀번호를 입력해 주세요."));
   });
 
   test("연타 간격이 지나면 횟수를 초기화한다", () => {
@@ -83,24 +89,106 @@ describe("점검 진입 차단", () => {
     expect(screen.getByRole("dialog")).toBeTruthy();
   });
 
-  test("웹에서는 경고 이모지를 연타해도 입력창이 열리지 않는다", () => {
+  test("웹에서도 7번 연타한 뒤 올바른 비밀번호로 앱을 사용할 수 있다", async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     renderGate();
-    for (let index = 0; index < 10; index += 1)
-      fireEvent.click(screen.getByRole("img", { name: "점검 안내" }));
+    tapWarning(6);
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(screen.queryByText("정상 앱")).toBeNull();
+    tapWarning(1);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    await submitCode("020202");
+    expect(screen.getByText("정상 앱")).toBeTruthy();
+    expect(addListener).not.toHaveBeenCalled();
   });
 
-  test("잘못된 코드는 차단하고 올바른 코드를 입력하면 앱을 표시한다", async () => {
+  test("넓은 웹 화면은 기존 목업을 표시하고 좁아지면 숨긴다", () => {
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    const originalWidth = window.innerWidth;
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1024);
+    renderGate("/home");
+    expect(screen.getByText("9:41")).toBeTruthy();
+    expect(screen.queryByRole("navigation")).toBeNull();
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    fireEvent(window, new Event("resize"));
+    expect(screen.queryByText("9:41")).toBeNull();
+    expect(screen.getByRole("button", { name: "점검 안내" })).toBeTruthy();
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(originalWidth);
+  });
+
+  test("네이티브에서는 목업과 하단 메뉴 없이 점검 화면을 표시한다", () => {
+    renderGate("/home");
+    expect(screen.queryByText("9:41")).toBeNull();
+    expect(screen.queryByRole("navigation")).toBeNull();
+    expect(screen.getByRole("heading", { name: "서비스 점검 중입니다" })).toBeTruthy();
+  });
+
+  test("올바른 코드를 입력하면 앱을 표시한다", async () => {
     renderGate();
     tapWarning();
-    await submitCode("123456");
-    expect(screen.getByRole("alert").textContent).toBe("비밀번호가 일치하지 않습니다.");
-    expect(screen.queryByText("정상 앱")).toBeNull();
     await submitCode("020202");
     expect(screen.getByText("정상 앱")).toBeTruthy();
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  test.each(["1", "123456", "0202020"])(
+    "Android에서 틀린 코드 %s를 입력하면 앱을 종료한다",
+    async code => {
+      vi.mocked(Capacitor.getPlatform).mockReturnValue("android");
+      renderGate();
+      tapWarning();
+      await submitCode(code);
+      expect(exitApp).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole("heading", { name: "앱 이용이 종료되었습니다" })).toBeTruthy();
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(screen.queryByRole("button", { name: "점검 안내" })).toBeNull();
+      expect(screen.queryByText("정상 앱")).toBeNull();
+    }
+  );
+
+  test("Android 종료 API가 실패해도 재입력을 허용하지 않는다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("android");
+    exitApp.mockRejectedValueOnce(new Error("종료 실패"));
+    renderGate();
+    tapWarning();
+    await submitCode("1");
+    expect(screen.getByRole("heading", { name: "앱 이용이 종료되었습니다" })).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  test("웹은 탭 닫기를 요청하고 닫히지 않아도 이용을 종료한다", async () => {
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("web");
+    renderGate();
+    tapWarning();
+    await submitCode("1");
+    expect(window.close).toHaveBeenCalledTimes(1);
+    expect(exitApp).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "앱 이용이 종료되었습니다" })).toBeTruthy();
+    expect(screen.queryByText("정상 앱")).toBeNull();
+  });
+
+  test("iOS에서 오입력하면 종료 화면을 유지하고 재실행 시에만 다시 입력할 수 있다", async () => {
+    const view = renderGate();
+    tapWarning();
+    await submitCode("1");
+    expect(exitApp).not.toHaveBeenCalled();
+    expect(window.close).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "앱 이용이 종료되었습니다" })).toBeTruthy();
+    view.unmount();
+    renderGate();
+    tapWarning();
+    await submitCode("020202");
+    expect(screen.getByText("정상 앱")).toBeTruthy();
+  });
+
+  test("오입력으로 종료된 화면은 점검 종료 시각이 지나도 앱으로 전환되지 않는다", async () => {
+    renderGate();
+    tapWarning();
+    await submitCode("1");
+    vi.setSystemTime(new Date("2026-10-22T21:00:00+09:00"));
+    act(() => handleAppStateChange({ isActive: true }));
+    expect(screen.getByRole("heading", { name: "앱 이용이 종료되었습니다" })).toBeTruthy();
+    expect(screen.queryByText("정상 앱")).toBeNull();
   });
 
   test("앱을 새로 실행하면 허용 상태를 유지하지 않는다", async () => {
@@ -124,31 +212,42 @@ describe("점검 진입 차단", () => {
     expect(screen.getByText("정상 앱")).toBeTruthy();
   });
 
-  test("숫자 6자리가 되기 전에는 확인할 수 없다", () => {
+  test("길이 안내 없이 한 자리부터 확인할 수 있고 입력 길이를 제한하지 않는다", () => {
     renderGate();
     tapWarning();
-    const input = screen.getByLabelText<HTMLInputElement>("6자리 비밀번호를 입력해 주세요.");
-    fireEvent.change(input, { target: { value: "01a234" } });
-    expect(input.value).toBe("01234");
+    const input = screen.getByLabelText<HTMLInputElement>("비밀번호를 입력해 주세요.");
+    expect(screen.queryByText(/6자리/)).toBeNull();
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "확인" }).disabled).toBe(true);
-    fireEvent.change(input, { target: { value: "0123456789" } });
-    expect(input.value).toBe("012345");
+    fireEvent.change(input, { target: { value: "1" } });
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "확인" }).disabled).toBe(false);
+    fireEvent.change(input, { target: { value: "0123456789" } });
+    expect(input.value).toBe("0123456789");
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "확인" }).disabled).toBe(false);
+  });
+
+  test("배경을 눌러도 입력창이 닫히지 않는다", () => {
+    renderGate();
+    tapWarning();
+    const dialog = screen.getByRole("dialog");
+    const backdrop = dialog.querySelector('[aria-hidden="true"]');
+    expect(backdrop).toBeTruthy();
+    if (!backdrop) throw new Error("모달 배경이 없습니다.");
+    fireEvent.click(backdrop);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "닫기" })).toBeNull();
   });
 
   test("취소하면 입력을 지우고 경고 버튼으로 포커스를 돌린다", () => {
     renderGate();
     tapWarning();
-    fireEvent.change(screen.getByLabelText("6자리 비밀번호를 입력해 주세요."), {
+    fireEvent.change(screen.getByLabelText("비밀번호를 입력해 주세요."), {
       target: { value: "123" },
     });
     fireEvent.click(screen.getByRole("button", { name: "취소" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "점검 안내" }));
     tapWarning();
-    expect(screen.getByLabelText<HTMLInputElement>("6자리 비밀번호를 입력해 주세요.").value).toBe(
-      ""
-    );
+    expect(screen.getByLabelText<HTMLInputElement>("비밀번호를 입력해 주세요.").value).toBe("");
   });
 
   test("정식 점검 종료 시각에 열려 있는 화면도 자동 해제한다", () => {
