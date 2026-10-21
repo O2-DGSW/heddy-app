@@ -1,4 +1,6 @@
 /** AR 서버와의 WebRTC 연결에 쓰는 헬퍼. React 상태와 무관하다 */
+import { Capacitor } from "@capacitor/core";
+
 import { requestNativeCameraPermission } from "./cameraPermission";
 
 const ICE_GATHERING_TIMEOUT_MS = 3000;
@@ -129,14 +131,20 @@ export const openCamera = async (
 
   await requestNativeCameraPermission();
 
-  // 고밀도 화면에서 확대 표시되지 않도록 서버의 800×1298 출력에 입력을 맞춘다.
-  // 선호 크기를 지원하지 않는 카메라는 브라우저가 가능한 크기로 조절한다.
+  // 폰의 캡처 제약값은 기본 방향(가로) 기준이고 실제 트랙 크기는 기기 방향에 따라 뒤집힌다.
+  // 네이티브 송신 픽셀의 세로 비율은 portraitCameraStream에서 별도로 맞춘다.
+  // https://w3c.github.io/mediacapture-main/#constrainable-properties
+  const platform = Capacitor.getPlatform();
+  const isNative = platform === "ios" || platform === "android";
+  const width = isNative ? 1298 : 800;
+  const height = isNative ? 800 : 1298;
   const video: MediaTrackConstraints & { zoom: ConstrainDouble } = {
     facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
     frameRate: { ideal: 30, max: 30 },
-    width: { ideal: 800 },
-    height: { ideal: 1298 },
-    aspectRatio: { ideal: 800 / 1298 },
+    width: { ideal: width },
+    height: { ideal: height },
+    aspectRatio: { ideal: width / height },
+    ...(isNative ? { resizeMode: "crop-and-scale" } : {}),
     zoom: { ideal: 0.5 },
   };
   return navigator.mediaDevices.getUserMedia({ audio: false, video });
