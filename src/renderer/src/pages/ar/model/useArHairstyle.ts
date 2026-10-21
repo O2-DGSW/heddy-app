@@ -16,9 +16,7 @@ export const useArHairstyle = (hairstyleOptions: ArHairstyleOption[]) => {
   const handleGroomColorReset = useCallback((color = DEFAULT_AR_HAIR_COLOR) => {
     const nextColor = /^#[0-9a-f]{6}$/i.test(color) ? color : DEFAULT_AR_HAIR_COLOR;
     setFitSettings(current =>
-      current.groom_color === nextColor
-        ? current
-        : { ...current, groom_color: nextColor }
+      current.groom_color === nextColor ? current : { ...current, groom_color: nextColor }
     );
   }, []);
 
