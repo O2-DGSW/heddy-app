@@ -1,5 +1,5 @@
 import { font } from "@heddy/design-tokens";
-import { cn } from "@/shared";
+import { cn, Skeleton } from "@/shared";
 
 interface HomeSectionSkeletonProps {
   variant: "record" | "recommendation" | "saved-style";
@@ -16,7 +16,7 @@ const HomeSectionSkeleton = ({ variant }: HomeSectionSkeletonProps) => {
   return (
     <div role="status" aria-live="polite">
       <span className="sr-only">{message}</span>
-      <div aria-hidden="true" className="motion-safe:animate-pulse">
+      <div aria-hidden="true" className="w-full">
         {variant === "recommendation" ? (
           <div className="px-4 py-1">
             {[0, 1, 2].map(index => (
@@ -24,41 +24,33 @@ const HomeSectionSkeleton = ({ variant }: HomeSectionSkeletonProps) => {
                 key={index}
                 className="flex min-h-24 items-center gap-3 border-b border-[var(--home-line)] py-3 last:border-0"
               >
-                <span className="size-16 shrink-0 rounded-2xl bg-[var(--home-line)]" />
+                <Skeleton className="size-16 shrink-0 rounded-2xl" />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <span className="h-3 w-10 rounded bg-[var(--home-line)]" />
-                  <span className="h-4 w-3/4 rounded bg-[var(--home-line)]" />
-                  <span className="h-3 w-1/2 rounded bg-[var(--home-line)]" />
+                  <Skeleton className="h-3 w-10 rounded" />
+                  <Skeleton className="h-4 w-3/4 rounded" />
+                  <Skeleton className="h-3 w-1/2 rounded" />
                 </div>
-                <span className="h-7 w-14 shrink-0 rounded-full bg-[var(--home-line)]" />
+                <Skeleton className="h-7 w-14 shrink-0 rounded-full" />
               </div>
             ))}
           </div>
         ) : variant === "record" ? (
           <div className="flex items-center gap-3.5 p-4">
-            <span className="size-24 shrink-0 rounded-2xl bg-[var(--home-line)]" />
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <span className="h-3 w-1/3 rounded bg-[var(--home-line)]" />
-              <span className="h-4 w-3/4 rounded bg-[var(--home-line)]" />
-              <span className="h-3 w-1/2 rounded bg-[var(--home-line)]" />
-              <span className="h-3 w-2/3 rounded bg-[var(--home-line)]" />
+            <Skeleton className="size-24 shrink-0 rounded-2xl" />
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <Skeleton className={cn("h-[1lh] w-1/3 rounded", font.caption.medium)} />
+              <Skeleton className={cn("h-[1lh] w-3/4 rounded", font.body.semiBold)} />
+              <Skeleton className={cn("h-[1lh] w-1/2 rounded", font.caption.medium)} />
+              <Skeleton className="h-3.5 w-20 rounded" />
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 p-3">
-            <span className="aspect-[4/3] w-full rounded-2xl bg-[var(--home-line)]" />
-            <span className="my-1 h-4 w-1/3 rounded bg-[var(--home-line)]" />
+            <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
+            <Skeleton className="my-1 h-4 w-1/3 rounded" />
           </div>
         )}
       </div>
-      {variant === "recommendation" && (
-        <p
-          aria-hidden="true"
-          className={cn(font.caption.medium, "px-4 pb-4 pt-2 text-center text-[var(--home-muted)]")}
-        >
-          {message}
-        </p>
-      )}
     </div>
   );
 };
