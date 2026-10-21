@@ -1,6 +1,6 @@
 import { font, lightTheme } from "@heddy/design-tokens";
 
-import { cn, ArrowIcon, ConfirmModal } from "@/shared";
+import { cn, Skeleton, ArrowIcon, ConfirmModal } from "@/shared";
 
 import { getIsTagDisabled } from "../../lib/styleTag";
 import { PREFERRED_STYLE_TABS, TAB_LABEL_BY_TYPE, TITLE_BY_TAB } from "../../model/constants";
@@ -27,6 +27,7 @@ const PreferredStyleRegistrationPage = () => {
     handleTagClick,
     isExcludedSummaryExpanded,
     isFetching,
+    isInitialLoading,
     isPreferredSummaryExpanded,
     isSaveDisabled,
     isSaving,
@@ -126,13 +127,33 @@ const PreferredStyleRegistrationPage = () => {
                 </h2>
 
                 <div className="flex flex-wrap gap-[4px]">
-                  {isFetching && styleTags.length === 0 ? (
-                    <p
-                      className={`px-[10px] py-[8px] ${font.label.regular}`}
-                      style={{ color: lightTheme.label.assistive }}
+                  {isInitialLoading ? (
+                    <div
+                      role="status"
+                      aria-busy="true"
+                      aria-label="스타일 태그를 불러오는 중"
+                      className="w-full"
                     >
-                      스타일 태그를 불러오는 중입니다.
-                    </p>
+                      <span className="sr-only">스타일 태그를 불러오는 중</span>
+                      <div aria-hidden="true" className="flex flex-wrap gap-[4px]">
+                        {[
+                          "w-20",
+                          "w-16",
+                          "w-24",
+                          "w-20",
+                          "w-16",
+                          "w-20",
+                          "w-24",
+                          "w-16",
+                          "w-20",
+                          "w-24",
+                          "w-16",
+                          "w-20",
+                        ].map((width, index) => (
+                          <Skeleton key={index} className={cn("h-[26px] rounded-[15px]", width)} />
+                        ))}
+                      </div>
+                    </div>
                   ) : (
                     styleTags.map(tag => (
                       <StyleTagButton
@@ -160,30 +181,57 @@ const PreferredStyleRegistrationPage = () => {
                   선택 결과
                 </h2>
 
-                <div className="rounded-[15px]">
+                {isInitialLoading ? (
                   <div
-                    className="border-b transition-all duration-200"
-                    style={{ borderColor: lightTheme.label.disable }}
+                    role="status"
+                    aria-busy="true"
+                    aria-label="선택한 스타일을 불러오는 중"
+                    className="rounded-[15px]"
                   >
-                    <StyleTagResultRow
-                      isExpanded={isPreferredSummaryExpanded}
-                      label="선호 태그"
-                      onToggleExpand={handlePreferredSummaryToggle}
-                      status="preferred"
-                      tags={preferredTags}
-                    />
+                    <span className="sr-only">선택한 스타일을 불러오는 중</span>
+                    {["선호 태그", "제외 태그"].map(label => (
+                      <div
+                        key={label}
+                        aria-hidden="true"
+                        className="flex min-h-[54px] items-center justify-between gap-3 border-b px-[clamp(10px,3.2vw,14px)] py-[14px] last:border-b-0"
+                        style={{ borderColor: lightTheme.label.disable }}
+                      >
+                        <span
+                          className={cn(font.body.medium, "shrink-0 leading-[26px]")}
+                          style={{ color: lightTheme.label.inactive }}
+                        >
+                          {label}
+                        </span>
+                        <Skeleton className="h-[26px] w-28 rounded-[15px]" />
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <div className="rounded-[15px]">
+                    <div
+                      className="border-b transition-all duration-200"
+                      style={{ borderColor: lightTheme.label.disable }}
+                    >
+                      <StyleTagResultRow
+                        isExpanded={isPreferredSummaryExpanded}
+                        label="선호 태그"
+                        onToggleExpand={handlePreferredSummaryToggle}
+                        status="preferred"
+                        tags={preferredTags}
+                      />
+                    </div>
 
-                  <div className="transition-all duration-200">
-                    <StyleTagResultRow
-                      isExpanded={isExcludedSummaryExpanded}
-                      label="제외 태그"
-                      onToggleExpand={handleExcludedSummaryToggle}
-                      status="excluded"
-                      tags={excludedTags}
-                    />
+                    <div className="transition-all duration-200">
+                      <StyleTagResultRow
+                        isExpanded={isExcludedSummaryExpanded}
+                        label="제외 태그"
+                        onToggleExpand={handleExcludedSummaryToggle}
+                        status="excluded"
+                        tags={excludedTags}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </section>
             </div>
 
