@@ -37,6 +37,7 @@ const ArHairstyleCarousel = ({
     handlePointerMove,
     handlePointerUp,
     handlePointerCancel,
+    handleLostPointerCapture,
   } = useHairstyleCarousel({
     activeHairstylePosition,
     itemCount: hairstyleOptions.length,
@@ -71,13 +72,14 @@ const ArHairstyleCarousel = ({
   return (
     <div
       aria-label="헤어스타일 선택"
-      className="relative h-[80px] w-[404px] shrink-0 touch-pan-y select-none overflow-hidden"
+      className="relative h-[80px] w-[404px] shrink-0 touch-none select-none overflow-hidden"
+      data-pull-to-refresh="ignore"
       ref={carouselRef}
       onPointerCancel={handlePointerCancel}
       onPointerUp={handlePointerUp}
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
-      onLostPointerCapture={handlePointerCancel}
+      onLostPointerCapture={handleLostPointerCapture}
     >
       {HAIRSTYLE_VISIBLE_OFFSETS.map(offset => {
         const itemPosition = centerPosition + offset;
