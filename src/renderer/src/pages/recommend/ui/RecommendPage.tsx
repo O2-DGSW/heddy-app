@@ -24,9 +24,11 @@ const RecommendSkeleton = () => (
           <Skeleton className="aspect-square w-[30%] shrink-0 self-start rounded-lg max-[360px]:w-[28%]" />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex gap-1.5 max-[400px]:gap-1">
-              <Skeleton className={cn("h-[1lh] w-9 rounded-full", font.caption.medium)} />
-              <Skeleton className={cn("h-[1lh] w-14 rounded-full", font.caption.medium)} />
-              <Skeleton className={cn("h-[1lh] w-5 rounded-full", font.caption.medium)} />
+              <Skeleton className={cn("h-[calc(1lh+6px)] w-9 rounded-full", font.caption.medium)} />
+              <Skeleton
+                className={cn("h-[calc(1lh+6px)] w-14 rounded-full", font.caption.medium)}
+              />
+              <Skeleton className={cn("h-[calc(1lh+6px)] w-5 rounded-full", font.caption.medium)} />
             </div>
             <div className="flex flex-col gap-0.5">
               <Skeleton className={cn("h-[1lh] w-1/2 rounded", font.headline2.bold)} />
@@ -36,7 +38,10 @@ const RecommendSkeleton = () => (
               )}
             </div>
             <Skeleton
-              className={cn("mt-0.5 h-[1lh] w-full rounded-full py-1", font.caption.semiBold)}
+              className={cn(
+                "mt-0.5 h-[calc(1lh+12px)] w-full rounded-full max-[400px]:h-[calc(1lh+8px)]",
+                font.label.semiBold
+              )}
             />
           </div>
         </div>
