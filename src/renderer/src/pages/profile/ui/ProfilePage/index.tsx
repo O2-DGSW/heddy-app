@@ -11,7 +11,7 @@ import {
   chevronRightIcon,
   profileAvatar,
   ProfileSummarySkeleton,
-  PageSkeleton,
+  Skeleton,
   PROFILE_SUMMARY_BACKGROUND,
 } from "@/shared";
 
@@ -138,14 +138,6 @@ const ProfilePage = () => {
     setIsAccountDeletionModalOpen(true);
   };
 
-  if (isLoading) {
-    return (
-      <cap-page>
-        <PageSkeleton variant="profile" label="프로필을 불러오는 중" />
-      </cap-page>
-    );
-  }
-
   return (
     <cap-page>
       <section
@@ -168,7 +160,14 @@ const ProfilePage = () => {
                   id="profile-title"
                   style={{ color: lightTheme.label.neutral }}
                 >
-                  {profileName}님
+                  {isLoading ? (
+                    <span role="status" aria-busy="true" aria-label="프로필을 불러오는 중">
+                      <span className="sr-only">프로필을 불러오는 중</span>
+                      <Skeleton className="h-[1lh] w-36 max-w-full rounded" />
+                    </span>
+                  ) : (
+                    `${profileName}님`
+                  )}
                 </h1>
               </div>
 

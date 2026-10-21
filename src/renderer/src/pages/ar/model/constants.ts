@@ -17,4 +17,5 @@ export const HAIR_COLOR_OPTIONS = [
   { id: "olive", label: "올리브 브라운", color: "#91916B" },
 ] as const;
 
-export const DEFAULT_AR_HAIR_COLOR = HAIR_COLOR_OPTIONS[0].color;
+// 빈 값은 서버의 사용자 머리색 자동 맞춤을 유지한다.
+export const DEFAULT_AR_HAIR_COLOR = "";

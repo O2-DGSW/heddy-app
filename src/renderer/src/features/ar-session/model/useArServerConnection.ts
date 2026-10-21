@@ -34,6 +34,7 @@ export type ArConnectionFeedbackType =
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
 
 interface UseArServerConnectionResult {
+  offerGroom: { requested: string; applied: string | null } | null;
   connectionStatus: ArConnectionStatusType;
   connectionFeedback: ArConnectionFeedbackType;
   reconnectMessage: string | null;
@@ -80,6 +81,10 @@ export const useArServerConnection = (
   const [controlReady, setControlReady] = useState(false);
   const [isPreviewMirrored, setIsPreviewMirrored] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
+  const [offerGroom, setOfferGroom] = useState<UseArServerConnectionResult["offerGroom"]>(null);
+  const initialStyleRef = useRef({ groom, groom_color: settings.groom_color });
+  // 목록 조회가 늦거나 실패해도 서버가 원본(null)으로 정한 결과를 fit으로 다시 덮어쓰지 않는다.
+  const effectiveGroom = offerGroom?.requested === groom ? (offerGroom.applied ?? "") : groom;
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const {
@@ -90,7 +95,7 @@ export const useArServerConnection = (
     handleForeheadRefresh,
     handleControlEvent,
     reset: resetGroomFit,
-  } = useGroomFitControl(statsChannelRef, groom, settings);
+  } = useGroomFitControl(statsChannelRef, effectiveGroom, settings);
 
   const clearReconnectTimer = useCallback(() => {
     if (reconnectTimerRef.current !== null) {
@@ -129,6 +134,7 @@ export const useArServerConnection = (
     attachedVideosRef.current.clear();
     resetGroomFit();
     setControlReady(false);
+    setOfferGroom(null);
   }, [resetGroomFit]);
 
   const attachStream = useCallback((video: HTMLVideoElement, stream: MediaStream) => {
@@ -307,9 +313,14 @@ export const useArServerConnection = (
         const localDescription = peer.localDescription;
         if (!localDescription)
           throw new Error("AR 연결을 준비하지 못했습니다. 다시 연결해 주세요.");
-        const answer = await requestArServerOffer(baseUrl, localDescription, signal);
+        const initialStyle = initialStyleRef.current;
+        const answer = await requestArServerOffer(baseUrl, localDescription, signal, initialStyle);
         signal.throwIfAborted();
-        await peer.setRemoteDescription(answer);
+        if (answer.groom !== undefined) {
+          setOfferGroom({ requested: initialStyle.groom, applied: answer.groom });
+        }
+        // groom은 앱 메타데이터이며 WebRTC에는 SDP만 전달한다.
+        await peer.setRemoteDescription({ type: answer.type, sdp: answer.sdp });
       } catch (error: unknown) {
         if (signal.aborted) return;
         if (stage === "server") {
@@ -356,6 +367,10 @@ export const useArServerConnection = (
       stopConnection,
     ]
   );
+
+  useEffect(() => {
+    initialStyleRef.current = { groom, groom_color: settings.groom_color };
+  }, [groom, settings.groom_color]);
 
   useEffect(() => {
     if (!isPageActive) return;
@@ -429,12 +444,14 @@ export const useArServerConnection = (
   }, [clearReconnectTimer]);
 
   return {
+    offerGroom,
     connectionStatus,
     connectionFeedback,
     reconnectMessage,
     controlReady,
     isPreviewMirrored,
-    groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
+    groomState:
+      controlReady && groomState.groom !== effectiveGroom ? { status: "loading" } : groomState,
     foreheadState,
     handleGroomRetry,
     handleForeheadRefresh,

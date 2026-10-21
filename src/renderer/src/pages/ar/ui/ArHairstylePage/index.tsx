@@ -23,6 +23,8 @@ const prioritizeHippiePerm = (options: ArHairstyleOption[]) => {
   return [firstOption, ...options.filter(option => option.name !== firstOption.name)];
 };
 
+const normalizeGroomName = (value: string) => value.replace(/\s/g, "").toLowerCase();
+
 const ArHairstylePage = () => {
   const location = useLocation();
   const pageRef = useRef<HTMLElement>(null);
@@ -30,6 +32,7 @@ const ArHairstylePage = () => {
   const handlePageEnterRef = useRef<() => void>(() => undefined);
   const handlePageLeaveRef = useRef<() => void>(() => undefined);
   const appliedRecommendationRef = useRef<string | null>(null);
+  const appliedOfferRef = useRef<unknown>(null);
   const [isHairstyleBrowserOpen, setIsHairstyleBrowserOpen] = useState(false);
   const {
     data: serverHairstyleOptions = [],
@@ -50,13 +53,23 @@ const ArHairstylePage = () => {
     handleFitSettingsChange,
   } = useArHairstyle(hairstyleOptions);
   const selectedHairstyle = getCircularHairstyleOption(activeHairstylePosition, hairstyleOptions);
-  const requestedGroom = new URLSearchParams(location.search).get("groom");
-  // URL의 값을 바로 전송하지 않고 GPU 목록에 존재하는 groom만 선택한다.
+  const searchParams = new URLSearchParams(location.search);
+  const requestedGroom = searchParams.get("groom");
+  const requestedColor = searchParams.get("groom_color");
+  const requestKey = `${location.key}:${requestedGroom}`;
+  const normalizedGroom = normalizeGroomName(requestedGroom ?? "");
+  // 서버와 동일하게 이름·표시명을 공백 및 대소문자 구분 없이 찾는다.
   const requestedHairstylePosition = hairstyleOptions.findIndex(
-    option => option.name === requestedGroom && option.name !== ""
+    option =>
+      option.name !== "" &&
+      (normalizeGroomName(option.name) === normalizedGroom ||
+        normalizeGroomName(option.label) === normalizedGroom)
   );
-  const selectedGroom = selectedHairstyle.name;
+  // 목록보다 offer 준비가 빠른 경우에도 서버가 초기 선택을 해석할 수 있게 원래 요청을 보낸다.
+  const selectedGroom =
+    requestedGroom && (isGroomsPending || groomsError) ? requestedGroom : selectedHairstyle.name;
   const {
+    offerGroom,
     connectionStatus,
     connectionFeedback,
     reconnectMessage,
@@ -71,6 +84,9 @@ const ArHairstylePage = () => {
     handleReconnect,
     handleCameraSwitch,
   } = useArServerConnection(cameraPreviewRef, selectedGroom, fitSettings);
+  const offerHairstylePosition = hairstyleOptions.findIndex(
+    option => option.name === offerGroom?.applied
+  );
   const canSelectHairstyle = controlReady;
   const isConnectionPending = connectionStatus !== "connected";
   const isStyleLoading =
@@ -98,7 +114,6 @@ const ArHairstylePage = () => {
   const handleHairstyleBrowserClose = () => setIsHairstyleBrowserOpen(false);
 
   useEffect(() => {
-    const requestKey = `${location.key}:${requestedGroom}`;
     if (
       !requestedGroom ||
       isGroomsPending ||
@@ -108,6 +123,9 @@ const ArHairstylePage = () => {
       return;
 
     appliedRecommendationRef.current = requestKey;
+    if (requestedColor && /^#[0-9a-f]{6}$/i.test(requestedColor)) {
+      handleFitSettingsChange({ groom_color: requestedColor });
+    }
     if (requestedHairstylePosition < 0) {
       selectHairstylePosition(0);
       showInfoToast("추천한 스타일은 현재 AR에서 사용할 수 없어요. 다른 스타일을 골라 주세요.");
@@ -120,7 +138,29 @@ const ArHairstylePage = () => {
     isGroomsPending,
     location.key,
     requestedGroom,
+    requestedColor,
+    requestKey,
+    handleFitSettingsChange,
     requestedHairstylePosition,
+    selectHairstylePosition,
+  ]);
+
+  useEffect(() => {
+    if (!offerGroom || appliedOfferRef.current === offerGroom || isGroomsPending) return;
+    // 응답을 기다리는 사이 사용자가 고른 다른 스타일은 덮어쓰지 않는다.
+    if (
+      normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedGroom) &&
+      normalizeGroomName(offerGroom.requested) !== normalizeGroomName(selectedHairstyle.label)
+    )
+      return;
+    appliedOfferRef.current = offerGroom;
+    selectHairstylePosition(offerHairstylePosition >= 0 ? offerHairstylePosition : 0);
+  }, [
+    offerGroom,
+    isGroomsPending,
+    selectedGroom,
+    selectedHairstyle.label,
+    offerHairstylePosition,
     selectHairstylePosition,
   ]);
 
@@ -135,12 +175,12 @@ const ArHairstylePage = () => {
 
     return setupPage(pageElement, {
       onWillEnter: () => {
-        handleGroomColorReset();
+        handleGroomColorReset(requestedColor ?? "");
         handlePageEnterRef.current();
       },
       onDidLeave: () => handlePageLeaveRef.current(),
     });
-  }, [handleGroomColorReset]);
+  }, [handleGroomColorReset, requestedColor]);
 
   return (
     <cap-page ref={pageRef}>
