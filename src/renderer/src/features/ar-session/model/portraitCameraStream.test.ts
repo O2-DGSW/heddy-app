@@ -37,12 +37,13 @@ beforeEach(() => {
   vi.spyOn(HTMLVideoElement.prototype, "videoHeight", "get").mockImplementation(() => height);
   vi.spyOn(HTMLMediaElement.prototype, "readyState", "get").mockImplementation(() => ready);
   play.mockResolvedValue(undefined);
-  vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(function (
-    this: HTMLVideoElement
-  ) {
-    video = this;
-    return play();
+  const createElement = document.createElement.bind(document);
+  vi.spyOn(document, "createElement").mockImplementation((tagName, options) => {
+    const element = createElement(tagName, options);
+    if (element instanceof HTMLVideoElement) video = element;
+    return element;
   });
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(play);
   vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(pause);
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     drawImage,
