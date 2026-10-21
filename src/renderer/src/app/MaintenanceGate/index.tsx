@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { MaintenancePage } from "@/pages/maintenance";
+import { PageLoading } from "@/shared";
 import { MobileLayout } from "../layouts/MobileLayout";
 
 import {
@@ -13,6 +14,9 @@ import {
   MAINTENANCE_SCHEDULE_LABEL,
   verifyMaintenanceCode,
 } from "./maintenance";
+import { rememberMaintenanceAccess, restoreMaintenanceAccess } from "./maintenanceAccess";
+
+type MaintenanceAccessStatusType = "checking" | "locked" | "unlocked";
 
 interface MaintenanceGateProps {
   children: ReactNode;
@@ -20,14 +24,15 @@ interface MaintenanceGateProps {
 
 const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
   const [isActive, setIsActive] = useState(() => isMaintenanceActive(Date.now()));
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [accessStatus, setAccessStatus] = useState<MaintenanceAccessStatusType>("checking");
   const [isAccessEnded, setIsAccessEnded] = useState(false);
   const isNative = Capacitor.isNativePlatform();
 
   const handleUnlock = async (code: string): Promise<void> => {
     const isValid = await verifyMaintenanceCode(code);
     if (isValid) {
-      setIsUnlocked(true);
+      await rememberMaintenanceAccess();
+      setAccessStatus("unlocked");
       return;
     }
 
@@ -44,6 +49,16 @@ const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
       // 종료 API가 실패해도 종료 안내 화면을 유지한다.
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    void restoreMaintenanceAccess().then(isAllowed => {
+      if (isMounted) setAccessStatus(isAllowed ? "unlocked" : "locked");
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -73,15 +88,19 @@ const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
     };
   }, [isNative]);
 
-  if (!isAccessEnded && (!isActive || isUnlocked)) return children;
+  if (!isAccessEnded && (!isActive || accessStatus === "unlocked")) return children;
 
   return (
     <MobileLayout hideNavigation>
-      <MaintenancePage
-        isAccessEnded={isAccessEnded}
-        onUnlock={handleUnlock}
-        scheduleLabel={MAINTENANCE_SCHEDULE_LABEL}
-      />
+      {accessStatus === "checking" ? (
+        <PageLoading label="기기 허용 상태 확인 중" />
+      ) : (
+        <MaintenancePage
+          isAccessEnded={isAccessEnded}
+          onUnlock={handleUnlock}
+          scheduleLabel={MAINTENANCE_SCHEDULE_LABEL}
+        />
+      )}
     </MobileLayout>
   );
 };

@@ -52,7 +52,7 @@ const MaintenancePage = ({ isAccessEnded, scheduleLabel, onUnlock }: Maintenance
     try {
       await onUnlock(code);
     } catch {
-      setError("비밀번호를 확인하지 못했습니다. 다시 시도해 주세요.");
+      setError("앱 진입을 처리하지 못했습니다. 다시 시도해 주세요.");
     } finally {
       setIsPending(false);
     }
