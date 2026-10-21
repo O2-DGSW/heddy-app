@@ -37,6 +37,10 @@ const HomePage = () => {
     navigate("/cuts");
   };
 
+  const handleRecentRecordClick = (recordId: string) => {
+    navigate(`/cuts/${encodeURIComponent(recordId)}`);
+  };
+
   const handleRecommendationClick = () => {
     if (recommendations.isError) {
       void recommendations.refetch();
@@ -82,6 +86,7 @@ const HomePage = () => {
                 isLoading={recentRecord.isLoading}
                 isError={recentRecord.isError}
                 onAddClick={() => navigate("/cuts/add")}
+                onRecordClick={handleRecentRecordClick}
                 onClick={handleRecentRecordListClick}
               />
             </div>
