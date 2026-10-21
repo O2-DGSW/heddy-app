@@ -35,11 +35,16 @@ const orientationOffer = {
   ].join("\r\n"),
 } satisfies RTCSessionDescriptionInit;
 
-test.each(["\r\n", "\n"])(
-  "iOS offer는 회전 확장만 제외하고 코덱·ICE·다른 확장과 줄바꿈(%j)을 보존한다",
-  newline => {
+test.each([
+  ["ios", "\r\n"],
+  ["ios", "\n"],
+  ["android", "\r\n"],
+  ["android", "\n"],
+])(
+  "%s offer는 회전 확장만 제외하고 코덱·ICE·다른 확장과 줄바꿈(%j)을 보존한다",
+  (platform, newline) => {
     const offer = { ...orientationOffer, sdp: orientationOffer.sdp.replaceAll("\r\n", newline) };
-    const prepared = prepareArServerOffer(offer, "ios");
+    const prepared = prepareArServerOffer(offer, platform);
     expect(prepared.type).toBe("offer");
     expect(prepared.sdp).toBe(
       [
@@ -55,11 +60,11 @@ test.each(["\r\n", "\n"])(
       ].join(newline)
     );
     expect(offer.sdp).toContain("urn:3gpp:video-orientation");
-    expect(prepareArServerOffer(prepared, "ios")).toEqual(prepared);
+    expect(prepareArServerOffer(prepared, platform)).toEqual(prepared);
   }
 );
 
-test.each(["android", "web"])("%s의 offer는 회전 확장까지 그대로 유지한다", platform => {
+test.each(["web"])("%s의 offer는 회전 확장까지 그대로 유지한다", platform => {
   expect(prepareArServerOffer(orientationOffer, platform)).toBe(orientationOffer);
 });
 

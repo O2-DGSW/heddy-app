@@ -145,18 +145,18 @@ describe("공용 카메라 미리보기의 작은 캐러셀", () => {
   });
 });
 
-const pointer = (target: Element, type: string, x = 200, id = 1) => {
+const pointer = (target: Element, type: string, x = 200, id = 1, pointerType = "mouse") => {
   const event = new MouseEvent(type, { bubbles: true, clientX: x, button: 0 });
   Object.defineProperties(event, {
     pointerId: { value: id },
-    pointerType: { value: "touch" },
+    pointerType: { value: pointerType },
     isPrimary: { value: id === 1 },
     timeStamp: { value: performance.now() },
   });
   fireEvent(target, event);
 };
 
-describe("네이티브 터치 드래그", () => {
+describe("마우스·펜 포인터 드래그", () => {
   test.each([-1, 1])("버튼의 캡처 해제가 버블링돼도 %s 방향으로 계속 넘긴다", direction => {
     const { carousel, onSelect } = setup();
     const button = carousel.querySelector('[aria-pressed="true"]');
@@ -230,6 +230,168 @@ describe("네이티브 터치 드래그", () => {
     pointer(carousel, "pointerdown");
     pointer(carousel, "pointermove", 30);
     pointer(carousel, "pointerup", 30);
+    advance(1000);
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(onDisabledSelect).toHaveBeenCalledOnce();
+  });
+});
+
+interface TestTouchPoint {
+  identifier: number;
+  clientX: number;
+  clientY: number;
+}
+const finger = (clientX: number, identifier = 11): TestTouchPoint => ({
+  identifier,
+  clientX,
+  clientY: 40,
+});
+const touch = (
+  target: Element,
+  type: string,
+  touches: TestTouchPoint[],
+  changedTouches = touches
+) => {
+  const event = new Event(type, { bubbles: true, cancelable: type !== "touchcancel" });
+  Object.defineProperties(event, {
+    touches: { value: touches },
+    changedTouches: { value: changedTouches },
+    timeStamp: { value: performance.now() },
+  });
+  fireEvent(target, event);
+  return event;
+};
+const selectedButton = (carousel: HTMLElement) => {
+  const button = carousel.querySelector('[aria-pressed="true"]');
+  if (!(button instanceof HTMLButtonElement)) throw new Error("선택된 스타일이 없습니다.");
+  return button;
+};
+
+describe("모바일 Touch Events 드래그", () => {
+  test.each([-1, 1])("Pointer Events 없이 손가락으로 %s 방향 스타일을 선택한다", direction => {
+    const { carousel, onSelect } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    advance(100);
+    const move = touch(target, "touchmove", [finger(200 - direction * 85)]);
+    expect(move.defaultPrevented).toBe(true);
+    advance(100);
+    touch(target, "touchend", [], [finger(200 - direction * 85)]);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(direction);
+  });
+
+  test("가상 목록에서 원래 썸네일이 제거되고 손가락이 영역 밖으로 나가도 계속 넘긴다", () => {
+    const { carousel, onSelect } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    advance(100);
+    touch(target, "touchmove", [finger(-140)]);
+    advance(100);
+    expect(target.isConnected).toBe(false);
+    touch(target, "touchmove", [finger(-225)]);
+    advance(100);
+    touch(target, "touchend", [], [finger(-225)]);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(5);
+  });
+
+  test("같은 손가락의 pointer 이벤트·캡처 해제·cancel을 중복 처리하지 않는다", () => {
+    const { carousel, onSelect } = setup();
+    const target = selectedButton(carousel);
+    pointer(target, "pointerdown", 200, 11, "touch");
+    touch(target, "touchstart", [finger(200)]);
+    advance(100);
+    touch(target, "touchmove", [finger(115)]);
+    pointer(target, "pointermove", 115, 11, "touch");
+    pointer(carousel, "lostpointercapture", 115, 11, "touch");
+    pointer(carousel, "pointercancel", 115, 11, "touch");
+    advance(100);
+    pointer(carousel, "pointerup", 115, 11, "touch");
+    touch(target, "touchend", [], [finger(115)]);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
+  test("단순 탭은 기본 클릭으로 한 번만 선택한다", () => {
+    const { carousel, onSelect, getByRole } = setup();
+    const target = getByRole("button", { name: "스타일 1 선택" });
+    touch(target, "touchstart", [finger(200)]);
+    touch(target, "touchend", [], [finger(200)]);
+    fireEvent.click(target);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(1);
+    expect(selectedButton(carousel).getAttribute("aria-label")).toBe("스타일 1 선택");
+  });
+
+  test("드래그 후 호환 클릭을 막고 다음 손가락 탭은 정상 선택한다", () => {
+    const { carousel, onSelect, getByRole } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    advance(100);
+    touch(target, "touchmove", [finger(115)]);
+    advance(100);
+    touch(target, "touchend", [], [finger(115)]);
+    fireEvent.click(target);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(1);
+    const next = getByRole("button", { name: "스타일 2 선택" });
+    touch(next, "touchstart", [finger(200)]);
+    touch(next, "touchend", [], [finger(200)]);
+    fireEvent.click(next);
+    advance(1000);
+    expect(onSelect.mock.calls).toEqual([[1], [2]]);
+  });
+
+  test("터치 취소와 다중 터치는 기존 선택으로 돌아가고 서버 선택을 보내지 않는다", () => {
+    const { carousel, onSelect } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    advance(100);
+    touch(target, "touchmove", [finger(115)]);
+    touch(target, "touchcancel", [], [finger(115)]);
+    advance(1000);
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(selectedButton(carousel).getAttribute("aria-label")).toBe("스타일 0 선택");
+    touch(target, "touchstart", [finger(200)]);
+    touch(target, "touchmove", [finger(115), finger(180, 12)]);
+    touch(target, "touchend", [], [finger(115)]);
+    advance(1000);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  test("다른 손가락의 touchend는 진행 중 드래그를 완료하지 않는다", () => {
+    const { carousel, onSelect } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    touch(target, "touchend", [finger(200)], [finger(200, 12)]);
+    advance(100);
+    touch(target, "touchmove", [finger(115)]);
+    advance(100);
+    touch(target, "touchend", [], [finger(115)]);
+    advance(1000);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
+  test("이탈 후 제거된 썸네일의 늦은 터치는 선택을 적용하지 않는다", () => {
+    const { carousel, onSelect, unmount } = setup();
+    const target = selectedButton(carousel);
+    touch(target, "touchstart", [finger(200)]);
+    touch(target, "touchmove", [finger(115)]);
+    unmount();
+    touch(target, "touchmove", [finger(30)]);
+    touch(target, "touchend", [], [finger(30)]);
+    advance(1000);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  test("연결 전 손가락 입력은 포인터 이벤트와 중복 안내하지 않는다", () => {
+    const { carousel, onSelect, onDisabledSelect } = setup(true);
+    const target = selectedButton(carousel);
+    pointer(target, "pointerdown", 200, 11, "touch");
+    touch(target, "touchstart", [finger(200)]);
+    touch(target, "touchmove", [finger(115)]);
+    touch(target, "touchend", [], [finger(115)]);
     advance(1000);
     expect(onSelect).not.toHaveBeenCalled();
     expect(onDisabledSelect).toHaveBeenCalledOnce();
