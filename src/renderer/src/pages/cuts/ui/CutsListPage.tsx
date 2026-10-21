@@ -62,7 +62,12 @@ export const CutsListPage = () => {
         }
       >
         {isPending || isError ? (
-          <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
+          <CutsRecordListStatus
+            errorMessage={error?.message}
+            isError={isError}
+            onRetry={refetch}
+            viewMode={viewMode}
+          />
         ) : (
           <>
             <CutsRecordList

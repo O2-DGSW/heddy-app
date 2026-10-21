@@ -1,6 +1,6 @@
 import { font, lightTheme, palette } from "@heddy/design-tokens";
 
-import { cn, ArrowIcon } from "@/shared";
+import { cn, Skeleton, ArrowIcon } from "@/shared";
 
 import { useSharePermissions } from "../../model/useSharePermissions";
 import type {
@@ -111,6 +111,39 @@ const PermissionSection = ({ disabled = false, section, onToggle }: PermissionSe
   );
 };
 
+const SharePermissionsSkeleton = () => (
+  <div role="status" aria-busy="true" aria-label="공유 권한 정보를 불러오는 중">
+    <span className="sr-only">공유 권한 정보를 불러오는 중</span>
+    {[
+      { title: "동의 항목", rows: 3 },
+      { title: "공유 링크별 상태", rows: 1 },
+    ].map(section => (
+      <div
+        key={section.title}
+        aria-hidden="true"
+        className="flex flex-col gap-[clamp(24px,4.5dvh,36px)] border-b px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)] last:border-b-0"
+        style={{ borderColor: lightTheme.line.alternative }}
+      >
+        <h2 className={font.headline1.semiBold} style={{ color: lightTheme.label.neutral }}>
+          {section.title}
+        </h2>
+        {Array.from({ length: section.rows }, (_, index) => (
+          <div
+            key={index}
+            className="flex items-start justify-between gap-[clamp(12px,3.2vw,16px)]"
+          >
+            <div className="flex min-w-0 flex-1 flex-col pt-[2px]">
+              <Skeleton className={cn("h-[1lh] w-2/3 rounded", font.body.medium)} />
+              <Skeleton className={cn("h-[1lh] w-full rounded", font.label.regular)} />
+            </div>
+            <Skeleton className="h-[27px] w-[45px] shrink-0 rounded-[14px]" />
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+);
+
 const SharePermissionsPage = () => {
   const {
     actionErrorMessage,
@@ -120,6 +153,7 @@ const SharePermissionsPage = () => {
     handleSave,
     handleToggle,
     isFetching,
+    isInitialLoading,
     isSaveDisabled,
     isSaving,
     loadErrorMessage,
@@ -157,13 +191,8 @@ const SharePermissionsPage = () => {
         style={{ backgroundColor: lightTheme.fill.normal }}
       >
         <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {isFetching && sections.length === 0 ? (
-            <p
-              className={`px-[clamp(18px,5.8vw,25px)] py-[clamp(28px,5.2dvh,46px)] text-center ${font.body.medium}`}
-              style={{ color: lightTheme.label.assistive }}
-            >
-              공유 권한 정보를 불러오는 중입니다.
-            </p>
+          {isInitialLoading ? (
+            <SharePermissionsSkeleton />
           ) : (
             sections.map((section, index) => (
               <div
