@@ -1,4 +1,5 @@
-import { afterEach, expect, test, vi } from "vitest";
+import { Capacitor } from "@capacitor/core";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import {
   configureVideoSender,
   openCamera,
@@ -8,7 +9,13 @@ import {
 
 vi.mock("./cameraPermission", () => ({ requestNativeCameraPermission: vi.fn() }));
 
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.spyOn(Capacitor, "getPlatform").mockReturnValue("web");
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 const orientationOffer = {
   type: "offer",
@@ -181,6 +188,29 @@ test.each([false, true])(
         width: { ideal: 800 },
         height: { ideal: 1298 },
         aspectRatio: { ideal: 800 / 1298 },
+        frameRate: { ideal: 30, max: 30 },
+        zoom: { ideal: 0.5 },
+      },
+    });
+  }
+);
+
+test.each(["ios", "android"])(
+  "%s는 기기 기본 방향 기준으로 카메라 비율을 요청하고 카메라 전환 조건을 유지한다",
+  async platform => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+    const stream = {};
+    const getUserMedia = vi.fn().mockResolvedValue(stream);
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });
+    expect(await openCamera("user", true)).toBe(stream);
+    expect(getUserMedia).toHaveBeenCalledWith({
+      audio: false,
+      video: {
+        facingMode: { exact: "user" },
+        width: { ideal: 1298 },
+        height: { ideal: 800 },
+        aspectRatio: { ideal: 1298 / 800 },
+        resizeMode: "crop-and-scale",
         frameRate: { ideal: 30, max: 30 },
         zoom: { ideal: 0.5 },
       },
