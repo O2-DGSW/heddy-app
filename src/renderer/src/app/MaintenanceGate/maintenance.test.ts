@@ -5,7 +5,8 @@ import { isMaintenanceActive, verifyMaintenanceCode } from "./maintenance";
 describe("점검 시간", () => {
   test.each([
     ["2026-10-20T23:59:59.999+09:00", false],
-    ["2026-10-21T00:00:00+09:00", true],
+    ["2026-10-21T00:00:00+09:00", false],
+    ["2026-10-21T23:59:59.999+09:00", false],
     ["2026-10-22T00:00:00+09:00", true],
     ["2026-10-22T20:59:59.999+09:00", true],
     ["2026-10-22T21:00:00+09:00", false],
