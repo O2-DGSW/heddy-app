@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   offer: vi.fn(),
   baseUrl: vi.fn(),
   syncGroomFit: vi.fn(),
+  fitGroom: vi.fn(),
   handleGroomRetry: vi.fn(),
   handleForeheadRefresh: vi.fn(),
   handleControlEvent: vi.fn(),
@@ -29,11 +30,14 @@ vi.mock("./peerConnection", async importOriginal => ({
   waitForIceGatheringComplete: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("./useGroomFitControl", () => ({
-  useGroomFitControl: () => ({
-    groomState: { status: "idle" },
-    foreheadState: { status: "idle" },
-    ...mocks,
-  }),
+  useGroomFitControl: (_channel: unknown, groom: string) => {
+    mocks.fitGroom(groom);
+    return {
+      groomState: { status: "idle" },
+      foreheadState: { status: "idle" },
+      ...mocks,
+    };
+  },
 }));
 
 class Peer extends EventTarget {
@@ -463,4 +467,12 @@ test("groom null 응답이어도 연결을 실패 처리하지 않는다", async
   act(() => Peer.instances[0].changeState("connected"));
   expect(hook.result.current.connectionStatus).toBe("connected");
   expect(hook.result.current.offerGroom).toEqual({ requested: "", applied: null });
+});
+
+test.each(["crop-cut", null])("서버의 실제 groom %s를 초기 fit 제어에 반영한다", async applied => {
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: applied });
+  const preview = { current: null };
+  renderHook(() => useArServerConnection(preview, "크롭컷", DEFAULT_GROOM_FIT_SETTINGS));
+  await advance();
+  expect(mocks.fitGroom).toHaveBeenLastCalledWith(applied ?? "");
 });
