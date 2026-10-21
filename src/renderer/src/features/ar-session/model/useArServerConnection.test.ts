@@ -128,7 +128,8 @@ test.each(["ios", "android", "web"])(
     expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
       "/ar-server",
       { type: "offer", sdp: expectedSdp },
-      expect.any(AbortSignal)
+      expect.any(AbortSignal),
+      { groom: "", groom_color: "" }
     );
   }
 );
@@ -153,7 +154,8 @@ describe("ICE 후보 수집과 offer 전송", () => {
     expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
       "/ar-server",
       peer.localDescription,
-      expect.any(AbortSignal)
+      expect.any(AbortSignal),
+      { groom: "", groom_color: "" }
     );
     expect(peer.setRemoteDescription).toHaveBeenCalledWith({ type: "answer", sdp: "answer" });
     expect(hook.result.current.connectionFeedback).toBe("connecting");
@@ -422,4 +424,43 @@ describe("AR 연결 상태와 복구", () => {
     expect(hook.result.current.connectionFeedback).toBe("unavailable");
     expect(mocks.openCamera).not.toHaveBeenCalled();
   });
+});
+
+test("offer 준비 중 바뀐 최신 스타일과 색상을 보내고 실제 적용 groom을 보존한다", async () => {
+  let ready: () => void = () => {};
+  const iceReady = new Promise<void>(resolve => {
+    ready = resolve;
+  });
+  vi.mocked(waitForIceGatheringComplete).mockReturnValueOnce(iceReady);
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: "crop-cut" });
+  const preview = { current: null };
+  const hook = renderHook(
+    ({ groom, color }) =>
+      useArServerConnection(preview, groom, { ...DEFAULT_GROOM_FIT_SETTINGS, groom_color: color }),
+    { initialProps: { groom: "", color: "" } }
+  );
+  await advance();
+  hook.rerender({ groom: "크롭컷", color: "#123456" });
+  await act(async () => ready());
+  expect(mocks.offer).toHaveBeenCalledWith(
+    "/ar-server",
+    { type: "offer", sdp: "offer" },
+    expect.any(AbortSignal),
+    { groom: "크롭컷", groom_color: "#123456" }
+  );
+  expect(hook.result.current.offerGroom).toEqual({ requested: "크롭컷", applied: "crop-cut" });
+  expect(Peer.instances[0].setRemoteDescription).toHaveBeenCalledWith({
+    type: "answer",
+    sdp: "answer",
+  });
+  expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+});
+
+test("groom null 응답이어도 연결을 실패 처리하지 않는다", async () => {
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: null });
+  const hook = setup();
+  await advance();
+  act(() => Peer.instances[0].changeState("connected"));
+  expect(hook.result.current.connectionStatus).toBe("connected");
+  expect(hook.result.current.offerGroom).toEqual({ requested: "", applied: null });
 });
