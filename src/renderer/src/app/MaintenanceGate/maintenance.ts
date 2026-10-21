@@ -1,6 +1,6 @@
 export const MAINTENANCE_START = Date.parse("2026-10-22T00:00:00+09:00");
 export const MAINTENANCE_END = Date.parse("2026-10-22T21:00:00+09:00");
-export const MAINTENANCE_SCHEDULE_LABEL = "2026년 10월 22일 00:00 ~ 21:00 (한국 시간)";
+export const MAINTENANCE_SCHEDULE_LABEL = "2026년 10월 22일 00:00 ~ 21:00 (KST)";
 
 // TODO: 이번 점검 종료 후 사전 표시 구간을 제거한다. 개발 확인 요청으로 하루 먼저
 // 차단하되, 무기한 강제 표시가 남지 않도록 정식 점검 종료 시각을 함께 적용한다.
