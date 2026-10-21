@@ -8,7 +8,7 @@ import { MobileLayout } from "../layouts/MobileLayout";
 
 import {
   isMaintenanceActive,
-  MAINTENANCE_DISPLAY_START,
+  MAINTENANCE_START,
   MAINTENANCE_END,
   MAINTENANCE_SCHEDULE_LABEL,
   verifyMaintenanceCode,
@@ -51,8 +51,7 @@ const MaintenanceGate = ({ children }: MaintenanceGateProps) => {
       clearTimeout(timer);
       const now = Date.now();
       setIsActive(isMaintenanceActive(now));
-      const nextBoundary =
-        now < MAINTENANCE_DISPLAY_START ? MAINTENANCE_DISPLAY_START : MAINTENANCE_END;
+      const nextBoundary = now < MAINTENANCE_START ? MAINTENANCE_START : MAINTENANCE_END;
       // 경계 시각에 바로 전환하고, 기기 시간 변경도 최대 1분 안에 반영한다.
       const delay = nextBoundary > now ? Math.min(60_000, nextBoundary - now) : 60_000;
       timer = setTimeout(handleTimeChange, delay);
