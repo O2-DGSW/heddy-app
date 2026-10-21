@@ -175,12 +175,12 @@ const ArHairstylePage = () => {
 
     return setupPage(pageElement, {
       onWillEnter: () => {
-        handleGroomColorReset();
+        handleGroomColorReset(requestedColor ?? "");
         handlePageEnterRef.current();
       },
       onDidLeave: () => handlePageLeaveRef.current(),
     });
-  }, [handleGroomColorReset]);
+  }, [handleGroomColorReset, requestedColor]);
 
   return (
     <cap-page ref={pageRef}>
