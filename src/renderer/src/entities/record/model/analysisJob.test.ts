@@ -19,6 +19,7 @@ const job = (patch: Partial<AnalysisJobApiData>): AnalysisJobApiData => ({
 
 describe("analysisJob", () => {
   test("상태를 화면 단계로 나누고, 모르는 상태는 진행 중으로 본다", () => {
+    expect(getAnalysisJobPhase(job({ status: "STALE", analysis_id: "old" }))).toBe("stale");
     expect(getAnalysisJobPhase(undefined)).toBe("pending");
     expect(getAnalysisJobPhase(job({ status: "QUEUED" }))).toBe("pending");
     expect(getAnalysisJobPhase(job({ status: "SOMETHING_NEW" }))).toBe("pending");

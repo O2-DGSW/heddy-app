@@ -71,7 +71,7 @@ export const CutsDetailAnalysisPage = () => {
       return (
         <CutsAnalysisNotice
           actionLabel="사진 바꾸기"
-          description="사진에서 머리를 찾기 어려워요. 머리가 잘 보이는 밝은 사진으로 바꿔 주세요."
+          description={view.message}
           onAction={handleEditPhoto}
           title="이 사진으로는 분석할 수 없어요"
         />

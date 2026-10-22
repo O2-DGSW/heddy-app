@@ -65,6 +65,12 @@ export type RecommendationBasisApiData = {
   style_preferences?: RecommendationStylePreferencesApiData | null;
   current_hair?: RecommendationCurrentHairApiData | null;
   available_care_time_minutes?: number | null;
+  photo_analysis?: {
+    status: string;
+    observed_length?: string | null;
+    applied: boolean;
+    compared_style_count?: number;
+  } | null;
 };
 
 export type RecommendationApiData = {

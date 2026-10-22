@@ -8,6 +8,7 @@ export const usePutStylePreferences = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (body: StylePreferencesRequest) => putStylePreferencesApi(body),
     onSuccess: data => {
       queryClient.setQueryData(styleQueryKeys.preferences(), data);

@@ -13,6 +13,7 @@ export const usePatchTreatmentRecord = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: ({ recordId, body }: UpdateTreatmentRecordVariables) =>
       updateTreatmentRecordApi(recordId, body),
     onSuccess: updated => {

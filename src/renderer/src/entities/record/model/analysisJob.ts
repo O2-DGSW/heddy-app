@@ -1,7 +1,7 @@
 import type { AnalysisJobApiData } from "./analysis.types";
 
 /** 화면이 구분하는 작업 단계. 모르는 상태는 아직 끝나지 않은 것으로 보고 계속 확인한다 */
-export type AnalysisJobPhaseType = "pending" | "succeeded" | "failed" | "unavailable";
+export type AnalysisJobPhaseType = "pending" | "succeeded" | "failed" | "unavailable" | "stale";
 
 export const getAnalysisJobPhase = (
   job: AnalysisJobApiData | null | undefined
@@ -9,6 +9,8 @@ export const getAnalysisJobPhase = (
   if (!job) {
     return "pending";
   }
+
+  if (job.status === "STALE") return "stale";
 
   // 결과 식별자가 있으면 상태 이름과 상관없이 결과를 가져올 수 있다
   if (job.analysis_id || job.status === "SUCCEEDED") {

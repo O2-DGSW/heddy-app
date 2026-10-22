@@ -70,6 +70,29 @@ const buildCurrentHairValue = (basis: RecommendationBasisApiData) => {
   ]);
 };
 
+const buildPhotoAnalysisValue = (basis: RecommendationBasisApiData): string | null => {
+  const photo = basis.photo_analysis;
+  if (!photo) return null;
+  const compared = photo.compared_style_count ?? 0;
+  const shape = compared > 0 ? `윤곽 ${compared}개 스타일 비교 반영` : null;
+  if (photo.applied)
+    return joinValues([
+      `${toLabel(photo.observed_length, HAIR_LENGTH_LABEL) ?? "머리 길이"} 반영`,
+      shape,
+    ]);
+  if (photo.status === "NEWER_PROFILE") return joinValues(["직접 수정한 머리 길이 우선", shape]);
+  if (shape) return shape;
+  const messages: Record<string, string> = {
+    NO_RECENT_PHOTO: "최근 시술 후 사진이 없어 미반영",
+    UNCERTAIN: "길이 판별 어려움 · 얼굴과 머리 전체가 보이는 사진 필요",
+    UNREADABLE: "사진을 읽을 수 없음 · JPEG/PNG로 변경 필요",
+    DISABLED: "사진 분석을 사용할 수 없어 미반영",
+    UNAVAILABLE: "사진 분석 일시 실패 · 다시 추천받기 필요",
+    ASSESSED: "사진 확인 완료 · 길이·윤곽은 미반영",
+  };
+  return messages[photo.status] ?? "사진 분석 미반영";
+};
+
 /**
  * 추천 응답의 recommendation_basis를 "추천 근거 데이터" 표의 행 목록으로 바꾼다.
  * 서버가 항목을 통째로 비워 보낼 수 있어, 값이 없는 행은 라벨만 남지 않도록 아예 뺀다.
@@ -92,6 +115,7 @@ export const mapRecommendationToBasisRows = (
     },
     { label: "선호 | 제외 태그", value: buildStylePreferencesValue(basis) },
     { label: "현재 머리", value: buildCurrentHairValue(basis) },
+    { label: "사진 분석", value: buildPhotoAnalysisValue(basis) },
     {
       label: "관리 가능 시간",
       value:
