@@ -29,6 +29,7 @@ vi.mock("@/entities/record/api/treatmentRecordApi", async importOriginal => ({
 }));
 
 import { useCutsAnalysis } from "./useCutsAnalysis";
+import { recordQueryKeys } from "@/entities/record";
 
 const ANALYSIS = {
   analysis_id: "analysis-1",
@@ -49,9 +50,9 @@ const RECORD = {
   ],
 };
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
+const createWrapper = (
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+) => {
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -140,6 +141,66 @@ describe("useCutsAnalysis", () => {
     await waitFor(() => expect(result.current.view.status).toBe("failed"));
     result.current.handleRetry();
     await waitFor(() => expect(api.postAnalysisJobRetryApi).toHaveBeenCalledWith("job-1"));
+  });
+
+  test("기록 조회 실패를 무한 로딩으로 숨기지 않는다", async () => {
+    api.getLatestAnalysisApi.mockResolvedValue(null);
+    api.getTreatmentRecordApi.mockRejectedValue(new Error("사진 목록 조회 실패"));
+    const { result } = renderHook(() => useCutsAnalysis("record-1"), { wrapper: createWrapper() });
+    await waitFor(() =>
+      expect(result.current.view).toEqual({ status: "load-error", message: "사진 목록 조회 실패" })
+    );
+  });
+
+  test.each(["UNAVAILABLE", "STALE"])("%s 작업은 진행 중으로 남지 않는다", async status => {
+    api.getLatestAnalysisApi.mockResolvedValue(null);
+    api.postAnalysisApi.mockResolvedValue({
+      job_id: "job-1",
+      record_id: "record-1",
+      photo_id: "photo-after",
+      status: "PENDING",
+      created_at: "",
+    });
+    api.getAnalysisJobApi.mockResolvedValue({
+      job_id: "job-1",
+      status,
+      failure: {
+        code: "UNSUPPORTED_IMAGE_FORMAT",
+        message: "JPEG 또는 PNG 이미지만 분석할 수 있습니다",
+      },
+    });
+    const { result } = renderHook(() => useCutsAnalysis("record-1"), { wrapper: createWrapper() });
+    await waitFor(() =>
+      expect(result.current.view.status).toBe(status === "STALE" ? "failed" : "unavailable")
+    );
+    if (status === "UNAVAILABLE")
+      expect(result.current.view).toMatchObject({
+        message: "JPEG 또는 PNG 이미지만 분석할 수 있습니다",
+      });
+  });
+
+  test("사진 교체 후 이전 분석 불가 작업 대신 새 사진을 분석한다", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    api.getLatestAnalysisApi.mockResolvedValue(null);
+    api.postAnalysisApi.mockImplementation(async (_recordId, body) => ({
+      job_id: body.photo_id,
+      record_id: "record-1",
+      photo_id: body.photo_id,
+      status: "PENDING",
+      created_at: "",
+    }));
+    api.getAnalysisJobApi.mockResolvedValue({ job_id: "photo-after", status: "UNAVAILABLE" });
+    const { result } = renderHook(() => useCutsAnalysis("record-1"), {
+      wrapper: createWrapper(client),
+    });
+    await waitFor(() => expect(result.current.view.status).toBe("unavailable"));
+    client.setQueryData(recordQueryKeys.detail("record-1"), {
+      ...RECORD,
+      photos: [{ photo_id: "new-photo", image_type: "AFTER", sort_order: 0 }],
+    });
+    await waitFor(() =>
+      expect(api.postAnalysisApi).toHaveBeenCalledWith("record-1", { photo_id: "new-photo" })
+    );
   });
 
   test("사진이 없으면 요청하지 않고 사진 추가를 안내한다", async () => {

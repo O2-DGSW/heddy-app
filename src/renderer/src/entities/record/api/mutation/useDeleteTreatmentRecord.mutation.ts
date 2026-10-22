@@ -7,6 +7,7 @@ export const useDeleteTreatmentRecord = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (recordId: string) => deleteTreatmentRecordApi(recordId),
     onSuccess: (_result, recordId) => {
       queryClient.removeQueries({ queryKey: recordQueryKeys.detail(recordId) });

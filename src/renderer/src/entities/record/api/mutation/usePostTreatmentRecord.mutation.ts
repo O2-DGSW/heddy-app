@@ -8,6 +8,7 @@ export const usePostTreatmentRecord = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (body: CreateTreatmentRecordRequest) => createTreatmentRecordApi(body),
     onSuccess: created => {
       queryClient.setQueryData(recordQueryKeys.detail(created.record_id), created);

@@ -6,6 +6,8 @@ export type RecommendationHairstyleApiData = {
   /** AR 체험 방식. 스펙에 값이 정의돼 있지 않다 */
   ar_mode?: string | null;
   asset_version?: string | null;
+  /** 추천 카탈로그와 GPU 서버 /grooms의 name을 연결하는 명시적 매핑 */
+  ar_groom_name?: string | null;
 };
 
 export type RecommendationReasonApiData = {
@@ -63,6 +65,12 @@ export type RecommendationBasisApiData = {
   style_preferences?: RecommendationStylePreferencesApiData | null;
   current_hair?: RecommendationCurrentHairApiData | null;
   available_care_time_minutes?: number | null;
+  photo_analysis?: {
+    status: string;
+    observed_length?: string | null;
+    applied: boolean;
+    compared_style_count?: number;
+  } | null;
 };
 
 export type RecommendationApiData = {

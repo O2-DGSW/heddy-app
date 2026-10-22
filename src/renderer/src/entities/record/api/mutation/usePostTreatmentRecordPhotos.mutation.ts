@@ -48,6 +48,7 @@ export const usePostTreatmentRecordPhotos = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true, mayPartiallySucceed: true },
     mutationFn: uploadPhotos,
     // 변수에 사진 File이 담겨 있어 화면을 떠나면 바로 캐시에서 지운다(기본 5분 보관).
     gcTime: 0,

@@ -3,7 +3,13 @@ import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { ApiHttpError } from "./request.ts";
-import { apiClient, configureApiClient, getApiErrorMessage, getHttpStatus } from "./client.ts";
+import {
+  apiClient,
+  configureApiClient,
+  getApiErrorMessage,
+  getApiFieldErrors,
+  getHttpStatus,
+} from "./client.ts";
 
 const auth = {
   getAccessToken: vi.fn<() => Promise<string | null>>(),
@@ -95,6 +101,31 @@ describe("에러 헬퍼", () => {
     expect(getHttpStatus(new Error("wrapped", { cause: axiosError }))).toBe(422);
     expect(getHttpStatus(new ApiHttpError(404, null))).toBe(404);
     expect(getHttpStatus(new Error("network"))).toBeUndefined();
+  });
+
+  test("검증 실패의 필드 오류를 cause까지 따라가 꺼내고, 모양이 다른 항목은 버린다", () => {
+    const validationError = new AxiosError("bad", "ERR_BAD_REQUEST", undefined, undefined, {
+      status: 400,
+      statusText: "",
+      headers: {},
+      config: { headers: new AxiosHeaders() },
+      data: {
+        error: {
+          code: "VALIDATION_FAILED",
+          message: "필드 검증에 실패했습니다.",
+          field_errors: [
+            { field: "password", reason: "size must be between 8 and 100" },
+            { field: 1, reason: "잘못된 모양" },
+          ],
+        },
+      },
+    });
+
+    expect(getApiFieldErrors(new Error("wrapped", { cause: validationError }))).toEqual([
+      { field: "password", reason: "size must be between 8 and 100" },
+    ]);
+    expect(getApiFieldErrors(axiosError)).toEqual([]);
+    expect(getApiFieldErrors(new Error("network"))).toEqual([]);
   });
 
   test("서버 메시지를 우선하고 없으면 기본 문구를 쓴다", () => {

@@ -1,10 +1,10 @@
 import { Capacitor } from "@capacitor/core";
 import { lightTheme } from "@heddy/design-tokens";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { NavBar } from "../../widgets/nav-bar";
 import { BottomBarVisibilityProvider, ToastProvider, useBottomBarVisibility } from "@/shared";
-import { env } from "@/shared/config";
 import {
   PAGE_SCROLL_PATHS,
   PAGE_SCROLL_PREFIXES,
@@ -25,7 +25,7 @@ const useBrowserDevicePreview = () => {
   const [viewport, setViewport] = useState(getBrowserViewport);
 
   useEffect(() => {
-    if (!env.isDev || Capacitor.isNativePlatform()) {
+    if (Capacitor.isNativePlatform()) {
       return;
     }
 
@@ -37,9 +37,9 @@ const useBrowserDevicePreview = () => {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const isBrowserDevelopment = env.isDev && !Capacitor.isNativePlatform();
+  const isBrowser = !Capacitor.isNativePlatform();
   // 좁은 브라우저 폭에서는 기기 프레임만 숨기고 실제 웹 화면은 그대로 렌더링한다.
-  const isBrowserDevicePreview = isBrowserDevelopment && viewport.width >= 640;
+  const isBrowserDevicePreview = isBrowser && viewport.width >= 640;
   const devicePreviewScale = isBrowserDevicePreview
     ? Math.min(1, Math.max(0, (viewport.height - DEVICE_PREVIEW_PADDING) / DEVICE_FRAME_HEIGHT))
     : 1;
@@ -47,7 +47,12 @@ const useBrowserDevicePreview = () => {
   return { isBrowserDevicePreview, devicePreviewScale };
 };
 
-const MobileLayoutContent = () => {
+interface MobileLayoutProps {
+  children?: ReactNode;
+  hideNavigation?: boolean;
+}
+
+const MobileLayoutContent = ({ children, hideNavigation = false }: MobileLayoutProps) => {
   const location = useLocation();
   const { isBottomBarHidden } = useBottomBarVisibility();
   const { isBrowserDevicePreview, devicePreviewScale } = useBrowserDevicePreview();
@@ -56,10 +61,11 @@ const MobileLayoutContent = () => {
     PAGE_SCROLL_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix));
 
   const hideBottomBar =
+    hideNavigation ||
     BOTTOM_BAR_HIDDEN_PATHS.includes(location.pathname) ||
     BOTTOM_BAR_HIDDEN_PREFIXES.some(pathPrefix => location.pathname.startsWith(pathPrefix)) ||
     isBottomBarHidden;
-  const reserveBottomSafeArea = hideBottomBar && location.pathname !== "/ar";
+  const reserveBottomSafeArea = hideNavigation || (hideBottomBar && location.pathname !== "/ar");
 
   return (
     <div
@@ -114,7 +120,7 @@ const MobileLayoutContent = () => {
             <main
               className={`min-h-0 flex-1 overscroll-none px-safe pt-safe no-scrollbar ${usePageScroll ? "overflow-hidden" : "touch-pan-y overflow-y-auto [-webkit-overflow-scrolling:touch]"} ${reserveBottomSafeArea ? "pb-safe" : "pb-0"}`}
             >
-              <Outlet />
+              {children ?? <Outlet />}
             </main>
             {/* iOS WebView는 CSS만으로 내부 스크롤의 bounce(러버밴드)를 완전히 막을 수 없어서,
               스크롤을 아무리 당겨도 이 영역이 항상 배경색으로 덮여 있도록
@@ -185,10 +191,10 @@ const MobileLayoutContent = () => {
   );
 };
 
-const MobileLayout = () => {
+const MobileLayout = ({ children, hideNavigation }: MobileLayoutProps) => {
   return (
     <BottomBarVisibilityProvider>
-      <MobileLayoutContent />
+      <MobileLayoutContent hideNavigation={hideNavigation}>{children}</MobileLayoutContent>
     </BottomBarVisibilityProvider>
   );
 };

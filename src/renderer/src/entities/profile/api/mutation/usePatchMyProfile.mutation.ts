@@ -8,6 +8,7 @@ export const usePatchMyProfile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (body: UpdateMyProfileRequest) => patchMyProfileApi(body),
     onSuccess: profile => {
       queryClient.setQueryData(profileQueryKeys.mine(), profile);

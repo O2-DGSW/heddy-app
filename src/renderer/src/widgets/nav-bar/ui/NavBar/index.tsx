@@ -1,4 +1,5 @@
 import { lightTheme } from "@heddy/design-tokens";
+import { setNavigation } from "@capgo/capacitor-transitions/react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { NAV_ITEMS } from "../../constants/nav-items";
@@ -10,6 +11,14 @@ const NavBar = () => {
   const location = useLocation();
 
   const handleNavigation = (to: string) => {
+    if (location.pathname === to) return;
+
+    // 하단 탭은 서로 독립된 시작점이므로 이전 탭을 뒤로가기 대상으로 쌓지 않는다.
+    const currentIndex = NAV_ITEMS.findIndex(
+      item => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+    );
+    const nextIndex = NAV_ITEMS.findIndex(item => item.to === to);
+    setNavigation("root", nextIndex < currentIndex ? "back" : "forward");
     navigate(to);
   };
 

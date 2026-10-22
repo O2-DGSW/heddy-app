@@ -1,9 +1,79 @@
-import { afterEach, expect, test, vi } from "vitest";
-import { configureVideoSender, openCamera, resolveCameraFacingMode } from "./peerConnection";
+import { Capacitor } from "@capacitor/core";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import {
+  configureVideoSender,
+  openCamera,
+  prepareArServerOffer,
+  resolveCameraFacingMode,
+} from "./peerConnection";
 
 vi.mock("./cameraPermission", () => ({ requestNativeCameraPermission: vi.fn() }));
 
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.spyOn(Capacitor, "getPlatform").mockReturnValue("web");
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
+const orientationOffer = {
+  type: "offer",
+  sdp: [
+    "v=0",
+    "m=video 9 UDP/TLS/RTP/SAVPF 96",
+    "a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid",
+    "a=extmap:2 urn:3gpp:video-orientation",
+    "a=extmap:3/sendrecv urn:3GPP:video-orientation:6",
+    "a=extmap:4 urn:ietf:params:rtp-hdrext:encrypt urn:3gpp:video-orientation",
+    "a=extmap:5 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01",
+    "a=extmap:6 urn:3gpp:video-orientation-other",
+    "a=rtpmap:96 VP8/90000",
+    "a=ice-ufrag:camera",
+    "a=candidate:1 1 UDP 1 192.0.2.1 5000 typ host",
+    "",
+  ].join("\r\n"),
+} satisfies RTCSessionDescriptionInit;
+
+test.each([
+  ["ios", "\r\n"],
+  ["ios", "\n"],
+  ["android", "\r\n"],
+  ["android", "\n"],
+])(
+  "%s offer는 회전 확장만 제외하고 코덱·ICE·다른 확장과 줄바꿈(%j)을 보존한다",
+  (platform, newline) => {
+    const offer = { ...orientationOffer, sdp: orientationOffer.sdp.replaceAll("\r\n", newline) };
+    const prepared = prepareArServerOffer(offer, platform);
+    expect(prepared.type).toBe("offer");
+    expect(prepared.sdp).toBe(
+      [
+        "v=0",
+        "m=video 9 UDP/TLS/RTP/SAVPF 96",
+        "a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid",
+        "a=extmap:5 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01",
+        "a=extmap:6 urn:3gpp:video-orientation-other",
+        "a=rtpmap:96 VP8/90000",
+        "a=ice-ufrag:camera",
+        "a=candidate:1 1 UDP 1 192.0.2.1 5000 typ host",
+        "",
+      ].join(newline)
+    );
+    expect(offer.sdp).toContain("urn:3gpp:video-orientation");
+    expect(prepareArServerOffer(prepared, platform)).toEqual(prepared);
+  }
+);
+
+test.each(["web"])("%s의 offer는 회전 확장까지 그대로 유지한다", platform => {
+  expect(prepareArServerOffer(orientationOffer, platform)).toBe(orientationOffer);
+});
+
+test("iOS에서도 SDP가 없거나 offer가 아닌 설명은 변경하지 않는다", () => {
+  const empty: RTCSessionDescriptionInit = { type: "offer" };
+  const answer: RTCSessionDescriptionInit = { ...orientationOffer, type: "answer" };
+  expect(prepareArServerOffer(empty, "ios")).toBe(empty);
+  expect(prepareArServerOffer(answer, "ios")).toBe(answer);
+});
 
 const setupSender = (rejectPreference = false, codecs: RTCRtpCodec[] = []) => {
   const parameters: RTCRtpSendParameters = {
@@ -123,6 +193,29 @@ test.each([false, true])(
         width: { ideal: 800 },
         height: { ideal: 1298 },
         aspectRatio: { ideal: 800 / 1298 },
+        frameRate: { ideal: 30, max: 30 },
+        zoom: { ideal: 0.5 },
+      },
+    });
+  }
+);
+
+test.each(["ios", "android"])(
+  "%s는 기기 기본 방향 기준으로 카메라 비율을 요청하고 카메라 전환 조건을 유지한다",
+  async platform => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+    const stream = {};
+    const getUserMedia = vi.fn().mockResolvedValue(stream);
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });
+    expect(await openCamera("user", true)).toBe(stream);
+    expect(getUserMedia).toHaveBeenCalledWith({
+      audio: false,
+      video: {
+        facingMode: { exact: "user" },
+        width: { ideal: 1298 },
+        height: { ideal: 800 },
+        aspectRatio: { ideal: 1298 / 800 },
+        resizeMode: "crop-and-scale",
         frameRate: { ideal: 30, max: 30 },
         zoom: { ideal: 0.5 },
       },

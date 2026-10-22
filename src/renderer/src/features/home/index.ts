@@ -1,4 +1,5 @@
 export { default as HomeHeader } from "./ui/HomeHeader";
+export { default as HeddyLogo } from "./ui/HeddyLogo";
 export { default as RecentRecordCard } from "./ui/RecentRecordCard";
 export { default as RecommendationSection } from "./ui/RecommendationSection";
 export type { ArStyleType, RecentRecordType, RecommendationCardType } from "./model/home.types";

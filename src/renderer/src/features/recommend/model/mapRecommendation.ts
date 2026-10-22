@@ -54,6 +54,7 @@ const mapRecommendationItem = (
 
   return {
     id: item.hairstyle?.hairstyle_id ?? `recommend-${index}`,
+    arGroomName: item.hairstyle?.ar_groom_name?.trim() || undefined,
     thumbnailUrl: item.hairstyle?.thumbnail_url ?? "",
     styleName: item.hairstyle?.style_name ?? "",
     // 추천 방식·난이도는 값이 확정되지 않아 모르면 배지를 숨긴다.

@@ -41,11 +41,6 @@ export const CutsListPage = () => {
       : undefined,
   });
 
-  const handleAddRecord = () => {
-    setDirection("forward");
-    navigate("/cuts/add");
-  };
-
   const handleRecordClick = (record: CutsRecord) => {
     prefetchTreatmentRecord(record.id);
     prefetchLatestAnalysis(record.id);
@@ -67,12 +62,16 @@ export const CutsListPage = () => {
         }
       >
         {isPending || isError ? (
-          <CutsRecordListStatus errorMessage={error?.message} isError={isError} onRetry={refetch} />
+          <CutsRecordListStatus
+            errorMessage={error?.message}
+            isError={isError}
+            onRetry={refetch}
+            viewMode={viewMode}
+          />
         ) : (
           <>
             <CutsRecordList
               isFiltered={isCutsCategory(categoryFilter)}
-              onAddRecord={handleAddRecord}
               onRecordClick={handleRecordClick}
               records={records}
               viewMode={viewMode}

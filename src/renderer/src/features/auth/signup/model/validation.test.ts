@@ -1,11 +1,16 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  getEmailError,
+  getNicknameError,
+  getPasswordConfirmError,
+  getPasswordError,
   hasEnteredFullPhone,
   isPasswordMatch,
   isRequiredSignupAgreementsAccepted,
   isValidEmail,
   isValidPhone,
+  mapSignupFieldErrors,
 } from "./validation";
 
 const ALL_DECLINED = {
@@ -59,5 +64,46 @@ describe("hasEnteredFullPhone", () => {
     expect(hasEnteredFullPhone("010-1234")).toBe(false);
     expect(hasEnteredFullPhone("011-123-4567")).toBe(true);
     expect(hasEnteredFullPhone("010-1234-5678")).toBe(true);
+  });
+});
+
+describe("칸별 오류 문구", () => {
+  test("비밀번호는 8자 미만이면 몇 자인지까지 알려 준다", () => {
+    expect(getPasswordError("")).toBe("비밀번호를 입력해주세요.");
+    expect(getPasswordError("1234")).toBe("비밀번호는 8자 이상이어야 합니다. (현재 4자)");
+    expect(getPasswordError("12345678")).toBeNull();
+    expect(getPasswordError("a".repeat(101))).toBe("비밀번호는 100자 이하여야 합니다.");
+  });
+
+  test("닉네임은 비었거나 30자를 넘으면 알려 준다", () => {
+    expect(getNicknameError("  ")).toBe("닉네임을 입력해주세요.");
+    expect(getNicknameError("헤디")).toBeNull();
+    expect(getNicknameError("가".repeat(31))).toBe("닉네임은 30자 이하여야 합니다. (현재 31자)");
+  });
+
+  test("이메일과 비밀번호 확인 문구", () => {
+    expect(getEmailError("")).toBe("이메일을 입력해주세요.");
+    expect(getEmailError("heddy")).toContain("올바른 이메일 형식이 아닙니다");
+    expect(getEmailError("heddy@example.com")).toBeNull();
+    expect(getPasswordConfirmError("12345678", "")).toBe("비밀번호를 한 번 더 입력해주세요.");
+    expect(getPasswordConfirmError("12345678", "1234567")).toBe("비밀번호가 일치하지 않습니다.");
+  });
+
+  test("서버 field_errors를 칸별 한국어 문구로 바꾸고, 폼에 없는 필드는 뺀다", () => {
+    expect(
+      mapSignupFieldErrors([
+        { field: "password", reason: "size must be between 8 and 100" },
+        { field: "nickname", reason: "must not be blank" },
+        { field: "email", reason: "must be a well-formed email address" },
+        { field: "hair_profile.hair_type", reason: "must not be null" },
+      ])
+    ).toEqual({
+      password: "비밀번호는 8자 이상 100자 이하여야 합니다.",
+      nickname: "닉네임을 입력해주세요.",
+      email: "올바른 이메일 형식이 아닙니다. 예: heddy@example.com",
+    });
+    expect(
+      mapSignupFieldErrors([{ field: "nickname", reason: "size must be between 0 and 30" }])
+    ).toEqual({ nickname: "닉네임은 30자 이하여야 합니다." });
   });
 });

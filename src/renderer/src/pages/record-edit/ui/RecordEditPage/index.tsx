@@ -3,7 +3,12 @@ import { font, lightTheme } from "@heddy/design-tokens";
 import { useNavigate, useParams } from "react-router-dom";
 import { setDirection } from "@capgo/capacitor-transitions/react";
 
-import { useGetTreatmentRecord, usePatchTreatmentRecord } from "@/entities/record";
+import {
+  RECORD_FIELDS,
+  RECORD_DETAIL_FIELDS,
+  useGetTreatmentRecord,
+  usePatchTreatmentRecord,
+} from "@/entities/record";
 import {
   RecordAddForm,
   mapDetailToFormValues,
@@ -13,7 +18,7 @@ import {
   mapFormValuesToUpdateRequest,
   usePutTreatmentRecordPhotos,
 } from "@/features/record-add";
-import { ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
+import { cn, Skeleton, ArrowIcon, ConfirmModal, showErrorToast, useLeaveConfirm } from "@/shared";
 import type { RecordFormSubmitValues } from "@/features/record-add";
 
 const pageStyle = { backgroundColor: lightTheme.background.normal };
@@ -21,6 +26,48 @@ const headingStyle = { color: lightTheme.label.neutral };
 
 /** 기록 추가 화면과 같은 폼을 쓰고, 기존 값을 채운 뒤 버튼만 취소·수정 완료로 바꾼다 */
 const SAVE_ERROR_MESSAGE = "시술기록을 수정하지 못했습니다. 다시 시도해 주세요.";
+
+const RecordEditSkeleton = () => (
+  <div
+    role="status"
+    aria-busy="true"
+    aria-label="시술기록을 불러오는 중"
+    className="mx-auto flex w-full max-w-[391px] flex-col gap-[clamp(22px,3.4dvh,28px)] px-[clamp(14px,4.2vw,20px)] pb-[clamp(20px,3.4dvh,30px)] pt-[clamp(8px,1.5dvh,12px)]"
+  >
+    <span className="sr-only">시술기록을 불러오는 중</span>
+    <div aria-hidden="true" className="flex flex-col gap-[6px]">
+      <h2 className={font.headline2.semiBold} style={headingStyle}>
+        사진
+      </h2>
+      <div className="flex gap-[clamp(8px,2.8vw,11px)] overflow-hidden pb-[2px]">
+        <Skeleton className="size-[clamp(82px,26vw,100px)] shrink-0 rounded-[10px]" />
+        <Skeleton className="size-[clamp(82px,26vw,100px)] shrink-0 rounded-[10px]" />
+      </div>
+    </div>
+    {[
+      "시술 날짜",
+      "시술 종류",
+      "소요 시간",
+      ...RECORD_FIELDS.map(field => field.label),
+      "만족도",
+      ...RECORD_DETAIL_FIELDS.map(field => field.label),
+      "메모",
+    ].map(label => (
+      <div key={label} aria-hidden="true" className="flex flex-col gap-[6px]">
+        <span className={font.headline2.semiBold} style={headingStyle}>
+          {label}
+        </span>
+        <Skeleton
+          className={cn("w-full rounded-[10px]", label === "메모" ? "h-[92px]" : "h-[42px]")}
+        />
+      </div>
+    ))}
+    <div aria-hidden="true" className="grid grid-cols-2 gap-[7px] pt-[clamp(8px,1.6dvh,12px)]">
+      <Skeleton className="h-[42px] rounded-[10px]" />
+      <Skeleton className="h-[42px] rounded-[10px]" />
+    </div>
+  </div>
+);
 
 const RecordEditPage = () => {
   const navigate = useNavigate();
@@ -120,14 +167,14 @@ const RecordEditPage = () => {
         </header>
 
         <div className="min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-scroll overscroll-contain pb-[clamp(18px,3dvh,26px)] no-scrollbar [-webkit-overflow-scrolling:touch]">
-          {(isPending || isError) && (
+          {isPending && <RecordEditSkeleton />}
+
+          {!isPending && isError && (
             <p
               className={`px-4 pt-6 text-center ${font.label.regular}`}
               style={{ color: lightTheme.label.assistive }}
             >
-              {isError
-                ? (error?.message ?? "시술기록을 불러오지 못했습니다.")
-                : "시술기록을 불러오는 중"}
+              {error?.message ?? "시술기록을 불러오지 못했습니다."}
             </p>
           )}
 
