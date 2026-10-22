@@ -42,6 +42,55 @@ test("SDP가 없는 요청을 서버로 보내지 않는다", async () => {
   expect(mocks.post).not.toHaveBeenCalled();
 });
 
+test.each(["crop-cut", "크롭컷", " CROP-CUT "])(
+  "초기 groom %s를 offer JSON에 포함한다",
+  async groom => {
+    mocks.post.mockResolvedValue({ sdp: "server-sdp", type: "answer", groom: "crop-cut" });
+    const answer = await requestArServerOffer(
+      "/ar-server",
+      { type: "offer", sdp: "sdp" },
+      undefined,
+      { groom }
+    );
+    expect(mocks.post.mock.calls[0][1]).toEqual({
+      type: "offer",
+      sdp: "sdp",
+      out_size: "800x1298",
+      groom: groom.trim(),
+    });
+    expect(answer.groom).toBe("crop-cut");
+  }
+);
+
+test("선택한 색상만 전달하고 자동 맞춤일 때는 색상 필드를 생략한다", async () => {
+  await requestArServerOffer("/ar-server", { type: "offer", sdp: "sdp" }, undefined, {
+    groom: "crop-cut",
+    groom_color: "#Ab1234",
+  });
+  expect(mocks.post.mock.calls[0][1].groom_color).toBe("#Ab1234");
+  await requestArServerOffer("/ar-server", { type: "offer", sdp: "sdp" }, undefined, {
+    groom: "crop-cut",
+    groom_color: "",
+  });
+  expect(mocks.post.mock.calls[1][1]).not.toHaveProperty("groom_color");
+});
+
+test("없는 스타일의 null 응답도 정상 SDP 연결 응답으로 보존한다", async () => {
+  mocks.post.mockResolvedValue({ sdp: "server-sdp", type: "answer", groom: null });
+  await expect(
+    requestArServerOffer("/ar-server", { type: "offer", sdp: "sdp" }, undefined, {
+      groom: "unknown",
+    })
+  ).resolves.toEqual({ sdp: "server-sdp", type: "answer", groom: null });
+});
+
+test("잘못된 groom 응답 타입을 거부한다", async () => {
+  mocks.post.mockResolvedValue({ sdp: "server-sdp", type: "answer", groom: 123 });
+  await expect(requestArServerOffer("/ar-server", { type: "offer", sdp: "sdp" })).rejects.toThrow(
+    "스타일 응답"
+  );
+});
+
 test("잘못된 SDP 응답을 연결에 적용하지 않는다", async () => {
   mocks.post.mockResolvedValue({ sdp: "server-sdp", type: "offer" });
   await expect(

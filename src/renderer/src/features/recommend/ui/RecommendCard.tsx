@@ -75,7 +75,7 @@ export const RecommendCard = ({ rank, recommendation }: RecommendCardProps) => {
 
         {/* 시안처럼 참고기록 바로 아래에 붙인다 */}
         <div className="mt-0.5">
-          <RecommendArButton />
+          <RecommendArButton arGroomName={recommendation.arGroomName} />
         </div>
       </div>
     </article>

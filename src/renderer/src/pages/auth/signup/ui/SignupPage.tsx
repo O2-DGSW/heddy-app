@@ -6,7 +6,8 @@ import { publicUrl } from "@/shared/lib";
 const pageStyle = { backgroundColor: lightTheme.background.normal };
 
 const SignupPage = () => {
-  const { customerForm, setCustomerForm, submitSignup, isLoading, error } = useSignup();
+  const { customerForm, setCustomerForm, submitSignup, isLoading, error, serverFieldErrors } =
+    useSignup();
 
   return (
     <cap-page className="block h-full w-full touch-pan-y overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]">
@@ -43,6 +44,7 @@ const SignupPage = () => {
               onSubmit={submitSignup}
               isLoading={isLoading}
               error={error}
+              serverFieldErrors={serverFieldErrors}
             />
           </div>
         </div>

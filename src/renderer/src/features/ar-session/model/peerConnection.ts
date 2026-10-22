@@ -1,7 +1,9 @@
 /** AR 서버와의 WebRTC 연결에 쓰는 헬퍼. React 상태와 무관하다 */
+import { Capacitor } from "@capacitor/core";
+
 import { requestNativeCameraPermission } from "./cameraPermission";
 
-const ICE_GATHERING_TIMEOUT_MS = 10000;
+const ICE_GATHERING_TIMEOUT_MS = 3000;
 export type ArCameraFacingModeType = "user" | "environment";
 
 export const resolveCameraFacingMode = (
@@ -40,7 +42,8 @@ export const waitForIceGatheringComplete = async (
   await new Promise<void>((resolve, reject) => {
     const timeout = window.setTimeout(() => {
       cleanup();
-      reject(new Error("ICE candidate 수집 시간이 초과되었습니다."));
+      // 늦은 후보 때문에 연결을 다시 시작하지 않고, 지금까지 모인 localDescription을 전송한다.
+      resolve();
     }, ICE_GATHERING_TIMEOUT_MS);
 
     const handleIceGatheringStateChange = () => {
@@ -96,6 +99,29 @@ export const configureVideoSender = (
   void transceiver.sender.setParameters(parameters).catch(() => undefined);
 };
 
+export const prepareArServerOffer = (
+  offer: RTCSessionDescriptionInit,
+  platform: string
+): RTCSessionDescriptionInit => {
+  if ((platform !== "ios" && platform !== "android") || offer.type !== "offer" || !offer.sdp)
+    return offer;
+
+  // AR 서버는 회전 메타데이터를 해석하지 않으므로 두 네이티브 플랫폼 모두 픽셀에 방향을 적용한다.
+  // WebKit: https://bugs.webkit.org/show_bug.cgi?id=85851#c90
+  // libwebrtc: VideoSendStreamTest.RequestSourceRotateIfVideoOrientationExtensionNotSupported
+  const sdp = offer.sdp
+    .split("\n")
+    .filter(
+      line =>
+        !/^a=extmap:\d+(?:\/\S+)?[ \t]+(?:urn:ietf:params:rtp-hdrext:encrypt[ \t]+)?urn:3gpp:video-orientation(?::6)?(?:[ \t\r]|$)/i.test(
+          line
+        )
+    )
+    .join("\n");
+
+  return { ...offer, sdp };
+};
+
 /** 요청한 방향의 카메라를 연다. 카메라를 쓸 수 없는 환경이면 이유를 담아 던진다 */
 export const openCamera = async (
   facingMode: ArCameraFacingModeType = "user",
@@ -107,14 +133,20 @@ export const openCamera = async (
 
   await requestNativeCameraPermission();
 
-  // 고밀도 화면에서 확대 표시되지 않도록 서버의 800×1298 출력에 입력을 맞춘다.
-  // 선호 크기를 지원하지 않는 카메라는 브라우저가 가능한 크기로 조절한다.
+  // 폰의 캡처 제약값은 기본 방향(가로) 기준이고 실제 트랙 크기는 기기 방향에 따라 뒤집힌다.
+  // 네이티브 송신 픽셀의 세로 비율은 portraitCameraStream에서 별도로 맞춘다.
+  // https://w3c.github.io/mediacapture-main/#constrainable-properties
+  const platform = Capacitor.getPlatform();
+  const isNative = platform === "ios" || platform === "android";
+  const width = isNative ? 1298 : 800;
+  const height = isNative ? 800 : 1298;
   const video: MediaTrackConstraints & { zoom: ConstrainDouble } = {
     facingMode: requireExactFacingMode ? { exact: facingMode } : { ideal: facingMode },
     frameRate: { ideal: 30, max: 30 },
-    width: { ideal: 800 },
-    height: { ideal: 1298 },
-    aspectRatio: { ideal: 800 / 1298 },
+    width: { ideal: width },
+    height: { ideal: height },
+    aspectRatio: { ideal: width / height },
+    ...(isNative ? { resizeMode: "crop-and-scale" } : {}),
     zoom: { ideal: 0.5 },
   };
   return navigator.mediaDevices.getUserMedia({ audio: false, video });

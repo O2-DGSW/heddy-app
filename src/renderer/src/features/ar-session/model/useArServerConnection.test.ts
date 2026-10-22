@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
+import { Capacitor } from "@capacitor/core";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_GROOM_FIT_SETTINGS } from "@/entities/ar-groom";
 import { ApiHttpError } from "@heddy/api";
+import { configureVideoSender, waitForIceGatheringComplete } from "./peerConnection";
 import { useArServerConnection } from "./useArServerConnection";
 
 const mocks = vi.hoisted(() => ({
   openCamera: vi.fn(),
+  portrait: vi.fn(),
   offer: vi.fn(),
   baseUrl: vi.fn(),
   syncGroomFit: vi.fn(),
+  fitGroom: vi.fn(),
   handleGroomRetry: vi.fn(),
   handleForeheadRefresh: vi.fn(),
   handleControlEvent: vi.fn(),
@@ -26,17 +30,22 @@ vi.mock("./peerConnection", async importOriginal => ({
   configureVideoSender: vi.fn(),
   waitForIceGatheringComplete: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("./portraitCameraStream", () => ({ createPortraitCameraStream: mocks.portrait }));
 vi.mock("./useGroomFitControl", () => ({
-  useGroomFitControl: () => ({
-    groomState: { status: "idle" },
-    foreheadState: { status: "idle" },
-    ...mocks,
-  }),
+  useGroomFitControl: (_channel: unknown, groom: string) => {
+    mocks.fitGroom(groom);
+    return {
+      groomState: { status: "idle" },
+      foreheadState: { status: "idle" },
+      ...mocks,
+    };
+  },
 }));
 
 class Peer extends EventTarget {
   static instances: Peer[] = [];
   connectionState = "new";
+  iceGatheringState: RTCIceGatheringState = "gathering";
   localDescription = { type: "offer", sdp: "offer" };
   channel = new EventTarget();
   constructor() {
@@ -46,8 +55,10 @@ class Peer extends EventTarget {
   createDataChannel() {
     return this.channel;
   }
-  createOffer = vi.fn().mockResolvedValue(this.localDescription);
-  setLocalDescription = vi.fn().mockResolvedValue(undefined);
+  createOffer = vi.fn(async () => this.localDescription);
+  setLocalDescription = vi.fn(async (description: RTCSessionDescriptionInit) => {
+    this.localDescription = { type: description.type, sdp: description.sdp ?? "" };
+  });
   setRemoteDescription = vi.fn().mockResolvedValue(undefined);
   close() {
     this.changeState("closed");
@@ -64,6 +75,8 @@ const track = {
   getSettings: vi.fn<() => MediaTrackSettings>(),
 };
 const stream = { getTracks: () => [track], getVideoTracks: () => [track] };
+const portraitTrack = { stop: vi.fn(), addEventListener: vi.fn() };
+const portraitStream = { getTracks: () => [portraitTrack], getVideoTracks: () => [portraitTrack] };
 const setup = () => {
   const preview = { current: null };
   return renderHook(() => useArServerConnection(preview, "", DEFAULT_GROOM_FIT_SETTINGS));
@@ -81,6 +94,7 @@ const setOnline = (online: boolean) => {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  vi.spyOn(Capacitor, "getPlatform").mockReturnValue("web");
   Peer.instances = [];
   vi.stubGlobal("RTCPeerConnection", Peer);
   Object.defineProperty(navigator, "mediaDevices", {
@@ -92,12 +106,103 @@ beforeEach(() => {
   track.label = "";
   track.getSettings.mockReturnValue({});
   mocks.openCamera.mockResolvedValue(stream);
+  mocks.portrait.mockResolvedValue(portraitStream);
   mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer" });
 });
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
+});
+
+test.each(["ios", "android", "web"])(
+  "%s에서 준비한 SDP를 localDescription과 서버 offer 요청에 동일하게 사용한다",
+  async platform => {
+    const originalSdp = "v=0\r\na=extmap:4 urn:3gpp:video-orientation\r\na=ice-ufrag:camera\r\n";
+    const expectedSdp = platform === "web" ? originalSdp : "v=0\r\na=ice-ufrag:camera\r\n";
+    class OrientationPeer extends Peer {
+      localDescription = { type: "offer", sdp: originalSdp };
+    }
+    vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+    vi.stubGlobal("RTCPeerConnection", OrientationPeer);
+
+    setup();
+    await advance(0);
+
+    expect(Peer.instances[0].setLocalDescription).toHaveBeenCalledWith({
+      type: "offer",
+      sdp: expectedSdp,
+    });
+    expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
+      "/ar-server",
+      { type: "offer", sdp: expectedSdp },
+      expect.any(AbortSignal),
+      { groom: "", groom_color: "" }
+    );
+  }
+);
+
+describe("ICE 후보 수집과 offer 전송", () => {
+  beforeEach(async () => {
+    const actual = await vi.importActual<typeof import("./peerConnection")>("./peerConnection");
+    vi.mocked(waitForIceGatheringComplete).mockImplementationOnce(
+      actual.waitForIceGatheringComplete
+    );
+  });
+
+  test("3초가 지나면 재시도 없이 그때까지 수집한 localDescription을 전송한다", async () => {
+    const hook = setup();
+    await advance(0);
+    const peer = Peer.instances[0];
+    await advance(2999);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    peer.localDescription = { type: "offer", sdp: "offer-with-collected-candidates" };
+
+    await advance(1);
+    expect(mocks.offer).toHaveBeenCalledExactlyOnceWith(
+      "/ar-server",
+      peer.localDescription,
+      expect.any(AbortSignal),
+      { groom: "", groom_color: "" }
+    );
+    expect(peer.setRemoteDescription).toHaveBeenCalledWith({ type: "answer", sdp: "answer" });
+    expect(hook.result.current.connectionFeedback).toBe("connecting");
+
+    await advance(10_000);
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+    expect(Peer.instances).toHaveLength(1);
+    expect(track.stop).not.toHaveBeenCalled();
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+  });
+
+  test("ICE 수집이 먼저 완료되면 3초를 기다리지 않고 한 번만 전송한다", async () => {
+    setup();
+    await advance(1000);
+    const peer = Peer.instances[0];
+    expect(mocks.offer).not.toHaveBeenCalled();
+
+    peer.iceGatheringState = "complete";
+    act(() => peer.dispatchEvent(new Event("icegatheringstatechange")));
+    await advance(0);
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+
+    await advance(3000);
+    expect(mocks.offer).toHaveBeenCalledTimes(1);
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+  });
+
+  test("ICE 수집 중 페이지를 나가면 제한 시간이 지나도 offer를 전송하지 않는다", async () => {
+    const hook = setup();
+    await advance(1000);
+    act(() => hook.result.current.handlePageLeave());
+
+    await advance(3000);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(track.stop).toHaveBeenCalledTimes(1);
+    expect(hook.result.current.connectionStatus).toBe("idle");
+    expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("AR 연결 상태와 복구", () => {
@@ -328,4 +433,130 @@ describe("AR 연결 상태와 복구", () => {
     expect(hook.result.current.connectionFeedback).toBe("unavailable");
     expect(mocks.openCamera).not.toHaveBeenCalled();
   });
+});
+
+describe("네이티브 세로 송신 연결", () => {
+  test.each(["ios", "android", "web"])(
+    "%s에서 네이티브만 가공된 트랙을 전송하고 원본 방향 판별을 유지한다",
+    async platform => {
+      vi.mocked(Capacitor.getPlatform).mockReturnValue(platform);
+      track.getSettings.mockReturnValue({ facingMode: "user" });
+      const preview = document.createElement("video");
+      vi.spyOn(preview, "play").mockResolvedValue(undefined);
+      const previewRef = { current: preview };
+      const hook = renderHook(() =>
+        useArServerConnection(previewRef, "", DEFAULT_GROOM_FIT_SETTINGS)
+      );
+      await advance();
+      const native = platform !== "web";
+      expect(configureVideoSender).toHaveBeenCalledExactlyOnceWith(
+        Peer.instances[0],
+        native ? portraitTrack : track
+      );
+      expect(preview.srcObject).toBe(native ? portraitStream : stream);
+      expect(hook.result.current.isPreviewMirrored).toBe(true);
+      expect(mocks.portrait).toHaveBeenCalledTimes(native ? 1 : 0);
+      if (native) {
+        expect(mocks.portrait).toHaveBeenCalledWith(
+          stream,
+          expect.any(AbortSignal),
+          expect.any(Function)
+        );
+      }
+      hook.unmount();
+      expect(track.stop).toHaveBeenCalledOnce();
+      if (native) expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    }
+  );
+
+  test("가공 중 화면을 나가면 원본 카메라를 닫고 늦은 결과로 연결하지 않는다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("ios");
+    let complete: (value: typeof portraitStream) => void = () => undefined;
+    mocks.portrait.mockReturnValueOnce(
+      new Promise(resolve => {
+        complete = resolve;
+      })
+    );
+    const hook = setup();
+    await advance(0);
+    act(() => hook.result.current.handlePageLeave());
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    await act(async () => complete(portraitStream));
+    expect(Peer.instances).toHaveLength(0);
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(hook.result.current.connectionStatus).toBe("idle");
+  });
+
+  test("세로 출력이 지원되지 않으면 원본을 송신하지 않고 카메라를 정리한다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("android");
+    mocks.portrait.mockRejectedValueOnce(new DOMException("Unsupported", "NotSupportedError"));
+    const hook = setup();
+    await advance();
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.offer).not.toHaveBeenCalled();
+    expect(configureVideoSender).not.toHaveBeenCalled();
+    expect(hook.result.current.connectionStatus).toBe("error");
+  });
+
+  test("송신 중 프레임 처리가 실패하면 기존 재연결 경로로 복구한다", async () => {
+    vi.mocked(Capacitor.getPlatform).mockReturnValue("ios");
+    const hook = setup();
+    await advance();
+    act(() => Peer.instances[0].changeState("connected"));
+    act(() => mocks.portrait.mock.calls[0][2]());
+    expect(hook.result.current.connectionFeedback).toBe("reconnecting");
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(mocks.portrait.mock.calls[0][1].aborted).toBe(true);
+    await advance(1001);
+    await advance();
+    expect(mocks.portrait).toHaveBeenCalledTimes(2);
+  });
+});
+
+test("offer 준비 중 바뀐 최신 스타일과 색상을 보내고 실제 적용 groom을 보존한다", async () => {
+  let ready: () => void = () => {};
+  const iceReady = new Promise<void>(resolve => {
+    ready = resolve;
+  });
+  vi.mocked(waitForIceGatheringComplete).mockReturnValueOnce(iceReady);
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: "crop-cut" });
+  const preview = { current: null };
+  const hook = renderHook(
+    ({ groom, color }) =>
+      useArServerConnection(preview, groom, { ...DEFAULT_GROOM_FIT_SETTINGS, groom_color: color }),
+    { initialProps: { groom: "", color: "" } }
+  );
+  await advance();
+  hook.rerender({ groom: "크롭컷", color: "#123456" });
+  await act(async () => ready());
+  expect(mocks.offer).toHaveBeenCalledWith(
+    "/ar-server",
+    { type: "offer", sdp: "offer" },
+    expect.any(AbortSignal),
+    { groom: "크롭컷", groom_color: "#123456" }
+  );
+  expect(hook.result.current.offerGroom).toEqual({ requested: "크롭컷", applied: "crop-cut" });
+  expect(Peer.instances[0].setRemoteDescription).toHaveBeenCalledWith({
+    type: "answer",
+    sdp: "answer",
+  });
+  expect(mocks.openCamera).toHaveBeenCalledTimes(1);
+});
+
+test("groom null 응답이어도 연결을 실패 처리하지 않는다", async () => {
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: null });
+  const hook = setup();
+  await advance();
+  act(() => Peer.instances[0].changeState("connected"));
+  expect(hook.result.current.connectionStatus).toBe("connected");
+  expect(hook.result.current.offerGroom).toEqual({ requested: "", applied: null });
+});
+
+test.each(["crop-cut", null])("서버의 실제 groom %s를 초기 fit 제어에 반영한다", async applied => {
+  mocks.offer.mockResolvedValue({ type: "answer", sdp: "answer", groom: applied });
+  const preview = { current: null };
+  renderHook(() => useArServerConnection(preview, "크롭컷", DEFAULT_GROOM_FIT_SETTINGS));
+  await advance();
+  expect(mocks.fitGroom).toHaveBeenLastCalledWith(applied ?? "");
 });

@@ -187,6 +187,7 @@ export const useSharePermissions = () => {
     handleSave,
     handleToggle,
     isFetching,
+    isInitialLoading: (isConsentsFetching && !consents) || (isSharesFetching && !shares),
     isSaveDisabled: isFetching || isSaving || Boolean(loadErrorMessage) || !hasChanges,
     isSaving,
     loadErrorMessage,

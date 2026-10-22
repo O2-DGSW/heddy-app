@@ -2,7 +2,7 @@ import axios, { isAxiosError } from "axios";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 import { ApiHttpError } from "./request.ts";
-import type { ApiResponse } from "./types.ts";
+import type { ApiFieldError, ApiResponse } from "./types.ts";
 
 /** 앱 서버(REST) 요청에 쓰는 클라이언트. 주소와 인증은 앱 시작 시 configureApiClient로 주입한다 */
 export const apiClient = axios.create({
@@ -102,6 +102,32 @@ export const getHttpStatus = (error: unknown): number | undefined => {
   }
 
   return undefined;
+};
+
+const isApiFieldError = (value: unknown): value is ApiFieldError =>
+  typeof value === "object" &&
+  value !== null &&
+  "field" in value &&
+  typeof value.field === "string" &&
+  "reason" in value &&
+  typeof value.reason === "string";
+
+/**
+ * 검증 실패 응답의 필드별 오류. 화면이 "필드 검증에 실패했습니다." 대신 칸마다 이유를 보여 줄 때 쓴다.
+ * api 함수들이 사용자용 메시지로 감싸서 던지므로 cause까지 따라간다. 없으면 빈 배열이다.
+ */
+export const getApiFieldErrors = (error: unknown): ApiFieldError[] => {
+  if (isAxiosError<ApiResponse<unknown>>(error)) {
+    const fieldErrors: unknown = error.response?.data?.error?.field_errors;
+
+    return Array.isArray(fieldErrors) ? fieldErrors.filter(isApiFieldError) : [];
+  }
+
+  if (error instanceof Error && error.cause) {
+    return getApiFieldErrors(error.cause);
+  }
+
+  return [];
 };
 
 /** 서버가 내려준 오류 메시지. 없으면 fallbackMessage를 쓴다 */

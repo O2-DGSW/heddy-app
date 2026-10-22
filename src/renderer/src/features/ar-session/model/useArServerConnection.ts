@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { getHttpStatus } from "@heddy/api";
@@ -9,10 +10,12 @@ import { parseArServerEvent, parseDataChannelPayload } from "./arServerEvent";
 import {
   configureVideoSender,
   openCamera,
+  prepareArServerOffer,
   resolveCameraFacingMode,
   waitForIceGatheringComplete,
 } from "./peerConnection";
 import type { ArCameraFacingModeType } from "./peerConnection";
+import { createPortraitCameraStream } from "./portraitCameraStream";
 import { useGroomFitControl } from "./useGroomFitControl";
 
 export type ArConnectionFeedbackType =
@@ -31,6 +34,7 @@ export type ArConnectionFeedbackType =
 export type ArConnectionStatusType = "connecting" | "connected" | "error" | "idle";
 
 interface UseArServerConnectionResult {
+  offerGroom: { requested: string; applied: string | null } | null;
   connectionStatus: ArConnectionStatusType;
   connectionFeedback: ArConnectionFeedbackType;
   reconnectMessage: string | null;
@@ -77,6 +81,10 @@ export const useArServerConnection = (
   const [controlReady, setControlReady] = useState(false);
   const [isPreviewMirrored, setIsPreviewMirrored] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
+  const [offerGroom, setOfferGroom] = useState<UseArServerConnectionResult["offerGroom"]>(null);
+  const initialStyleRef = useRef({ groom, groom_color: settings.groom_color });
+  // 목록 조회가 늦거나 실패해도 서버가 원본(null)으로 정한 결과를 fit으로 다시 덮어쓰지 않는다.
+  const effectiveGroom = offerGroom?.requested === groom ? (offerGroom.applied ?? "") : groom;
   // 값이 바뀌면 연결 effect가 재실행된다(재연결 또는 카메라 전환).
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const {
@@ -87,7 +95,7 @@ export const useArServerConnection = (
     handleForeheadRefresh,
     handleControlEvent,
     reset: resetGroomFit,
-  } = useGroomFitControl(statsChannelRef, groom, settings);
+  } = useGroomFitControl(statsChannelRef, effectiveGroom, settings);
 
   const clearReconnectTimer = useCallback(() => {
     if (reconnectTimerRef.current !== null) {
@@ -126,6 +134,7 @@ export const useArServerConnection = (
     attachedVideosRef.current.clear();
     resetGroomFit();
     setControlReady(false);
+    setOfferGroom(null);
   }, [resetGroomFit]);
 
   const attachStream = useCallback((video: HTMLVideoElement, stream: MediaStream) => {
@@ -179,6 +188,7 @@ export const useArServerConnection = (
           localStream.getTracks().forEach(track => track.stop());
           return;
         }
+        localStreamRef.current = localStream;
         // 수신하는 서버 트랙에는 방향 정보가 없으므로 로컬 카메라에서 한 번 판별한다.
         const previewFacingMode = resolveCameraFacingMode(
           localStream.getVideoTracks()[0],
@@ -187,6 +197,12 @@ export const useArServerConnection = (
         // 최초 ideal 요청과 다른 카메라가 열려도 다음 전환은 실제 방향을 기준으로 한다.
         if (previewFacingMode) cameraFacingModeRef.current = previewFacingMode;
         setIsPreviewMirrored(previewFacingMode === "user");
+        const platform = Capacitor.getPlatform();
+        const outgoingStream =
+          platform === "ios" || platform === "android"
+            ? await createPortraitCameraStream(localStream, signal, failConnection)
+            : localStream;
+        signal.throwIfAborted();
         stage = "server";
         setConnectionFeedback(
           hasConnectedRef.current
@@ -197,10 +213,11 @@ export const useArServerConnection = (
         );
         // 권한 응답을 기다리는 시간은 제한하지 않고, 실제 연결 시도만 만료시킨다.
         connectionDeadlineRef.current = setTimeout(failConnection, 30_000);
-        localStreamRef.current = localStream;
-        if (previewVideoRef.current) attachStream(previewVideoRef.current, localStream);
+        if (previewVideoRef.current) attachStream(previewVideoRef.current, outgoingStream);
 
-        const peer = new RTCPeerConnection();
+        const peer = new RTCPeerConnection({
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        });
         peerConnectionRef.current = peer;
         const isCurrentPeer = () => !signal.aborted && peerConnectionRef.current === peer;
 
@@ -230,16 +247,19 @@ export const useArServerConnection = (
           })();
         });
 
-        localStream.getVideoTracks().forEach(track => {
-          configureVideoSender(peer, track);
-          track.addEventListener(
-            "ended",
-            () => {
-              if (isCurrentPeer()) failConnection();
-            },
-            { once: true }
-          );
-        });
+        outgoingStream.getVideoTracks().forEach(track => configureVideoSender(peer, track));
+        // 원본 카메라 종료와 가공 트랙 종료 모두 기존 재연결 경로로 복구한다.
+        new Set([...localStream.getVideoTracks(), ...outgoingStream.getVideoTracks()]).forEach(
+          track => {
+            track.addEventListener(
+              "ended",
+              () => {
+                if (isCurrentPeer()) failConnection();
+              },
+              { once: true }
+            );
+          }
+        );
         peer.addEventListener("track", event => {
           if (!isCurrentPeer() || event.track.kind !== "video" || !previewVideoRef.current) return;
           attachStream(previewVideoRef.current, event.streams[0] ?? new MediaStream([event.track]));
@@ -286,16 +306,21 @@ export const useArServerConnection = (
           }
         });
 
-        const offer = await peer.createOffer();
+        const offer = prepareArServerOffer(await peer.createOffer(), Capacitor.getPlatform());
         signal.throwIfAborted();
         await peer.setLocalDescription(offer);
         await waitForIceGatheringComplete(peer, signal);
         const localDescription = peer.localDescription;
         if (!localDescription)
           throw new Error("AR 연결을 준비하지 못했습니다. 다시 연결해 주세요.");
-        const answer = await requestArServerOffer(baseUrl, localDescription, signal);
+        const initialStyle = initialStyleRef.current;
+        const answer = await requestArServerOffer(baseUrl, localDescription, signal, initialStyle);
         signal.throwIfAborted();
-        await peer.setRemoteDescription(answer);
+        if (answer.groom !== undefined) {
+          setOfferGroom({ requested: initialStyle.groom, applied: answer.groom });
+        }
+        // groom은 앱 메타데이터이며 WebRTC에는 SDP만 전달한다.
+        await peer.setRemoteDescription({ type: answer.type, sdp: answer.sdp });
       } catch (error: unknown) {
         if (signal.aborted) return;
         if (stage === "server") {
@@ -342,6 +367,10 @@ export const useArServerConnection = (
       stopConnection,
     ]
   );
+
+  useEffect(() => {
+    initialStyleRef.current = { groom, groom_color: settings.groom_color };
+  }, [groom, settings.groom_color]);
 
   useEffect(() => {
     if (!isPageActive) return;
@@ -415,12 +444,14 @@ export const useArServerConnection = (
   }, [clearReconnectTimer]);
 
   return {
+    offerGroom,
     connectionStatus,
     connectionFeedback,
     reconnectMessage,
     controlReady,
     isPreviewMirrored,
-    groomState: controlReady && groomState.groom !== groom ? { status: "loading" } : groomState,
+    groomState:
+      controlReady && groomState.groom !== effectiveGroom ? { status: "loading" } : groomState,
     foreheadState,
     handleGroomRetry,
     handleForeheadRefresh,
