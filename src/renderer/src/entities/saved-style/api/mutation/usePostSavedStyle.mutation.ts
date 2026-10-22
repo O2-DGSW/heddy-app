@@ -11,6 +11,7 @@ export const usePostSavedStyle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (body: SaveStyleRequest) => saveStyleApi(body),
     onSuccess: async (savedStyle, request) => {
       const savedStyleWithHairstyleId = {

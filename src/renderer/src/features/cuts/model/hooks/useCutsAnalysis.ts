@@ -1,6 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 
+import { recommendationQueryKeys } from "@/entities/recommendation";
+
 import {
   getAnalysisJobPhase,
   getAnalysisJobProgress,
@@ -29,7 +31,7 @@ export type CutsAnalysisViewType =
   | { status: "no-photo" }
   | { status: "analyzing"; progress: number | null; isTakingLong: boolean }
   | { status: "failed"; message: string }
-  | { status: "unavailable" }
+  | { status: "unavailable"; message: string }
   | { status: "result"; result: CutsAnalysisResult; canReanalyze: boolean };
 
 interface UseCutsAnalysisResult {
@@ -55,7 +57,8 @@ const FAILED_MESSAGE = "분석 중에 문제가 생겼어요. 다시 시도해 �
 export const useCutsAnalysis = (recordId: string | undefined): UseCutsAnalysisResult => {
   const queryClient = useQueryClient();
   const latestAnalysis = useGetLatestAnalysis(recordId);
-  const { data: record } = useGetTreatmentRecord(recordId);
+  const recordQuery = useGetTreatmentRecord(recordId);
+  const { data: record } = recordQuery;
   const { data: activeJob } = useGetActiveAnalysisJob(recordId);
   const jobQuery = useGetAnalysisJob(activeJob?.job_id);
   const postAnalysis = usePostAnalysis();
@@ -87,17 +90,31 @@ export const useCutsAnalysis = (recordId: string | undefined): UseCutsAnalysisRe
       return { status: "load-error", message: "시술기록을 찾을 수 없어요." };
     }
 
+    if (recordQuery.isError) {
+      return { status: "load-error", message: recordQuery.error.message };
+    }
+
     if (activeJob) {
+      if (jobPhase === "stale") {
+        return {
+          status: "failed",
+          message: "분석 중 사진이 변경됐어요. 현재 사진으로 다시 분석해 주세요.",
+        };
+      }
       if (jobQuery.isError) {
         return { status: "failed", message: jobQuery.error.message };
       }
 
       if (jobPhase === "failed") {
-        return { status: "failed", message: FAILED_MESSAGE };
+        return { status: "failed", message: job?.failure?.message || FAILED_MESSAGE };
       }
 
       if (jobPhase === "unavailable") {
-        return { status: "unavailable" };
+        return {
+          status: "unavailable",
+          message:
+            job?.failure?.message || "얼굴과 머리 전체가 보이는 밝은 정면 사진으로 바꿔 주세요.",
+        };
       }
 
       return {
@@ -178,8 +195,19 @@ export const useCutsAnalysis = (recordId: string | undefined): UseCutsAnalysisRe
       return;
     }
 
+    void recordQuery.refetch();
     void latestAnalysis.refetch();
   };
+
+  // A replaced photo must not remain pinned to the failed/unavailable job for the old photo.
+  useEffect(() => {
+    if (!recordId || !targetPhoto || !activeJob || activeJob.photo_id === targetPhoto.photo_id)
+      return;
+    queryClient.setQueryData(recordQueryKeys.activeAnalysisJob(recordId), null);
+    autoRequestedRecordIdRef.current = null;
+    postAnalysis.reset();
+    retryAnalysis.reset();
+  }, [recordId, targetPhoto, activeJob, queryClient, postAnalysis, retryAnalysis]);
 
   // 결과가 없는 기록이면 들어오자마자 분석을 요청한다(사용자가 버튼을 찾아 누르는 시간을 없앤다)
   useEffect(() => {
@@ -221,6 +249,7 @@ export const useCutsAnalysis = (recordId: string | undefined): UseCutsAnalysisRe
           return;
         }
 
+        void queryClient.invalidateQueries({ queryKey: recommendationQueryKeys.all });
         queryClient.setQueryData(recordQueryKeys.latestAnalysis(recordId), completedAnalysis);
         queryClient.setQueryData(recordQueryKeys.activeAnalysisJob(recordId), null);
       })

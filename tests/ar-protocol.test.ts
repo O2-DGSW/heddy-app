@@ -15,12 +15,13 @@ import {
 const defaults = DEFAULT_GROOM_FIT_SETTINGS;
 
 test("groom 이름만 목록에 사용하고 GLB를 이미지로 노출하지 않는다", () => {
-  assert.deepEqual(
-    parseArGrooms({
-      grooms: [{ name: "short-swept", url: "/grooms/style.glb", n_strands: 12855 }],
-    }),
-    [{ id: "short-swept", label: "short-swept" }]
-  );
+  const [groom] = parseArGrooms({
+    grooms: [{ name: "short-swept", url: "/grooms/style.glb", n_strands: 12855 }],
+  });
+  assert.equal(groom.name, "short-swept");
+  assert.equal(groom.label, "short-swept");
+  assert.equal(groom.thumbUrl, undefined);
+  assert.equal(groom.viewsUrl, undefined);
   assert.deepEqual(parseArGrooms({ grooms: [] }), []);
 });
 

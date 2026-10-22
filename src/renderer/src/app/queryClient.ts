@@ -3,6 +3,8 @@ import { Capacitor } from "@capacitor/core";
 import { focusManager, QueryClient } from "@tanstack/react-query";
 import { getHttpStatus } from "@heddy/api";
 
+import { createRecommendationMutationCache } from "./recommendationInvalidation";
+
 const MAX_QUERY_RETRY_COUNT = 2;
 /** 화면을 오갈 때마다 같은 데이터를 다시 받지 않도록 30초 동안은 캐시를 그대로 쓴다 */
 const DEFAULT_STALE_TIME_MS = 30_000;
@@ -33,7 +35,8 @@ const shouldRetryQuery = (failureCount: number, error: Error) => {
   return failureCount < MAX_QUERY_RETRY_COUNT;
 };
 
-export const queryClient = new QueryClient({
+export const queryClient: QueryClient = new QueryClient({
+  mutationCache: createRecommendationMutationCache(() => queryClient),
   defaultOptions: {
     queries: {
       retry: shouldRetryQuery,

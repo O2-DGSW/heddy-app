@@ -8,6 +8,7 @@ export const useDeleteSavedStyle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { affectsRecommendations: true },
     mutationFn: (savedStyleId: string) => deleteSavedStyleApi(savedStyleId),
     onSuccess: async (_data, savedStyleId) => {
       queryClient.setQueryData<SavedStylesResponse>(savedStyleQueryKeys.lists(), current =>

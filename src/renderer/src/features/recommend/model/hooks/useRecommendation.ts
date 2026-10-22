@@ -27,7 +27,10 @@ export const useRecommendation = () => {
     },
   });
 
-  const items = useMemo(() => mapRecommendationToItems(data ?? null), [data]);
+  const items = useMemo(
+    () => mapRecommendationToItems(isError ? null : (data ?? null)),
+    [data, isError]
+  );
   const basisRows = useMemo(
     () => mapRecommendationToBasisRows(data?.recommendation_basis),
     [data?.recommendation_basis]
