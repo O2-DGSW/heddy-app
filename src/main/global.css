@@ -2,14 +2,6 @@
 @source "../../packages";
 @source "../";
 
-@font-face {
-  font-family: "Pretendard";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 45 920;
-  src: url("/font/PretendardVariable.woff2") format("woff2");
-}
-
 @layer base {
   :root {
     /* NavBar 콘텐츠 높이(pt-16 + 아이템 ~56px) + max(최소 16px, 기기별 세이프에어리어).
@@ -25,7 +17,7 @@
   body,
   #root {
     font-family:
-      "Pretendard",
+      "Pretendard Variable",
       -apple-system,
       BlinkMacSystemFont,
       system-ui,
